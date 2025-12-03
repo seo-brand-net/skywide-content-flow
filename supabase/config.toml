@@ -1,0 +1,10 @@
+project_id = "sgwocrvftiwxofvykmhh"
+
+[functions.send-password-reset]
+verify_jwt = false
+
+[functions.ai-rewrite-chat]
+verify_jwt = true
+
+[functions.parse-document]
+verify_jwt = true
