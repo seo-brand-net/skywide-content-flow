@@ -45,7 +45,7 @@ export default function Dashboard() {
 
   const validateForm = (): boolean => {
     const newErrors: Partial<FormData> = {};
-    
+
     if (!formData.articleTitle.trim()) newErrors.articleTitle = 'Article Title is required';
     if (!formData.titleAudience.trim()) newErrors.titleAudience = 'Title Audience is required';
     if (!formData.seoKeywords.trim()) newErrors.seoKeywords = 'SEO Keywords is required';
@@ -71,7 +71,7 @@ export default function Dashboard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast({
         title: "Validation Error",
@@ -105,7 +105,7 @@ export default function Dashboard() {
 
       let webhookSuccess = false;
       let webhookResponseData = null;
-      
+
       // 2. Send to webhook (existing functionality)
       try {
         const response = await fetch('https://seobrand.app.n8n.cloud/webhook/content-engine', {
@@ -126,7 +126,7 @@ export default function Dashboard() {
         });
 
         webhookSuccess = response.ok;
-        
+
         // Capture the response for Google Drive link
         if (response.ok) {
           try {
@@ -150,6 +150,43 @@ export default function Dashboard() {
         // Continue even if webhook fails - database save is primary
       }
 
+      // 2.1. Send to DEV webhook (Secondary workflow)
+      try {
+        console.log('Sending to DEV webhook...');
+        const devResponse = await fetch('https://seobrand.app.n8n.cloud/webhook/content-engine', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            articleTitle: formData.articleTitle,
+            titleAudience: formData.titleAudience,
+            seoKeywords: formData.seoKeywords,
+            articleType: formData.articleType,
+            clientName: formData.clientName,
+            creativeBrief: formData.creativeBrief,
+            wordCount: formData.wordCount,
+            requestId: dbData[0].id,
+            env: 'dev' // Optional: identifying flag
+          }),
+        });
+
+        if (devResponse.ok) {
+          console.log('DEV Webhook sent successfully');
+          try {
+            const devJson = await devResponse.json();
+            console.log('DEV Webhook response:', devJson);
+          } catch (e) {
+            console.log('DEV Webhook response is not JSON');
+          }
+        } else {
+          console.error('DEV Webhook failed with status:', devResponse.status);
+        }
+      } catch (devError) {
+        console.error('DEV Webhook error:', devError);
+        // Fail silently for dev webhook
+      }
+
       // 3. Update database with webhook status and response
       if (dbData && dbData[0]) {
         console.log('Attempting to update database with:', {
@@ -162,9 +199,9 @@ export default function Dashboard() {
 
         const { data: updateData, error: updateError } = await supabase
           .from('content_requests')
-          .update({ 
+          .update({
             webhook_sent: webhookSuccess,
-            webhook_response: webhookResponseData 
+            webhook_response: webhookResponseData
           })
           .eq('id', dbData[0].id)
           .select();
@@ -172,7 +209,7 @@ export default function Dashboard() {
         if (updateError) {
           console.error('Error updating webhook status:', updateError);
           toast({
-            title: "Database Update Error", 
+            title: "Database Update Error",
             description: `Failed to update webhook status: ${updateError.message}`,
             variant: "destructive",
           });
@@ -185,7 +222,7 @@ export default function Dashboard() {
         title: "Success!",
         description: "Content request submitted successfully.",
       });
-      
+
       // Reset form after successful submission
       setFormData({
         articleTitle: '',
@@ -224,7 +261,7 @@ export default function Dashboard() {
             Hello {user?.email}, submit your content creation requests below.
           </p>
         </div>
-        
+
         <Card className="bg-card border-border hover-glow">
           <CardHeader>
             <CardTitle className="seobrand-subtitle">Content Submission Form</CardTitle>
