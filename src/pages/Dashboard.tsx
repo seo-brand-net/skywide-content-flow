@@ -153,7 +153,7 @@ export default function Dashboard() {
       // 2.1. Send to DEV webhook (Secondary workflow)
       try {
         console.log('Sending to DEV webhook...');
-        const devResponse = await fetch('https://seobrand.app.n8n.cloud/webhook/content-engine', {
+        const devResponse = await fetch('https://seobrand.app.n8n.cloud/webhook/content-engine-dev', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
