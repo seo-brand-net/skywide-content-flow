@@ -106,49 +106,6 @@ export default function Dashboard() {
       let webhookSuccess = false;
       let webhookResponseData = null;
 
-      // 2. Send to webhook (existing functionality)
-      try {
-        const response = await fetch('https://seobrand.app.n8n.cloud/webhook/content-engine', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            articleTitle: formData.articleTitle,
-            titleAudience: formData.titleAudience,
-            seoKeywords: formData.seoKeywords,
-            articleType: formData.articleType,
-            clientName: formData.clientName,
-            creativeBrief: formData.creativeBrief,
-            wordCount: formData.wordCount,
-            requestId: dbData[0].id,
-          }),
-        });
-
-        webhookSuccess = response.ok;
-
-        // Capture the response for Google Drive link
-        if (response.ok) {
-          try {
-            const jsonResponse = await response.json();
-            console.log('Webhook JSON response:', jsonResponse);
-            webhookResponseData = JSON.stringify(jsonResponse);
-          } catch (e) {
-            console.log('Webhook response is not JSON, trying text...');
-            try {
-              webhookResponseData = await response.text();
-              console.log('Webhook text response:', webhookResponseData);
-            } catch (textError) {
-              console.error('Error reading webhook response as text:', textError);
-            }
-          }
-        } else {
-          console.error('Webhook request failed with status:', response.status);
-        }
-      } catch (webhookError) {
-        console.error('Webhook failed:', webhookError);
-        // Continue even if webhook fails - database save is primary
-      }
 
       // 2.1. Send to DEV webhook (Secondary workflow)
       try {
@@ -166,6 +123,10 @@ export default function Dashboard() {
             clientName: formData.clientName,
             creativeBrief: formData.creativeBrief,
             wordCount: formData.wordCount,
+            primaryKeyword: formData.primaryKeyword,
+            secondaryKeyword: formData.secondaryKeyword,
+            semanticTheme: formData.semanticTheme,
+            tone: formData.tone,
             requestId: dbData[0].id,
             env: 'dev' // Optional: identifying flag
           }),
@@ -250,6 +211,57 @@ export default function Dashboard() {
     }
   };
 
+  const fillRandomData = () => {
+    const titles = ["The Future of AI", "Top 10 SEO Strategies", "Sustainable Living Guide", "Crypto Market Trends", "Remote Work Best Practices"];
+    const audiences = ["Tech Professionals", "Small Business Owners", "Eco-conscious Consumers", "Investors", "HR Managers"];
+    const clients = ["TechCorp", "GreenLife", "CryptoKing", "WorkSmart", "HealthPlus"];
+    const types = ["Website", "Blogs"];
+    const tones = ["Professional", "Casual", "Authoritative", "Friendly", "Technical"];
+
+    const random = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+
+    setFormData({
+      articleTitle: random(titles),
+      titleAudience: random(audiences),
+      seoKeywords: "ai, technology, future, innovation",
+      clientName: random(clients),
+      creativeBrief: "Please write a comprehensive article covering the main points of the topic. Include statistics and expert opinions where possible.",
+      articleType: random(types),
+      wordCount: "1200",
+      primaryKeyword: "technology",
+      secondaryKeyword: "innovation",
+      semanticTheme: "Business & Tech",
+      tone: random(tones)
+    });
+  };
+
+  const clearTestData = async () => {
+    if (!user?.id) return;
+
+    if (!confirm('Are you sure you want to delete ALL your content requests? This cannot be undone.')) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('content_requests')
+      .delete()
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error deleting data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete requests.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "All your requests have been deleted.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-4xl mx-auto">
@@ -264,7 +276,27 @@ export default function Dashboard() {
 
         <Card className="bg-card border-border hover-glow">
           <CardHeader>
-            <CardTitle className="seobrand-subtitle">Content Submission Form</CardTitle>
+            <CardTitle className="seobrand-subtitle flex justify-between items-center">
+              Content Submission Form
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={clearTestData}
+                  className="text-xs"
+                >
+                  Clear Data
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={fillRandomData}
+                  className="text-xs"
+                >
+                  Fill Test Data
+                </Button>
+              </div>
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
