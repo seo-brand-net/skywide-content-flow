@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
-import { Eye, Clock, User, ExternalLink, Search } from 'lucide-react';
+import { Eye, Clock, User, ExternalLink, Search, Check, X, AlertTriangle } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ContentRequest {
   id: string;
@@ -46,6 +48,9 @@ export default function MyRequests() {
   const [selectedRequest, setSelectedRequest] = useState<ContentRequest | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [requestToReject, setRequestToReject] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -87,7 +92,7 @@ export default function MyRequests() {
         // If we have requests, fetch user profiles for them
         if (data && data.length > 0) {
           const userIds = [...new Set(data.map(req => req.user_id))];
-          
+
           const { data: profilesData, error: profilesError } = await supabase
             .from('profiles')
             .select('id, full_name, email, role')
@@ -159,7 +164,7 @@ export default function MyRequests() {
         .select('role, email')
         .eq('id', user?.id)
         .single();
-        
+
       if (data) {
         setUserRole(data.role || 'user');
       }
@@ -224,7 +229,7 @@ export default function MyRequests() {
 
   const getGoogleDriveLink = (webhookResponse: string | null): string | null => {
     if (!webhookResponse) return null;
-    
+
     try {
       const parsed = JSON.parse(webhookResponse);
       return parsed.gDriveLink || null;
@@ -237,12 +242,58 @@ export default function MyRequests() {
     }
   };
 
+  const handleStatusUpdate = async (id: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('content_requests')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      const test = await supabase.from('content_requests').select('*').eq('id', id);
+      console.log(test);
+
+      if (error) throw error;
+
+      // Update local state
+      setRequests(requests.map(req =>
+        req.id === id ? { ...req, status: newStatus } : req
+      ));
+
+      toast({
+        title: "Status Updated",
+        description: `Request has been ${newStatus.replace('_', ' ')}.`,
+      });
+
+      if (isRejectDialogOpen) {
+        setIsRejectDialogOpen(false);
+        setRequestToReject(null);
+      }
+
+      if (isDetailModalOpen && selectedRequest?.id === id) {
+        setSelectedRequest({ ...selectedRequest, status: newStatus });
+      }
+
+    } catch (err: any) {
+      console.error('Error updating status:', err);
+      toast({
+        title: "Error",
+        description: "Failed to update status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const confirmReject = (id: string) => {
+    setRequestToReject(id);
+    setIsRejectDialogOpen(true);
+  };
+
   // Filter requests based on search term
   const filteredRequests = useMemo(() => {
     if (!searchTerm.trim()) return requests;
-    
+
     const search = searchTerm.toLowerCase();
-    return requests.filter(request => 
+    return requests.filter(request =>
       request.article_title.toLowerCase().includes(search) ||
       request.client_name.toLowerCase().includes(search) ||
       request.article_type.toLowerCase().includes(search) ||
@@ -320,7 +371,7 @@ export default function MyRequests() {
               )}
             </h1>
             <p className="text-muted-foreground">
-              {userRole === 'admin' 
+              {userRole === 'admin'
                 ? `Viewing ${filteredRequests.length} of ${requests.length} content requests`
                 : `You have ${filteredRequests.length} of ${requests.length} submitted content requests`}
             </p>
@@ -345,7 +396,7 @@ export default function MyRequests() {
             </p>
           )}
         </div>
-        
+
         {filteredRequests.length === 0 && requests.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
@@ -363,8 +414,8 @@ export default function MyRequests() {
               <p className="text-lg text-muted-foreground mb-4">
                 No requests found matching "{searchTerm}".
               </p>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setSearchTerm('')}
               >
                 Clear search
@@ -395,7 +446,7 @@ export default function MyRequests() {
                     <TableBody>
                       {filteredRequests.map((request) => {
                         const googleDriveLink = getGoogleDriveLink(request.webhook_response);
-                        
+
                         return (
                           <TableRow key={request.id} className="border-b border-border hover:bg-muted/50 transition-colors">
                             <TableCell className="py-4 px-6">
@@ -408,7 +459,7 @@ export default function MyRequests() {
                                 </p>
                               </div>
                             </TableCell>
-                            
+
                             {userRole === 'admin' && (
                               <TableCell className="py-4 px-4">
                                 {request.profiles ? (
@@ -421,29 +472,29 @@ export default function MyRequests() {
                                 )}
                               </TableCell>
                             )}
-                            
+
                             <TableCell className="py-4 px-4">
                               <span className="text-sm text-foreground font-medium">{request.client_name}</span>
                             </TableCell>
-                            
+
                             <TableCell className="py-4 px-4">
                               <Badge variant="outline" className="text-xs font-medium">
                                 {request.article_type}
                               </Badge>
                             </TableCell>
-                            
+
                             <TableCell className="py-4 px-4">
                               <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                                 {request.status.replace('_', ' ')}
                               </span>
                             </TableCell>
-                            
+
                             <TableCell className="py-4 px-4">
                               <div className="text-sm text-muted-foreground">
                                 {formatDate(request.created_at)}
                               </div>
                             </TableCell>
-                            
+
                             <TableCell className="py-4 px-4">
                               {googleDriveLink ? (
                                 <Button
@@ -464,17 +515,43 @@ export default function MyRequests() {
                                 </div>
                               )}
                             </TableCell>
-                            
+
                             <TableCell className="py-4 px-4">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openDetailView(request)}
-                                className="text-xs hover:bg-muted"
-                              >
-                                <Eye className="h-3 w-3 mr-1" />
-                                Details
-                              </Button>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openDetailView(request)}
+                                  className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted"
+                                  title="View Details"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+
+                                {userRole === 'admin' && request.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleStatusUpdate(request.id, 'in_progress')}
+                                      className="h-8 w-8 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-sm hover:shadow transition-all"
+                                      title="Approve"
+                                    >
+                                      <Check className="h-4 w-4" />
+                                    </Button>
+
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => confirmReject(request.id)}
+                                      className="h-8 w-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-sm hover:shadow transition-all"
+                                      title="Reject"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
@@ -491,7 +568,7 @@ export default function MyRequests() {
                 <DialogHeader>
                   <DialogTitle>Request Details</DialogTitle>
                 </DialogHeader>
-                
+
                 {selectedRequest && (
                   <div className="space-y-6">
                     <div className="grid gap-4">
@@ -499,34 +576,34 @@ export default function MyRequests() {
                         <label className="text-sm font-medium text-muted-foreground">Article Title</label>
                         <p className="text-foreground mt-1">{selectedRequest.article_title}</p>
                       </div>
-                      
+
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Target Audience</label>
                         <p className="text-foreground mt-1">{selectedRequest.title_audience}</p>
                       </div>
-                      
+
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">SEO Keywords</label>
                         <p className="text-foreground mt-1">{selectedRequest.seo_keywords}</p>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Client Name</label>
                           <p className="text-foreground mt-1">{selectedRequest.client_name}</p>
                         </div>
-                        
+
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Article Type</label>
                           <p className="text-foreground mt-1">{selectedRequest.article_type}</p>
                         </div>
                       </div>
-                      
+
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Creative Brief</label>
                         <p className="text-foreground mt-1 whitespace-pre-wrap">{selectedRequest.creative_brief}</p>
                       </div>
-                      
+
                       {/* Google Drive Documents Section */}
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Documents</label>
@@ -550,14 +627,14 @@ export default function MyRequests() {
                           )}
                         </div>
                       </div>
-                      
+
                       {userRole === 'admin' && selectedRequest.profiles && (
                         <div className="border-t border-border pt-4">
                           <label className="text-sm font-medium text-muted-foreground">Submitted By</label>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-foreground">{selectedRequest.profiles.full_name}</span>
                             <span className="text-muted-foreground">({selectedRequest.profiles.email})</span>
-                            <Badge 
+                            <Badge
                               variant={selectedRequest.profiles.role === 'admin' ? 'default' : 'secondary'}
                               className="text-xs"
                             >
@@ -566,7 +643,7 @@ export default function MyRequests() {
                           </div>
                         </div>
                       )}
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Status</label>
@@ -576,7 +653,7 @@ export default function MyRequests() {
                             </span>
                           </div>
                         </div>
-                        
+
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Webhook Status</label>
                           <p className="text-foreground mt-1">
@@ -584,23 +661,69 @@ export default function MyRequests() {
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Submitted</label>
                           <p className="text-foreground mt-1">{formatDate(selectedRequest.created_at)}</p>
                         </div>
-                        
+
                         <div>
                           <label className="text-sm font-medium text-muted-foreground">Last Updated</label>
                           <p className="text-foreground mt-1">{formatDate(selectedRequest.updated_at)}</p>
                         </div>
                       </div>
                     </div>
+
+                    {userRole === 'admin' && selectedRequest.status === 'pending' && (
+                      <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            setIsDetailModalOpen(false);
+                            confirmReject(selectedRequest.id);
+                          }}
+                          className="bg-red-500 hover:bg-red-600"
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Reject Request
+                        </Button>
+                        <Button
+                          onClick={() => handleStatusUpdate(selectedRequest.id, 'in_progress')}
+                          className="bg-green-500 hover:bg-green-600 text-white"
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Approve Request
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </DialogContent>
             </Dialog>
+
+            <AlertDialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-5 w-5" />
+                    Reject Request
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to reject this content request? This action will update the status to 'rejected'.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setRequestToReject(null)}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => requestToReject && handleStatusUpdate(requestToReject, 'cancelled')}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Reject
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </div>
