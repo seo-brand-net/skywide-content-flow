@@ -95,6 +95,11 @@ export default function Dashboard() {
           article_type: formData.articleType,
           client_name: formData.clientName,
           creative_brief: formData.creativeBrief,
+          wordCount: formData.wordCount,
+          primaryKeyword: formData.primaryKeyword,
+          secondaryKeyword: formData.secondaryKeyword,
+          semanticTheme: formData.semanticTheme,
+          tone: formData.tone,
           status: 'pending'
         }])
         .select();
