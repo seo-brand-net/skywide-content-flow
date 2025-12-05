@@ -13,7 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 interface FormData {
   articleTitle: string;
   titleAudience: string;
-  seoKeywords: string;
   clientName: string;
   creativeBrief: string;
   articleType: string;
@@ -31,7 +30,6 @@ export default function Dashboard() {
   const [formData, setFormData] = useState<FormData>({
     articleTitle: '',
     titleAudience: '',
-    seoKeywords: '',
     clientName: '',
     creativeBrief: '',
     articleType: '',
@@ -48,7 +46,6 @@ export default function Dashboard() {
 
     if (!formData.articleTitle.trim()) newErrors.articleTitle = 'Article Title is required';
     if (!formData.titleAudience.trim()) newErrors.titleAudience = 'Title Audience is required';
-    if (!formData.seoKeywords.trim()) newErrors.seoKeywords = 'SEO Keywords is required';
     if (!formData.clientName.trim()) newErrors.clientName = 'Client Name is required';
     if (!formData.creativeBrief.trim()) newErrors.creativeBrief = 'Creative Brief is required';
     if (!formData.articleType) newErrors.articleType = 'Article Type is required';
@@ -91,7 +88,6 @@ export default function Dashboard() {
           user_id: user?.id,
           article_title: formData.articleTitle,
           title_audience: formData.titleAudience,
-          seo_keywords: formData.seoKeywords,
           article_type: formData.articleType,
           client_name: formData.clientName,
           creative_brief: formData.creativeBrief,
@@ -118,7 +114,6 @@ export default function Dashboard() {
           body: JSON.stringify({
             articleTitle: formData.articleTitle,
             titleAudience: formData.titleAudience,
-            seoKeywords: formData.seoKeywords,
             articleType: formData.articleType,
             clientName: formData.clientName,
             creativeBrief: formData.creativeBrief,
@@ -188,7 +183,6 @@ export default function Dashboard() {
       setFormData({
         articleTitle: '',
         titleAudience: '',
-        seoKeywords: '',
         clientName: '',
         creativeBrief: '',
         articleType: '',
@@ -223,7 +217,6 @@ export default function Dashboard() {
     setFormData({
       articleTitle: random(titles),
       titleAudience: random(audiences),
-      seoKeywords: "ai, technology, future, innovation",
       clientName: random(clients),
       creativeBrief: "Please write a comprehensive article covering the main points of the topic. Include statistics and expert opinions where possible.",
       articleType: random(types),
@@ -330,22 +323,6 @@ export default function Dashboard() {
                   />
                   {errors.titleAudience && (
                     <p className="text-sm text-destructive">{errors.titleAudience}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="seoKeywords" className="text-foreground">
-                    SEO Keywords *
-                  </Label>
-                  <Input
-                    id="seoKeywords"
-                    value={formData.seoKeywords}
-                    onChange={(e) => handleInputChange('seoKeywords', e.target.value)}
-                    className={`bg-background border-input ${errors.seoKeywords ? 'border-destructive' : ''}`}
-                    placeholder="Enter SEO keywords"
-                  />
-                  {errors.seoKeywords && (
-                    <p className="text-sm text-destructive">{errors.seoKeywords}</p>
                   )}
                 </div>
 
