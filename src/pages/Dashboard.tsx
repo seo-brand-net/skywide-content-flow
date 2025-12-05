@@ -88,6 +88,7 @@ export default function Dashboard() {
           user_id: user?.id,
           article_title: formData.articleTitle,
           title_audience: formData.titleAudience,
+          seo_keywords: '', // Empty string to satisfy NOT NULL constraint (field removed from form)
           article_type: formData.articleType,
           client_name: formData.clientName,
           creative_brief: formData.creativeBrief,
@@ -96,6 +97,7 @@ export default function Dashboard() {
         .select();
 
       if (dbError) {
+        console.error('Database error details:', dbError);
         throw new Error(`Database error: ${dbError.message}`);
       }
 
@@ -195,9 +197,10 @@ export default function Dashboard() {
 
     } catch (error) {
       console.error('Submission error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your request. Please try again.",
+        description: errorMessage || "There was an error submitting your request. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -271,7 +274,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="seobrand-subtitle flex justify-between items-center">
               Content Submission Form
-              {/* <div className="flex gap-2">
+               <div className="flex gap-2">
                 <Button
                   type="button"
                   variant="destructive"
@@ -288,7 +291,7 @@ export default function Dashboard() {
                 >
                   Fill Test Data
                 </Button>
-              </div> */}
+              </div> 
             </CardTitle>
           </CardHeader>
           <CardContent>
