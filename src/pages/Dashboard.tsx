@@ -274,7 +274,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="seobrand-subtitle flex justify-between items-center">
               Content Submission Form
-               <div className="flex gap-2">
+               {/* <div className="flex gap-2">
                 <Button
                   type="button"
                   variant="destructive"
@@ -291,7 +291,7 @@ export default function Dashboard() {
                 >
                   Fill Test Data
                 </Button>
-              </div> 
+              </div>  */}
             </CardTitle>
           </CardHeader>
           <CardContent>
