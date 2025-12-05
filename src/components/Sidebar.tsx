@@ -75,7 +75,7 @@ export function Sidebar({ userRole, loading }: SidebarProps) {
   const currentNavItems = userRole === 'admin' ? adminNavItems : navItems;
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
+    <div style={{ zIndex: 99 }} className="z-99 fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-sidebar-border">
         <Logo />
@@ -87,15 +87,15 @@ export function Sidebar({ userRole, loading }: SidebarProps) {
           {currentNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
-            
+
             return (
               <li key={item.path}>
                 <NavLink
                   to={item.path}
                   className={`
                     flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors
-                    ${active 
-                      ? 'bg-sidebar-accent text-sidebar-primary' 
+                    ${active
+                      ? 'bg-sidebar-accent text-sidebar-primary'
                       : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
                     }
                   `}
@@ -111,9 +111,9 @@ export function Sidebar({ userRole, loading }: SidebarProps) {
 
       {/* SEObrand Logo */}
       <div className="p-4 flex flex-col items-center">
-        <img 
-          src="/lovable-uploads/ae19eee1-57bc-4b76-865e-f89a663021a9.png" 
-          alt="SEObrand" 
+        <img
+          src="/lovable-uploads/ae19eee1-57bc-4b76-865e-f89a663021a9.png"
+          alt="SEObrand"
           className="h-12 opacity-60 hover:opacity-80 transition-opacity"
         />
         <p className="text-xs text-sidebar-foreground/60 mt-2 text-center">
