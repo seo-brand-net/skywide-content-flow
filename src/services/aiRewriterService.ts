@@ -100,7 +100,7 @@ export async function uploadDocument(file: File): Promise<{ text: string; fileNa
   const { data: { session } } = await supabase.auth.getSession();
 
   const response = await fetch(
-    `https://sgwocrvftiwxofvykmhh.supabase.co/functions/v1/parse-document`,
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/parse-document`,
     {
       method: 'POST',
       headers: {
@@ -130,7 +130,7 @@ export async function streamChat(
 
   try {
     const response = await fetch(
-      `https://sgwocrvftiwxofvykmhh.supabase.co/functions/v1/ai-rewrite-chat`,
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/ai-rewrite-chat`,
       {
         method: 'POST',
         headers: {
