@@ -81,7 +81,7 @@ export default function Analytics() {
                     return acc;
                 }, {} as Record<string, number>) || {};
 
-                const statusDistribution = Object.entries(statusCounts).map(([status, count]) => ({
+                const statusDistribution = (Object.entries(statusCounts) as [string, number][]).map(([status, count]) => ({
                     status,
                     count,
                     percentage: totalRequests > 0 ? (count / totalRequests) * 100 : 0

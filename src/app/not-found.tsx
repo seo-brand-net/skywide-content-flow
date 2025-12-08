@@ -1,7 +1,6 @@
 "use client";
 
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
