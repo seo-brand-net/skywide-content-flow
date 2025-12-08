@@ -1,6 +1,7 @@
+"use client";
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -37,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check if this is a password reset flow
         const urlParams = new URLSearchParams(window.location.search);
         const isResetFlow = urlParams.get('type') === 'recovery' || event === 'PASSWORD_RECOVERY';
-        
+
         if (isResetFlow && session) {
           // Handle password reset - set session but don't treat as regular login
           setSession(session);
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const urlParams = new URLSearchParams(window.location.search);
       const isResetFlow = urlParams.get('type') === 'recovery';
       const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
-      
+
       if ((isResetFlow || storedResetState) && session) {
         setSession(session);
         setUser(null);
@@ -115,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, displayName?: string) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -159,16 +160,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Check if we have a valid session before attempting logout
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session) {
         // Attempt server-side logout with local scope
         await supabase.auth.signOut({ scope: 'local' });
       }
-      
+
       // Clear any remaining auth data from localStorage as fallback
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('sb-sgwocrvftiwxofvykmhh-auth-token');
-      
+
       toast({
         title: "Signed Out",
         description: "You have been successfully signed out.",
@@ -176,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       // Treat any logout error as successful since we've already cleared local state
       // This handles 403 session_not_found and other server-side issues gracefully
-      
+
       // Ensure complete cleanup of auth data
       try {
         localStorage.removeItem('supabase.auth.token');
@@ -201,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = async (email: string) => {
     try {
       const redirectUrl = `${window.location.origin}/reset-password`;
-      
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
@@ -247,7 +248,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsPasswordReset(false);
         setUser(session?.user ?? null);
         sessionStorage.removeItem('isPasswordReset');
-        
+
         toast({
           title: "Password Updated",
           description: "Your password has been successfully updated.",

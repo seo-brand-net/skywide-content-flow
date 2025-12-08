@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
 export interface Conversation {
   id: string;
@@ -26,7 +26,7 @@ export async function createConversation(
   contentRequestId?: string
 ): Promise<{ data: Conversation | null; error: any }> {
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     return { data: null, error: new Error('Not authenticated') };
   }
@@ -98,7 +98,7 @@ export async function uploadDocument(file: File): Promise<{ text: string; fileNa
   formData.append('file', file);
 
   const { data: { session } } = await supabase.auth.getSession();
-  
+
   const response = await fetch(
     `https://sgwocrvftiwxofvykmhh.supabase.co/functions/v1/parse-document`,
     {
@@ -161,7 +161,7 @@ export async function streamChat(
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      
+
       let newlineIndex: number;
       while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
         let line = buffer.slice(0, newlineIndex);

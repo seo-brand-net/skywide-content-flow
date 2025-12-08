@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/lib/supabase';
 
 export async function sendCustomPasswordResetEmail(email: string): Promise<{ error: any }> {
   try {
@@ -22,7 +22,7 @@ export async function sendCustomPasswordResetEmail(email: string): Promise<{ err
       console.error('Custom email error:', emailError);
       // Fallback to Supabase default email
       console.log('Falling back to Supabase default email');
-      
+
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
