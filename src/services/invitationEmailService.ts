@@ -1,13 +1,13 @@
 export async function sendInvitationEmail(
-  email: string, 
-  fullName: string, 
-  role: string, 
+  email: string,
+  fullName: string,
+  role: string,
   token: string
 ): Promise<any> {
   try {
     const webhookUrl = 'https://seobrand.app.n8n.cloud/webhook/send-invitation';
     const appUrl = 'https://preview--skywide-content-flow.lovable.app';
-    
+
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
