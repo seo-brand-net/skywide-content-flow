@@ -1,12 +1,9 @@
 {
+  "framework": "nextjs",
   "rewrites": [
     {
       "source": "/api/n8n/:match*",
       "destination": "https://seobrand.app.n8n.cloud/:match*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
