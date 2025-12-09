@@ -4,7 +4,7 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
-        const response = await fetch('https://n8n-6v8fm-u36794.vm.elestio.app/webhook/70436a30-ecd4-4896-bedc-b52bbfd37f65', {
+        const response = await fetch(process.env.N8N_RESEARCH_WEBHOOK_URL!, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -4,7 +4,7 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
-        const response = await fetch('https://seobrand.app.n8n.cloud/webhook/content-engine-dev', {
+        const response = await fetch(process.env.N8N_CONTENT_ENGINE_WEBHOOK_URL!, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

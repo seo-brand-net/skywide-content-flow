@@ -6,7 +6,7 @@ export async function sendInvitationEmail(
 ): Promise<any> {
   try {
     const webhookUrl = 'https://seobrand.app.n8n.cloud/webhook/send-invitation';
-    const appUrl = 'https://preview--skywide-content-flow.lovable.app';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
     const response = await fetch(webhookUrl, {
       method: 'POST',

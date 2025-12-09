@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     // Check for existing password reset state
@@ -51,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
           setIsPasswordReset(false);
           sessionStorage.removeItem('isPasswordReset');
+          router.push('/login');
         } else if (!isPasswordReset) {
           // Regular authentication flow (only if not in password reset mode)
           setSession(session);
@@ -80,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -153,20 +156,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Immediately clear local state to provide instant UI feedback
-    setSession(null);
-    setUser(null);
-
     try {
-      // Check if we have a valid session before attempting logout
-      const { data: { session } } = await supabase.auth.getSession();
+      // Perform full sign out to clear cookies
+      await supabase.auth.signOut();
 
-      if (session) {
-        // Attempt server-side logout with local scope
-        await supabase.auth.signOut({ scope: 'local' });
-      }
+      // Clear local state
+      setSession(null);
+      setUser(null);
 
-      // Clear any remaining auth data from localStorage as fallback
+      // Clear any legacy auth data
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('sb-sgwocrvftiwxofvykmhh-auth-token');
 
@@ -174,27 +172,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Signed Out",
         description: "You have been successfully signed out.",
       });
-    } catch (error: any) {
-      // Treat any logout error as successful since we've already cleared local state
-      // This handles 403 session_not_found and other server-side issues gracefully
 
-      // Ensure complete cleanup of auth data
-      try {
-        localStorage.removeItem('supabase.auth.token');
-        localStorage.removeItem('sb-sgwocrvftiwxofvykmhh-auth-token');
-        // Clear all possible Supabase auth keys
-        Object.keys(localStorage).forEach(key => {
-          if (key.includes('supabase') || key.includes('sb-')) {
-            localStorage.removeItem(key);
-          }
-        });
-      } catch (cleanupError) {
-        console.warn('Cleanup error:', cleanupError);
-      }
+      router.push('/login');
+    } catch (error: any) {
+      // Force cleanup even on error
+      setSession(null);
+      setUser(null);
+      router.push('/login');
 
       toast({
         title: "Signed Out",
-        description: "You have been successfully signed out.",
+        description: "You have been signed out.",
       });
     }
   };

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { PostgrestError } from "@supabase/supabase-js";
 
 export interface Conversation {
   id: string;
@@ -19,12 +20,17 @@ export interface Message {
   created_at: string;
 }
 
+type ServiceResponse<T> = {
+  data: T | null;
+  error: PostgrestError | Error | null;
+}
+
 export async function createConversation(
   title: string,
   documentName?: string,
   documentContent?: string,
   contentRequestId?: string
-): Promise<{ data: Conversation | null; error: any }> {
+): Promise<ServiceResponse<Conversation>> {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -46,7 +52,7 @@ export async function createConversation(
   return { data, error };
 }
 
-export async function getConversations(): Promise<{ data: Conversation[] | null; error: any }> {
+export async function getConversations(): Promise<ServiceResponse<Conversation[]>> {
   const { data, error } = await supabase
     .from('ai_conversations')
     .select('*')
@@ -55,7 +61,7 @@ export async function getConversations(): Promise<{ data: Conversation[] | null;
   return { data, error };
 }
 
-export async function getConversation(id: string): Promise<{ data: Conversation | null; error: any }> {
+export async function getConversation(id: string): Promise<ServiceResponse<Conversation>> {
   const { data, error } = await supabase
     .from('ai_conversations')
     .select('*')
@@ -65,7 +71,7 @@ export async function getConversation(id: string): Promise<{ data: Conversation 
   return { data, error };
 }
 
-export async function getMessages(conversationId: string): Promise<{ data: Message[] | null; error: any }> {
+export async function getMessages(conversationId: string): Promise<ServiceResponse<Message[]>> {
   const { data, error } = await supabase
     .from('ai_messages')
     .select('*')
@@ -75,7 +81,7 @@ export async function getMessages(conversationId: string): Promise<{ data: Messa
   return { data: data as Message[] | null, error };
 }
 
-export async function deleteConversation(id: string): Promise<{ error: any }> {
+export async function deleteConversation(id: string): Promise<{ error: PostgrestError | null }> {
   const { error } = await supabase
     .from('ai_conversations')
     .delete()
@@ -84,7 +90,7 @@ export async function deleteConversation(id: string): Promise<{ error: any }> {
   return { error };
 }
 
-export async function updateConversationTitle(id: string, title: string): Promise<{ error: any }> {
+export async function updateConversationTitle(id: string, title: string): Promise<{ error: PostgrestError | null }> {
   const { error } = await supabase
     .from('ai_conversations')
     .update({ title })
@@ -93,7 +99,7 @@ export async function updateConversationTitle(id: string, title: string): Promis
   return { error };
 }
 
-export async function uploadDocument(file: File): Promise<{ text: string; fileName: string } | null> {
+export async function uploadDocument(file: File): Promise<{ text: string; fileName: string }> {
   const formData = new FormData();
   formData.append('file', file);
 

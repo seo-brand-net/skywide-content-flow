@@ -11,11 +11,7 @@ export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (user && !loading) {
-      router.push('/dashboard');
-    }
-  }, [user, loading, router]);
+  // Removed auto-redirect to allow users to see homepage first
 
   if (loading) {
     return (
@@ -85,7 +81,7 @@ export default function Home() {
             <Button
               size="lg"
               className="bg-brand-blue-crayola hover:bg-brand-blue-crayola/90 text-white hover-glow text-lg px-8 py-6 transition-colors"
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/dashboard')}
             >
               <LogIn className="mr-2 h-5 w-5" />
               Access Dashboard
