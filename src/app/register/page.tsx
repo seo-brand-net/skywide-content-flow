@@ -41,20 +41,23 @@ function RegisterContent() {
         setIsSubmitting(true);
 
         try {
-            // Create user account
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: invitation.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        full_name: invitation.full_name,
-                        display_name: invitation.full_name,
-                    }
-                }
+            // Call Server API to register (handles auto-confirm)
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: invitation.email,
+                    password: formData.password,
+                    role: invitation.role,
+                    fullName: invitation.full_name,
+                    token: token
+                })
             });
 
-            if (authError) {
-                if (authError.message.includes('already registered')) {
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 409) { // Conflict / Already Registered
                     toast({
                         title: "Account Already Exists",
                         description: "An account with this email already exists. Please sign in instead.",
@@ -63,46 +66,12 @@ function RegisterContent() {
                     router.push('/login');
                     return;
                 }
-                throw authError;
-            }
-
-            if (!authData.user) {
-                throw new Error('Failed to create user account');
-            }
-
-            // Create profile record
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .insert({
-                    id: authData.user.id,
-                    email: invitation.email,
-                    full_name: invitation.full_name,
-                    display_name: invitation.full_name,
-                    role: invitation.role,
-                });
-
-            if (profileError) {
-                console.error('Profile creation error:', profileError);
-                // Don't throw here as the user account was created successfully
-            }
-
-            // Update invitation status
-            const { error: invitationError } = await supabase
-                .from('user_invitations')
-                .update({
-                    status: 'accepted',
-                    accepted_at: new Date().toISOString()
-                })
-                .eq('token', token);
-
-            if (invitationError) {
-                console.error('Invitation update error:', invitationError);
-                // Don't throw here as the user account was created successfully
+                throw new Error(data.error || 'Registration failed');
             }
 
             toast({
                 title: "Account Created Successfully!",
-                description: `Welcome to SKYWIDE Content Dashboard! You can now sign in with your credentials.`,
+                description: `Welcome to SKYWIDE Content Dashboard! You can now sign in immediately.`,
             });
 
             // Redirect to login page
