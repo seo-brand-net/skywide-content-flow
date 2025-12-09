@@ -15,7 +15,7 @@ import { InvitationTable } from '@/components/invitation/InvitationTable';
 
 
 export default function InviteUsers() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { userRole, isAdmin, loading: roleLoading } = useUserRole(user?.id);
     const { invitations, loading, fetchInvitations } = useInvitations(user?.id);
     const { toast } = useToast();
@@ -155,8 +155,8 @@ export default function InviteUsers() {
         }
     };
 
-    // Show loading while role is being checked
-    if (roleLoading) {
+    // Show loading while auth or role is being checked
+    if (authLoading || roleLoading) {
         return (
             <div className="flex items-center justify-center h-96">
                 <div className="flex items-center gap-3">

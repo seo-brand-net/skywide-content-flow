@@ -20,7 +20,7 @@ interface AnalyticsData {
 }
 
 export default function Analytics() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { isAdmin, loading: roleLoading } = useUserRole(user?.id);
     const router = useRouter();
     const { toast } = useToast();
@@ -105,8 +105,8 @@ export default function Analytics() {
         fetchAnalytics();
     }, [user, isAdmin, roleLoading]);
 
-    // Show loading while checking role
-    if (roleLoading) {
+    // Show loading while auth or role is being checked
+    if (authLoading || roleLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>

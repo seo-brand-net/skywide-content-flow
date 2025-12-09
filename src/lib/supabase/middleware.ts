@@ -40,6 +40,12 @@ export async function updateSession(request: NextRequest) {
     const path = request.nextUrl.pathname
 
     // Protected Routes Handling
+
+    // API Routes should not redirect to login page
+    if (path.startsWith('/api/')) {
+        return supabaseResponse
+    }
+
     // If no user and trying to access protected routes
     if (
         !user &&

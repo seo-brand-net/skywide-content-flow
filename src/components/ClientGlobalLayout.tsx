@@ -5,7 +5,16 @@ import { Sidebar } from "./Sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 
-const NO_SIDEBAR_PATHS = ["/login", "/register", "/reset-password", "/"];
+const SIDEBAR_PATHS = [ // Whitelist of paths that SHOULD have the sidebar
+    "/dashboard",
+    "/research",
+    "/my-requests",
+    "/settings",
+    "/invite-users",
+    "/analytics",
+    "/features",
+    "/ai-rewriter"
+];
 
 export function ClientGlobalLayout({
     children,
@@ -16,11 +25,10 @@ export function ClientGlobalLayout({
     const { user } = useAuth();
     const { userRole, loading } = useUserRole(user?.id);
 
-    const isNoSidebar = NO_SIDEBAR_PATHS.some((path) =>
-        path === "/" ? pathname === "/" : pathname?.startsWith(path)
-    );
+    // Only show sidebar if the path starts with one of the whitelisted paths
+    const showSidebar = pathname ? SIDEBAR_PATHS.some((path) => pathname.startsWith(path)) : false;
 
-    if (isNoSidebar) {
+    if (!showSidebar) {
         return <>{children}</>;
     }
 

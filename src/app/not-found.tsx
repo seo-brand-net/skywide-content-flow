@@ -1,46 +1,73 @@
 "use client";
 
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Home } from 'lucide-react';
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Home, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
-    return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
-            <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative bg-background border rounded-lg p-12 text-center shadow-xl">
-                    <h1 className="text-[150px] font-bold leading-none bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/20 select-none">
-                        404
-                    </h1>
-                    <div className="space-y-2 mb-8">
-                        <h2 className="text-2xl font-semibold tracking-tight">Page not found</h2>
-                        <p className="text-muted-foreground max-w-[400px] mx-auto">
-                            Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or never existed.
-                        </p>
-                    </div>
+    const router = useRouter();
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <Button
-                            variant="outline"
-                            className="w-full sm:w-auto gap-2"
-                            onClick={() => window.history.back()}
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                            Go Back
-                        </Button>
-                        <Button asChild className="w-full sm:w-auto gap-2">
-                            <Link href="/">
-                                <Home className="w-4 h-4" />
-                                Return Home
-                            </Link>
-                        </Button>
+    const handleGoHome = () => {
+        router.push("/");
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
+            <div className="max-w-2xl w-full text-center slide-in-from-bottom-5 animate-in fade-in duration-500">
+
+                {/* 404 Illustration Area */}
+                <div className="mb-8 flex justify-center">
+                    <div className="relative">
+                        {/* Large 404 Text Effect */}
+                        <div className="relative z-10">
+                            <h1 className="text-[8rem] md:text-[12rem] font-bold leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary/20 select-none">
+                                404
+                            </h1>
+                        </div>
+
+                        {/* Background Glow */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-primary/20 blur-[100px] rounded-full"></div>
                     </div>
                 </div>
-            </div>
 
-            <div className="mt-12 text-sm text-muted-foreground/50">
-                Error Code: 404_NOT_FOUND
+                {/* Friendly Message */}
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                    Oops… we couldn't find that page.
+                </h2>
+
+                {/* Description */}
+                <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-md mx-auto">
+                    The page you're looking for may have been moved, deleted, or the link was incorrect.
+                </p>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <Button
+                        size="lg"
+                        onClick={handleGoHome}
+                        className="w-full sm:w-auto gap-2 text-lg h-12 px-8"
+                    >
+                        <Home className="h-5 w-5" />
+                        Go Back Home
+                    </Button>
+
+                    <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => router.back()}
+                        className="w-full sm:w-auto gap-2 text-lg h-12 px-8"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                        Go Back
+                    </Button>
+                </div>
+
+                {/* Footer info */}
+                <div className="mt-12 pt-8 border-t border-border/50">
+                    <p className="text-sm text-muted-foreground">
+                        Error Code: 404_PAGE_NOT_FOUND
+                    </p>
+                </div>
             </div>
         </div>
     );
