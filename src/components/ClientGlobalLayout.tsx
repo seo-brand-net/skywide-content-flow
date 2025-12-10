@@ -25,8 +25,8 @@ export function ClientGlobalLayout({
     const { user } = useAuth();
     const { userRole, loading } = useUserRole(user?.id);
 
-    // Only show sidebar if the path starts with one of the whitelisted paths
-    const showSidebar = pathname ? SIDEBAR_PATHS.some((path) => pathname.startsWith(path)) : false;
+    // Only show sidebar if the path starts with one of the whitelisted paths AND is not login
+    const showSidebar = pathname && !pathname.includes('/login') ? SIDEBAR_PATHS.some((path) => pathname.startsWith(path)) : false;
 
     if (!showSidebar) {
         return <>{children}</>;
