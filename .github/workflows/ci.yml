@@ -60,11 +60,11 @@ jobs:
   notify:
     name: Notify Slack
     needs: [test-unit, test-e2e]
-    # Only run on push to main (production)
+    # Run on main (production) and development (for testing)
     if: >
       always() &&
       github.event_name == 'push' &&
-      github.ref == 'refs/heads/main'
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack Notification
