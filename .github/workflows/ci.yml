@@ -65,7 +65,7 @@ jobs:
           retention-days: 30
 
   notify:
-    name: Notify Production Update
+    name: Notify Slack
     needs: [test-unit, test-e2e]
     if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
