@@ -67,13 +67,23 @@ jobs:
   notify:
     name: Notify Production Update
     needs: [test-unit, test-e2e]
-    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Send Notification
         run: |
-          echo "::notice title=Deployment Success::Tests passed and code merged to main."
-          echo "Sending specific update to Product Manager..."
-          # PLACEHOLDER: Replace the below line with actual notification logic
-          # Example: curl -X POST -H 'Content-type: application/json' --data '{"text":"Production update: Tests passed!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
-          echo "Notification sent (simulated)."
+          # Determine status
+          if [ "${{ needs.test-unit.result }}" == "success" ] && [ "${{ needs.test-e2e.result }}" == "success" ]; then
+            STATUS="SUCCESS"
+            COLOR="good"
+            EMOJI=":white_check_mark:"
+          else
+            STATUS="FAILURE"
+            COLOR="danger"
+            EMOJI=":x:"
+          fi
+          
+          MESSAGE="$EMOJI *Deployment $STATUS* on *${{ github.repository }}*\nBranch: \`${{ github.ref_name }}\`\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run Logs>"
+          
+          # Send payload
+          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" ${{ secrets.SLACK_WEBHOOK_URL }}
