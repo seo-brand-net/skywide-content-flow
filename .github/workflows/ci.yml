@@ -30,7 +30,6 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    # Enable container for Playwright if needed, or just install browsers
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,12 +48,6 @@ jobs:
 
       - name: Run E2E Tests
         run: npm run test:e2e
-        env:
-          # Add any necessary environment variables here, e.g.
-          # NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          # NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # CI: true (Automatically set by GitHub Actions)
-          noop: true 
 
       - name: Upload Playwright Report
         if: always()
@@ -67,23 +60,28 @@ jobs:
   notify:
     name: Notify Slack
     needs: [test-unit, test-e2e]
-    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Only run on push to main (production)
+    if: >
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Send Notification
+      - name: Send Slack Notification
         run: |
-          # Determine status
-          if [ "${{ needs.test-unit.result }}" == "success" ] && [ "${{ needs.test-e2e.result }}" == "success" ]; then
+          UNIT_RESULT="${{ needs.test-unit.result }}"
+          E2E_RESULT="${{ needs.test-e2e.result }}"
+
+          if [ "$UNIT_RESULT" = "success" ] && [ "$E2E_RESULT" = "success" ]; then
             STATUS="SUCCESS"
             COLOR="good"
             EMOJI=":white_check_mark:"
           else
-            STATUS="FAILURE"
+            STATUS="FAILED"
             COLOR="danger"
             EMOJI=":x:"
           fi
-          
-          MESSAGE="$EMOJI *Deployment $STATUS* on *${{ github.repository }}*\nBranch: \`${{ github.ref_name }}\`\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run Logs>"
-          
-          # Send payload
+
+          MESSAGE="$EMOJI Deployment *$STATUS*\nBranch: \`${{ github.ref_name }}\`\nView Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
           curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" ${{ secrets.SLACK_WEBHOOK_URL }}
