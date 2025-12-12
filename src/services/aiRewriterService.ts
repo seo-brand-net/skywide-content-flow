@@ -135,8 +135,13 @@ export async function streamChat(
   const { data: { session } } = await supabase.auth.getSession();
 
   try {
+    // Use local API proxy to avoid CORS issues
+    const functionUrl = '/api/ai-chat';
+
+    console.log('[AI Rewriter] Fetching:', functionUrl);
+
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/ai-rewrite-chat`,
+      functionUrl,
       {
         method: 'POST',
         headers: {

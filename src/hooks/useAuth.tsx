@@ -28,11 +28,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Check for existing password reset state
     const storedResetState = sessionStorage.getItem('isPasswordReset');
     if (storedResetState === 'true') {
       setIsPasswordReset(true);
     }
+  }, []);
+
+  useEffect(() => {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
