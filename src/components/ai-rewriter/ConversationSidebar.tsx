@@ -37,7 +37,7 @@ export function ConversationSidebar({
   const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
 
   const filteredConversations = conversations.filter((conv) =>
-    conv.title.toLowerCase().includes(searchQuery.toLowerCase())
+    (conv.title || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
@@ -89,11 +89,10 @@ export function ConversationSidebar({
               <div
                 key={conversation.id}
                 onClick={() => onSelectConversation(conversation.id)}
-                className={`p-3 rounded-lg cursor-pointer transition-colors mb-2 group ${
-                  currentConversationId === conversation.id
+                className={`p-3 rounded-lg cursor-pointer transition-colors mb-2 group ${currentConversationId === conversation.id
                     ? 'bg-primary/10 border border-primary'
                     : 'hover:bg-muted border border-transparent'
-                }`}
+                  }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">

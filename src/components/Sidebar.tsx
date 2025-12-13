@@ -2,6 +2,7 @@
 
 import { Home, FileText, BarChart, Settings, LogOut, Users, MessageSquare, Search, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -114,12 +115,16 @@ export function Sidebar({ userRole, loading }: SidebarProps) {
 
             {/* SEObrand Logo */}
             <div className="p-4 flex flex-col items-center">
-                {/* Updated Image for Next.js - assuming file is in public/lovable-uploads */}
-                <img
-                    src="/lovable-uploads/ae19eee1-57bc-4b76-865e-f89a663021a9.png"
-                    alt="SEObrand"
-                    className="h-12 opacity-60 hover:opacity-80 transition-opacity"
-                />
+                {/* Updated Image for Next.js */}
+                <div className="relative h-12 w-full mb-2">
+                    <Image
+                        src="/lovable-uploads/ae19eee1-57bc-4b76-865e-f89a663021a9.png"
+                        alt="SEObrand"
+                        fill
+                        className="object-contain opacity-60 hover:opacity-80 transition-opacity"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                </div>
                 <p className="text-xs text-sidebar-foreground/60 mt-2 text-center">
                     For SEO Brand Staff Members Only
                 </p>
@@ -129,6 +134,7 @@ export function Sidebar({ userRole, loading }: SidebarProps) {
             <div className="p-4 border-t border-sidebar-border">
                 <Button
                     onClick={signOut}
+                    data-testid="sign-out-button"
                     variant="ghost"
                     className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent/50"
                 >

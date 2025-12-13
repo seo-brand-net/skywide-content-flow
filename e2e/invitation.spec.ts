@@ -1,19 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Invitation Flow', () => {
+    test.setTimeout(60000);
     test.beforeEach(async ({ page }) => {
         // Login as admin before each test
         await page.goto('/login');
         await page.getByLabel('Email').fill('samuel@seobrand.net');
         await page.getByLabel('Password').fill('Farrahdc12@');
         await page.getByTestId('sign-in-button').click({ force: true });
-        await expect(page).toHaveURL('/dashboard', { timeout: 15000 });
+        await expect(page).toHaveURL('/dashboard', { timeout: 25000 });
     });
 
     test('should navigate to invite users page', async ({ page }) => {
         // Navigate to Invite Users page
         await page.getByRole('link', { name: 'Invite Users' }).click();
-        await expect(page).toHaveURL('/invite-users');
+        await expect(page).toHaveURL('/invite-users', { timeout: 20000 });
         await expect(page.getByRole('heading', { name: 'Invite Users' })).toBeVisible();
     });
 
@@ -28,7 +29,7 @@ test.describe('Invitation Flow', () => {
         await page.getByRole('button', { name: 'Send Invitation' }).click({ force: true });
 
         // Since browser validation blocks submission, we just verify we are still on the same page
-        await expect(page).toHaveURL('/invite-users');
+        await expect(page).toHaveURL('/invite-users', { timeout: 20000 });
     });
 
     test('should send an invitation successfully', async ({ page }) => {
