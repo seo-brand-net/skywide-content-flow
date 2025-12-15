@@ -41,3 +41,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Large Project Files
+Projec-Quote-Tool.xlsx
+
+/excel-preview
+
+excel_structure.json

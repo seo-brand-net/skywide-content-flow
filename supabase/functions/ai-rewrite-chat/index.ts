@@ -5,6 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.3';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
@@ -14,9 +15,9 @@ serve(async (req) => {
 
   try {
     const { conversationId, message, model = 'gpt-5-2025-08-07' } = await req.json();
-    
+
     console.log('AI Rewrite Chat function called:', { conversationId, model, messageLength: message?.length });
-    
+
     if (!conversationId || !message) {
       console.error('Missing required parameters:', { conversationId: !!conversationId, message: !!message });
       return new Response(JSON.stringify({ error: 'Missing conversationId or message' }), {
@@ -42,7 +43,7 @@ serve(async (req) => {
     // Get authorization header to identify user
     const authHeader = req.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
-    
+
     // Verify user
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     if (authError || !user) {
@@ -70,8 +71,8 @@ serve(async (req) => {
     const { data: conversation, error: convError } = conversationResult;
     const { data: messages, error: msgError } = messagesResult;
 
-    console.log('Conversation fetched:', { 
-      found: !!conversation, 
+    console.log('Conversation fetched:', {
+      found: !!conversation,
       hasDocument: !!conversation?.document_content,
       documentName: conversation?.document_name,
       messageCount: messages?.length || 0
@@ -160,14 +161,14 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', { status: response.status, error: errorText });
-      
+
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
           status: 429,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      
+
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: 'Payment required. Please add funds to your OpenAI account.' }), {
           status: 402,
