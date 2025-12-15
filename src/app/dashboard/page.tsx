@@ -115,7 +115,7 @@ export default function Dashboard() {
                     },
                     body: JSON.stringify({
                         title: formData.articleTitle,
-                        title_audience: formData.titleAudience,
+                        audience: formData.titleAudience,
                         client_name: formData.clientName,
                         creative_brief: formData.creativeBrief,
                         article_type: formData.articleType,
