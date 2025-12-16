@@ -24,6 +24,7 @@ interface FormData {
     secondaryKeyword: string;
     semanticTheme: string;
     tone: string;
+    pageIntent: string;
 }
 
 export default function Dashboard() {
@@ -40,7 +41,8 @@ export default function Dashboard() {
         primaryKeyword: '',
         secondaryKeyword: '',
         semanticTheme: '',
-        tone: ''
+        tone: '',
+        pageIntent: ''
     });
     const [errors, setErrors] = useState<Partial<FormData>>({});
 
@@ -57,6 +59,7 @@ export default function Dashboard() {
         if (!formData.secondaryKeyword.trim()) newErrors.secondaryKeyword = 'Secondary Keyword is required';
         if (!formData.semanticTheme.trim()) newErrors.semanticTheme = 'Semantic Theme is required';
         if (!formData.tone.trim()) newErrors.tone = 'Tone is required';
+        if (!formData.pageIntent.trim()) newErrors.pageIntent = 'Page Intent is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -95,6 +98,7 @@ export default function Dashboard() {
                     article_type: formData.articleType,
                     client_name: formData.clientName,
                     creative_brief: formData.creativeBrief,
+                    page_intent: formData.pageIntent,
                     status: 'pending'
                 }])
                 .select();
@@ -124,6 +128,7 @@ export default function Dashboard() {
                         secondary_keywords: formData.secondaryKeyword,
                         semantic_theme: formData.semanticTheme,
                         tone: formData.tone,
+                        page_intent: formData.pageIntent,
                         request_id: dbData[0].id,
                         user_id: user?.id,
                         timestamp: new Date().toISOString(),
@@ -184,7 +189,8 @@ export default function Dashboard() {
                 primaryKeyword: '',
                 secondaryKeyword: '',
                 semanticTheme: '',
-                tone: ''
+                tone: '',
+                pageIntent: ''
             });
 
         } catch (error: any) {
@@ -205,6 +211,7 @@ export default function Dashboard() {
         const clients = ["TechCorp", "GreenLife", "CryptoKing", "WorkSmart", "HealthPlus"];
         const types = ["Website", "Blogs"];
         const tones = ["Professional", "Casual", "Authoritative", "Friendly", "Technical"];
+        const intents = ["Informational", "Transactional", "Commercial", "Navigational", "Lead Generation"];
 
         const random = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -218,7 +225,8 @@ export default function Dashboard() {
             primaryKeyword: "technology",
             secondaryKeyword: "innovation",
             semanticTheme: "Business & Tech",
-            tone: random(tones)
+            tone: random(tones),
+            pageIntent: random(intents)
         });
     };
 
@@ -435,6 +443,22 @@ export default function Dashboard() {
                                     />
                                     {errors.tone && (
                                         <p className="text-sm text-destructive">{errors.tone}</p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="pageIntent" className="text-foreground">
+                                        Page Intent *
+                                    </Label>
+                                    <Input
+                                        id="pageIntent"
+                                        value={formData.pageIntent}
+                                        onChange={(e) => handleInputChange('pageIntent', e.target.value)}
+                                        className={`bg-background border-input ${errors.pageIntent ? 'border-destructive' : ''}`}
+                                        placeholder="e.g. Informational, Transactional, Lead Gen"
+                                    />
+                                    {errors.pageIntent && (
+                                        <p className="text-sm text-destructive">{errors.pageIntent}</p>
                                     )}
                                 </div>
 

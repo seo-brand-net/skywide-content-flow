@@ -1,0 +1,94 @@
+# PRIMARY CONSTRAINT - Word Count
+Target: {{ $('Webhook').item.json.word_count }} words
+Acceptable range: {{ $('Webhook').item.json.word_count * 0.9 }}-{{ $('Webhook').item.json.word_count * 1.1 }} words
+
+All improvements must maintain this word count.
+
+# SEO Keywords
+Primary Keyword:{{ $('Webhook').item.json.primary_keywords }}
+Secondary Keyword:{{ $('Webhook').item.json.secondary_keywords }}
+Semantic Theme:{{ $('Webhook').item.json.semantic_theme }}
+- Use each listed keyword at least once if it fits naturally; never stuff or force
+- Prefer the primary/first keyword near the title/first H2 if natural
+- Incorporate the semantic theme throughout
+
+# Critical Rules
+- The opening paragraph must include {{ $('Webhook').item.json.client_name }} within the first two sentences
+- Never replace {{ $('Webhook').item.json.client_name }} with "the company" or "the brand"
+- Never start with greetings like "Hello," "Welcome," "Hey," or audience-flattery ("dear readers," "lovers of...")
+- Write as a NEUTRAL EXPERT about {{ $('Webhook').item.json.client_name }} - never use "we," "our," "us" from any company perspective
+- Always use second person ("you") or neutral third person
+
+## Objective
+Improve this content's performance scores while maintaining its conversational, authentic tone and target word count.
+
+## Current Performance Analysis:
+- Overall Score: {{ $('1st Scoring Agent1').item.json.message.content.overallScore }}/100
+- Identified Issues: {{ $('1st Scoring Agent1').item.json.message.content.issues }}
+- Recommended Fixes: {{ $('1st Scoring Agent1').item.json.message.content.fixes }}
+- Expected Impact: {{ $('1st Scoring Agent1').item.json.message.content.impact }}
+
+## Improvement Strategy:
+
+### 1. Preserve Conversational Tone (HIGHEST PRIORITY)
+- Must still sound like helpful advice from a knowledgeable friend
+- Keep natural speech patterns, contractions, varied sentences
+- Avoid any AI phrases or corporate language
+- Maintain personality and authenticity above all else
+
+### 2. Strategic SEO Enhancement
+- Improve keyword integration naturally (no stuffing)
+- Strengthen entity relationships and semantic relevance
+- Enhance header structure if needed
+- Better snippet readiness without sounding robotic
+
+### 3. Readability Polish
+- Improve structure while maintaining flow
+- Better scannability (formatting, emphasis)
+- Clearer paragraph focus
+- Mobile-friendly adjustments
+
+### 4. Trust & Authority Building
+- Add credible sources where missing
+- Strengthen EEAT signals naturally
+- Include professional context appropriately
+- Admit limitations where honest
+
+### 5. Engagement Improvement
+- More compelling opening if needed
+- Better flow and transitions
+- Clearer answers to reader questions
+- Stronger conclusion with actionable next steps
+
+### 6. Conversion Optimization
+- Natural mentions of {{ $('Webhook').item.json.client_name }} where appropriate
+- Clear value proposition
+- Subtle calls-to-action that don't sound salesy
+- Build trust in client's services
+
+## Implementation Guidelines:
+- Apply only the fixes that will meaningfully improve scores
+- Make changes that feel organic, not algorithmic
+- If a fix would compromise authenticity, skip it or find a gentler approach
+- Focus on genuine helpfulness over technical perfection
+- Maintain word count by making smart replacements, not just additions
+- **NEVER sacrifice the conversational "friend giving advice" voice**
+
+## Content to Improve:
+{{ $('Document Export Sanitization4').first().json.message.content }}
+
+## Before Submitting - MANDATORY CHECKS:
+1. Word count between {{ $('Webhook').item.json.word_count * 0.9 }}-{{ $('Webhook').item.json.word_count * 1.1 }}?
+2. Still sounds like genuine, helpful advice from a knowledgeable friend?
+3. {{ $('Webhook').item.json.client_name }} mentioned naturally in first two sentences?
+4. No "we/our" from any company perspective?
+5. Improvements address the scoring issues without sounding forced?
+6. Would this score higher on a re-evaluation?
+7. Did you maintain authentic voice despite improvements?
+
+## Output Requirements:
+Provide ONLY the improved content. Include Meta Title and Meta Description, then the full article with all improvements applied.
+
+No explanatory text, improvement summaries, or meta-commentary. The content should speak for itself.
+
+Quality priority: Authentic helpfulness + Better performance (in that order)
