@@ -1,0 +1,136 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e20]:
+          - heading "SKYWIDE" [level=1] [ref=e21]
+          - paragraph [ref=e22]: POWERED BY SEOBRAND
+      - navigation [ref=e23]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Dashboard" [ref=e26] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e27]
+              - text: Dashboard
+          - listitem [ref=e30]:
+            - link "My Requests" [ref=e31] [cursor=pointer]:
+              - /url: /my-requests
+              - img [ref=e32]
+              - text: My Requests
+          - listitem [ref=e35]:
+            - link "AI Rewriter" [ref=e36] [cursor=pointer]:
+              - /url: /ai-rewriter
+              - img [ref=e37]
+              - text: AI Rewriter
+          - listitem [ref=e40]:
+            - link "Features" [ref=e41] [cursor=pointer]:
+              - /url: /features
+              - img [ref=e42]
+              - text: Features
+          - listitem [ref=e44]:
+            - link "Research" [ref=e45] [cursor=pointer]:
+              - /url: /research
+              - img [ref=e46]
+              - text: Research
+          - listitem [ref=e49]:
+            - link "Invite Users" [ref=e50] [cursor=pointer]:
+              - /url: /invite-users
+              - img [ref=e51]
+              - text: Invite Users
+          - listitem [ref=e56]:
+            - link "Analytics" [ref=e57] [cursor=pointer]:
+              - /url: /analytics
+              - img [ref=e58]
+              - text: Analytics
+          - listitem [ref=e59]:
+            - link "Settings" [ref=e60] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e61]
+              - text: Settings
+      - generic [ref=e64]:
+        - img "SEObrand" [ref=e66]
+        - paragraph [ref=e67]: For SEO Brand Staff Members Only
+      - button "Sign Out" [ref=e69] [cursor=pointer]:
+        - img
+        - text: Sign Out
+    - main [ref=e70]:
+      - generic [ref=e72]:
+        - generic [ref=e73]:
+          - heading "Welcome to SKYWIDE Dashboard" [level=1] [ref=e74]
+          - paragraph [ref=e75]: Hello samuel@seobrand.net, submit your content creation requests below.
+        - generic [ref=e76]:
+          - generic [ref=e78]:
+            - text: Content Submission Form
+            - generic [ref=e79]:
+              - button "Clear Data" [ref=e80] [cursor=pointer]
+              - button "Fill Test Data" [ref=e81] [cursor=pointer]
+          - generic [ref=e83]:
+            - generic [ref=e84]:
+              - generic [ref=e85]:
+                - text: Article Title *
+                - textbox "Article Title *" [ref=e86]:
+                  - /placeholder: Enter article title
+                  - text: Mock Submission Article
+              - generic [ref=e87]:
+                - text: Target Audience *
+                - textbox "Target Audience *" [ref=e88]:
+                  - /placeholder: Enter target audience
+                  - text: Testers
+              - generic [ref=e89]:
+                - text: Client Name *
+                - textbox "Client Name *" [ref=e90]:
+                  - /placeholder: Enter client name
+                  - text: Mock Corp
+              - generic [ref=e91]:
+                - text: Article Type *
+                - combobox [ref=e92] [cursor=pointer]:
+                  - generic: Blogs
+                  - img [ref=e93]
+                - combobox [ref=e95]
+              - generic [ref=e96]:
+                - text: Word Count *
+                - textbox "Word Count *" [ref=e97]:
+                  - /placeholder: Enter word count
+                  - text: "500"
+              - generic [ref=e98]:
+                - text: Primary Keyword *
+                - textbox "Primary Keyword *" [ref=e99]:
+                  - /placeholder: Enter primary keyword
+                  - text: mock
+              - generic [ref=e100]:
+                - text: Secondary Keyword *
+                - textbox "Secondary Keyword *" [ref=e101]:
+                  - /placeholder: Enter secondary keyword
+                  - text: mock2
+              - generic [ref=e102]:
+                - text: Semantic Theme *
+                - textbox "Semantic Theme *" [ref=e103]:
+                  - /placeholder: Enter semantic theme
+                  - text: Mocking
+              - generic [ref=e104]:
+                - text: Tone *
+                - textbox "Tone *" [ref=e105]:
+                  - /placeholder: Enter tone
+                  - text: Neutral
+              - generic [ref=e106]:
+                - text: Page Intent *
+                - textbox "Page Intent *" [ref=e107]:
+                  - /placeholder: e.g. Informational, Transactional, Lead Gen
+                - paragraph [ref=e108]: Page Intent is required
+            - generic [ref=e109]:
+              - text: Creative Brief *
+              - textbox "Creative Brief *" [ref=e110]:
+                - /placeholder: Enter detailed creative brief...
+                - text: Test brief
+            - button "Submit Content Request" [active] [ref=e111] [cursor=pointer]
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e117] [cursor=pointer]:
+    - img [ref=e118]
+  - alert [ref=e121]
+```

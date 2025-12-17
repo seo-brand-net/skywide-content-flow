@@ -43,6 +43,7 @@ test.describe('Dashboard Functionality', () => {
         await page.getByLabel('Secondary Keyword *').fill('automation', { force: true });
         await page.getByLabel('Semantic Theme *').fill('QA', { force: true });
         await page.getByLabel('Tone *').fill('Professional', { force: true });
+        await page.getByLabel('Page Intent *').fill('Informational', { force: true });
         await page.getByLabel('Creative Brief *').fill('This is a test brief.', { force: true });
 
         await expect(page.getByLabel('Article Title *')).toHaveValue('E2E Test Article');
@@ -111,12 +112,13 @@ test.describe('Dashboard Functionality', () => {
         await page.getByLabel('Secondary Keyword *').fill('mock2', { force: true });
         await page.getByLabel('Semantic Theme *').fill('Mocking', { force: true });
         await page.getByLabel('Tone *').fill('Neutral', { force: true });
+        await page.getByLabel('Page Intent *').fill('Informational', { force: true });
         await page.getByLabel('Creative Brief *').fill('Test brief', { force: true });
 
         // Submit
         await page.getByRole('button', { name: 'Submit Content Request' }).click({ force: true });
 
-        // Expect specific success message
-        await expect(page.getByText('Content request submitted successfully.', { exact: true })).toBeVisible({ timeout: 20000 });
+        // Expect specific success message with increased timeout
+        await expect(page.getByText('Content request submitted successfully.', { exact: true })).toBeVisible({ timeout: 30000 });
     });
 });

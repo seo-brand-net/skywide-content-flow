@@ -1,0 +1,93 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]:
+        - img [ref=e6]
+        - generic [ref=e20]:
+          - heading "SKYWIDE" [level=1] [ref=e21]
+          - paragraph [ref=e22]: POWERED BY SEOBRAND
+      - navigation [ref=e23]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Dashboard" [ref=e26] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e27]
+              - text: Dashboard
+          - listitem [ref=e30]:
+            - link "My Requests" [ref=e31] [cursor=pointer]:
+              - /url: /my-requests
+              - img [ref=e32]
+              - text: My Requests
+          - listitem [ref=e35]:
+            - link "AI Rewriter" [ref=e36] [cursor=pointer]:
+              - /url: /ai-rewriter
+              - img [ref=e37]
+              - text: AI Rewriter
+          - listitem [ref=e40]:
+            - link "Features" [ref=e41] [cursor=pointer]:
+              - /url: /features
+              - img [ref=e42]
+              - text: Features
+          - listitem [ref=e44]:
+            - link "Research" [ref=e45] [cursor=pointer]:
+              - /url: /research
+              - img [ref=e46]
+              - text: Research
+          - listitem [ref=e49]:
+            - link "Invite Users" [ref=e50] [cursor=pointer]:
+              - /url: /invite-users
+              - img [ref=e51]
+              - text: Invite Users
+          - listitem [ref=e56]:
+            - link "Analytics" [ref=e57] [cursor=pointer]:
+              - /url: /analytics
+              - img [ref=e58]
+              - text: Analytics
+          - listitem [ref=e59]:
+            - link "Settings" [ref=e60] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e61]
+              - text: Settings
+      - generic [ref=e64]:
+        - img "SEObrand" [ref=e66]
+        - paragraph [ref=e67]: For SEO Brand Staff Members Only
+      - button "Sign Out" [ref=e69] [cursor=pointer]:
+        - img
+        - text: Sign Out
+    - main [ref=e70]:
+      - generic [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]: Submit Feature Request
+          - generic [ref=e76]: Help us improve by submitting feature requests, bug reports, or suggestions.
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - text: Feature Title
+            - textbox "Feature Title" [ref=e80]:
+              - /placeholder: Enter a clear title for your request
+          - generic [ref=e81]:
+            - text: Category
+            - combobox "Category" [ref=e82] [cursor=pointer]:
+              - generic: Feature Request
+              - img [ref=e83]
+            - combobox [ref=e85]
+          - generic [ref=e86]:
+            - text: Priority Level
+            - combobox "Priority Level" [ref=e87] [cursor=pointer]:
+              - generic: Medium
+              - img [ref=e88]
+            - combobox [ref=e90]
+          - generic [ref=e91]:
+            - text: Feature Description
+            - textbox "Feature Description" [ref=e92]:
+              - /placeholder: Provide a detailed description of your request...
+          - button "Submit Feature Request" [ref=e93] [cursor=pointer]
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e99] [cursor=pointer]:
+    - img [ref=e100]
+  - alert [ref=e103]
+```
