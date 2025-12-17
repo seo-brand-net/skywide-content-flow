@@ -94,7 +94,12 @@ export default function Dashboard() {
                     user_id: user?.id,
                     article_title: formData.articleTitle,
                     title_audience: formData.titleAudience,
-                    seo_keywords: "",
+                    seo_keywords: "", // Legacy field, keeping empty or could map primary here too? keeping empty as requested
+                    primary_keywords: formData.primaryKeyword ? [formData.primaryKeyword] : [], // Assuming single string input from form, wrapped in array
+                    secondary_keywords: formData.secondaryKeyword ? [formData.secondaryKeyword] : [],
+                    semantic_themes: formData.semanticTheme ? [formData.semanticTheme] : [],
+                    tone: formData.tone,
+                    word_count: parseInt(formData.wordCount) || 0,
                     article_type: formData.articleType,
                     client_name: formData.clientName,
                     creative_brief: formData.creativeBrief,
