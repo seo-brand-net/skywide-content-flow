@@ -4,7 +4,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.3";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
-// Create Supabase admin client for generating recovery links
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -28,18 +27,13 @@ interface PasswordResetRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
-  console.log("Password reset email function called");
-  
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { email, resetUrl, userFullName }: PasswordResetRequest = await req.json();
-    console.log("Sending password reset email to:", email);
 
-    // Generate proper Supabase recovery link
     const { data, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
       email,
@@ -49,15 +43,13 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (linkError) {
-      console.error("Failed to generate recovery link:", linkError);
       throw linkError;
     }
 
     const recoveryLink = data.properties.action_link;
-    console.log("Generated recovery link for:", email);
 
     const emailResponse = await resend.emails.send({
-      from: "SKYWIDE <passwordreset@skywide.co>",
+      from: "SKYWIDE <registrations@skywide.co>",
       to: [email],
       subject: "Reset Your SKYWIDE Password",
       html: `
@@ -71,14 +63,10 @@ const handler = async (req: Request): Promise<Response> => {
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #ffffff; background-color: #1a1a1a; margin: 0; padding: 0;">
           <div style="max-width: 600px; margin: 40px auto; padding: 0 20px;">
             <div style="background-color: #2a2a2a; border: 1px solid #333; border-radius: 12px; padding: 40px; text-align: center;">
-              
-              <!-- Header -->
               <div style="margin-bottom: 32px;">
                 <h1 style="color: #06b6d4; font-size: 32px; font-weight: bold; margin: 0 0 8px 0; letter-spacing: 2px;">SKYWIDE</h1>
                 <p style="color: #888; font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">POWERED BY SEOBRAND AI</p>
               </div>
-
-              <!-- Content -->
               <div style="margin-bottom: 32px;">
                 <h2 style="color: #ffffff; font-size: 24px; font-weight: 600; margin: 0 0 16px 0;">Reset Your Password</h2>
                 ${userFullName ? `<p style="color: #cccccc; font-size: 16px; margin: 0 0 24px 0;">Hello ${userFullName},</p>` : ''}
@@ -86,16 +74,12 @@ const handler = async (req: Request): Promise<Response> => {
                   We received a request to reset your password for your SKYWIDE account. Click the button below to create a new password.
                 </p>
               </div>
-
-              <!-- CTA Button -->
               <div style="margin: 32px 0;">
                 <a href="${recoveryLink}"
                    style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #0891b2); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; border: none; cursor: pointer;">
                   Reset Password
                 </a>
               </div>
-
-              <!-- Additional Info -->
               <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #333;">
                 <p style="color: #888; font-size: 14px; margin: 0 0 8px 0;">
                   If you didn't request this password reset, you can safely ignore this email.
@@ -104,8 +88,6 @@ const handler = async (req: Request): Promise<Response> => {
                   This link will expire in 24 hours for security reasons.
                 </p>
               </div>
-
-              <!-- Footer -->
               <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #333;">
                 <p style="color: #666; font-size: 12px; margin: 0;">
                   © 2024 SKYWIDE. All rights reserved.
@@ -118,11 +100,13 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Password reset email sent successfully:", emailResponse);
+    if (emailResponse.error) {
+      throw new Error(`Email provider error: ${emailResponse.error.message}`);
+    }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
-      messageId: emailResponse.data?.id 
+    return new Response(JSON.stringify({
+      success: true,
+      messageId: emailResponse.data?.id
     }), {
       status: 200,
       headers: {
@@ -131,11 +115,10 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error in send-password-reset function:", error);
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         error: error.message,
-        success: false 
+        success: false
       }),
       {
         status: 500,

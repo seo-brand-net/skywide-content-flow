@@ -12,12 +12,25 @@ async function login(page: any) {
     await page.waitForURL(/dashboard/i, { timeout: 20000 });
 }
 
+// Retrying goto helper
+async function retryGoto(page: any, url: string, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await page.goto(url, { waitUntil: 'load', timeout: 30000 });
+            return;
+        } catch (error) {
+            console.log(`Retry ${i + 1}/${retries} for ${url} failed: ${error}`);
+            if (i === retries - 1) throw error;
+        }
+    }
+}
+
 test.describe('Features Page', () => {
     test.setTimeout(60000);
 
     test.beforeEach(async ({ page }) => {
         await login(page);
-        await page.goto('/features');
+        await retryGoto(page, '/features');
     });
 
     test('loads successfully', async ({ page }) => {

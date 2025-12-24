@@ -60,10 +60,10 @@ function ResetPasswordContent() {
 
     // Redirect authenticated users to dashboard (but not during password reset)
     useEffect(() => {
-        if (user && step === 'request' && !isPasswordReset) {
+        if (user && !isPasswordReset) {
             router.push('/dashboard');
         }
-    }, [user, router, step, isPasswordReset]);
+    }, [user, router, isPasswordReset]);
 
     const handleRequestReset = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -80,18 +80,20 @@ function ResetPasswordContent() {
             const { error } = await sendCustomPasswordResetEmail(email);
 
             if (error) {
+                console.error('Password reset failed:', error);
                 toast({
-                    title: "Error",
-                    description: error.message,
+                    title: "Reset Failed",
+                    description: error.message || "Could not send reset email. Please try again later.",
                     variant: "destructive",
                 });
             } else {
                 toast({
                     title: "Check your email",
-                    description: "We've sent you a password reset link from SKYWIDE.",
+                    description: "If an account exists for this email, you will receive a reset link shortly.",
                 });
             }
-        } catch (error) {
+        } catch (error: any) {
+            console.error('Unexpected error during password reset:', error);
             toast({
                 title: "Error",
                 description: "An unexpected error occurred. Please try again.",
