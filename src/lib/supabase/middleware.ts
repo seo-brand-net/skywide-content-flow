@@ -58,7 +58,12 @@ export async function updateSession(request: NextRequest) {
         // Redirect to login
         const url = request.nextUrl.clone()
         url.pathname = '/login'
-        return NextResponse.redirect(url)
+        const response = NextResponse.redirect(url)
+        // Copy headers/cookies from supabaseResponse to the new redirect response
+        supabaseResponse.headers.forEach((value, key) => {
+            response.headers.set(key, value)
+        })
+        return response
     }
 
     // Auth Routes Handling
@@ -67,7 +72,12 @@ export async function updateSession(request: NextRequest) {
         // Redirect to dashboard
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
-        return NextResponse.redirect(url)
+        const response = NextResponse.redirect(url)
+        // Copy headers/cookies from supabaseResponse to the new redirect response
+        supabaseResponse.headers.forEach((value, key) => {
+            response.headers.set(key, value)
+        })
+        return response
     }
 
     return supabaseResponse

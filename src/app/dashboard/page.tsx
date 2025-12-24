@@ -211,27 +211,69 @@ export default function Dashboard() {
     };
 
     const fillRandomData = () => {
-        const titles = ["The Future of AI", "Top 10 SEO Strategies", "Sustainable Living Guide", "Crypto Market Trends", "Remote Work Best Practices"];
+        const testScenarios = [
+            {
+                title: "The Future of AI in Content Creation",
+                brief: "Explore how generative AI models are reshaping the editorial landscape. Focus on the shift from manual writing to AI-assisted workflows, ethical considerations for accuracy, and how human editors remain the final layer of quality assurance. Avoid alarmist tones; focus on partnership between tech and talent.",
+                primary: "AI content creation",
+                secondary: "generative AI trends",
+                theme: "Technology & Innovation",
+                intent: "Informational"
+            },
+            {
+                title: "Top 10 SEO Strategies for 2024",
+                brief: "Provide a high-level guide on modern SEO beyond keywords. Cover the importance of E-E-A-T (Experience, Expertise, Authoritativeness, and Trustworthiness), optimizing for zero-click searches, and why mobile-first indexing is no longer optional but a baseline. Ensure all advice is actionable for small to mid-sized businesses.",
+                primary: "SEO strategies 2024",
+                secondary: "Google E-E-A-T",
+                theme: "Digital Marketing",
+                intent: "Commercial"
+            },
+            {
+                title: "Sustainable Living: A Practical Guide",
+                brief: "A roadmap for individuals looking to reduce their environmental impact without radical lifestyle changes. Include sections on zero-waste kitchen habits, ethical fashion choices, and the long-term benefits of circular economy participation. The tone should be encouraging and non-judgmental, acting as a 'mentor' to the reader.",
+                primary: "sustainable living tips",
+                secondary: "eco-friendly habits",
+                theme: "Lifestyle & Sustainability",
+                intent: "Informational"
+            },
+            {
+                title: "Crypto Market Trends: What to Watch",
+                brief: "An analysis of the current state of decentralized finance (DeFi) and institutional adoption of blockchain. Discuss the impact of Bitcoin ETFs, the rise of Layer 2 solutions for scalability, and what long-term investors should consider regarding portfolio diversification. Maintain a balanced, expert view without financial advice disclaimers (not needed for this test).",
+                primary: "crypto market trends",
+                secondary: "blockchain adoption",
+                theme: "Finance & Crypto",
+                intent: "Commercial"
+            },
+            {
+                title: "Remote Work Best Practices for Hybrid Teams",
+                brief: "A comprehensive look at maintaining company culture in a distributed environment. Address asynchronous communication tools, setting boundaries to prevent burnout, and how leadership can foster trust when face-to-face interaction is limited. Focus on practical solutions for HR managers and team leads.",
+                primary: "remote work best practices",
+                secondary: "hybrid team management",
+                theme: "Business & Management",
+                intent: "Lead Generation"
+            }
+        ];
+
         const audiences = ["Tech Professionals", "Small Business Owners", "Eco-conscious Consumers", "Investors", "HR Managers"];
         const clients = ["TechCorp", "GreenLife", "CryptoKing", "WorkSmart", "HealthPlus"];
         const types = ["Website", "Blogs"];
         const tones = ["Professional", "Casual", "Authoritative", "Friendly", "Technical"];
-        const intents = ["Informational", "Transactional", "Commercial", "Navigational", "Lead Generation"];
 
-        const random = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+        const random = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+        const scenario = random(testScenarios);
 
         setFormData({
-            articleTitle: random(titles),
+            articleTitle: scenario.title,
             titleAudience: random(audiences),
             clientName: random(clients),
-            creativeBrief: "Please write a comprehensive article covering the main points of the topic. Include statistics and expert opinions where possible.",
+            creativeBrief: scenario.brief,
             articleType: random(types),
             wordCount: "1200",
-            primaryKeyword: "technology",
-            secondaryKeyword: "innovation",
-            semanticTheme: "Business & Tech",
+            primaryKeyword: scenario.primary,
+            secondaryKeyword: scenario.secondary,
+            semanticTheme: scenario.theme,
             tone: random(tones),
-            pageIntent: random(intents)
+            pageIntent: scenario.intent
         });
     };
 

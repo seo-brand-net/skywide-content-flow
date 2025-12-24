@@ -13,7 +13,8 @@ const SIDEBAR_PATHS = [ // Whitelist of paths that SHOULD have the sidebar
     "/invite-users",
     "/analytics",
     "/features",
-    "/ai-rewriter"
+    "/ai-rewriter",
+    "/content-briefs"
 ];
 
 export function ClientGlobalLayout({

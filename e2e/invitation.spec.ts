@@ -3,6 +3,15 @@ import { test, expect } from '@playwright/test';
 test.describe('Invitation Flow', () => {
     test.setTimeout(60000);
     test.beforeEach(async ({ page }) => {
+        // Mock the invitation email webhook to prevent sending real emails
+        await page.route('https://seobrand.app.n8n.cloud/webhook/send-invitation', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({ message: 'Mocked success' }),
+            });
+        });
+
         // Login as admin before each test
         await page.goto('/login');
         await page.getByLabel('Email').fill('samuel@seobrand.net');

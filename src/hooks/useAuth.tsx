@@ -38,7 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('Auth state change:', event, !!session);
+
         // Check if this is a password reset flow
         const urlParams = new URLSearchParams(window.location.search);
         const isResetFlow = urlParams.get('type') === 'recovery' || event === 'PASSWORD_RECOVERY';
@@ -56,10 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsPasswordReset(false);
           sessionStorage.removeItem('isPasswordReset');
           router.push('/login');
-        } else if (!isPasswordReset) {
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           // Regular authentication flow (only if not in password reset mode)
-          setSession(session);
-          setUser(session?.user ?? null);
+          if (!isPasswordReset) {
+            setSession(session);
+            setUser(session?.user ?? null);
+          }
         }
         setLoading(false);
       }
@@ -166,9 +170,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setUser(null);
 
-      // Clear any legacy auth data
+      // Clear any auth data from local storage
+      const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
+      if (projectRef) {
+        localStorage.removeItem(`sb-${projectRef}-auth-token`);
+      }
       localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('sb-sgwocrvftiwxofvykmhh-auth-token');
 
       toast({
         title: "Signed Out",

@@ -21,7 +21,8 @@ export default function Login() {
 
     // Redirect authenticated users
     useEffect(() => {
-        if (user) {
+        const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
+        if (user && !storedResetState) {
             router.push('/dashboard');
         }
     }, [user, router]);
