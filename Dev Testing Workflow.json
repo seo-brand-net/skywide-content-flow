@@ -1015,7 +1015,19 @@
               "operation": "largerEqual",
               "value2": 80
             }
-          ]
+          ],
+          "string": [
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
         }
       },
       "type": "n8n-nodes-base.if",
@@ -1037,7 +1049,19 @@
               "operation": "largerEqual",
               "value2": 73
             }
-          ]
+          ],
+          "string": [
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
         }
       },
       "type": "n8n-nodes-base.if",
@@ -1068,9 +1092,18 @@
                 "type": "number",
                 "operation": "gte"
               }
+            },
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "looseTypeValidation": true,
         "options": {}
@@ -1282,7 +1315,19 @@
               "operation": "largerEqual",
               "value2": 73
             }
-          ]
+          ],
+          "string": [
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
         }
       },
       "type": "n8n-nodes-base.if",
@@ -1375,7 +1420,19 @@
               "operation": "largerEqual",
               "value2": 73
             }
-          ]
+          ],
+          "string": [
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
         }
       },
       "type": "n8n-nodes-base.if",
@@ -1397,7 +1454,19 @@
               "operation": "largerEqual",
               "value2": 73
             }
-          ]
+          ],
+          "string": [
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
         }
       },
       "type": "n8n-nodes-base.if",
@@ -1428,9 +1497,18 @@
                 "type": "number",
                 "operation": "gte"
               }
+            },
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
-          "combinator": "and"
+          "combinator": "or"
         },
         "looseTypeValidation": true,
         "options": {}
@@ -1642,7 +1720,19 @@
               "operation": "largerEqual",
               "value2": 73
             }
-          ]
+          ],
+          "string": [
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
         }
       },
       "type": "n8n-nodes-base.if",
@@ -2144,6 +2234,15 @@
                 "type": "number",
                 "operation": "largerEqual"
               }
+            },
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "or"
@@ -2455,6 +2554,15 @@
                 "type": "number",
                 "operation": "largerEqual"
               }
+            },
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "or"
@@ -2763,6 +2871,15 @@
               "operator": {
                 "type": "number",
                 "operation": "largerEqual"
+              }
+            },
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
               }
             }
           ],
@@ -3079,6 +3196,15 @@
                 "type": "number",
                 "operation": "largerEqual"
               }
+            },
+            {
+              "id": "test_bypass",
+              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
+              "rightValue": "test",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
             }
           ],
           "combinator": "or"
@@ -3174,6 +3300,54 @@
       ],
       "id": "test-callback-node-id",
       "name": "Send Test Callback"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $('Webhook1').item.json.body.target_path }}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "equals",
+              "value2": "path_primary_snippet",
+              "output": 0
+            },
+            {
+              "operation": "equals",
+              "value2": "path_claude_snippet",
+              "output": 1
+            },
+            {
+              "operation": "equals",
+              "value2": "path_faq_a",
+              "output": 2
+            },
+            {
+              "operation": "equals",
+              "value2": "path_faq_b",
+              "output": 3
+            },
+            {
+              "operation": "equals",
+              "value2": "path_faq_c",
+              "output": 4
+            },
+            {
+              "operation": "equals",
+              "value2": "path_faq_d",
+              "output": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -11800,
+        -800
+      ],
+      "id": "path_router_id",
+      "name": "Path Router"
     }
   ],
   "pinData": {
@@ -3862,12 +4036,7 @@
       "main": [
         [
           {
-            "node": "OpenAI Draft (GPT-4O)1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Claude Draft (Claude Opus 3)1",
+            "node": "Path Router",
             "type": "main",
             "index": 0
           }
@@ -4167,7 +4336,7 @@
       "main": [
         [
           {
-            "node": "1st Scoring Agent2",
+            "node": "Test Quality Audit",
             "type": "main",
             "index": 0
           }
@@ -4586,7 +4755,7 @@
       "main": [
         [
           {
-            "node": "1st Scoring Agent3",
+            "node": "Test Quality Audit",
             "type": "main",
             "index": 0
           }
@@ -5154,6 +5323,52 @@
         [
           {
             "node": "Send Test Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Path Router": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Draft (GPT-4O)1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Claude Draft (Claude Opus 3)1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields7",
             "type": "main",
             "index": 0
           }
