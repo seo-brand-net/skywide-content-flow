@@ -11,7 +11,7 @@ import { Loader2, CheckCircle2, XCircle, PlayCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const EXPORT_PATHS = [
-    { id: 'path_openai_snippet', name: 'OpenAI Optimized (Snippet)' },
+    { id: 'path_primary_snippet', name: 'Primary Optimized (Snippet)' },
     { id: 'path_claude_snippet', name: 'Claude Optimized (Snippet)' },
     { id: 'path_faq_a', name: 'FAQ Branch A' },
     { id: 'path_faq_b', name: 'FAQ Branch B' },
