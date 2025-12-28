@@ -1,13 +1,13 @@
 "use client";
 
 import { useAuth } from '@/hooks/useAuth';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle, PlayCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, PlayCircle, FileSearch } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const EXPORT_PATHS = [
@@ -22,11 +22,13 @@ const EXPORT_PATHS = [
 interface TestResult {
     pathId: string;
     pathName: string;
-    status: 'pending' | 'running' | 'success' | 'failed';
+    status: 'pending' | 'running' | 'success' | 'failed' | 'timeout';
     score?: number;
     alignment?: string;
     improvements?: string[];
     error?: string;
+    data?: any;
+    timestamp?: string;
 }
 
 export default function TestExportPage() {
@@ -69,31 +71,62 @@ export default function TestExportPage() {
 
     const runSingleTest = async (pathId: string, pathName: string): Promise<TestResult> => {
         const mockData = getMockData();
+        const requestId = crypto.randomUUID();
+
         try {
-            const response = await fetch('/api/proxy-n8n', {
+            // 1. Trigger the workflow via the TEST proxy
+            const triggerResponse = await fetch('/api/proxy-n8n-test', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...mockData,
                     target_path: pathId,
                     request_status: 'test',
+                    request_id: requestId,
                     user_id: user?.id,
                     timestamp: new Date().toISOString(),
                 }),
             });
 
-            if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-            const data = await response.json();
+            if (!triggerResponse.ok) throw new Error(`Trigger failed: ${triggerResponse.status}`);
 
-            // Assuming n8n returns comparison data in this format
-            return {
-                pathId,
-                pathName,
-                status: 'success',
-                score: data.comparison?.score || 100,
-                alignment: data.comparison?.alignment || 'Perfectly aligned',
-                improvements: data.comparison?.improvements || [],
-            };
+            // 2. Poll for results (Async Callback architecture)
+            return new Promise((resolve) => {
+                let attempts = 0;
+                const maxAttempts = 50; // 250 seconds
+                const pollInterval = setInterval(async () => {
+                    attempts++;
+                    try {
+                        const pollRes = await fetch(`/api/test-callback?request_id=${requestId}`);
+                        const pollData = await pollRes.json();
+
+                        if (pollRes.ok && pollData.status === 'completed') {
+                            clearInterval(pollInterval);
+                            resolve({
+                                pathId,
+                                pathName,
+                                status: 'success',
+                                score: pollData.data?.overall_alignment_score || pollData.data?.alignment_score || 0,
+                                alignment: pollData.data?.alignment_summary || 'Analysis complete',
+                                improvements: pollData.data?.suggestions || [],
+                                data: pollData.data,
+                                timestamp: new Date().toLocaleTimeString()
+                            });
+                        } else if (attempts >= maxAttempts) {
+                            clearInterval(pollInterval);
+                            resolve({
+                                pathId,
+                                pathName,
+                                status: 'timeout',
+                                error: 'Results took too long to arrive.'
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Polling error:", err);
+                    }
+                }, 5000);
+            });
+
         } catch (error: any) {
             return {
                 pathId,
@@ -111,14 +144,13 @@ export default function TestExportPage() {
             ? EXPORT_PATHS
             : EXPORT_PATHS.filter(p => p.id === selectedPath);
 
-        const initialResults: TestResult[] = pathsToTest.map(p => ({
+        setResults(pathsToTest.map(p => ({
             pathId: p.id,
             pathName: p.name,
             status: 'pending',
-        }));
-        setResults(initialResults);
+        })));
 
-        const testPromises = pathsToTest.map(async (path, index) => {
+        const resultsPromises = pathsToTest.map(async (path) => {
             setResults(prev => prev.map(r => r.pathId === path.id ? { ...r, status: 'running' } : r));
             const result = await runSingleTest(path.id, path.name);
             setResults(prev => prev.map(r => r.pathId === path.id ? result : r));
@@ -126,13 +158,13 @@ export default function TestExportPage() {
             return result;
         });
 
-        await Promise.all(testPromises);
+        await Promise.all(resultsPromises);
         setIsTesting(false);
         setOverallProgress(100);
 
         toast({
-            title: "Testing Complete",
-            description: selectedPath === 'all' ? "All paths tested." : `Test for ${results[0].pathName} finished.`,
+            title: "Testing Sequence Complete",
+            description: "Diagnostic reports are ready for review.",
         });
     };
 
@@ -141,10 +173,10 @@ export default function TestExportPage() {
             <div className="max-w-5xl mx-auto space-y-8">
                 <div>
                     <h1 className="text-3xl font-bold seobrand-title seobrand-title-accent mb-2">
-                        Export Infrastructure Testing
+                        Export Infrastructure Testing (Async)
                     </h1>
                     <p className="text-muted-foreground">
-                        Select an export path to trigger a mock request and verify the comparison output.
+                        Triggering tests via <code>/api/proxy-n8n-test</code> with asynchronous callback polling.
                     </p>
                 </div>
 
@@ -173,20 +205,20 @@ export default function TestExportPage() {
                                 className="w-full md:w-48 bg-brand-blue-crayola hover:bg-brand-blue-crayola/90"
                             >
                                 {isTesting ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Running...</>
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Diagnostic In Progress...</>
                                 ) : (
-                                    <><PlayCircle className="mr-2 h-4 w-4" /> Run Test</>
+                                    <><PlayCircle className="mr-2 h-4 w-4" /> Start Evaluation</>
                                 )}
                             </Button>
                         </div>
 
                         {isTesting && (
                             <div className="mt-8 space-y-2">
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span>Overall Progress</span>
+                                <div className="flex justify-between text-sm mb-1 text-muted-foreground">
+                                    <span>Cumulative Progress</span>
                                     <span>{Math.round(overallProgress)}%</span>
                                 </div>
-                                <Progress value={overallProgress} className="h-2" />
+                                <Progress value={overallProgress} className="h-1 bg-muted/20" />
                             </div>
                         )}
                     </CardContent>
@@ -194,41 +226,68 @@ export default function TestExportPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {results.map((result) => (
-                        <Card key={result.pathId} className={`border-border ${result.status === 'running' ? 'animate-pulse' : ''}`}>
+                        <Card key={result.pathId} className={`bg-card/30 border-border ${result.status === 'running' ? 'border-brand-blue-crayola/50 shadow-[0_0_15px_rgba(37,99,235,0.1)]' : ''}`}>
                             <CardHeader className="pb-2">
                                 <div className="flex justify-between items-start">
-                                    <CardTitle className="text-sm font-medium">{result.pathName}</CardTitle>
-                                    {result.status === 'success' && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                                    {result.status === 'failed' && <XCircle className="h-4 w-4 text-destructive" />}
+                                    <CardTitle className="text-sm font-bold tracking-tight">{result.pathName}</CardTitle>
+                                    {result.status === 'success' && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                                    {result.status === 'failed' && <XCircle className="h-4 w-4 text-rose-500" />}
+                                    {result.status === 'timeout' && <Loader2 className="h-4 w-4 text-amber-500" />}
                                     {result.status === 'running' && <Loader2 className="h-4 w-4 animate-spin text-brand-blue-crayola" />}
                                 </div>
                             </CardHeader>
                             <CardContent>
                                 {result.status === 'success' && (
-                                    <div className="space-y-2">
+                                    <div className="space-y-4">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-muted-foreground">Alignment Score</span>
-                                            <span className="text-lg font-bold text-brand-blue-crayola">{result.score}%</span>
+                                            <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Alignment</span>
+                                            <span className="text-2xl font-black text-brand-blue-crayola">{result.score}%</span>
                                         </div>
-                                        <p className="text-xs italic">{result.alignment}</p>
+                                        <p className="text-xs text-foreground/80 leading-relaxed bg-muted/30 p-3 rounded-lg border border-border/20 italic">
+                                            "{result.alignment}"
+                                        </p>
                                         {result.improvements && result.improvements.length > 0 && (
-                                            <div className="mt-4 pt-4 border-t border-border">
-                                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Suggestions</p>
-                                                <ul className="text-xs list-disc pl-4 space-y-1">
-                                                    {result.improvements.map((imp, i) => <li key={i}>{imp}</li>)}
+                                            <div className="space-y-2">
+                                                <p className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground">Strategic Suggestions</p>
+                                                <ul className="text-[11px] space-y-1">
+                                                    {result.improvements.slice(0, 3).map((imp, i) => (
+                                                        <li key={i} className="flex gap-2 items-start">
+                                                            <div className="w-1 h-1 rounded-full bg-brand-blue-crayola mt-1.5 shrink-0" />
+                                                            <span>{imp}</span>
+                                                        </li>
+                                                    ))}
                                                 </ul>
                                             </div>
                                         )}
+                                        <div className="flex justify-between items-center pt-2 border-t border-border/10">
+                                            <span className="text-[10px] font-mono text-muted-foreground">{result.timestamp}</span>
+                                            <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 hover:bg-brand-blue-crayola/10 text-brand-blue-crayola">
+                                                Full Report
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
                                 {result.status === 'failed' && (
-                                    <p className="text-xs text-destructive">{result.error}</p>
+                                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                                        <p className="text-xs text-rose-500 font-medium">{result.error}</p>
+                                    </div>
+                                )}
+                                {result.status === 'timeout' && (
+                                    <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                                        <p className="text-xs text-amber-500 font-medium">Wait timeout - n8n still processing</p>
+                                    </div>
                                 )}
                                 {result.status === 'pending' && (
-                                    <p className="text-xs text-muted-foreground">Waiting to start...</p>
+                                    <p className="text-[11px] text-muted-foreground italic">Awaiting sequence...</p>
                                 )}
                                 {result.status === 'running' && (
-                                    <p className="text-xs text-brand-blue-crayola">Processing output comparison...</p>
+                                    <div className="space-y-2">
+                                        <p className="text-[11px] text-brand-blue-crayola font-medium flex items-center gap-2">
+                                            <Loader2 size={12} className="animate-spin" />
+                                            Analyzing generation...
+                                        </p>
+                                        <Progress value={45} className="h-1 bg-brand-blue-crayola/10" />
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
