@@ -42,7 +42,7 @@ export default function TestExportPage() {
     const getMockData = () => {
         const scenarios = [
             {
-                article_title: "The Ethical Dilemma of AI Diagnostics",
+                title: "The Ethical Dilemma of AI Diagnostics",
                 creative_brief: "Analyze the intersection of medicine and machine learning. Focus on patient privacy, the risk of algorithmic bias in marginalized communities, and why a human-in-the-loop system is non-negotiable for critical health decisions.",
                 primary_keywords: "AI medical ethics",
                 secondary_keywords: "healthcare algorithms bias",
@@ -50,7 +50,7 @@ export default function TestExportPage() {
                 page_intent: "Informational"
             },
             {
-                article_title: "Sustainable Urban Farming: 2024 Blueprint",
+                title: "Sustainable Urban Farming: 2024 Blueprint",
                 creative_brief: "Showcase innovative ways cities are tackling food deserts. Cover vertical hydroponics, rooftop community gardens, and the role of municipal policy in incentivizing green space conversion.",
                 primary_keywords: "urban farming solutions",
                 secondary_keywords: "vertical gardening benefits",
@@ -62,9 +62,9 @@ export default function TestExportPage() {
         return {
             ...random,
             client_name: "TechTest",
-            title_audience: "Professionals",
+            audience: "Professionals",
             article_type: "Blogs",
-            word_count: "1000",
+            word_count: "1200",
             tone: "Professional"
         };
     };
