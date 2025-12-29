@@ -11,12 +11,12 @@ import { Loader2, CheckCircle2, XCircle, PlayCircle, FileSearch } from 'lucide-r
 import { Progress } from '@/components/ui/progress';
 
 const EXPORT_PATHS = [
-    { id: 'path_primary_snippet', name: 'Primary Optimized (Snippet)' },
-    { id: 'path_claude_snippet', name: 'Claude Optimized (Snippet)' },
-    { id: 'path_faq_a', name: 'FAQ Branch A' },
-    { id: 'path_faq_b', name: 'FAQ Branch B' },
-    { id: 'path_faq_c', name: 'FAQ Branch C' },
-    { id: 'path_faq_d', name: 'FAQ Branch D' },
+    { id: 'openai_qa_loop', name: 'OpenAI QA Loop' },
+    { id: 'openai_score_loop', name: 'OpenAI Score Loop' },
+    { id: 'openai_direct_export', name: 'OpenAI Direct Export' },
+    { id: 'claude_qa_loop', name: 'Claude QA Loop' },
+    { id: 'claude_score_loop', name: 'Claude Score Loop' },
+    { id: 'claude_direct_export', name: 'Claude Direct Export' },
 ];
 
 interface TestResult {

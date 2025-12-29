@@ -9,12 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Play, CheckCircle2, XCircle, Beaker, FileSearch } from "lucide-react";
 
 const TEST_PATHS = [
-    { id: "path_primary_snippet", name: "Path 1", description: "Primary Optimized (Snippet)" },
-    { id: "path_claude_snippet", name: "Path 2", description: "Claude Optimized (Snippet)" },
-    { id: "path_faq_a", name: "Path 3", description: "FAQ Branch A" },
-    { id: "path_faq_b", name: "Path 4", description: "FAQ Branch B" },
-    { id: "path_faq_c", name: "Path 5", description: "FAQ Branch C" },
-    { id: "path_faq_d", name: "Path 6", description: "FAQ Branch D" }
+    { id: "openai_qa_loop", name: "OpenAI QA Loop", description: "OpenAI QA Validator loop" },
+    { id: "openai_score_loop", name: "OpenAI Score Loop", description: "OpenAI Score optimization loop" },
+    { id: "openai_direct_export", name: "OpenAI Direct Export", description: "OpenAI Direct export" },
+    { id: "claude_qa_loop", name: "Claude QA Loop", description: "Claude QA Validator loop" },
+    { id: "claude_score_loop", name: "Claude Score Loop", description: "Claude Score optimization loop" },
+    { id: "claude_direct_export", name: "Claude Direct Export", description: "Claude Direct export" }
 ];
 
 export default function TestExportsPage() {

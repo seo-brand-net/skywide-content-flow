@@ -10,11 +10,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -13104,
-        -2304
+        -768,
+        -2688
       ],
       "typeVersion": 1,
-      "id": "cf873676-d0a3-4f37-8358-fbede545a0bc",
+      "id": "d7267793-6570-4ba5-850b-0bd15d6dd67b",
       "name": "Sticky Note"
     },
     {
@@ -23,11 +23,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -12496,
-        -1856
+        -160,
+        -2240
       ],
       "typeVersion": 1,
-      "id": "ca47e2ec-cb21-4137-a0bb-b896028ff10b",
+      "id": "673cbdd3-2e3e-4385-8d6c-a888f6bb89bf",
       "name": "Sticky Note5"
     },
     {
@@ -89,26 +89,26 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -11728,
-        -528
+        624,
+        -912
       ],
-      "id": "8e803117-05d1-4e00-aec7-4e9ca4e548e4",
+      "id": "5169a447-8794-4067-af4a-991d3b8f91dc",
       "name": "Clean1"
     },
     {
       "parameters": {
         "httpMethod": "POST",
         "path": "content-engine-dev-test",
-        "responseMode": "onReceived",
+        "responseMode": "responseNode",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        -12400,
-        -432
+        -64,
+        -816
       ],
-      "id": "4ea918d5-07b6-4f4f-964a-5bda7e6516fe",
+      "id": "ff5d149b-6786-43a3-8358-f9d4dc1838db",
       "name": "Webhook1",
       "webhookId": "c9d7ab2c-298f-4b57-be8e-235a1c25f1ef"
     },
@@ -133,10 +133,10 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        -11952,
-        -432
+        400,
+        -816
       ],
-      "id": "2b90ea03-3fdf-4ea4-a883-65b61eac166a",
+      "id": "3e41e18d-8787-43ad-9bf6-e4e7ef1243cc",
       "name": "Create folder1",
       "notesInFlow": true,
       "credentials": {
@@ -164,10 +164,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -11432,
-        -156
+        912,
+        -544
       ],
-      "id": "f34fbdb3-c423-483f-9c0c-4b64cf38454c",
+      "id": "aef0789b-1f52-498c-87b7-f299aac69ad4",
       "name": "Anthropic Chat Model4",
       "credentials": {
         "anthropicApi": {
@@ -198,10 +198,10 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        -10928,
-        -528
+        1424,
+        -912
       ],
-      "id": "6a89862e-5edd-4d3b-8d04-6fee9d0d1c3a",
+      "id": "a40c8eb8-c096-4c32-922e-aae75539eafa",
       "name": "Data Check & Research Gaps1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -221,10 +221,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -11152,
-        -528
+        1200,
+        -912
       ],
-      "id": "e8466454-0c35-4bd7-82de-b7d0dd80898b",
+      "id": "94c9e1cf-069a-40b5-a50a-439b4c562ebb",
       "name": "Merge3"
     },
     {
@@ -254,10 +254,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -10704,
-        -676
+        1648,
+        -1056
       ],
-      "id": "2c4882c6-b139-48ff-af1c-d73cef762929",
+      "id": "cbc9e058-bfb8-47ad-a5a4-4e8643856ec3",
       "name": "OpenAI Keyword Check + Semantic Gap1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -284,10 +284,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -10704,
-        -380
+        1648,
+        -768
       ],
-      "id": "58ca8eb7-4854-4911-8369-9050a51261bd",
+      "id": "0d3ca16b-dc7c-4273-a4d5-c79d9ef6ef0c",
       "name": "Claude Keyword Check + Semantic Gap1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -309,10 +309,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -10632,
-        -156
+        1712,
+        -544
       ],
-      "id": "809bbc28-4752-44eb-b74b-58b5b92891c2",
+      "id": "74c73e46-194b-4cbc-aed5-82823472640b",
       "name": "Anthropic Chat Model5",
       "credentials": {
         "anthropicApi": {
@@ -330,10 +330,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -10352,
-        -528
+        2000,
+        -912
       ],
-      "id": "42dc479e-8fdc-43f2-83f0-153c2c838c27",
+      "id": "b7a22375-ab2f-4d06-9970-35a5e53ca217",
       "name": "Merge5"
     },
     {
@@ -352,10 +352,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -9904,
-        -528
+        2448,
+        -912
       ],
-      "id": "903e8ffd-5053-4189-a9bf-1ac91db66350",
+      "id": "39c8a90b-bc5f-404b-bbcc-03318143b679",
       "name": "Claude Apply Recommendations1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -376,10 +376,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -9832,
-        -304
+        2512,
+        -688
       ],
-      "id": "af687994-31dd-47f9-b8eb-f892f970620b",
+      "id": "579fc48b-908d-4868-8fd7-edf0399496a9",
       "name": "Anthropic Chat Model6",
       "credentials": {
         "anthropicApi": {
@@ -414,10 +414,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -9552,
-        -676
+        2800,
+        -1056
       ],
-      "id": "982377ba-e8f5-47c0-824c-e9a1b07a0dcd",
+      "id": "7c434274-95a9-4041-ba62-a3fbb58fee0c",
       "name": "OpenAI EEAT Injection1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -444,10 +444,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -9552,
-        -380
+        2800,
+        -768
       ],
-      "id": "2f3589f6-eb65-442c-a5b7-4b65f095773c",
+      "id": "6e1452f0-4609-4ee9-bfc0-f03daa476d90",
       "name": "Claude EEAT Injection1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -461,10 +461,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -9200,
-        -528
+        3152,
+        -912
       ],
-      "id": "4bb0b828-b259-452f-af53-ff8649aaad7d",
+      "id": "a36b5620-ab65-4a38-bbda-5ce55406f4f2",
       "name": "Merge6"
     },
     {
@@ -483,10 +483,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -9480,
-        -156
+        2864,
+        -544
       ],
-      "id": "9a21dfac-c191-4dce-8337-0c318a3f191d",
+      "id": "14507ade-2e4a-40d8-89b8-fed0ee0731da",
       "name": "Anthropic Chat Model7",
       "credentials": {
         "anthropicApi": {
@@ -521,10 +521,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -8752,
-        -528
+        3600,
+        -912
       ],
-      "id": "4f91bc94-6011-449f-be57-839efb0e3cd1",
+      "id": "c50e6d1e-d3de-4a50-81a1-707e20777703",
       "name": "OpenAI SEO Optimization1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -561,10 +561,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -8176,
-        -676
+        4176,
+        -1056
       ],
-      "id": "9e04f423-5847-4637-abf1-c9fd279e20d3",
+      "id": "b91d2222-2d15-496a-adfe-8d7020b898e9",
       "name": "OpenAI NLP & PR Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -591,10 +591,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -8176,
-        -380
+        4176,
+        -768
       ],
-      "id": "13061203-a62c-4624-97a5-89d9862aa54d",
+      "id": "ec26e17c-b1ee-4ecc-be53-ff3ece3dbbe7",
       "name": "Claude NLP & PR Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -615,10 +615,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -8104,
-        -156
+        4240,
+        -544
       ],
-      "id": "73b0be78-0aa6-443e-a610-97d02ae74c9c",
+      "id": "f242a0b7-9b39-4512-b2b4-cc5cf8542b0e",
       "name": "Anthropic Chat Model11",
       "credentials": {
         "anthropicApi": {
@@ -636,10 +636,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -7824,
-        -528
+        4528,
+        -912
       ],
-      "id": "c82bdfa3-7a36-4667-ada0-63b0acf2f69e",
+      "id": "c5d454c7-af27-4bc5-af98-f1e93de18c63",
       "name": "Merge7"
     },
     {
@@ -658,10 +658,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -7304,
-        400
+        5040,
+        16
       ],
-      "id": "cfceb238-74d1-4967-b3d3-5720f8fb25ad",
+      "id": "8bc63da0-8d23-4f63-b100-0ace4e5f7989",
       "name": "Anthropic Chat Model12",
       "credentials": {
         "anthropicApi": {
@@ -685,10 +685,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -6728,
-        400
+        5616,
+        16
       ],
-      "id": "dcee49ab-a454-4ade-bd8a-dcd4dd33b39f",
+      "id": "6237c528-fb35-44b5-938e-3f2919d7ad9b",
       "name": "Anthropic Chat Model13",
       "credentials": {
         "anthropicApi": {
@@ -713,10 +713,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -6800,
-        176
+        5552,
+        -208
       ],
-      "id": "9f055d47-af40-4f8c-86c9-7d45edf7449b",
+      "id": "ef40a31b-4327-40fb-adf6-35d3e2b56041",
       "name": "Claude Final SEO Snippet Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -747,10 +747,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -7376,
-        -1256
+        4976,
+        -1648
       ],
-      "id": "4ceeb961-a16d-4448-9efc-b6b5673ee733",
+      "id": "8b0b5ad8-4323-43c4-a726-6ea20ad623ec",
       "name": "OpenAI Humanised Readability Rewrite",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -787,10 +787,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -6448,
-        -1256
+        5904,
+        -1648
       ],
-      "id": "0f644556-381e-4911-98ea-8844fe16e3df",
+      "id": "9a3c4038-ff69-4c4d-b8ff-ca52e5de6953",
       "name": "Document Export Sanitization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -806,10 +806,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -7600,
-        -1256
+        4752,
+        -1648
       ],
-      "id": "82dc0360-cbe8-4e25-8a23-33f3e3c10096",
+      "id": "c9598a90-ca1b-4384-b305-b66ff147049c",
       "name": "Wait6",
       "webhookId": "7a372933-6525-4c44-92e4-7743d0a44c8b"
     },
@@ -818,10 +818,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -7600,
-        176
+        4752,
+        -208
       ],
-      "id": "c7164861-9f3a-47f2-9d1a-5c3d81577a02",
+      "id": "8142f77a-56fb-4397-87e8-d06a128c5f46",
       "name": "Wait7",
       "webhookId": "7a372933-6525-4c44-92e4-7743d0a44c8b"
     },
@@ -830,10 +830,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -7024,
-        -1256
+        5328,
+        -1648
       ],
-      "id": "7e2b570e-66f2-49c3-8ed3-3fabe543d9eb",
+      "id": "fab3c8ce-e84d-469a-8a68-32f882132fdc",
       "name": "Wait8",
       "webhookId": "a748588d-97b9-4b52-99b1-31c0affeeab3"
     },
@@ -842,10 +842,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -7024,
-        176
+        5328,
+        -208
       ],
-      "id": "3c39017a-38b5-42c2-8c9b-af19d72c17c6",
+      "id": "d1a906af-a4c9-4591-b0f0-7df4c166a154",
       "name": "Wait10",
       "webhookId": "49d694d9-d5d4-4509-867a-89cc50a2f04b"
     },
@@ -854,10 +854,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -8976,
-        -528
+        3376,
+        -912
       ],
-      "id": "9908018a-e42b-4d25-9768-ba711ddaac17",
+      "id": "f663167f-826a-4a6f-9714-e2aa86745855",
       "name": "Wait14",
       "webhookId": "2db62569-3f26-4159-85e0-9a8b47a13344"
     },
@@ -866,10 +866,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -8400,
-        -676
+        3952,
+        -1056
       ],
-      "id": "a5a5a143-f433-4af1-86b3-a8d9311315c0",
+      "id": "ec1eea3a-97e9-4a9a-ba8d-f60162484c19",
       "name": "Wait17",
       "webhookId": "e0466a06-d809-467b-b0d1-3171ddae30a6"
     },
@@ -878,10 +878,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        -10128,
-        -528
+        2224,
+        -912
       ],
-      "id": "1937f253-4e54-41ec-8b43-71526a87a68d",
+      "id": "931b95f1-7e3a-4082-8624-7a55733d1021",
       "name": "Wait18",
       "webhookId": "be177216-d87e-494c-b058-1d021b29a470"
     },
@@ -933,10 +933,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -11728,
-        -336
+        624,
+        -720
       ],
-      "id": "50796441-f469-4299-b486-ca7ff423f359",
+      "id": "6764eae0-1c31-4ea6-8073-d930953ef7a1",
       "name": "Google Drive Notification1",
       "notesInFlow": true,
       "notes": "Add G-Drive Link to Skywide Dashboard"
@@ -957,10 +957,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -5520,
-        -1040
+        6832,
+        -1424
       ],
-      "id": "1346e3f6-186a-45b9-98c7-7391ed85ed7d",
+      "id": "faa3e448-b60b-425d-8984-5c4804ecf2c7",
       "name": "1st Improvement LLM2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -992,10 +992,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -5168,
-        -1040
+        7184,
+        -1424
       ],
-      "id": "15d725a7-0d07-48cc-8301-cddd88210cec",
+      "id": "05c8c8fd-feab-448d-a4cf-9fbbfd15d3fb",
       "name": "2nd Scoring Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1009,17 +1009,9 @@
     {
       "parameters": {
         "conditions": {
-          "string": [
-            {
-              "value1": "={{ $('Webhook1').item.json.body.target_path }}",
-              "operation": "equal",
-              "value2": "openai_qa_loop"
-            }
-          ],
-          "combinator": "or",
           "number": [
             {
-              "value1": "={{ $json.message.content.overallScore }}",
+              "value1": "={{ $('Webhook1').item.json.body.target_path === 'openai_qa_loop' ? 80 : $json.message.content.overallScore }}",
               "operation": "largerEqual",
               "value2": 80
             }
@@ -1029,27 +1021,19 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -5744,
-        -1256
+        6608,
+        -1648
       ],
-      "id": "16d56f9d-0389-470a-b0d9-157b43c6416b",
+      "id": "e2e3f3a7-b401-4a64-a3c2-7bface212c9d",
       "name": "80+ ?2",
       "notes": "Checks if content score meets the target threshold of 85"
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
-            {
-              "value1": "={{ $('Webhook1').item.json.body.target_path }}",
-              "operation": "equal",
-              "value2": "openai_direct_export"
-            }
-          ],
-          "combinator": "or",
           "number": [
             {
-              "value1": "={{ $json.message.content.overallScore }}",
+              "value1": "={{ $('Webhook1').item.json.body.target_path === 'openai_direct_export' ? 73 : $json.message.content.overallScore }}",
               "operation": "largerEqual",
               "value2": 73
             }
@@ -1059,10 +1043,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -4816,
-        -1040
+        7536,
+        -1424
       ],
-      "id": "9724d364-500a-427b-bb51-40585edaba9d",
+      "id": "f5722c85-7567-4e09-8164-63689f97c533",
       "name": "80 +?4",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1102,10 +1086,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -4368,
-        -1136
+        7984,
+        -1520
       ],
-      "id": "7d19bba9-fd11-4c92-a67b-203d7aa1ce57",
+      "id": "d7bb0687-1669-4780-8f42-e1aeaf7407cb",
       "name": "Check Max Iterations2",
       "notesInFlow": true,
       "notes": "Prevent infinite loops by checking if we've tried too many times"
@@ -1127,10 +1111,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -4592,
-        -968
+        7760,
+        -1360
       ],
-      "id": "72b49b60-694f-4418-ada6-e9c01582505b",
+      "id": "85408951-ff0f-4593-8aa0-c094b2a72cef",
       "name": "Max Iterations2"
     },
     {
@@ -1149,10 +1133,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -4144,
-        -1012
+        8208,
+        -1392
       ],
-      "id": "2ce2879a-1385-4a09-a3ea-7f3c16e8ad86",
+      "id": "379723a8-255a-4afd-b5ee-4efce8025af5",
       "name": "Improvement LLM2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1173,10 +1157,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -4072,
-        -788
+        8272,
+        -1168
       ],
-      "id": "e087f50a-802d-4065-bfe2-1f0916912dfb",
+      "id": "a3e726b6-443c-49f0-9ac4-792c1b7ad4dc",
       "name": "Anthropic Chat Model18",
       "credentials": {
         "anthropicApi": {
@@ -1212,10 +1196,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -3792,
-        -1012
+        8560,
+        -1392
       ],
-      "id": "a8524977-892c-4007-8013-e98e48ce4148",
+      "id": "003e8ad8-8013-45be-8d5f-a8d3e1bd9777",
       "name": "Scoring7",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1242,10 +1226,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -5448,
-        -816
+        6896,
+        -1200
       ],
-      "id": "1c5d5c0d-95ba-4a96-8840-f6be019d652e",
+      "id": "328f4255-b00a-4655-b3ce-5711a5762ed6",
       "name": "Anthropic Chat Model19",
       "credentials": {
         "anthropicApi": {
@@ -1281,10 +1265,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -6096,
-        -1256
+        6256,
+        -1648
       ],
-      "id": "bc247169-a9dd-4f79-887e-5272bb481383",
+      "id": "713b0c05-dd17-4879-b3d0-565c0143af3d",
       "name": "1st Scoring Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1312,10 +1296,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -3440,
-        -844
+        8912,
+        -1232
       ],
-      "id": "072ad568-a4ef-4aa3-b704-c07f7c607c65",
+      "id": "b0bdebf5-fb88-4eb3-a834-d287d262f237",
       "name": "80 +?5",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1335,10 +1319,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -5520,
-        392
+        6832,
+        16
       ],
-      "id": "dbbdda98-000a-49d4-90a1-59d88bea080d",
+      "id": "51c25990-0df2-4a86-9084-6a1ecc63189e",
       "name": "1st Improvement LLM3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1373,10 +1357,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -5168,
-        392
+        7184,
+        16
       ],
-      "id": "5fc4a7a8-8f0f-4464-bad4-db632aef1a53",
+      "id": "8176f1b0-79be-4f0a-89c6-01ba9f5962c4",
       "name": "2nd Scoring Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1393,17 +1377,9 @@
     {
       "parameters": {
         "conditions": {
-          "string": [
-            {
-              "value1": "={{ $('Webhook1').item.json.body.target_path }}",
-              "operation": "equal",
-              "value2": "claude_qa_loop"
-            }
-          ],
-          "combinator": "or",
           "number": [
             {
-              "value1": "={{ $json.message.content.overallScore }}",
+              "value1": "={{ $('Webhook1').item.json.body.target_path === 'claude_qa_loop' ? 73 : $json.message.content.overallScore }}",
               "operation": "largerEqual",
               "value2": 73
             }
@@ -1413,27 +1389,19 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -5744,
-        176
+        6608,
+        -208
       ],
-      "id": "2f9bcad0-5958-4acd-b8ad-0de2ca11b8e2",
+      "id": "842d04b8-772f-481d-b115-0cca33f043c1",
       "name": "80+ ?3",
       "notes": "Checks if content score meets the target threshold of 85"
     },
     {
       "parameters": {
         "conditions": {
-          "string": [
-            {
-              "value1": "={{ $('Webhook1').item.json.body.target_path }}",
-              "operation": "equal",
-              "value2": "claude_direct_export"
-            }
-          ],
-          "combinator": "or",
           "number": [
             {
-              "value1": "={{ $json.message.content.overallScore }}",
+              "value1": "={{ $('Webhook1').item.json.body.target_path === 'claude_direct_export' ? 73 : $json.message.content.overallScore }}",
               "operation": "largerEqual",
               "value2": 73
             }
@@ -1443,10 +1411,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -4816,
-        392
+        7536,
+        16
       ],
-      "id": "54d0b7b9-523a-4ea5-8b97-3b7cc061dc74",
+      "id": "122460d0-b998-4afd-8f27-dfb3a4f0d752",
       "name": "80 +?6",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1486,10 +1454,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -4368,
-        296
+        7984,
+        -96
       ],
-      "id": "f21f0c5c-b2ee-4e5c-b33e-e7dae6aa9748",
+      "id": "09263a58-6c37-46fb-9048-0d3ec34a567a",
       "name": "Check Max Iterations3",
       "notesInFlow": true,
       "notes": "Prevent infinite loops by checking if we've tried too many times"
@@ -1511,10 +1479,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -4592,
-        464
+        7760,
+        80
       ],
-      "id": "9309908b-fbe3-47dd-b618-6641aa624f5e",
+      "id": "4e325eb8-f158-4382-8789-a5ed2711da4e",
       "name": "Max Iterations3"
     },
     {
@@ -1533,10 +1501,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -4144,
-        420
+        8208,
+        48
       ],
-      "id": "ec441ed0-c099-49fd-9e41-90128e750ea3",
+      "id": "b8c29754-0812-49f4-8f80-2d7b7e87caf4",
       "name": "Improvement LLM3",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1557,10 +1525,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -4072,
-        644
+        8272,
+        272
       ],
-      "id": "98e454a7-3447-4a63-a4b6-02e05490e1e4",
+      "id": "ba241341-0883-41c5-90b7-dcf3733f9c7a",
       "name": "Anthropic Chat Model20",
       "credentials": {
         "anthropicApi": {
@@ -1596,10 +1564,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -3792,
-        420
+        8560,
+        48
       ],
-      "id": "b2436687-5ff9-4a6c-ade0-56b997d66541",
+      "id": "9526f965-6809-4a8a-9049-70d99f59dd11",
       "name": "Scoring1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1626,10 +1594,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -5448,
-        616
+        6896,
+        240
       ],
-      "id": "20614f08-c518-4e7a-9f8c-cedd1d19bc3b",
+      "id": "c197c041-5be7-46d8-883e-7891e2a5e58d",
       "name": "Anthropic Chat Model21",
       "credentials": {
         "anthropicApi": {
@@ -1665,10 +1633,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -6096,
-        176
+        6256,
+        -208
       ],
-      "id": "66cee35f-26f9-4e80-8c61-74cc09ded9ef",
+      "id": "2785d6d3-f124-4427-a0fc-bc2d3ea4906d",
       "name": "1st Scoring Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1696,10 +1664,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -3440,
-        588
+        8912,
+        208
       ],
-      "id": "c8ca0589-745b-40a5-9209-4fd296744404",
+      "id": "86346c34-75a7-4ae3-8954-c4af5bdf5cd3",
       "name": "80 +?7",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1729,10 +1697,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -6800,
-        -1256
+        5552,
+        -1648
       ],
-      "id": "787d4307-00ff-40fc-9c02-61c11a55b82b",
+      "id": "10f9bab4-980d-4451-b9e6-03c8d40ec3b6",
       "name": "Final SEO Snippet Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1769,10 +1737,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -6448,
-        176
+        5904,
+        -208
       ],
-      "id": "3846a7f0-2cb3-4167-8a53-d627a8b20579",
+      "id": "ce7704d8-7d41-4b36-b214-18d287c07237",
       "name": "Document Export Sanitization5",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1810,10 +1778,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -11504,
-        -676
+        848,
+        -1056
       ],
-      "id": "493ef42d-cb79-45f1-a27a-6eebf89405dd",
+      "id": "42abd875-af77-4543-a0a6-2e98a8876dc7",
       "name": "OpenAI Draft (GPT-4O)1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1840,10 +1808,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -11504,
-        -380
+        848,
+        -768
       ],
-      "id": "77199e58-a01b-4ecc-9cdd-1c31b2115ed2",
+      "id": "d808c358-cdb7-4ee8-be37-1e3fbab3d3e5",
       "name": "Claude Draft (Claude Opus 3)1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1864,10 +1832,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        -7376,
-        176
+        4976,
+        -208
       ],
-      "id": "cbb491a1-8e53-4396-8db2-79169e9e37ec",
+      "id": "59a7053a-3cb7-40df-ab83-58b337a46af0",
       "name": "Claude Humanised Readability Rewrite",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1890,10 +1858,10 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        -12176,
-        -432
+        176,
+        -816
       ],
-      "id": "8430d2de-5687-412d-ba3b-1bfb8f15e35e",
+      "id": "85b17178-70f7-47f5-9fdb-1071b5a66b82",
       "name": "Execution Data1"
     },
     {
@@ -1917,13 +1885,13 @@
         },
         "options": {}
       },
-      "id": "c5243646-d1be-4403-8a8b-7e59f43ba0a4",
+      "id": "e3a3d7a5-6dcb-49c6-aa0d-d083af783836",
       "name": "FAQ Schema Generator",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        -1888
+        10160,
+        -2272
       ],
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1945,10 +1913,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1840,
-        -1888
+        10512,
+        -2272
       ],
-      "id": "a9336f4c-daba-476a-8eba-a67c55e069dc"
+      "id": "b609e887-ad2f-4046-8e46-15496e837b70"
     },
     {
       "parameters": {
@@ -1970,10 +1938,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        -1696
+        10160,
+        -2080
       ],
-      "id": "972013f2-608a-4571-8db2-2e48571629c0",
+      "id": "91e89101-b7b2-442e-bf7a-7a41cde97b44",
       "name": "QA Rewriter Agent",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2005,10 +1973,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1840,
-        -1572
+        10512,
+        -1952
       ],
-      "id": "78e3f0b3-2df7-4a87-bd8e-1ae07b47c6cf"
+      "id": "39a3545f-2098-4cbe-a55c-e9871f3f7c4d"
     },
     {
       "parameters": {
@@ -2036,10 +2004,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -1616,
-        -1888
+        10736,
+        -2272
       ],
-      "id": "e027f765-0193-41e6-8c74-b3edd86f35d1",
+      "id": "e5690bbc-03d9-473e-8e5c-fcf9dee37d3e",
       "name": "Document Export Sanitization3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2063,10 +2031,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2768,
-        -1792
+        9584,
+        -2176
       ],
-      "id": "67efbdc4-e53b-4b0a-bf2f-9214dc194323",
+      "id": "2c661677-c43f-4bcd-8266-266f13b87cbb",
       "name": "AI Agent",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2081,10 +2049,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2632,
-        -1568
+        9712,
+        -1952
       ],
-      "id": "1b0748e4-899e-408f-8292-007ec26a984a",
+      "id": "5887192e-54ef-46c2-bffb-ce267fbe1e3b",
       "name": "Structured Output Parser"
     },
     {
@@ -2102,10 +2070,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -2760,
-        -1568
+        9584,
+        -1952
       ],
-      "id": "8f5cd7cc-3c02-4b76-b887-c0a942cd8ea8",
+      "id": "410c4552-8784-479a-99b0-0da06cc5a299",
       "name": "OpenAI Chat Model",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2136,10 +2104,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3216,
-        -1668
+        9136,
+        -2048
       ],
-      "id": "da4b9735-845d-44d5-a120-31eb0441c25a",
+      "id": "a87e0701-222e-45bf-b15c-a7c819a1ee17",
       "name": "Edit Fields"
     },
     {
@@ -2159,10 +2127,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2992,
-        -1792
+        9360,
+        -2176
       ],
-      "id": "b89ac5ce-e18a-4de0-84e2-608e35caf9dd",
+      "id": "022e8f36-21e1-4ba5-a9af-f0a567db4ef7",
       "name": "Edit Fields1"
     },
     {
@@ -2192,27 +2160,19 @@
                 "type": "number",
                 "operation": "largerEqual"
               }
-            },
-            {
-              "id": "test_bypass",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
             }
           ],
           "combinator": "or"
-        }
+        },
+        "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2416,
-        -1792
+        9936,
+        -2176
       ],
-      "id": "c187df6f-489a-4680-bcdc-1757f9e3167d",
+      "id": "e886cad0-e081-462a-b064-adafb0402b5a",
       "name": "If"
     },
     {
@@ -2236,13 +2196,13 @@
         },
         "options": {}
       },
-      "id": "da4c4357-7049-4b27-ba10-a282feef0212",
+      "id": "44bea96c-0636-4cc2-b464-6b0de085f5b7",
       "name": "FAQ Schema Generator1",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        -456
+        10160,
+        -848
       ],
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2264,10 +2224,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1840,
-        -456
+        10512,
+        -848
       ],
-      "id": "ca945425-7a2d-47e3-9127-d521d5d4874b"
+      "id": "5ba4f47f-c7ef-4a49-9b5d-2d4330c4678e"
     },
     {
       "parameters": {
@@ -2289,10 +2249,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        -264
+        10160,
+        -656
       ],
-      "id": "dbfe8a65-b8cd-4e4c-8cbd-a7b0d4d6ef2b",
+      "id": "3c9ecd7f-bc36-4d9d-89e4-eea8ff087d53",
       "name": "QA Rewriter Agent1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2324,10 +2284,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1840,
-        -140
+        10512,
+        -528
       ],
-      "id": "e57aa77b-c59d-4ebe-929b-22408b0c5672"
+      "id": "00050c68-23d1-4f14-89d1-a710399bcc23"
     },
     {
       "parameters": {
@@ -2355,10 +2315,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -1616,
-        -456
+        10736,
+        -848
       ],
-      "id": "14a54229-610a-465a-ae7b-23176658ccbc",
+      "id": "7fe084bd-88ba-46cd-bc1c-cdbf126a23a9",
       "name": "Document Export Sanitization4",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2382,10 +2342,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2768,
-        -360
+        9584,
+        -752
       ],
-      "id": "c30120a4-2b58-4224-9443-86c95eb44440",
+      "id": "49609e75-3151-4d9d-b722-4b93e18eb25c",
       "name": "AI Agent1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2400,10 +2360,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2632,
-        -136
+        9712,
+        -528
       ],
-      "id": "bc0aa116-a48b-4d57-be88-d72019413b30",
+      "id": "0299c399-e251-4eee-9f09-1e7f47bfdce8",
       "name": "Structured Output Parser1"
     },
     {
@@ -2421,10 +2381,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -2760,
-        -136
+        9584,
+        -528
       ],
-      "id": "ec39c5af-4087-4354-bc0c-cdc5f5c4ff11",
+      "id": "cb5fb6cc-05bd-4afe-b3dc-b366e0a7a98e",
       "name": "OpenAI Chat Model1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2455,10 +2415,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3216,
-        -236
+        9136,
+        -624
       ],
-      "id": "05b61116-3abd-4558-985f-a811decd7488",
+      "id": "36b1505d-66e1-4c65-b958-ef7ceec63fa3",
       "name": "Edit Fields2"
     },
     {
@@ -2478,10 +2438,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2992,
-        -360
+        9360,
+        -752
       ],
-      "id": "d509890f-3d14-49c3-ab83-25d39008258b",
+      "id": "00e96679-6cbb-4193-8496-767b8d428fd3",
       "name": "Edit Fields3"
     },
     {
@@ -2511,27 +2471,19 @@
                 "type": "number",
                 "operation": "largerEqual"
               }
-            },
-            {
-              "id": "test_bypass",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
             }
           ],
           "combinator": "or"
-        }
+        },
+        "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2416,
-        -360
+        9936,
+        -752
       ],
-      "id": "071d2810-e609-4bd0-851d-f10ab32b8883",
+      "id": "c0cc89c2-d5e4-4b6a-bce1-6b70d1843c57",
       "name": "If1"
     },
     {
@@ -2555,13 +2507,13 @@
         },
         "options": {}
       },
-      "id": "e7b442d9-be58-484f-9a4c-314c309f7dc7",
+      "id": "41335b43-5634-4893-a772-cf24f17391d7",
       "name": "FAQ Schema Generator2",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        368
+        10160,
+        -16
       ],
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2583,10 +2535,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1840,
-        368
+        10512,
+        -16
       ],
-      "id": "8340b296-84dc-413b-8a45-59398fc16efa"
+      "id": "9e761057-f97c-49a1-9624-9cdbd3f0c907"
     },
     {
       "parameters": {
@@ -2608,10 +2560,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        560
+        10160,
+        176
       ],
-      "id": "993cb021-6b08-4e90-bf48-d88aa38900f0",
+      "id": "7322e7a3-57c7-40ba-a772-2abcab578977",
       "name": "QA Rewriter Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2643,10 +2595,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1840,
-        684
+        10512,
+        304
       ],
-      "id": "72e3b3b8-aa9f-458b-81bf-7f023676edf0"
+      "id": "d40255f8-3aad-4635-af62-b21c5334d1bc"
     },
     {
       "parameters": {
@@ -2674,10 +2626,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -1616,
-        368
+        10736,
+        -16
       ],
-      "id": "5c46c6f4-fbf0-4f9a-91cb-27214aa6716f",
+      "id": "0d129f0a-316c-4093-8c8f-0c7cefe1ff0c",
       "name": "Document Export Sanitization6",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2701,10 +2653,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2768,
-        464
+        9584,
+        80
       ],
-      "id": "be34c9f0-5ec1-46eb-bca5-3a3105aa52c4",
+      "id": "71880d95-d516-482f-9ef3-bc30add572e4",
       "name": "AI Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2719,10 +2671,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2632,
-        688
+        9712,
+        304
       ],
-      "id": "b71dedf3-8398-4117-b3f0-c31839447daa",
+      "id": "510c31cb-5360-4427-b339-20d0c74aa1ea",
       "name": "Structured Output Parser2"
     },
     {
@@ -2738,10 +2690,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -2760,
-        688
+        9584,
+        304
       ],
-      "id": "4c887b74-7e7e-4e2a-b999-e0341dc2f6ff",
+      "id": "37bfcd28-a558-43c4-a97d-c2b1430b2f92",
       "name": "OpenAI Chat Model2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2772,10 +2724,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3216,
-        588
+        9136,
+        208
       ],
-      "id": "7029ebb1-ca3e-4af6-aaf5-b97b3506fe05",
+      "id": "518bc809-5721-4810-b5ad-f4dec9a18788",
       "name": "Edit Fields4"
     },
     {
@@ -2795,10 +2747,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2992,
-        464
+        9360,
+        80
       ],
-      "id": "8fe1c233-4004-4ad5-a6f5-062256481eca",
+      "id": "e054a87d-6745-4746-a103-7b3fe868526f",
       "name": "Edit Fields5"
     },
     {
@@ -2828,27 +2780,19 @@
                 "type": "number",
                 "operation": "largerEqual"
               }
-            },
-            {
-              "id": "test_bypass",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
             }
           ],
           "combinator": "or"
-        }
+        },
+        "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2416,
-        464
+        9936,
+        80
       ],
-      "id": "320541d7-2cce-4232-9948-818d6e5f13e1",
+      "id": "ead4dac5-4a5d-4123-94a4-5a9d3998e33e",
       "name": "If2"
     },
     {
@@ -2872,13 +2816,13 @@
         },
         "options": {}
       },
-      "id": "402669e5-5787-4e7c-9b7b-481281b75a59",
+      "id": "e2c60ad2-934d-420c-a1fc-f0d1b2c6f0cb",
       "name": "FAQ Schema Generator3",
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        -1064
+        10160,
+        -1456
       ],
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2900,10 +2844,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1840,
-        -1064
+        10512,
+        -1456
       ],
-      "id": "ce111565-a666-4c12-9eac-50f2a4ab6758"
+      "id": "2bb47e7e-06b2-4a23-85ea-eb5498a8a17d"
     },
     {
       "parameters": {
@@ -2925,10 +2869,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -2192,
-        -872
+        10160,
+        -1264
       ],
-      "id": "d2d243b1-f50c-4eaa-a6ab-205c36673665",
+      "id": "6e2ae44f-7ed4-4258-b70c-0e88033afbb9",
       "name": "QA Rewriter Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2960,10 +2904,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1840,
-        -748
+        10512,
+        -1136
       ],
-      "id": "5e5c0956-d53d-437f-bcfe-f580a17d1e0b"
+      "id": "abd054ca-2561-4b59-9ead-e5c50cd1c6cf"
     },
     {
       "parameters": {
@@ -2991,10 +2935,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -1616,
-        -1064
+        10736,
+        -1456
       ],
-      "id": "b7c3279f-3f27-462c-85b3-6602829969cd",
+      "id": "d9a9cd0c-698b-4286-914b-166f91ed4a99",
       "name": "Document Export Sanitization7",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -3018,10 +2962,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        -2768,
-        -968
+        9584,
+        -1360
       ],
-      "id": "81e64d0e-f759-43c1-9913-a8c95fd3cfb4",
+      "id": "342d18d0-d4b4-44df-90f0-8db19615a9c2",
       "name": "AI Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -3036,10 +2980,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        -2632,
-        -744
+        9712,
+        -1136
       ],
-      "id": "a90d708b-ca63-43e7-8761-a30e9567d5af",
+      "id": "e5c63d27-5933-4e30-8424-c329dc5d0ee4",
       "name": "Structured Output Parser3"
     },
     {
@@ -3055,10 +2999,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -2760,
-        -744
+        9584,
+        -1136
       ],
-      "id": "c969d5a8-4a55-43f2-a1c9-b68cd7b66237",
+      "id": "ad6d610e-a99f-4bb7-ae89-ad46d8619c9f",
       "name": "OpenAI Chat Model3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -3095,10 +3039,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -3216,
-        -844
+        9136,
+        -1232
       ],
-      "id": "ad2e72e5-2a34-4862-a9fb-8f25f57c63e9",
+      "id": "77220852-8714-4f5c-8ddb-9a1fdcad715a",
       "name": "Edit Fields6"
     },
     {
@@ -3118,10 +3062,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -2992,
-        -968
+        9360,
+        -1360
       ],
-      "id": "720da036-f3e9-4e2c-8246-6f145011a788",
+      "id": "0036c9e7-991e-4c6e-83c4-d8d789ea15bb",
       "name": "Edit Fields7"
     },
     {
@@ -3151,27 +3095,19 @@
                 "type": "number",
                 "operation": "largerEqual"
               }
-            },
-            {
-              "id": "test_bypass",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
             }
           ],
           "combinator": "or"
-        }
+        },
+        "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2416,
-        -968
+        9936,
+        -1360
       ],
-      "id": "419394d5-ede3-48df-932d-ad0cd498efe6",
+      "id": "3e1d5f0e-1f4c-4863-b37e-49eb2053003c",
       "name": "If3"
     },
     {
@@ -3182,10 +3118,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        -912,
-        -748
+        11440,
+        -1136
       ],
-      "id": "ce7debfd-4b4c-4778-9b92-c3de7ae081e3",
+      "id": "f7e01264-de1d-47f2-ac16-84b61a20e6de",
       "name": "Respond to Test Webhook"
     },
     {
@@ -3215,10 +3151,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        -1264,
-        -748
+        11088,
+        -1136
       ],
-      "id": "3ab63984-7ef7-4dbd-975c-28ad7eaa145f",
+      "id": "4aca49f7-235e-43b8-af6e-bc11e5e51873",
       "name": "Test Quality Audit",
       "credentials": {
         "openAiApi": {
@@ -3229,87 +3165,11 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "={{ .NEXT_PUBLIC_APP_URL }}/api/test-callback",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "request_id",
-              "value": "={{ .first().json.body.request_id }}"
-            },
-            {
-              "name": "audit_data",
-              "value": "={{  }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -964,
-        -748
-      ],
-      "id": "test-callback-node-id",
-      "name": "Send Test Callback"
-    },
-    {
-      "parameters": {
-        "dataType": "string",
-        "value1": "={{ $('Webhook1').item.json.body.target_path }}",
-        "rules": {
-          "rules": [
-            {
-              "operation": "equal",
-              "value2": "path_primary_snippet",
-              "output": 0
-            },
-            {
-              "operation": "equal",
-              "value2": "path_claude_snippet",
-              "output": 1
-            },
-            {
-              "operation": "equal",
-              "value2": "path_faq_a",
-              "output": 2
-            },
-            {
-              "operation": "equal",
-              "value2": "path_faq_b",
-              "output": 3
-            },
-            {
-              "operation": "equal",
-              "value2": "path_faq_c",
-              "output": 4
-            },
-            {
-              "operation": "equal",
-              "value2": "path_faq_d",
-              "output": 5
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 1,
-      "position": [
-        -11800,
-        -800
-      ],
-      "id": "path_router_id",
-      "name": "Path Router"
-    },
-    {
-      "parameters": {
         "conditions": {
           "string": [
             {
               "value1": "={{ $('Webhook1').item.json.body.target_path }}",
-              "operation": "startsWith",
+              "operation": "contains",
               "value2": "openai"
             }
           ]
@@ -4010,7 +3870,12 @@
       "main": [
         [
           {
-            "node": "Path Router",
+            "node": "OpenAI Draft (GPT-4O)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Claude Draft (Claude Opus 3)1",
             "type": "main",
             "index": 0
           }
@@ -4305,7 +4170,7 @@
       "main": [
         [
           {
-            "node": "Test Quality Audit",
+            "node": "1st Scoring Agent2",
             "type": "main",
             "index": 0
           }
@@ -4724,7 +4589,7 @@
       "main": [
         [
           {
-            "node": "Test Quality Audit",
+            "node": "1st Scoring Agent3",
             "type": "main",
             "index": 0
           }
@@ -5291,53 +5156,7 @@
       "main": [
         [
           {
-            "node": "Send Test Callback",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Path Router": {
-      "main": [
-        [
-          {
-            "node": "OpenAI Draft (GPT-4O)1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Claude Draft (Claude Opus 3)1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Edit Fields1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Edit Fields3",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Edit Fields5",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Edit Fields7",
+            "node": "Respond to Test Webhook",
             "type": "main",
             "index": 0
           }
@@ -5367,7 +5186,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "45f331a0-c4b2-4ef1-9bde-92dcc0754cee",
+  "versionId": "19fc0db2-35cc-475c-b7a5-664066e5af49",
   "meta": {
     "instanceId": "a09af904c89d8bd1ffb34a0a4a29385c214bff1ce25df6d68c440d7ac472b65f"
   },
