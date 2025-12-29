@@ -104,22 +104,23 @@ export async function POST(request: NextRequest) {
         try {
             const fs = require('fs');
             const path = require('path');
-            const backupPath = path.join(process.cwd(), 'backup_real.json');
+            // Ensure we look for the backup in the project root
+            const backupPath = path.resolve(process.cwd(), 'backup_real.json');
 
+            console.log(`Checking for backup data at: ${backupPath}`);
             if (fs.existsSync(backupPath)) {
-                console.log('Checking for backup data to restore...');
+                console.log('Found backup file. Checking for user data to restore...');
                 const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-                const userEmail = email.toLowerCase();
+                const userEmail = email.toLowerCase().trim();
 
-                // Find old profile to get old ID (though we used email for mapping in the script)
-                // Actually, just filtering by email in the backup content is safer if we trust the email.
-                // But the backup is structured by Table. 
-                // We need to find the OLD User ID associated with this email in the backup 'profiles'.
-                const oldProfile = (backup['profiles'] || []).find((p: any) => p.email?.toLowerCase() === userEmail);
+                // Find old profile to get old ID
+                const oldProfile = (backup['profiles'] || []).find((p: any) =>
+                    p.email?.toLowerCase().trim() === userEmail
+                );
 
                 if (oldProfile) {
                     const oldUserId = oldProfile.id;
-                    console.log(`Found backup data for ${userEmail} (Old ID: ${oldUserId}). Restoring...`);
+                    console.log(`Found historical data for ${userEmail} (Old ID: ${oldUserId}). Restoring to New ID: ${userId}...`);
 
                     // Restore Content Requests
                     const userRequests = (backup['content_requests'] || []).filter((r: any) => r.user_id === oldUserId);
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
                             .upsert(requestsToInsert);
 
                         if (reqError) console.error('Restoration Error (Requests):', reqError);
-                        else console.log(`Restored ${userRequests.length} requests.`);
+                        else console.log(`Successfully restored ${userRequests.length} content requests.`);
                     }
 
                     // Restore AI Conversations
@@ -151,26 +152,28 @@ export async function POST(request: NextRequest) {
                             .upsert(convosToInsert);
 
                         if (convError) console.error('Restoration Error (Conversations):', convError);
-                        else console.log(`Restored ${userConversations.length} conversations.`);
+                        else {
+                            console.log(`Successfully restored ${userConversations.length} conversations.`);
+
+                            // Restore AI Messages (Linked to Conversations we just restored)
+                            const userConvoIds = new Set(userConversations.map((c: any) => c.id));
+                            const userMessages = (backup['ai_messages'] || []).filter((m: any) => userConvoIds.has(m.conversation_id));
+
+                            if (userMessages.length > 0) {
+                                const { error: msgError } = await supabaseAdmin
+                                    .from('ai_messages')
+                                    .upsert(userMessages);
+
+                                if (msgError) console.error('Restoration Error (Messages):', msgError);
+                                else console.log(`Successfully restored ${userMessages.length} messages.`);
+                            }
+                        }
                     }
-
-                    // Restore AI Messages (Linked to Conversations we just restored)
-                    // Since we preserved Conversation IDs, we just look for messages matching those IDs.
-                    const userConvoIds = new Set(userConversations.map((c: any) => c.id));
-                    const userMessages = (backup['ai_messages'] || []).filter((m: any) => userConvoIds.has(m.conversation_id));
-
-                    if (userMessages.length > 0) {
-                        const { error: msgError } = await supabaseAdmin
-                            .from('ai_messages')
-                            .upsert(userMessages); // IDs are preserved, strictly linking to conversations
-
-                        if (msgError) console.error('Restoration Error (Messages):', msgError);
-                        else console.log(`Restored ${userMessages.length} messages.`);
-                    }
-
                 } else {
-                    console.log('No historical data found for this user in backup.');
+                    console.log(`No historical data found for email: ${userEmail}`);
                 }
+            } else {
+                console.error(`Backup file NOT found at: ${backupPath}`);
             }
         } catch (restoreError) {
             // Non-blocking error - ensure registration success is returned regardless
