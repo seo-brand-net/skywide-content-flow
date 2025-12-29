@@ -32,7 +32,7 @@ export default function TestExportsPage() {
         try {
             const payload = {
                 article_title: "Test Article: The Benefits of AI in SEO",
-                audience: "Digital Marketers",
+                title_audience: "Digital Marketers",
                 client_name: "SEOBrand",
                 creative_brief: "A test brief to verify the export pipeline.",
                 article_type: "Blogs",

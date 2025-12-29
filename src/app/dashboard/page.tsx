@@ -93,7 +93,7 @@ export default function Dashboard() {
                 .insert([{
                     user_id: user?.id,
                     article_title: formData.articleTitle,
-                    audience: formData.titleAudience,
+                    title_audience: formData.titleAudience,
                     seo_keywords: "", // Legacy field, keeping empty or could map primary here too? keeping empty as requested
                     primary_keywords: formData.primaryKeyword ? [formData.primaryKeyword] : [], // Assuming single string input from form, wrapped in array
                     secondary_keywords: formData.secondaryKeyword ? [formData.secondaryKeyword] : [],
@@ -123,7 +123,7 @@ export default function Dashboard() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        article_title: formData.articleTitle,
+                        title: formData.articleTitle,
                         audience: formData.titleAudience,
                         client_name: formData.clientName,
                         creative_brief: formData.creativeBrief,
@@ -254,7 +254,7 @@ export default function Dashboard() {
             }
         ];
 
-        const audiences = ["Tech Professionals", "Small Business Owners", "Eco-conscious Consumers", "Investors", "HR Managers"];
+        const title_audiences = ["Tech Professionals", "Small Business Owners", "Eco-conscious Consumers", "Investors", "HR Managers"];
         const clients = ["TechCorp", "GreenLife", "CryptoKing", "WorkSmart", "HealthPlus"];
         const types = ["Website", "Blogs"];
         const tones = ["Professional", "Casual", "Authoritative", "Friendly", "Technical"];
@@ -264,7 +264,7 @@ export default function Dashboard() {
 
         setFormData({
             articleTitle: scenario.title,
-            titleAudience: random(audiences),
+            titleAudience: random(title_audiences),
             clientName: random(clients),
             creativeBrief: scenario.brief,
             articleType: random(types),
@@ -367,7 +367,7 @@ export default function Dashboard() {
                                         value={formData.titleAudience}
                                         onChange={(e) => handleInputChange('titleAudience', e.target.value)}
                                         className={`bg-background border-input ${errors.titleAudience ? 'border-destructive' : ''}`}
-                                        placeholder="Enter target audience"
+                                        placeholder="Enter target title_audience"
                                     />
                                     {errors.titleAudience && (
                                         <p className="text-sm text-destructive">{errors.titleAudience}</p>
