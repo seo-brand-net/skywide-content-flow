@@ -98,7 +98,7 @@ export type Database = {
           page_intent: string | null
           seo_keywords: string
           status: string | null
-          title_audience: string
+          audience: string
           updated_at: string
           user_id: string
           webhook_response: string | null
@@ -114,7 +114,7 @@ export type Database = {
           page_intent?: string | null
           seo_keywords: string
           status?: string | null
-          title_audience: string
+          audience: string
           updated_at?: string
           user_id: string
           webhook_response?: string | null
@@ -130,7 +130,7 @@ export type Database = {
           page_intent?: string | null
           seo_keywords?: string
           status?: string | null
-          title_audience?: string
+          audience?: string
           updated_at?: string
           user_id?: string
           webhook_response?: string | null

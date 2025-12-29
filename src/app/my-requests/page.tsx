@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ContentRequest {
     id: string;
     article_title: string;
-    title_audience: string;
+    audience: string;
     article_type: string;
     client_name: string;
     creative_brief: string;
@@ -75,7 +75,7 @@ export default function MyRequests() {
                     .select(`
             id,
             article_title,
-            title_audience,
+            audience,
             client_name,
             article_type,
             creative_brief,
@@ -132,7 +132,7 @@ export default function MyRequests() {
                     .select(`
             id,
             article_title,
-            title_audience,
+            audience,
             client_name,
             article_type,
             creative_brief,
@@ -577,7 +577,7 @@ export default function MyRequests() {
 
                                             <div>
                                                 <label className="text-sm font-medium text-muted-foreground">Target Audience</label>
-                                                <p className="text-foreground mt-1">{selectedRequest.title_audience}</p>
+                                                <p className="text-foreground mt-1">{selectedRequest.audience}</p>
                                             </div>
 
 

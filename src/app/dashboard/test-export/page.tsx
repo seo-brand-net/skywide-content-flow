@@ -62,9 +62,9 @@ export default function TestExportPage() {
         return {
             ...random,
             client_name: "TechTest",
-            title_audience: "Professionals",
+            audience: "Professionals",
             article_type: "Blogs",
-            word_count: "1000",
+            word_count: "1200",
             tone: "Professional"
         };
     };

@@ -93,7 +93,7 @@ export default function Dashboard() {
                 .insert([{
                     user_id: user?.id,
                     article_title: formData.articleTitle,
-                    title_audience: formData.titleAudience,
+                    audience: formData.titleAudience,
                     seo_keywords: "", // Legacy field, keeping empty or could map primary here too? keeping empty as requested
                     primary_keywords: formData.primaryKeyword ? [formData.primaryKeyword] : [], // Assuming single string input from form, wrapped in array
                     secondary_keywords: formData.secondaryKeyword ? [formData.secondaryKeyword] : [],
@@ -124,7 +124,7 @@ export default function Dashboard() {
                     },
                     body: JSON.stringify({
                         article_title: formData.articleTitle,
-                        title_audience: formData.titleAudience,
+                        audience: formData.titleAudience,
                         client_name: formData.clientName,
                         creative_brief: formData.creativeBrief,
                         article_type: formData.articleType,
