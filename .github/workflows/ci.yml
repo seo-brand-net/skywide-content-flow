@@ -62,31 +62,31 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-  notify:
-    name: Notify Slack
-    needs: [test-unit, test-e2e]
-    # ONLY run when pushing (or merging) into MAIN
-    if: >
-      always() &&
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Slack Notification
-        run: |
-          UNIT_RESULT="${{ needs.test-unit.result }}"
-          E2E_RESULT="${{ needs.test-e2e.result }}"
+  # notify:
+  #   name: Notify Slack
+  #   needs: [test-unit, test-e2e]
+  #   # ONLY run when pushing (or merging) into MAIN
+  #   if: >
+  #     always() &&
+  #     github.event_name == 'push' &&
+  #     github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Send Slack Notification
+  #       run: |
+  #         UNIT_RESULT="${{ needs.test-unit.result }}"
+  #         E2E_RESULT="${{ needs.test-e2e.result }}"
 
-          if [ "$UNIT_RESULT" = "success" ] && [ "$E2E_RESULT" = "success" ]; then
-            STATUS="SUCCESS"
-            COLOR="good"
-            EMOJI=":white_check_mark:"
-          else
-            STATUS="FAILED"
-            COLOR="danger"
-            EMOJI=":x:"
-          fi
+  #         if [ "$UNIT_RESULT" = "success" ] && [ "$E2E_RESULT" = "success" ]; then
+  #           STATUS="SUCCESS"
+  #           COLOR="good"
+  #           EMOJI=":white_check_mark:"
+  #         else
+  #           STATUS="FAILED"
+  #           COLOR="danger"
+  #           EMOJI=":x:"
+  #         fi
 
-          MESSAGE="$EMOJI Deployment *$STATUS*\nBranch: \`${{ github.ref_name }}\`\nView Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  #         MESSAGE="$EMOJI Deployment *$STATUS*\nBranch: \`${{ github.ref_name }}\`\nView Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" ${{ secrets.SLACK_WEBHOOK_URL }}
+  #         curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -31,14 +31,14 @@ export default function TestExportsPage() {
 
         try {
             const payload = {
-                title: "Test Article: The Benefits of AI in SEO",
-                audience: "Digital Marketers",
+                article_title: "Test Article: The Benefits of AI in SEO",
+                title_audience: "Digital Marketers",
                 client_name: "SEOBrand",
                 creative_brief: "A test brief to verify the export pipeline.",
                 article_type: "Blogs",
                 word_count: "800",
-                primary_keywords: ["AI SEO", "SEO Automation"],
-                secondary_keywords: ["content engine", "n8n workflow"],
+                primary_keywords: "AI SEO, SEO Automation",
+                secondary_keywords: "content engine, n8n workflow",
                 semantic_theme: "Future of SEO",
                 tone: "Educational",
                 page_intent: "Informational",

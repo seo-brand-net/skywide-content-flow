@@ -123,8 +123,8 @@ export default function Dashboard() {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        title: formData.articleTitle,
-                        audience: formData.titleAudience,
+                        article_title: formData.articleTitle,
+                        title_audience: formData.titleAudience,
                         client_name: formData.clientName,
                         creative_brief: formData.creativeBrief,
                         article_type: formData.articleType,
