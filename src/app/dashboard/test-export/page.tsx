@@ -42,27 +42,27 @@ export default function TestExportPage() {
     const getMockData = () => {
         const scenarios = [
             {
-                title: "The Ethical Dilemma of AI Diagnostics",
-                brief: "Analyze the intersection of medicine and machine learning. Focus on patient privacy, the risk of algorithmic bias in marginalized communities, and why a human-in-the-loop system is non-negotiable for critical health decisions.",
-                primary: "AI medical ethics",
-                secondary: "healthcare algorithms bias",
-                theme: "Technology & Health",
-                intent: "Informational"
+                article_title: "The Ethical Dilemma of AI Diagnostics",
+                creative_brief: "Analyze the intersection of medicine and machine learning. Focus on patient privacy, the risk of algorithmic bias in marginalized communities, and why a human-in-the-loop system is non-negotiable for critical health decisions.",
+                primary_keywords: "AI medical ethics",
+                secondary_keywords: "healthcare algorithms bias",
+                semantic_theme: "Technology & Health",
+                page_intent: "Informational"
             },
             {
-                title: "Sustainable Urban Farming: 2024 Blueprint",
-                brief: "Showcase innovative ways cities are tackling food deserts. Cover vertical hydroponics, rooftop community gardens, and the role of municipal policy in incentivizing green space conversion.",
-                primary: "urban farming solutions",
-                secondary: "vertical gardening benefits",
-                theme: "Environment & Urbanism",
-                intent: "Commercial"
+                article_title: "Sustainable Urban Farming: 2024 Blueprint",
+                creative_brief: "Showcase innovative ways cities are tackling food deserts. Cover vertical hydroponics, rooftop community gardens, and the role of municipal policy in incentivizing green space conversion.",
+                primary_keywords: "urban farming solutions",
+                secondary_keywords: "vertical gardening benefits",
+                semantic_theme: "Environment & Urbanism",
+                page_intent: "Commercial"
             }
         ];
         const random = scenarios[Math.floor(Math.random() * scenarios.length)];
         return {
             ...random,
             client_name: "TechTest",
-            audience: "Professionals",
+            title_audience: "Professionals",
             article_type: "Blogs",
             word_count: "1000",
             tone: "Professional"
