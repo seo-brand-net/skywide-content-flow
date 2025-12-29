@@ -20,21 +20,26 @@ export async function sendCustomPasswordResetEmail(email: string): Promise<{ err
       console.warn('Could not fetch user profile for reset email:', e);
     }
 
-    // Send custom branded email via edge function (primary method)
-    console.log('Attempting custom email via edge function...');
-    const { data: functionData, error: functionError } = await supabase.functions.invoke('send-password-reset', {
-      body: {
+    // Send custom branded email via API route (primary method)
+    console.log('DEBUG: Attempting custom email via NEXT.JS API ROUTE (v2)...');
+    const response = await fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         email,
         resetUrl: `${window.location.origin}/reset-password`,
         userFullName,
-      }
+      })
     });
 
-    // Check for both invocation error and logical error in function response
-    if (functionError || (functionData && functionData.success === false)) {
-      console.error('Custom email service failed:', functionError || functionData?.error);
+    const data = await response.json();
 
-      // Fallback to Supabase default email if edge function fails
+    if (!response.ok) {
+      console.error('Custom email service failed:', data.error);
+
+      // Fallback to Supabase default email if API route fails
       console.log('Falling back to Supabase default email service...');
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
@@ -47,7 +52,7 @@ export async function sendCustomPasswordResetEmail(email: string): Promise<{ err
 
       console.log('Fallback email initiated via Supabase.');
     } else {
-      console.log('Custom reset email sent successfully via edge function.');
+      console.log('Custom reset email sent successfully via API route.');
     }
 
     return { error: null };
