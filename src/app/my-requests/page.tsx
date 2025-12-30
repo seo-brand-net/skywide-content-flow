@@ -181,16 +181,28 @@ export default function MyRequests() {
     const getGoogleDriveLink = (webhookResponse: any): string | null => {
         if (!webhookResponse) return null;
 
-        console.log('DEBUG: webhookResponse:', webhookResponse);
+        // Internal helper to extract URL from an object
+        const extractUrl = (obj: any): string | null => {
+            if (!obj) return null;
+            const possibleKeys = ['gDriveLink', 'url', 'link', 'documentUrl', 'message', 'googleDriveLink'];
+            for (const key of possibleKeys) {
+                const val = obj[key];
+                if (typeof val === 'string' && (val.includes('drive.google.com') || val.startsWith('http'))) {
+                    return val;
+                }
+            }
+            return null;
+        };
 
         // Handle case where it might already be an object (parsed by Supabase SDK)
         if (typeof webhookResponse === 'object') {
-            return webhookResponse.gDriveLink || webhookResponse.url || webhookResponse.link || webhookResponse.documentUrl || null;
+            const link = extractUrl(webhookResponse);
+            if (link) return link;
         }
 
         try {
             const parsed = JSON.parse(webhookResponse);
-            return parsed.gDriveLink || parsed.url || parsed.link || parsed.documentUrl || null;
+            return extractUrl(parsed);
         } catch {
             // If it's not JSON, check if it's a direct URL
             if (typeof webhookResponse === 'string' && (webhookResponse.includes('drive.google.com') || webhookResponse.startsWith('http'))) {

@@ -154,19 +154,26 @@ export default function Dashboard() {
 
             // 3. Update database with webhook status and response
             if (dbData && dbData[0]) {
-                console.log('Attempting to update database with:', {
-                    id: dbData[0].id,
+                const updatePayload: any = {
                     webhook_sent: webhookSuccess,
-                    webhook_response: webhookResponseData,
-                    user_id: user?.id,
-                });
+                };
+
+                // Only update webhook_response if it contains a valid link
+                // This prevents "Workflow was started" from overwriting a result that might have come via callback
+                const isMeaningfulResponse = (data: any) => {
+                    if (!data) return false;
+                    const str = typeof data === 'string' ? data : JSON.stringify(data);
+                    return (str.includes('drive.google.com') || str.includes('http')) && !str.includes('Workflow was started');
+                };
+
+                if (webhookSuccess && webhookResponseData && isMeaningfulResponse(webhookResponseData)) {
+                    updatePayload.webhook_response = webhookResponseData;
+                    updatePayload.status = 'in_progress';
+                }
 
                 const { data: updateData, error: updateError } = await supabase
                     .from('content_requests')
-                    .update({
-                        webhook_sent: webhookSuccess,
-                        webhook_response: webhookResponseData
-                    })
+                    .update(updatePayload)
                     .eq('id', dbData[0].id)
                     .select();
 
