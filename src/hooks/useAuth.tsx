@@ -63,9 +63,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Handle sign out
           setSession(null);
           setUser(null);
-          setIsPasswordReset(false);
-          sessionStorage.removeItem('isPasswordReset');
-          router.push('/login');
+
+          // Only clear and redirect if NOT in a reset flow and NOT on a public page
+          if (!isResetFlow && window.location.pathname !== '/reset-password' && window.location.pathname !== '/') {
+            setIsPasswordReset(false);
+            sessionStorage.removeItem('isPasswordReset');
+            router.push('/login');
+          }
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           // Regular authentication flow (only if not in password reset mode)
           if (!isPasswordReset) {

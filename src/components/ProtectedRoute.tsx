@@ -35,6 +35,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
             !user &&
             !isPasswordReset &&
             pathname !== '/login' &&
+            pathname !== '/reset-password' &&
+            pathname !== '/' &&
             toastShownForPath.current !== pathname
         ) {
             toastShownForPath.current = pathname;
