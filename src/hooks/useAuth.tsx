@@ -43,7 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // Check if this is a password reset flow
         const urlParams = new URLSearchParams(window.location.search);
-        const isResetFlow = urlParams.get('type') === 'recovery' || event === 'PASSWORD_RECOVERY';
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const isResetFlow = urlParams.get('type') === 'recovery' ||
+          hashParams.get('type') === 'recovery' ||
+          event === 'PASSWORD_RECOVERY';
 
         if (isResetFlow && session) {
           // Handle password reset - set session but don't treat as regular login
@@ -77,7 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       const urlParams = new URLSearchParams(window.location.search);
-      const isResetFlow = urlParams.get('type') === 'recovery';
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const isResetFlow = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
       const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
 
       if ((isResetFlow || storedResetState) && session) {
