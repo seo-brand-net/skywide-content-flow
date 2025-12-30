@@ -47,7 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const isResetFlow = urlParams.get('type') === 'recovery' ||
           hashParams.get('type') === 'recovery' ||
-          event === 'PASSWORD_RECOVERY';
+          event === 'PASSWORD_RECOVERY' ||
+          sessionStorage.getItem('isPasswordReset') === 'true';
 
         if (isResetFlow && session) {
           // Handle password reset landing
@@ -270,13 +271,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updatePassword = async (password: string) => {
     try {
       // Defensive check: Verify session exists before attempting update
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      let { data: { session: currentSession } } = await supabase.auth.getSession();
+
+      // If session is missing from client state but we HAVE it in our context, try re-hydrating
+      if (!currentSession && session) {
+        console.warn('Session missing from client, attempting re-hydration from context state...');
+        const { data, error: refreshError } = await supabase.auth.setSession({
+          access_token: session.access_token,
+          refresh_token: session.refresh_token
+        });
+        if (!refreshError && data.session) {
+          currentSession = data.session;
+          console.log('Re-hydration successful.');
+        } else {
+          console.error('Re-hydration failed:', refreshError);
+        }
+      }
 
       if (!currentSession) {
-        console.error('Password update failed: No active session found.');
+        console.error('Password update failed: Absolute session loss.');
         toast({
-          title: "Session Missing",
-          description: "Your session has expired or is invalid. Please try the reset link again.",
+          title: "Session Lost",
+          description: "Your secure session was lost. Please click the link in your email again.",
           variant: "destructive",
         });
         return { error: new Error('Auth session missing') };
