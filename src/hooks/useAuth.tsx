@@ -71,9 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             router.push('/login');
           }
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Regular authentication flow (only if not in password reset mode)
-          if (!isPasswordReset) {
-            setSession(session);
+          // Always keep session in sync
+          setSession(session);
+
+          // Only update user if NOT in password reset mode
+          if (!isResetFlow && !sessionStorage.getItem('isPasswordReset')) {
             setUser(session?.user ?? null);
           }
         }
@@ -252,6 +254,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updatePassword = async (password: string) => {
     try {
+      // Defensive check: Verify session exists before attempting update
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+
+      if (!currentSession) {
+        console.error('Password update failed: No active session found.');
+        toast({
+          title: "Session Missing",
+          description: "Your session has expired or is invalid. Please try the reset link again.",
+          variant: "destructive",
+        });
+        return { error: new Error('Auth session missing') };
+      }
+
       const { error } = await supabase.auth.updateUser({
         password: password
       });
@@ -263,9 +278,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           variant: "destructive",
         });
       } else {
+        // Get the latest session to ensure we have the updated user
+        const { data: { session: updatedSession } } = await supabase.auth.getSession();
+
         // Clear password reset state and establish proper session
         setIsPasswordReset(false);
-        setUser(session?.user ?? null);
+        setSession(updatedSession);
+        setUser(updatedSession?.user ?? null);
         sessionStorage.removeItem('isPasswordReset');
 
         toast({
