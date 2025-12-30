@@ -48,7 +48,8 @@ function ResetPasswordContent() {
                     const url = new URL(window.location.href);
                     url.searchParams.delete('code');
                     url.searchParams.delete('type');
-                    window.history.replaceState({}, '', url.toString());
+                    // Clear hash as well
+                    window.history.replaceState({}, '', url.pathname + url.search);
                 } else {
                     console.error('Failed to exchange code:', error);
                     toast({

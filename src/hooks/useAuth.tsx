@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('Auth state change:', event, !!session);
 
         // Check if this is a password reset flow
-        const urlParams = new URLSearchParams(window.location.search);
+        const urlParams = new URL(window.location.href).searchParams;
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const isResetFlow = urlParams.get('type') === 'recovery' ||
           hashParams.get('type') === 'recovery' ||
@@ -79,22 +79,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      const urlParams = new URLSearchParams(window.location.search);
+      const urlParams = new URL(window.location.href).searchParams;
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const isResetFlow = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+      const urlHasReset = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
       const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
+      const isResetFlow = urlHasReset || storedResetState;
 
-      if ((isResetFlow || storedResetState) && session) {
-        setSession(session);
-        setUser(null);
+      if (isResetFlow) {
         setIsPasswordReset(true);
         sessionStorage.setItem('isPasswordReset', 'true');
+
+        if (session) {
+          setSession(session);
+          setUser(null);
+        }
 
         // Redirect if not already on the reset-password page
         if (window.location.pathname !== '/reset-password') {
           router.push('/reset-password');
         }
-      } else if (!storedResetState) {
+      } else {
         setSession(session);
         setUser(session?.user ?? null);
         setIsPasswordReset(false);
