@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ interface FormData {
 
 export default function Dashboard() {
     const { user } = useAuth();
+    const { isAdmin } = useUserRole(user?.id);
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState<FormData>({
@@ -319,24 +321,26 @@ export default function Dashboard() {
                     <CardHeader>
                         <CardTitle className="seobrand-subtitle flex justify-between items-center">
                             Content Submission Form
-                            <div className="flex gap-2">
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    onClick={clearTestData}
-                                    className="text-xs"
-                                >
-                                    Clear Data
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={fillRandomData}
-                                    className="text-xs"
-                                >
-                                    Fill Test Data
-                                </Button>
-                            </div>
+                            {isAdmin && (
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        onClick={clearTestData}
+                                        className="text-xs"
+                                    >
+                                        Clear Data
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={fillRandomData}
+                                        className="text-xs"
+                                    >
+                                        Fill Test Data
+                                    </Button>
+                                </div>
+                            )}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
