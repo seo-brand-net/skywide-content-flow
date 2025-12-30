@@ -10,6 +10,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isPasswordReset: boolean;
+  setIsPasswordReset: (value: boolean) => void;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -68,7 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
 
           // Only clear and redirect if NOT in a reset flow and NOT on a public page
-          if (!isResetFlow && window.location.pathname !== '/reset-password' && window.location.pathname !== '/') {
+          // NOW INCLUDING /update-password
+          const isPublicPage = window.location.pathname === '/reset-password' ||
+            window.location.pathname === '/update-password' ||
+            window.location.pathname === '/';
+
+          if (!isResetFlow && !isPublicPage) {
             setIsPasswordReset(false);
             sessionStorage.removeItem('isPasswordReset');
             router.push('/login');
@@ -106,9 +112,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
 
-        // Only redirect on fresh landing with actual token in URL, and not on reset page
-        if (urlHasReset && !isOnResetPage) {
-          router.push('/reset-password' + window.location.search + window.location.hash);
+        // Only redirect on fresh landing with actual token in URL, and not already on a target page
+        const isTargetPage = window.location.pathname === '/reset-password' || window.location.pathname === '/update-password';
+        if (urlHasReset && !isTargetPage) {
+          router.push('/update-password' + window.location.search + window.location.hash);
         }
       } else {
         setSession(session);
@@ -229,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/reset-password`;
+      const redirectUrl = `${window.location.origin}/update-password`; // Changed from /reset-password to /update-password
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
@@ -316,6 +323,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     loading,
     isPasswordReset,
+    setIsPasswordReset,
     signIn,
     signUp,
     signOut,

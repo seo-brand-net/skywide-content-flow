@@ -23,16 +23,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
         }
 
-        // Harden the redirect URL to ensure it always points to the reset page
-        const forcedResetUrl = resetUrl.endsWith('/') || resetUrl.includes('login')
-            ? `${new URL(resetUrl).origin}/reset-password`
-            : resetUrl;
-
+        // Generate a secure password reset link
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
-            email,
+            email: email,
             options: {
-                redirectTo: forcedResetUrl,
+                // ALWAYS use the dedicated update-password page for recovery links
+                redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/update-password`,
             },
         });
 

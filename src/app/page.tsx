@@ -18,7 +18,7 @@ export default function Home() {
     const isResetFlow = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
 
     if (isResetFlow) {
-      router.push('/reset-password' + window.location.search + window.location.hash);
+      router.push('/update-password' + window.location.search + window.location.hash);
     }
   }, [router]);
 

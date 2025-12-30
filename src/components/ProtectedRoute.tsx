@@ -36,12 +36,15 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
             !isPasswordReset &&
             pathname !== '/login' &&
             pathname !== '/reset-password' &&
+            pathname !== '/update-password' &&
             pathname !== '/' &&
             toastShownForPath.current !== pathname
         ) {
             toastShownForPath.current = pathname;
             toast({
-                description: "Please log in to continue.",
+                title: "Authentication required",
+                description: "Please log in to access this page.",
+                variant: "destructive",
             });
             router.replace('/login');
         }
@@ -58,17 +61,19 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         );
     }
 
-    // Allow access to reset password page during password reset flow
-    if (isPasswordReset && pathname === '/reset-password') {
+    // Allow access to update password page during password reset flow
+    if (isPasswordReset && pathname === '/update-password') {
+        return <>{children}</>;
+    }
+
+    // Allow access to reset password page (for requesting links)
+    if (pathname === '/reset-password') {
         return <>{children}</>;
     }
 
     // Prevent access to other protected routes during password reset
-    if (isPasswordReset && pathname !== '/reset-password') {
-        // We can't return Navigate component, so we return null and let useEffect handle redirect
-        // or manually redirect here if Next.js allows. 
-        // Effect above handles the main login redirect, let's add specific logic here:
-        if (typeof window !== 'undefined') router.replace('/reset-password');
+    if (isPasswordReset && pathname !== '/update-password' && pathname !== '/reset-password') {
+        if (typeof window !== 'undefined') router.replace('/update-password');
         return null;
     }
 
