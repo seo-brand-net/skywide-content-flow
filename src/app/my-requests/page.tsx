@@ -12,7 +12,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { Eye, Clock, User, ExternalLink, Search } from 'lucide-react';
-import { useUserRole } from '@/hooks/useUserRole';
 
 interface ContentRequest {
     id: string;
@@ -37,23 +36,29 @@ interface ContentRequest {
 
 export default function MyRequests() {
     const { user } = useAuth();
-    const { userRole, isAdmin, loading: roleLoading } = useUserRole(user?.id);
     const [requests, setRequests] = useState<ContentRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const [userRole, setUserRole] = useState<string>('user');
     const [error, setError] = useState<string | null>(null);
     const [selectedRequest, setSelectedRequest] = useState<ContentRequest | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        if (user && userRole && !roleLoading) {
+        if (user) {
+            checkUserRole();
+        }
+    }, [user]);
+
+    useEffect(() => {
+        if (user && userRole) {
             fetchRequests();
         }
-    }, [user, userRole, roleLoading]);
+    }, [user, userRole]);
 
     const fetchRequests = async () => {
         try {
-            if (isAdmin) {
+            if (userRole === 'admin') {
                 // For admin users, fetch content requests with user profiles in a single query
                 const { data, error } = await supabase
                     .from('content_requests')
@@ -144,6 +149,22 @@ export default function MyRequests() {
         }
     };
 
+    const checkUserRole = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('role, email')
+                .eq('id', user?.id)
+                .single();
+
+            if (data) {
+                setUserRole(data.role || 'user');
+            }
+        } catch (err) {
+            console.error('Error checking user role:', err);
+        }
+    };
+
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -178,22 +199,15 @@ export default function MyRequests() {
         return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
     };
 
-    const getGoogleDriveLink = (webhookResponse: any): string | null => {
+    const getGoogleDriveLink = (webhookResponse: string | null): string | null => {
         if (!webhookResponse) return null;
-
-        console.log('DEBUG: webhookResponse:', webhookResponse);
-
-        // Handle case where it might already be an object (parsed by Supabase SDK)
-        if (typeof webhookResponse === 'object') {
-            return webhookResponse.gDriveLink || webhookResponse.url || webhookResponse.link || webhookResponse.documentUrl || null;
-        }
 
         try {
             const parsed = JSON.parse(webhookResponse);
-            return parsed.gDriveLink || parsed.url || parsed.link || parsed.documentUrl || null;
+            return parsed.gDriveLink || null;
         } catch {
             // If it's not JSON, check if it's a direct URL
-            if (typeof webhookResponse === 'string' && (webhookResponse.includes('drive.google.com') || webhookResponse.startsWith('http'))) {
+            if (webhookResponse.includes('drive.google.com')) {
                 return webhookResponse;
             }
             return null;
@@ -211,18 +225,18 @@ export default function MyRequests() {
             request.article_type.toLowerCase().includes(search) ||
             request.status.toLowerCase().includes(search) ||
             request.creative_brief.toLowerCase().includes(search) ||
-            (isAdmin && request.profiles?.full_name?.toLowerCase().includes(search)) ||
-            (isAdmin && request.profiles?.email?.toLowerCase().includes(search))
+            (userRole === 'admin' && request.profiles?.full_name?.toLowerCase().includes(search)) ||
+            (userRole === 'admin' && request.profiles?.email?.toLowerCase().includes(search))
         );
-    }, [requests, searchTerm, isAdmin]);
+    }, [requests, searchTerm, userRole]);
 
-    if (loading || roleLoading) {
+    if (loading) {
         return (
             <div className="min-h-screen bg-background p-8">
                 <div className="max-w-7xl mx-auto">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-foreground mb-2">My Requests</h1>
-                        <p className="text-muted-foreground">Loading content requests...</p>
+                        <p className="text-muted-foreground">Loading your submitted content requests...</p>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -278,12 +292,12 @@ export default function MyRequests() {
                     <div>
                         <h1 className="text-3xl font-bold text-foreground mb-2">
                             My Requests
-                            {isAdmin && (
+                            {userRole === 'admin' && (
                                 <Badge variant="default" className="ml-3">Admin</Badge>
                             )}
                         </h1>
                         <p className="text-muted-foreground">
-                            {isAdmin
+                            {userRole === 'admin'
                                 ? `Viewing ${filteredRequests.length} of ${requests.length} content requests`
                                 : `You have ${filteredRequests.length} of ${requests.length} submitted content requests`}
                         </p>
@@ -346,7 +360,7 @@ export default function MyRequests() {
                                         <TableHeader>
                                             <TableRow className="border-b border-border">
                                                 <TableHead className="font-semibold text-foreground py-4 px-6">Article Title</TableHead>
-                                                {isAdmin && <TableHead className="font-semibold text-foreground py-4 px-4">User</TableHead>}
+                                                {userRole === 'admin' && <TableHead className="font-semibold text-foreground py-4 px-4">User</TableHead>}
                                                 <TableHead className="font-semibold text-foreground py-4 px-4">Client</TableHead>
                                                 <TableHead className="font-semibold text-foreground py-4 px-4">Type</TableHead>
                                                 <TableHead className="font-semibold text-foreground py-4 px-4">Status</TableHead>
@@ -372,7 +386,7 @@ export default function MyRequests() {
                                                             </div>
                                                         </TableCell>
 
-                                                        {isAdmin && (
+                                                        {userRole === 'admin' && (
                                                             <TableCell className="py-4 px-4">
                                                                 {request.profiles ? (
                                                                     <div>
@@ -408,29 +422,24 @@ export default function MyRequests() {
                                                         </TableCell>
 
                                                         <TableCell className="py-4 px-4">
-                                                            <Button
-                                                                variant="default"
-                                                                size="sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    const link = getGoogleDriveLink(request.webhook_response);
-                                                                    if (link) window.open(link, '_blank');
-                                                                }}
-                                                                disabled={!getGoogleDriveLink(request.webhook_response)}
-                                                                className={`text-xs ${getGoogleDriveLink(request.webhook_response)
-                                                                    ? 'bg-brand-blue-crayola hover:bg-brand-blue-crayola/90'
-                                                                    : 'bg-muted text-muted-foreground'
-                                                                    } text-white transition-colors`}
-                                                            >
-                                                                {getGoogleDriveLink(request.webhook_response) ? (
-                                                                    <>
-                                                                        <ExternalLink className="h-3 w-3 mr-1" />
-                                                                        View Docs
-                                                                    </>
-                                                                ) : (
-                                                                    'Processing...'
-                                                                )}
-                                                            </Button>
+                                                            {googleDriveLink ? (
+                                                                <Button
+                                                                    variant="default"
+                                                                    size="sm"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        window.open(googleDriveLink, '_blank');
+                                                                    }}
+                                                                    className="text-xs bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 transition-colors"
+                                                                >
+                                                                    <ExternalLink className="h-3 w-3 mr-1" />
+                                                                    View Docs
+                                                                </Button>
+                                                            ) : (
+                                                                <div className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded">
+                                                                    {request.webhook_sent ? 'Pending' : 'Processing'}
+                                                                </div>
+                                                            )}
                                                         </TableCell>
 
                                                         <TableCell className="py-4 px-4">
@@ -499,24 +508,27 @@ export default function MyRequests() {
                                             <div>
                                                 <label className="text-sm font-medium text-muted-foreground">Documents</label>
                                                 <div className="mt-1">
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={() => {
-                                                            const link = getGoogleDriveLink(selectedRequest.webhook_response);
-                                                            if (link) window.open(link, '_blank');
-                                                        }}
-                                                        disabled={!getGoogleDriveLink(selectedRequest.webhook_response)}
-                                                        className="w-full sm:w-auto"
-                                                    >
-                                                        <ExternalLink className="h-4 w-4 mr-2" />
-                                                        {getGoogleDriveLink(selectedRequest.webhook_response)
-                                                            ? 'View Google Drive Documents'
-                                                            : 'Documents Processing...'}
-                                                    </Button>
+                                                    {getGoogleDriveLink(selectedRequest.webhook_response) ? (
+                                                        <Button
+                                                            variant="outline"
+                                                            onClick={() => {
+                                                                const link = getGoogleDriveLink(selectedRequest.webhook_response);
+                                                                if (link) window.open(link, '_blank');
+                                                            }}
+                                                            className="w-full sm:w-auto"
+                                                        >
+                                                            <ExternalLink className="h-4 w-4 mr-2" />
+                                                            View Google Drive Documents
+                                                        </Button>
+                                                    ) : (
+                                                        <p className="text-muted-foreground">
+                                                            {selectedRequest.webhook_sent ? 'Documents pending - please check back later' : 'Request is being processed'}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {isAdmin && selectedRequest.profiles && (
+                                            {userRole === 'admin' && selectedRequest.profiles && (
                                                 <div className="border-t border-border pt-4">
                                                     <label className="text-sm font-medium text-muted-foreground">Submitted By</label>
                                                     <div className="flex items-center gap-2 mt-1">

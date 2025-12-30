@@ -51,6 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null); // Don't set user to prevent auto-login behavior
           setIsPasswordReset(true);
           sessionStorage.setItem('isPasswordReset', 'true');
+
+          // Redirect to reset-password page if not already there
+          if (window.location.pathname !== '/reset-password') {
+            router.push('/reset-password');
+          }
         } else if (event === 'SIGNED_OUT') {
           // Handle sign out
           setSession(null);
@@ -80,6 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setIsPasswordReset(true);
         sessionStorage.setItem('isPasswordReset', 'true');
+
+        // Redirect if not already on the reset-password page
+        if (window.location.pathname !== '/reset-password') {
+          router.push('/reset-password');
+        }
       } else if (!storedResetState) {
         setSession(session);
         setUser(session?.user ?? null);
