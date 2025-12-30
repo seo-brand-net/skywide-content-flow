@@ -27,46 +27,46 @@ function ResetPasswordContent() {
     const { toast } = useToast();
 
     useEffect(() => {
-        // Check if we're in password reset mode from auth context
-        // AND we have a valid session to perform the reset
-        if (isPasswordReset && (user || session)) {
-            // Check if there's actually a session before committing to the reset UI
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    setStep('reset');
-                }
-            });
-            return;
-        }
+        const handleRecovery = async () => {
+            const urlParams = new URL(window.location.href).searchParams;
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const type = urlParams.get('type') || hashParams.get('type');
+            const code = urlParams.get('code') || hashParams.get('code');
 
-        // Exchange recovery code for session
-        const urlParams = new URL(window.location.href).searchParams;
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-
-        const type = urlParams.get('type') || hashParams.get('type');
-        const code = urlParams.get('code') || hashParams.get('code');
-
-        if (type === 'recovery' && code) {
-            supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-                if (!error) {
+            // 1. Priority: Direct recovery code in URL
+            if (type === 'recovery' && code) {
+                console.log('Recovery token detected in URL, exchanging...');
+                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                if (!error && data.session) {
                     setStep('reset');
                     // Clean URL
                     const url = new URL(window.location.href);
                     url.searchParams.delete('code');
                     url.searchParams.delete('type');
-                    // Clear hash as well
                     window.history.replaceState({}, '', url.pathname + url.search);
+                    return;
                 } else {
                     console.error('Failed to exchange code:', error);
                     toast({
-                        title: "Error",
-                        description: "Invalid or expired reset link. Please request a new one.",
+                        title: "Reset Link Invalid",
+                        description: "Your reset link may have expired. Please request a new one.",
                         variant: "destructive",
                     });
                 }
-            });
-        }
-    }, [searchParams, isPasswordReset, toast]);
+            }
+
+            // 2. Secondary: Auth context already says we're in reset flow
+            // Check session explicitly to be sure
+            if (isPasswordReset) {
+                const { data: { session: currentSession } } = await supabase.auth.getSession();
+                if (currentSession) {
+                    setStep('reset');
+                }
+            }
+        };
+
+        handleRecovery();
+    }, [isPasswordReset, toast]);
 
     // Redirect authenticated users to dashboard (but not during password reset)
     useEffect(() => {
@@ -277,6 +277,23 @@ function ResetPasswordContent() {
                                     )}
                                 </Button>
                             </form>
+                        )}
+
+                        {step === 'reset' && (
+                            <div className="mt-4 text-center">
+                                <button
+                                    type="button"
+                                    className="text-xs text-muted-foreground hover:text-foreground"
+                                    onClick={() => {
+                                        setStep('request');
+                                        sessionStorage.removeItem('isPasswordReset');
+                                        // Also clear potential tokens from URL
+                                        window.history.replaceState({}, '', window.location.pathname);
+                                    }}
+                                >
+                                    Need to request a new link?
+                                </button>
+                            </div>
                         )}
 
                         <div className="mt-4 text-center">

@@ -92,7 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const urlHasReset = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
       const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
-      const isResetFlow = urlHasReset || storedResetState;
+
+      // Only treat it as a reset flow if we're on the right page or have a fresh token
+      const isOnResetPage = window.location.pathname === '/reset-password';
+      const isResetFlow = urlHasReset || (storedResetState && isOnResetPage);
 
       if (isResetFlow) {
         setIsPasswordReset(true);
@@ -103,14 +106,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
 
-        // Only redirect on fresh landing with actual token in URL
-        if (urlHasReset && window.location.pathname !== '/reset-password') {
-          router.push('/reset-password');
+        // Only redirect on fresh landing with actual token in URL, and not on reset page
+        if (urlHasReset && !isOnResetPage) {
+          router.push('/reset-password' + window.location.search + window.location.hash);
         }
       } else {
         setSession(session);
         setUser(session?.user ?? null);
         setIsPasswordReset(false);
+        if (!isOnResetPage) sessionStorage.removeItem('isPasswordReset');
       }
       setLoading(false);
     });
