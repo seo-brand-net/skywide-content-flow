@@ -59,8 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // ONLY force redirect on fresh landing with token or event
           const hasActualToken = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
           if (hasActualToken || event === 'PASSWORD_RECOVERY') {
-            if (window.location.pathname !== '/reset-password') {
-              router.push('/reset-password');
+            const currentPath = window.location.pathname;
+            if (currentPath !== '/update-password') {
+              router.push('/update-password' + window.location.search + window.location.hash);
             }
           }
         } else if (event === 'SIGNED_OUT') {
@@ -100,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
 
       // Only treat it as a reset flow if we're on the right page or have a fresh token
-      const isOnResetPage = window.location.pathname === '/reset-password';
+      const isOnResetPage = window.location.pathname === '/reset-password' || window.location.pathname === '/update-password';
       const isResetFlow = urlHasReset || (storedResetState && isOnResetPage);
 
       if (isResetFlow) {

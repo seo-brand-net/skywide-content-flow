@@ -53,6 +53,7 @@ export async function updateSession(request: NextRequest) {
         !path.startsWith('/register') &&
         !path.startsWith('/auth') &&
         !path.startsWith('/reset-password') &&
+        !path.startsWith('/update-password') &&
         path !== '/'
     ) {
         // Redirect to login

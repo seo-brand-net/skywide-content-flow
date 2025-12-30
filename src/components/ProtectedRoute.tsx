@@ -61,13 +61,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         );
     }
 
-    // Allow access to update password page during password reset flow
-    if (isPasswordReset && pathname === '/update-password') {
-        return <>{children}</>;
-    }
-
-    // Allow access to reset password page (for requesting links)
-    if (pathname === '/reset-password') {
+    // Allow access to public entry points (reset-password and update-password)
+    // These pages handle their own auth state or don't require it (for requesting)
+    if (pathname === '/reset-password' || pathname === '/update-password') {
         return <>{children}</>;
     }
 
