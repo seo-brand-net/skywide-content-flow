@@ -46,7 +46,7 @@ export async function updateSession(request: NextRequest) {
         return supabaseResponse
     }
 
-    // If no user and trying to access protected routes
+    /* DISABLING REDIRECT FOR DEBUGGING 
     if (
         !user &&
         !path.startsWith('/login') &&
@@ -66,6 +66,7 @@ export async function updateSession(request: NextRequest) {
         })
         return response
     }
+    */
 
     // Auth Routes Handling
     // If user exists and trying to access login/register
