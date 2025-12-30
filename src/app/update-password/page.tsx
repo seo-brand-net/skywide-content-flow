@@ -33,34 +33,56 @@ function UpdatePasswordContent() {
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const type = urlParams.get('type') || hashParams.get('type');
             const code = urlParams.get('code') || hashParams.get('code');
+            const accessToken = hashParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token');
 
-            // 1. If we have a recovery token, try to exchange it
-            if (type === 'recovery' && code) {
-                console.log('Recovery token detected, exchanging...');
-                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-                if (!error && data.session) {
-                    setIsPasswordReset(true);
-                    sessionStorage.setItem('isPasswordReset', 'true');
-                    // Clean URL
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('code');
-                    url.searchParams.delete('type');
-                    window.history.replaceState({}, '', url.pathname + url.search);
-                    setIsValidating(false);
-                    return;
-                } else {
-                    console.error('Failed to exchange code:', error);
-                    toast({
-                        title: "Reset Link Invalid",
-                        description: "Your reset link may have expired or is invalid.",
-                        variant: "destructive",
+            // 1. If we have a recovery token (code or actual tokens), handle it
+            if (type === 'recovery') {
+                if (code) {
+                    console.log('Recovery code detected, exchanging...');
+                    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                    if (!error && data.session) {
+                        setIsPasswordReset(true);
+                        sessionStorage.setItem('isPasswordReset', 'true');
+                        // Clean URL (search and hash)
+                        const url = new URL(window.location.href);
+                        url.search = '';
+                        url.hash = '';
+                        window.history.replaceState({}, '', url.pathname);
+                        setIsValidating(false);
+                        return;
+                    }
+                } else if (accessToken) {
+                    console.log('Direct recovery tokens detected in hash, setting session...');
+                    const { data, error } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken || '',
                     });
-                    router.push('/reset-password');
-                    return;
+                    if (!error && data.session) {
+                        setIsPasswordReset(true);
+                        sessionStorage.setItem('isPasswordReset', 'true');
+                        // Clean URL (search and hash)
+                        const url = new URL(window.location.href);
+                        url.search = '';
+                        url.hash = '';
+                        window.history.replaceState({}, '', url.pathname);
+                        setIsValidating(false);
+                        return;
+                    }
                 }
+
+                // If type=recovery but exchange/setSession failed
+                console.error('Failed to establish recovery session');
+                toast({
+                    title: "Reset Link Invalid",
+                    description: "Your reset link may have expired or is invalid.",
+                    variant: "destructive",
+                });
+                router.push('/reset-password');
+                return;
             }
 
-            // 2. If no token, check if context already has a reset flow session
+            // 2. If no token in URL, check if context already has a reset flow session
             if (isPasswordReset || session) {
                 setIsValidating(false);
                 return;
