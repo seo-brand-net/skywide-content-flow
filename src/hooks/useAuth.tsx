@@ -49,15 +49,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           event === 'PASSWORD_RECOVERY';
 
         if (isResetFlow && session) {
-          // Handle password reset - set session but don't treat as regular login
+          // Handle password reset landing
           setSession(session);
-          setUser(null); // Don't set user to prevent auto-login behavior
+          setUser(null);
           setIsPasswordReset(true);
           sessionStorage.setItem('isPasswordReset', 'true');
 
-          // Redirect to reset-password page if not already there
-          if (window.location.pathname !== '/reset-password') {
-            router.push('/reset-password');
+          // ONLY force redirect on fresh landing with token or event
+          const hasActualToken = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+          if (hasActualToken || event === 'PASSWORD_RECOVERY') {
+            if (window.location.pathname !== '/reset-password') {
+              router.push('/reset-password');
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           // Handle sign out
@@ -100,8 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
 
-        // Redirect if not already on the reset-password page
-        if (window.location.pathname !== '/reset-password') {
+        // Only redirect on fresh landing with actual token in URL
+        if (urlHasReset && window.location.pathname !== '/reset-password') {
           router.push('/reset-password');
         }
       } else {

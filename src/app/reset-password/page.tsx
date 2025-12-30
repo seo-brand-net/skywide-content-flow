@@ -21,15 +21,21 @@ function ResetPasswordContent() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { user, updatePassword, isPasswordReset } = useAuth();
+    const { user, session, updatePassword, isPasswordReset } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
 
     useEffect(() => {
         // Check if we're in password reset mode from auth context
-        if (isPasswordReset) {
-            setStep('reset');
+        // AND we have a valid session to perform the reset
+        if (isPasswordReset && (user || session)) {
+            // Check if there's actually a session before committing to the reset UI
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                    setStep('reset');
+                }
+            });
             return;
         }
 
