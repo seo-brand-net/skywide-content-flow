@@ -34,8 +34,11 @@ function ResetPasswordContent() {
         }
 
         // Exchange recovery code for session
-        const type = searchParams.get('type');
-        const code = searchParams.get('code');
+        const urlParams = new URL(window.location.href).searchParams;
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+
+        const type = urlParams.get('type') || hashParams.get('type');
+        const code = urlParams.get('code') || hashParams.get('code');
 
         if (type === 'recovery' && code) {
             supabase.auth.exchangeCodeForSession(code).then(({ error }) => {

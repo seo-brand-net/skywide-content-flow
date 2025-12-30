@@ -11,7 +11,16 @@ export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Removed auto-redirect to allow users to see homepage first
+  // Fast-track recovery redirect
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const isResetFlow = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
+
+    if (isResetFlow) {
+      router.push('/reset-password' + window.location.search + window.location.hash);
+    }
+  }, [router]);
 
   if (loading) {
     return (

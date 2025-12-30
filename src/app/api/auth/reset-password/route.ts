@@ -23,11 +23,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
         }
 
+        // Harden the redirect URL to ensure it always points to the reset page
+        const forcedResetUrl = resetUrl.endsWith('/') || resetUrl.includes('login')
+            ? `${new URL(resetUrl).origin}/reset-password`
+            : resetUrl;
+
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
             email,
             options: {
-                redirectTo: resetUrl,
+                redirectTo: forcedResetUrl,
             },
         });
 
