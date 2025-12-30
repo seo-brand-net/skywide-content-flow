@@ -20,19 +20,23 @@ function UpdatePasswordContent() {
     const [isLoading, setIsLoading] = useState(false);
     const [isValidating, setIsValidating] = useState(true);
 
-    const { updatePassword, setIsPasswordReset } = useAuth();
+    const { updatePassword, setIsPasswordReset, session, loading: authLoading, isPasswordReset } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
 
     useEffect(() => {
+        // Wait for global auth state to initialize
+        if (authLoading) return;
+
         const handleRecovery = async () => {
             const urlParams = new URL(window.location.href).searchParams;
             const hashParams = new URLSearchParams(window.location.hash.substring(1));
             const type = urlParams.get('type') || hashParams.get('type');
             const code = urlParams.get('code') || hashParams.get('code');
 
+            // 1. If we have a recovery token, try to exchange it
             if (type === 'recovery' && code) {
-                console.log('Recovery token detected, exchanging on dedicated update page...');
+                console.log('Recovery token detected, exchanging...');
                 const { data, error } = await supabase.auth.exchangeCodeForSession(code);
                 if (!error && data.session) {
                     setIsPasswordReset(true);
@@ -42,32 +46,45 @@ function UpdatePasswordContent() {
                     url.searchParams.delete('code');
                     url.searchParams.delete('type');
                     window.history.replaceState({}, '', url.pathname + url.search);
+                    setIsValidating(false);
+                    return;
                 } else {
                     console.error('Failed to exchange code:', error);
                     toast({
                         title: "Reset Link Invalid",
-                        description: "Your reset link may have expired or is invalid. Please request a new one.",
+                        description: "Your reset link may have expired or is invalid.",
                         variant: "destructive",
                     });
                     router.push('/reset-password');
-                }
-            } else {
-                // No token in URL, check if we already have a session from a recent exchange
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session) {
-                    toast({
-                        title: "Access Denied",
-                        description: "No active password reset session found. Please use the link from your email.",
-                        variant: "destructive",
-                    });
-                    router.push('/reset-password');
+                    return;
                 }
             }
+
+            // 2. If no token, check if context already has a reset flow session
+            if (isPasswordReset || session) {
+                setIsValidating(false);
+                return;
+            }
+
+            // 3. Fallback: Check direct session one last time
+            const { data: { session: currentSession } } = await supabase.auth.getSession();
+            if (currentSession) {
+                setIsValidating(false);
+                return;
+            }
+
+            // 4. If all fails, redirect
+            toast({
+                title: "Access Denied",
+                description: "No active password reset session found. Please use the link from your email.",
+                variant: "destructive",
+            });
+            router.push('/reset-password');
             setIsValidating(false);
         };
 
         handleRecovery();
-    }, [setIsPasswordReset, toast, router]);
+    }, [authLoading, isPasswordReset, session, setIsPasswordReset, toast, router]);
 
     const handlePasswordUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
