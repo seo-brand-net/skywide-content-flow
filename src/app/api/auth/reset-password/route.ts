@@ -14,7 +14,16 @@ export async function POST(request: Request) {
         }
 
         // 1. Generate the recovery link securely
-        const { data, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        // First, check if the user exists to give a better error
+        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
+        const user = userData?.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+
+        if (!user) {
+            console.error(`API ROUTE: User ${email} not found in Supabase Auth for project ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
+            return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
+        }
+
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
             email,
             options: {
@@ -27,11 +36,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
 
-        const recoveryLink = data.properties.action_link;
+        const recoveryLink = linkData.properties.action_link;
 
         // 2. Send email via Resend
-        const { error: emailError } = await resend.emails.send({
-            from: `SKYWIDE <${process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'}>`,
+        const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+        console.log(`API ROUTE: Attempting to send from ${fromEmail} to ${email}`);
+
+        const { data: resendData, error: emailError } = await resend.emails.send({
+            from: `SKYWIDE <${fromEmail}>`,
             to: [email],
             subject: 'Reset Your SKYWIDE Password',
             html: `
@@ -83,11 +95,12 @@ export async function POST(request: Request) {
         });
 
         if (emailError) {
-            console.error('Resend Error:', emailError);
+            console.error('API ROUTE: Resend Error Response:', JSON.stringify(emailError, null, 2));
             return NextResponse.json({ error: emailError.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true });
+        console.log('API ROUTE: Resend Success! Message ID:', resendData?.id);
+        return NextResponse.json({ success: true, messageId: resendData?.id });
     } catch (error: any) {
         console.error('Reset Password API Error:', error);
         return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
