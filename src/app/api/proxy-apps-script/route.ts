@@ -9,8 +9,11 @@ export async function POST(request: Request) {
         const googleAppsScriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
 
         if (!googleAppsScriptUrl) {
+            console.error('Proxy Error: GOOGLE_APPS_SCRIPT_URL is missing in environment variables');
             return NextResponse.json({ error: 'Google Apps Script URL not configured in .env' }, { status: 500 });
         }
+
+        console.log('Target GAS URL:', googleAppsScriptUrl.substring(0, 30) + '...');
 
         const response = await fetch(googleAppsScriptUrl, {
             method: 'POST',

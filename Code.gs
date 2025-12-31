@@ -400,6 +400,7 @@ function ensureRequiredColumns(sheet) {
       const newCol = sheet.getLastColumn() + 1;
       sheet.getRange(1, newCol).setValue(req);
       headers.push(normalizeHeader(req));
+      debugLog('CREATED_COLUMN', req);
     }
   });
 }
@@ -489,14 +490,21 @@ function runBriefGeneration(workbookUrl, overrideFolderId) {
     };
   }
   
-  // Mark all target rows at once to prevent redundant processing
-  targets.forEach(r => {
-    sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
-    sheet.getRange(r + 1, runIdCol + 1).setValue(runId);
-  });
+  const startTime = new Date().getTime();
+  const TIME_LIMIT_MS = 300000; // 5-minute safety threshold
   
   targets.forEach(r => {
     try {
+      // Check time limit before starting a new row to prevent timeouts
+      if (new Date().getTime() - startTime > TIME_LIMIT_MS) {
+        debugLog('TIME_LIMIT_REACHED', 'Suspending batch to prevent script timeout');
+        return;
+      }
+
+      // Mark row as IN_PROGRESS immediately before starting
+      sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
+      sheet.getRange(r + 1, runIdCol + 1).setValue(runId);
+
       const rowObj = rowToObject(data[r], headers);
       const strategy = buildStrategy(rowObj);
       const brief = generateBriefWithClaude(strategy);
@@ -504,12 +512,12 @@ function runBriefGeneration(workbookUrl, overrideFolderId) {
       
       sheet.getRange(r + 1, headers['brief_url'].index + 1).setValue(docUrl);
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
-      sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
+      if (headers['notes']) sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
       
     } catch (e) {
       debugLog('ERROR', e);
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('ERROR');
-      sheet.getRange(r + 1, headers['notes'].index + 1).setValue(String(e.message || e).substring(0, 1000));
+      if (headers['notes']) sheet.getRange(r + 1, headers['notes'].index + 1).setValue(String(e.message || e).substring(0, 1000));
     }
   });
   
@@ -589,27 +597,45 @@ function generateBriefWithClaude(strategy, retryCount = 0) {
       const responseData = JSON.parse(responseText);
       debugLog(`TURN_${currentTurn}_RESPONSE`, { stop_reason: responseData.stop_reason, content_types: responseData.content?.map(c => c.type) });
       
-      conversationMessages.push({ role: 'assistant', content: responseData.content });
-      
       const toolUses = responseData.content.filter(block => block.type === 'tool_use');
+      const hasWebSearch = toolUses.some(u => u.name === 'web_search');
+      
+      // Anthropic Web Search Beta requirement: 
+      // Assistant messages with web_search must NOT contain text blocks.
+      let assistantContent = responseData.content;
+      if (hasWebSearch) {
+        assistantContent = responseData.content.filter(block => block.type === 'tool_use');
+        const strippedText = responseData.content.filter(block => block.type === 'text').map(b => b.text).join(' ');
+        if (strippedText) debugLog('STRIPPED_ASSISTANT_TEXT', strippedText.substring(0, 50) + '...');
+      }
+      
+      conversationMessages.push({ role: 'assistant', content: assistantContent });
+      
       if (toolUses.length > 0) {
         debugLog('TOOL_USE_FOUND', toolUses.map(u => u.name));
-        const toolResults = toolUses.map(toolUse => {
-          if (toolUse.name === 'web_search') {
-            return {
+        
+        // Anthropic Web Search Beta requirement:
+        // User messages with web_search_tool_result must not contain other blocks.
+        if (hasWebSearch) {
+          const webSearchTool = toolUses.find(u => u.name === 'web_search');
+          conversationMessages.push({ 
+            role: 'user', 
+            content: [{
               type: 'tool_result',
-              tool_use_id: toolUse.id,
+              tool_use_id: webSearchTool.id,
               content: [{ type: 'web_search_tool_result' }]
-            };
-          } else {
-            return {
-              type: 'tool_result',
-              tool_use_id: toolUse.id,
-              content: "Success"
-            };
-          }
-        });
-        conversationMessages.push({ role: 'user', content: toolResults });
+            }]
+          });
+          // If there were other tools, we'd need to split turns, 
+          // but model won't mix them with text-stripped web_search turns.
+        } else {
+          const toolResults = toolUses.map(toolUse => ({
+            type: 'tool_result',
+            tool_use_id: toolUse.id,
+            content: "Success"
+          }));
+          conversationMessages.push({ role: 'user', content: toolResults });
+        }
         continue;
       }
       

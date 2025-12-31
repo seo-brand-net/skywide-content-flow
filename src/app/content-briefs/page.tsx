@@ -132,27 +132,39 @@ export default function ContentBriefsPage() {
 
             const rows = result.result.rows;
             if (rows && rows.length > 0) {
-                const dbRows = rows.map((r: any) => ({
-                    client_id: client.id,
-                    url: r.url,
-                    url_type: r.url_type,
-                    page_type: r.page_type,
-                    primary_keyword: r.primary_keyword,
-                    secondary_keyword: r.secondary_keyword,
-                    longtail_keywords: r.longtail_keywords,
-                    location: r.location,
-                    intent: r.intent,
-                    status: r.status || 'DONE',
-                    brief_url: r.brief_url,
-                    run_id: r.run_id,
-                    notes: r.notes
-                }));
+                // Deduplicate by primary_keyword to avoid Supabase upsert conflicts
+                const uniqueRows = new Map();
 
-                const { error: upsertError } = await supabase
-                    .from('workbook_rows')
-                    .upsert(dbRows, { onConflict: 'client_id,primary_keyword' });
+                rows.forEach((r: any) => {
+                    const key = r.primary_keyword?.trim();
+                    if (!key) return;
 
-                if (upsertError) throw upsertError;
+                    uniqueRows.set(key, {
+                        client_id: client.id,
+                        url: r.url,
+                        url_type: r.url_type,
+                        page_type: r.page_type,
+                        primary_keyword: key,
+                        secondary_keyword: r.secondary_keyword,
+                        longtail_keywords: r.longtail_keywords,
+                        location: r.location,
+                        intent: r.intent,
+                        status: r.status || 'DONE',
+                        brief_url: r.brief_url,
+                        run_id: r.run_id,
+                        notes: r.notes
+                    });
+                });
+
+                const dbRows = Array.from(uniqueRows.values());
+
+                if (dbRows.length > 0) {
+                    const { error: upsertError } = await supabase
+                        .from('workbook_rows')
+                        .upsert(dbRows, { onConflict: 'client_id,primary_keyword' });
+
+                    if (upsertError) throw upsertError;
+                }
             }
             return result;
         },
