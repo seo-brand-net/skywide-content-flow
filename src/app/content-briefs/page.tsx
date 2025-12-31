@@ -9,10 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
-    FileText,
     Sparkles,
     FolderOpen,
-    Send,
     CheckCircle2,
     Search,
     ExternalLink,
@@ -57,18 +55,6 @@ export default function ContentBriefsPage() {
     const queryClient = useQueryClient();
     const [selectedClient, setSelectedClient] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [formData, setFormData] = useState({
-        url: '',
-        url_type: 'new',
-        page_type: 'blog page',
-        primary_keyword: '',
-        secondary_keyword: '',
-        longtail_keywords: '',
-        intent: 'informational',
-        location: 'Global',
-        status: 'NEW',
-        notes: ''
-    });
 
     // Queries
     const { data: clients = [], isLoading: isLoadingClients } = useQuery({
@@ -100,76 +86,30 @@ export default function ContentBriefsPage() {
 
     // Mutations
     const automationMutation = useMutation({
-        mutationFn: async ({ client, data }: { client: Client, data: any }) => {
+        mutationFn: async ({ client }: { client: Client }) => {
+            // 1. Call Apps Script to Generate (Batch Mode)
             const spreadsheetId = client.workbook_url?.match(/[-\w]{25,}/)?.[0];
 
-            // 1. Initial Insert to Supabase (Pending)
-            const { error: initialError } = await supabase
-                .from('workbook_rows')
-                .upsert([{
-                    client_id: client.id,
-                    ...data,
-                    status: 'PENDING',
-                    run_id: `run_${Date.now()}`
-                }], { onConflict: 'client_id,primary_keyword' });
-
-            if (initialError) {
-                console.error('Initial Upsert Error:', initialError);
-                throw initialError;
-            }
-            queryClient.invalidateQueries({ queryKey: ['workbook_rows', client.id] });
-
-            // 2. Call Apps Script to Generate
             const response = await fetch('/api/proxy-apps-script', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    command: 'generateDirectly',
-                    folderId: client.folder_id,
+                    command: 'runBriefGeneration',
                     workbookUrl: client.workbook_url,
                     spreadsheetId,
-                    data: { ...data, clientName: client.name }
+                    folderId: client.folder_id
                 }),
             });
 
             const result = await response.json();
             if (!response.ok || result.status === 'error') throw new Error(result.message || 'Automation failed');
 
-            const briefUrl = result.result?.urls?.[0] || result.result?.url;
-            if (!briefUrl) throw new Error('No brief URL returned from automation');
-
-            // 3. Final Update to Supabase
-            const { error: finalError } = await supabase
-                .from('workbook_rows')
-                .upsert([{
-                    client_id: client.id,
-                    primary_keyword: data.primary_keyword,
-                    status: 'DONE',
-                    brief_url: briefUrl,
-                    run_id: result.result.run_id || `run_${Date.now()}`
-                }], { onConflict: 'client_id,primary_keyword' });
-
-            if (finalError) {
-                console.error('Final Upsert Error:', finalError);
-                throw finalError;
-            }
             return result;
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
-            alert('Automation triggered successfully!');
-            setFormData({
-                url: '',
-                url_type: 'new',
-                page_type: 'blog page',
-                primary_keyword: '',
-                secondary_keyword: '',
-                longtail_keywords: '',
-                intent: 'informational',
-                location: 'Global',
-                status: 'NEW',
-                notes: ''
-            });
+            alert('Automation triggered for all new rows in the workbook!');
+            // 2. Trigger a sync to show the newest statuses
+            if (currentClient) syncMutation.mutate(currentClient);
         },
         onError: (error) => {
             alert(`Error: ${error.message}`);
@@ -224,38 +164,6 @@ export default function ContentBriefsPage() {
         }
     });
 
-    const draftMutation = useMutation({
-        mutationFn: async ({ client, data }: { client: Client, data: any }) => {
-            const { error } = await supabase
-                .from('workbook_rows')
-                .upsert([{
-                    client_id: client.id,
-                    ...data,
-                    status: 'NEW',
-                    run_id: `draft_${Date.now()}`
-                }], { onConflict: 'client_id,primary_keyword' });
-            if (error) {
-                console.error('Draft Upsert Error:', error);
-                throw error;
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
-            alert('Draft saved.');
-            setFormData({
-                url: '',
-                url_type: 'new',
-                page_type: 'blog page',
-                primary_keyword: '',
-                secondary_keyword: '',
-                longtail_keywords: '',
-                intent: 'informational',
-                location: 'Global',
-                status: 'NEW',
-                notes: ''
-            });
-        }
-    });
 
     const deleteMutation = useMutation({
         mutationFn: async (rowId: string) => {
@@ -267,22 +175,12 @@ export default function ContentBriefsPage() {
         }
     });
 
-    const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
-    };
 
     const currentClient = clients.find(c => c.id === selectedClient);
 
     const handleRunAutomation = () => {
         if (!selectedClient || !currentClient) return alert("Select a client.");
-        if (!formData.primary_keyword) return alert("Primary Keyword required.");
-        automationMutation.mutate({ client: currentClient, data: formData });
-    };
-
-    const handleSaveDraft = () => {
-        if (!selectedClient || !currentClient) return alert("Select a client.");
-        if (!formData.primary_keyword) return alert("Primary Keyword required.");
-        draftMutation.mutate({ client: currentClient, data: formData });
+        automationMutation.mutate({ client: currentClient });
     };
 
     const handleDeleteRow = (rowId: string) => {
@@ -375,130 +273,31 @@ export default function ContentBriefsPage() {
                                             </Button>
                                         </div>
 
-                                        <div className="space-y-4 pt-2">
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="url" className="text-[10px] font-bold uppercase text-muted-foreground">Page URL</Label>
-                                                    <Input
-                                                        id="url"
-                                                        placeholder="Leave blank for new"
-                                                        value={formData.url}
-                                                        onChange={(e) => handleInputChange('url', e.target.value)}
-                                                        className="bg-background/50 border-input h-9 text-xs"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="url_type" className="text-[10px] font-bold uppercase text-muted-foreground">URL Type</Label>
-                                                    <Select value={formData.url_type} onValueChange={(v) => handleInputChange('url_type', v)}>
-                                                        <SelectTrigger id="url_type" className="bg-background/50 border-input h-9 text-xs">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="new">New</SelectItem>
-                                                            <SelectItem value="existing">Existing</SelectItem>
-                                                            <SelectItem value="competitor">Competitor</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
+                                        <div className="space-y-4 pt-4">
+                                            <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    Manage brief data (URLs, keywords, etc.) directly in the client workbook.
+                                                    Click below to trigger the AI research engine for all rows marked as <strong>NEW</strong>.
+                                                </p>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="page_type" className="text-[10px] font-bold uppercase text-muted-foreground">Page Type</Label>
-                                                    <Select value={formData.page_type} onValueChange={(v) => handleInputChange('page_type', v)}>
-                                                        <SelectTrigger id="page_type" className="bg-background/50 border-input h-9 text-xs">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="blog page">Blog</SelectItem>
-                                                            <SelectItem value="service page">Service</SelectItem>
-                                                            <SelectItem value="category page">Category</SelectItem>
-                                                            <SelectItem value="homepage">Homepage</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="intent" className="text-[10px] font-bold uppercase text-muted-foreground">Intent</Label>
-                                                    <Input
-                                                        id="intent"
-                                                        value={formData.intent}
-                                                        onChange={(e) => handleInputChange('intent', e.target.value)}
-                                                        className="bg-background/50 border-input h-9 text-xs"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="primary_keyword" className="text-[10px] font-bold uppercase text-muted-foreground">Primary Keyword</Label>
-                                                <Input
-                                                    id="primary_keyword"
-                                                    placeholder="Target keyword..."
-                                                    value={formData.primary_keyword}
-                                                    onChange={(e) => handleInputChange('primary_keyword', e.target.value)}
-                                                    className="bg-background/50 border-input h-9 text-sm"
-                                                />
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="secondary_keyword" className="text-[10px] font-bold uppercase text-muted-foreground">Secondary Key.</Label>
-                                                    <Input
-                                                        id="secondary_keyword"
-                                                        value={formData.secondary_keyword}
-                                                        onChange={(e) => handleInputChange('secondary_keyword', e.target.value)}
-                                                        className="bg-background/50 border-input h-9 text-xs"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="location" className="text-[10px] font-bold uppercase text-muted-foreground">Location</Label>
-                                                    <Input
-                                                        id="location"
-                                                        value={formData.location}
-                                                        onChange={(e) => handleInputChange('location', e.target.value)}
-                                                        className="bg-background/50 border-input h-9 text-xs"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="longtail_keywords" className="text-[10px] font-bold uppercase text-muted-foreground">Longtail / Semantic Themes</Label>
-                                                <Input
-                                                    id="longtail_keywords"
-                                                    placeholder="Comma separated..."
-                                                    value={formData.longtail_keywords}
-                                                    onChange={(e) => handleInputChange('longtail_keywords', e.target.value)}
-                                                    className="bg-background/50 border-input h-9 text-xs"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="notes" className="text-[10px] font-bold uppercase text-muted-foreground">Notes</Label>
-                                                <Input
-                                                    id="notes"
-                                                    placeholder="Extra instructions..."
-                                                    value={formData.notes}
-                                                    onChange={(e) => handleInputChange('notes', e.target.value)}
-                                                    className="bg-background/50 border-input h-9 text-xs"
-                                                />
-                                            </div>
-
-                                            <div className="pt-2 grid grid-cols-2 gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    className="h-10 border-brand-blue-crayola/30 text-brand-blue-crayola hover:bg-brand-blue-crayola/5 font-bold text-xs"
-                                                    onClick={handleSaveDraft}
-                                                    disabled={automationMutation.isPending || draftMutation.isPending}
-                                                >
-                                                    {draftMutation.isPending ? "Saving..." : "Save Draft"}
-                                                </Button>
-                                                <Button
-                                                    className="h-10 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold text-xs shadow-lg shadow-brand-blue-crayola/20"
-                                                    onClick={handleRunAutomation}
-                                                    disabled={automationMutation.isPending || draftMutation.isPending}
-                                                >
-                                                    {automationMutation.isPending ? "Running..." : "Run AI"}
-                                                </Button>
-                                            </div>
+                                            <Button
+                                                className="w-full h-12 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold text-sm shadow-lg shadow-brand-blue-crayola/20"
+                                                onClick={handleRunAutomation}
+                                                disabled={automationMutation.isPending}
+                                            >
+                                                {automationMutation.isPending ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <RefreshCw className="w-4 h-4 animate-spin" />
+                                                        Processing Workbook...
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-2">
+                                                        <Sparkles className="w-4 h-4" />
+                                                        Trigger Research Engine
+                                                    </span>
+                                                )}
+                                            </Button>
                                         </div>
                                     </div>
                                 )}

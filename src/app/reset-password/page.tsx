@@ -89,15 +89,15 @@ function ResetPasswordContent() {
                     <div className="flex justify-center mb-4">
                         <Logo size="large" />
                     </div>
-                    <p className="text-muted-foreground">Secure Domain Branding</p>
+                    <p className="text-muted-foreground">Content Request Dashboard</p>
                 </div>
 
-                <Card className="hover-glow animate-fade-in border-brand-cyan/20">
+                <Card className="hover-glow animate-fade-in">
                     <CardHeader className="text-center">
-                        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-cyan to-brand-purple">
+                        <CardTitle className="text-2xl seobrand-title seobrand-title-accent">
                             Reset Password
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="seobrand-description">
                             Enter your email to receive reset instructions
                         </CardDescription>
                     </CardHeader>
@@ -112,20 +112,17 @@ function ResetPasswordContent() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="h-11 focus-visible:ring-brand-cyan"
+                                    className="h-11"
                                 />
                             </div>
 
                             <Button
                                 type="submit"
-                                className="w-full h-11 bg-brand-cyan hover:bg-brand-cyan/90 text-background font-bold hover-glow transition-all duration-300"
+                                className="w-full h-11 hover-glow"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
-                                    <div className="flex items-center space-x-2">
-                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-background"></div>
-                                        <span>Sending...</span>
-                                    </div>
+                                    'Sending...'
                                 ) : (
                                     <div className="flex items-center justify-center">
                                         <Mail className="mr-2 h-4 w-4" />
@@ -138,7 +135,7 @@ function ResetPasswordContent() {
                         <div className="mt-6 text-center">
                             <button
                                 type="button"
-                                className="text-sm text-muted-foreground hover:text-brand-cyan transition-colors"
+                                className="text-sm text-brand-blue-crayola hover:text-brand-blue-crayola/80 transition-colors"
                                 onClick={() => router.push('/login')}
                             >
                                 Back to Sign In
