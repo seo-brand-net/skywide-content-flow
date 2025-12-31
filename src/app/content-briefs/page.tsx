@@ -286,12 +286,7 @@ export default function ContentBriefsPage() {
                                         </div>
 
                                         <div className="space-y-4 pt-4">
-                                            <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
-                                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                                    Manage brief data (URLs, keywords, etc.) directly in the client workbook.
-                                                    Click below to trigger the AI research engine for all rows marked as <strong>NEW</strong>.
-                                                </p>
-                                            </div>
+
 
                                             <Button
                                                 className="w-full h-12 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold text-sm shadow-lg shadow-brand-blue-crayola/20"
