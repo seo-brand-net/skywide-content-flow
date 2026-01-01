@@ -19,7 +19,7 @@ export async function POST(request: Request) {
             .update({
                 webhook_response: audit_data,
                 webhook_sent: true,
-                status: 'completed'
+                status: 'complete'
             })
             .eq('id', request_id);
 

@@ -108,7 +108,6 @@ export default function Login() {
                                 className="w-full h-11 hover-glow"
                                 disabled={isLoading}
                                 role='button'
-                                name='Sign In'
                                 aria-label='Sign In'
                                 data-testid="sign-in-button"
                             >

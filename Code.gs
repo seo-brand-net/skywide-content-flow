@@ -37,8 +37,8 @@
 /***** CONFIGURATION *****/
 const CONFIG = {
   // Claude API Settings
-  CLAUDE_MODEL: "claude-3-5-sonnet-20241022",
-  CLAUDE_MAX_TOKENS: 8192,
+  CLAUDE_MODEL: "claude-sonnet-4-20250514",
+  CLAUDE_MAX_TOKENS: 24000,
   
   // Processing Settings
   MAX_ROWS_PER_RUN: 1,
@@ -471,12 +471,13 @@ function ensureRequiredColumns(sheet) {
   const lastCol = sheet.getLastColumn();
   debugLog('COLUMN_CHECK_START', { sheetName: sheet.getName(), lastCol: lastCol });
   
-  if (lastCol === 0) {
-    throw new Error(`Sheet "${sheet.getName()}" is empty. No headers found.`);
-  }
+  let rawHeaders = [];
+  let normalizedHeaders = [];
   
-  const rawHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
-  const normalizedHeaders = rawHeaders.map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
+  if (lastCol > 0) {
+    rawHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    normalizedHeaders = rawHeaders.map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
+  }
   
   const debugInfo = rawHeaders.map((h, i) => `${i}: "${h}" -> "${normalizedHeaders[i]}"`).join(', ');
   debugLog('NORMALIZED_HEADERS_DETAIL', debugInfo);
@@ -498,14 +499,18 @@ function ensureRequiredColumns(sheet) {
   const toAdd = outputHeaders.filter(h => !normalizedHeaders.includes(h));
   
   if (toAdd.length > 0) {
-    sheet.insertColumnsAfter(rawHeaders.length, toAdd.length);
-    const startCol = rawHeaders.length + 1;
+    const attachCol = Math.max(1, lastCol);
+    sheet.insertColumnsAfter(attachCol, toAdd.length);
+    const startCol = attachCol + 1;
     sheet.getRange(1, startCol, 1, toAdd.length).setValues([toAdd]);
   }
 }
 
 function getHeaderMap(sheet) {
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const lastCol = sheet.getLastColumn();
+  if (lastCol === 0) return {}; // Handle empty sheet gracefully
+  
+  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   const map = {};
   headers.forEach((h, i) => {
     const key = String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_');
@@ -644,6 +649,21 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
       sheet.getRange(r + 1, headers['brief_url'].index + 1).setValue(docUrl);
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
+
+      // === CROSS-POSTING (Dual-Workbook Sync) ===
+      const clientWorkbookUrl = rowObj['client_workbook'] || rowObj['workbook_url'];
+      if (clientWorkbookUrl && String(clientWorkbookUrl).trim().startsWith('http')) {
+        debugLog('CROSS-POSTING', { to: clientWorkbookUrl });
+        appendToWorkbook(String(clientWorkbookUrl).trim(), {
+          ...rowObj,
+          brief_url: docUrl,
+          status: 'DONE',
+          notes: 'Synced from Master'
+        });
+      }
+
+      // === SUPABASE PERSISTENCY (Dashboard Sync) ===
+      updateSupabaseRow(rowObj, docUrl);
       
     } catch (e) {
       debugLog('ERROR', e);
@@ -860,7 +880,7 @@ Your response must start with { and end with }. Nothing else.`;
           );
         }
       }
-      
+
       if (statusCode !== 200) {
         debugLog('CLAUDE_ERROR_BODY', responseText);
         
@@ -1662,6 +1682,13 @@ function setAnthropicKey(apiKey) {
   Logger.log('Anthropic API key saved');
 }
 
+function setSupabaseConfig(url, serviceRoleKey) {
+  const props = PropertiesService.getScriptProperties();
+  props.setProperty('SUPABASE_URL', url);
+  props.setProperty('SUPABASE_SERVICE_ROLE_KEY', serviceRoleKey);
+  Logger.log('Supabase config saved');
+}
+
 /***** WEB APP HANDLERS *****/
 function doPost(e) {
   try {
@@ -1672,6 +1699,8 @@ function doPost(e) {
     let result;
     if (command === 'getWorkbookData') {
       result = getWorkbookData(workbookUrl);
+    } else if (command === 'appendToClient') {
+      result = appendToWorkbook(workbookUrl, params.formData);
     } else {
       // Default: Trigger Brief Generation and return current state
       result = runBriefGeneration(params.folderId, workbookUrl);
@@ -1691,7 +1720,7 @@ function doPost(e) {
 }
 
 function getWorkbookData(workbookUrl) {
-  const ss = SpreadsheetApp.getActive();
+  const ss = workbookUrl ? SpreadsheetApp.openByUrl(workbookUrl) : SpreadsheetApp.getActive();
   let sheet = null;
   
   // 1. Precise GID Discovery
@@ -1719,4 +1748,105 @@ function getWorkbookData(workbookUrl) {
   
   debugLog('DATASYNC_SUCCESS', { count: rows.length, sheet: sheet.getName() });
   return { count: rows.length, sheet: sheet.getName(), rows: rows };
+}
+
+/**
+ * Appends or updates a row in a specific workbook/sheet
+ */
+function appendToWorkbook(workbookUrl, formData) {
+  try {
+    const ss = SpreadsheetApp.openByUrl(workbookUrl);
+    
+    // Try to targeting specific sheet from URL, or fallback to name, or default
+    let sheet = getSheetFromUrl(ss, workbookUrl);
+    if (!sheet) {
+      sheet = ss.getSheetByName('Content Brief Automation') || ss.getSheets()[0];
+    }
+
+    ensureRequiredColumns(sheet);
+    const headerMap = getHeaderMap(sheet);
+    
+    // Check if row already exists (by run_id or URL if applicable)
+    // For now, simpler implementation: just append. 
+    // In future: findRow(sheet, run_id) if we want to update.
+
+    const newRow = new Array(Object.keys(headerMap).length).fill('');
+    Object.keys(headerMap).forEach(header => {
+      // Try multiple field names (snake_case, Space Case)
+      const value = formData[header] || 
+                    formData[header.replace(/\s+/g, '_').toLowerCase()] ||
+                    formData[header.replace(/_/g, ' ')];
+      
+      if (value !== undefined) {
+        newRow[headerMap[header].index] = value;
+      }
+    });
+
+    // Special status override
+    if (headerMap['status']) {
+      newRow[headerMap['status'].index] = formData.status || 'NEW';
+    }
+
+    sheet.appendRow(newRow);
+    debugLog('APPEND_SUCCESS', { workbook: ss.getName(), sheet: sheet.getName() });
+    return { status: "success", message: `Appended row to ${ss.getName()}` };
+  } catch (e) {
+    debugLog('APPEND_ERROR', e);
+    return { status: "error", message: e.toString() };
+  }
+}
+
+/**
+ * Updates a row in the Supabase database
+ */
+function updateSupabaseRow(rowObj, briefUrl) {
+  const props = PropertiesService.getScriptProperties();
+  const supabaseUrl = props.getProperty('SUPABASE_URL');
+  const supabaseKey = props.getProperty('SUPABASE_SERVICE_ROLE_KEY');
+  
+  if (!supabaseUrl || !supabaseKey) {
+    debugLog('SUPABASE_SYNC_SKIP', 'Missing credentials (SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY)');
+    return;
+  }
+
+  const clientId = rowObj.client_id;
+  const primaryKeyword = rowObj.primary_keyword;
+
+  if (!clientId || !primaryKeyword) {
+    debugLog('SUPABASE_SYNC_SKIP', 'Missing client_id or primary_keyword in row data');
+    return;
+  }
+
+  const payload = {
+    status: 'DONE',
+    brief_url: briefUrl,
+    run_id: rowObj.run_id,
+    notes: rowObj.notes || '',
+    updated_at: new Date().toISOString()
+  };
+
+  // Match by client_id and primary_keyword
+  const url = `${supabaseUrl}/rest/v1/workbook_rows?client_id=eq.${clientId}&primary_keyword=eq.${encodeURIComponent(primaryKeyword)}`;
+  
+  try {
+    const response = UrlFetchApp.fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json'
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+
+    const code = response.getResponseCode();
+    if (code >= 200 && code < 300) {
+      debugLog('SUPABASE_SYNC_SUCCESS', { keyword: primaryKeyword });
+    } else {
+      debugLog('SUPABASE_SYNC_ERROR', { code: code, body: response.getContentText() });
+    }
+  } catch (e) {
+    debugLog('SUPABASE_SYNC_EXCEPTION', e.toString());
+  }
 }

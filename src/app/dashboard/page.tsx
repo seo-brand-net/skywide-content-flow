@@ -168,7 +168,7 @@ export default function Dashboard() {
 
                 if (webhookSuccess && webhookResponseData && isMeaningfulResponse(webhookResponseData)) {
                     updatePayload.webhook_response = webhookResponseData;
-                    updatePayload.status = 'in_progress';
+                    updatePayload.status = 'complete';
                 }
 
                 const { data: updateData, error: updateError } = await supabase

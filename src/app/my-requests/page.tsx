@@ -11,7 +11,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { Eye, Clock, User, ExternalLink, Search } from 'lucide-react';
+import { Eye, Clock, User, ExternalLink, Search, Loader2 } from 'lucide-react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from '@/components/ui/select';
 
 interface ContentRequest {
     id: string;
@@ -44,6 +51,12 @@ export default function MyRequests() {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
+    const [isInternalLoading, setIsInternalLoading] = useState(false);
+
     useEffect(() => {
         if (user) {
             checkUserRole();
@@ -54,13 +67,17 @@ export default function MyRequests() {
         if (user && userRole) {
             fetchRequests();
         }
-    }, [user, userRole]);
+    }, [user, userRole, currentPage, pageSize]);
 
     const fetchRequests = async () => {
+        setIsInternalLoading(true);
         try {
+            const from = (currentPage - 1) * pageSize;
+            const to = from + pageSize - 1;
+
             if (userRole === 'admin') {
                 // For admin users, fetch content requests with user profiles in a single query
-                const { data, error } = await supabase
+                const { data, error, count } = await supabase
                     .from('content_requests')
                     .select(`
             id,
@@ -76,10 +93,12 @@ export default function MyRequests() {
             created_at,
             updated_at,
             user_id
-          `)
-                    .order('created_at', { ascending: false });
+          `, { count: 'exact' })
+                    .order('created_at', { ascending: false })
+                    .range(from, to);
 
                 if (error) throw error;
+                setTotalCount(count || 0);
 
                 // If we have requests, fetch user profiles for them
                 if (data && data.length > 0) {
@@ -118,7 +137,7 @@ export default function MyRequests() {
                 }
             } else {
                 // For regular users, only fetch their own requests
-                const { data: requestsData, error: requestsError } = await supabase
+                const { data: requestsData, error: requestsError, count } = await supabase
                     .from('content_requests')
                     .select(`
             id,
@@ -134,18 +153,21 @@ export default function MyRequests() {
             created_at,
             updated_at,
             user_id
-          `)
+          `, { count: 'exact' })
                     .eq('user_id', user?.id)
-                    .order('created_at', { ascending: false });
+                    .order('created_at', { ascending: false })
+                    .range(from, to);
 
                 if (requestsError) throw requestsError;
                 setRequests(requestsData || []);
+                setTotalCount(count || 0);
             }
         } catch (err: any) {
             console.error('Error fetching requests:', err);
             setError(err.message);
         } finally {
             setLoading(false);
+            setIsInternalLoading(false);
         }
     };
 
@@ -176,13 +198,16 @@ export default function MyRequests() {
     };
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        const s = status.toLowerCase();
+        switch (s) {
             case 'pending':
                 return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
             case 'in_progress':
                 return 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30';
+            case 'complete':
             case 'completed':
                 return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
+            case 'failed':
             case 'cancelled':
                 return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
             default:
@@ -214,7 +239,8 @@ export default function MyRequests() {
         }
     };
 
-    // Filter requests based on search term
+    // For client-side search, we search only within the current page
+    // In a real high-volume app, you'd want server-side search
     const filteredRequests = useMemo(() => {
         if (!searchTerm.trim()) return requests;
 
@@ -229,6 +255,8 @@ export default function MyRequests() {
             (userRole === 'admin' && request.profiles?.email?.toLowerCase().includes(search))
         );
     }, [requests, searchTerm, userRole]);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     if (loading) {
         return (
@@ -298,8 +326,8 @@ export default function MyRequests() {
                         </h1>
                         <p className="text-muted-foreground">
                             {userRole === 'admin'
-                                ? `Viewing ${filteredRequests.length} of ${requests.length} content requests`
-                                : `You have ${filteredRequests.length} of ${requests.length} submitted content requests`}
+                                ? `Total ${totalCount} content requests across all users`
+                                : `You have submitted ${totalCount} content requests`}
                         </p>
                     </div>
                 </div>
@@ -350,79 +378,92 @@ export default function MyRequests() {
                     </Card>
                 ) : (
                     <>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Content Requests</CardTitle>
+                        <Card className="border-border/50 shadow-md hover-glow transition-all duration-300">
+                            <CardHeader className="bg-muted/50 border-b border-border/50">
+                                <CardTitle className="text-xl font-semibold flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-brand-blue-crayola" />
+                                    Recent Content Requests
+                                </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="border-b border-border">
-                                                <TableHead className="font-semibold text-foreground py-4 px-6">Article Title</TableHead>
-                                                {userRole === 'admin' && <TableHead className="font-semibold text-foreground py-4 px-4">User</TableHead>}
-                                                <TableHead className="font-semibold text-foreground py-4 px-4">Client</TableHead>
-                                                <TableHead className="font-semibold text-foreground py-4 px-4">Type</TableHead>
-                                                <TableHead className="font-semibold text-foreground py-4 px-4">Status</TableHead>
-                                                <TableHead className="font-semibold text-foreground py-4 px-4">Submitted</TableHead>
-                                                <TableHead className="font-semibold text-foreground py-4 px-4">View Docs</TableHead>
-                                                <TableHead className="font-semibold text-foreground py-4 px-4">Actions</TableHead>
+                                    <Table className="relative">
+                                        <TableHeader className="bg-muted/30 sticky top-0 z-10">
+                                            <TableRow className="border-b border-border/50">
+                                                <TableHead className="font-bold text-foreground py-4 px-6 w-[25%] min-w-[200px]">Article Title</TableHead>
+                                                {userRole === 'admin' && <TableHead className="font-bold text-foreground py-4 px-4 min-w-[150px]">User</TableHead>}
+                                                <TableHead className="font-bold text-foreground py-4 px-4 min-w-[120px]">Client</TableHead>
+                                                <TableHead className="font-bold text-foreground py-4 px-4 min-w-[100px]">Type</TableHead>
+                                                <TableHead className="font-bold text-foreground py-4 px-4 min-w-[120px]">Status</TableHead>
+                                                <TableHead className="font-bold text-foreground py-4 px-4 min-w-[160px]">Submitted</TableHead>
+                                                <TableHead className="font-bold text-foreground py-4 px-4 text-center min-w-[120px]">View Docs</TableHead>
+                                                <TableHead className="font-bold text-foreground py-4 px-4 text-center min-w-[100px]">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {filteredRequests.map((request) => {
+                                            {isInternalLoading && requests.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell colSpan={userRole === 'admin' ? 8 : 7} className="h-48 text-center">
+                                                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-brand-blue-crayola mb-2" />
+                                                        <p className="text-muted-foreground">Fetching requests...</p>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : filteredRequests.map((request) => {
                                                 const googleDriveLink = getGoogleDriveLink(request.webhook_response);
 
                                                 return (
-                                                    <TableRow key={request.id} className="border-b border-border hover:bg-muted/50 transition-colors">
-                                                        <TableCell className="py-4 px-6">
-                                                            <div className="max-w-xs">
-                                                                <p className="font-medium text-foreground truncate mb-1" title={request.article_title}>
+                                                    <TableRow key={request.id} className="border-b border-border/40 hover:bg-muted/60 transition-colors group">
+                                                        <TableCell className="py-5 px-6">
+                                                            <div className="flex flex-col gap-1">
+                                                                <p className="font-semibold text-foreground leading-tight group-hover:text-brand-blue-crayola transition-colors" title={request.article_title}>
                                                                     {request.article_title}
                                                                 </p>
-                                                                <p className="text-sm text-muted-foreground">
-                                                                    {truncateText(request.creative_brief, 50)}
+                                                                <p className="text-xs text-muted-foreground line-clamp-1 italic">
+                                                                    {request.id.substring(0, 8)}...
                                                                 </p>
                                                             </div>
                                                         </TableCell>
 
                                                         {userRole === 'admin' && (
-                                                            <TableCell className="py-4 px-4">
+                                                            <TableCell className="py-5 px-4 font-medium">
                                                                 {request.profiles ? (
-                                                                    <div>
-                                                                        <p className="text-sm font-medium text-foreground">{request.profiles.full_name}</p>
-                                                                        <p className="text-xs text-muted-foreground">{request.profiles.email}</p>
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-sm text-foreground">{request.profiles.full_name}</span>
+                                                                        <span className="text-xs text-muted-foreground">{request.profiles.email}</span>
                                                                     </div>
                                                                 ) : (
-                                                                    <span className="text-muted-foreground text-sm">-</span>
+                                                                    <span className="text-muted-foreground italic text-sm">System</span>
                                                                 )}
                                                             </TableCell>
                                                         )}
 
-                                                        <TableCell className="py-4 px-4">
-                                                            <span className="text-sm text-foreground font-medium">{request.client_name}</span>
+                                                        <TableCell className="py-5 px-4">
+                                                            <span className="text-sm text-foreground font-semibold px-2 py-1 bg-muted rounded-md border border-border/50">
+                                                                {request.client_name}
+                                                            </span>
                                                         </TableCell>
 
-                                                        <TableCell className="py-4 px-4">
-                                                            <Badge variant="outline" className="text-xs font-medium">
+                                                        <TableCell className="py-5 px-4 text-center">
+                                                            <Badge variant="secondary" className="text-[10px] uppercase tracking-wider font-bold">
                                                                 {request.article_type}
                                                             </Badge>
                                                         </TableCell>
 
-                                                        <TableCell className="py-4 px-4">
-                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                                                                {request.status.replace('_', ' ')}
+                                                        <TableCell className="py-5 px-4">
+                                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-tight shadow-sm border ${getStatusColor(request.status)}`}>
+                                                                {request.status === 'completed' ? 'complete' : request.status.replace('_', ' ')}
                                                             </span>
                                                         </TableCell>
 
-                                                        <TableCell className="py-4 px-4">
-                                                            <div className="text-sm text-muted-foreground">
+                                                        <TableCell className="py-5 px-4">
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+                                                                <Clock className="w-3 h-3" />
                                                                 {formatDate(request.created_at)}
                                                             </div>
                                                         </TableCell>
 
-                                                        <TableCell className="py-4 px-4">
-                                                            {googleDriveLink ? (
+                                                        <TableCell className="py-5 px-4 text-center">
+                                                            {googleDriveLink && (request.status === 'complete' || request.status === 'completed') ? (
                                                                 <Button
                                                                     variant="default"
                                                                     size="sm"
@@ -430,26 +471,32 @@ export default function MyRequests() {
                                                                         e.stopPropagation();
                                                                         window.open(googleDriveLink, '_blank');
                                                                     }}
-                                                                    className="text-xs bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 transition-colors"
+                                                                    className="text-xs font-bold bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 transition-all hover:scale-105 shadow-md"
                                                                 >
-                                                                    <ExternalLink className="h-3 w-3 mr-1" />
+                                                                    <ExternalLink className="h-3 w-3 mr-1.5" />
                                                                     View Docs
                                                                 </Button>
                                                             ) : (
-                                                                <div className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded">
-                                                                    {request.webhook_sent ? 'Pending' : 'Processing'}
-                                                                </div>
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    disabled
+                                                                    className="text-xs font-bold bg-muted/60 text-muted-foreground border-none cursor-not-allowed opacity-50 select-none"
+                                                                >
+                                                                    <Clock className="h-3 w-3 mr-1.5" />
+                                                                    {request.status.toUpperCase()}
+                                                                </Button>
                                                             )}
                                                         </TableCell>
 
-                                                        <TableCell className="py-4 px-4">
+                                                        <TableCell className="py-5 px-4 text-center">
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 onClick={() => openDetailView(request)}
-                                                                className="text-xs hover:bg-muted"
+                                                                className="text-xs font-bold hover:bg-brand-blue-crayola/10 hover:text-brand-blue-crayola transition-all"
                                                             >
-                                                                <Eye className="h-3 w-3 mr-1" />
+                                                                <Eye className="h-3 w-3 mr-1.5" />
                                                                 Details
                                                             </Button>
                                                         </TableCell>
@@ -458,6 +505,76 @@ export default function MyRequests() {
                                             })}
                                         </TableBody>
                                     </Table>
+                                </div>
+
+                                {/* Enhanced Pagination Controls */}
+                                <div className="p-4 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-muted-foreground font-medium">Page Size:</span>
+                                        <Select
+                                            value={pageSize.toString()}
+                                            onValueChange={(val: string) => {
+                                                setPageSize(parseInt(val));
+                                                setCurrentPage(1);
+                                            }}
+                                        >
+                                            <SelectTrigger className="h-8 w-20 text-xs font-bold">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="10">10</SelectItem>
+                                                <SelectItem value="20">20</SelectItem>
+                                                <SelectItem value="50">50</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <span className="text-sm text-muted-foreground ml-2">
+                                            Showing {Math.min(totalCount, (currentPage - 1) * pageSize + 1)} - {Math.min(totalCount, currentPage * pageSize)} of {totalCount}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={currentPage === 1 || isInternalLoading}
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            className="h-8 px-3 font-bold"
+                                        >
+                                            Prev
+                                        </Button>
+
+                                        <div className="flex items-center gap-1">
+                                            {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                                                let pageNum;
+                                                if (totalPages <= 5) pageNum = i + 1;
+                                                else if (currentPage <= 3) pageNum = i + 1;
+                                                else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                                                else pageNum = currentPage - 2 + i;
+
+                                                return (
+                                                    <Button
+                                                        key={pageNum}
+                                                        variant={currentPage === pageNum ? "default" : "ghost"}
+                                                        size="sm"
+                                                        onClick={() => setCurrentPage(pageNum)}
+                                                        className={`h-8 w-8 p-0 font-bold ${currentPage === pageNum ? 'bg-brand-blue-crayola' : ''}`}
+                                                    >
+                                                        {pageNum}
+                                                    </Button>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={currentPage === totalPages || isInternalLoading}
+                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                            className="h-8 px-3 font-bold"
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -549,7 +666,7 @@ export default function MyRequests() {
                                                     <label className="text-sm font-medium text-muted-foreground">Status</label>
                                                     <div className="mt-1">
                                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedRequest.status)}`}>
-                                                            {selectedRequest.status.replace('_', ' ')}
+                                                            {selectedRequest.status === 'completed' ? 'complete' : selectedRequest.status.replace('_', ' ')}
                                                         </span>
                                                     </div>
                                                 </div>

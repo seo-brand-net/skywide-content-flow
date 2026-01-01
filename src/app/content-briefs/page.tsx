@@ -24,6 +24,18 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useEffect } from 'react';
 import { AddClientModal } from '@/components/clients/AddClientModal';
+import { useToast } from "@/hooks/use-toast";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Client {
     id: string;
@@ -52,6 +64,7 @@ interface WorkbookRow {
 
 export default function ContentBriefsPage() {
     const { user } = useAuth();
+    const { toast } = useToast();
     const queryClient = useQueryClient();
     const [selectedClient, setSelectedClient] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
@@ -107,12 +120,20 @@ export default function ContentBriefsPage() {
             return result;
         },
         onSuccess: () => {
-            alert('Automation triggered for all new rows in the workbook!');
+            toast({
+                title: "Research Engine Triggered",
+                description: "Deep content analysis has started for all new rows in the workbook.",
+                variant: "default",
+            });
             // 2. Trigger a sync to show the newest statuses
             if (currentClient) syncMutation.mutate(currentClient);
         },
         onError: (error) => {
-            alert(`Error: ${error.message}`);
+            toast({
+                title: "Automation Failed",
+                description: error.message || "The research engine encountered an error.",
+                variant: "destructive",
+            });
         }
     });
 
@@ -170,9 +191,17 @@ export default function ContentBriefsPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
+            toast({
+                title: "Sync Complete",
+                description: "Workbook data is now up to date with the latest changes.",
+            });
         },
         onError: (error) => {
-            alert('Sync failed: ' + error.message);
+            toast({
+                title: "Sync Failed",
+                description: error.message,
+                variant: "destructive",
+            });
         }
     });
 
@@ -184,6 +213,10 @@ export default function ContentBriefsPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
+            toast({
+                title: "Row Deleted",
+                description: "The row has been removed from your workspace history.",
+            });
         }
     });
 
@@ -191,12 +224,15 @@ export default function ContentBriefsPage() {
     const currentClient = clients.find(c => c.id === selectedClient);
 
     const handleRunAutomation = () => {
-        if (!selectedClient || !currentClient) return alert("Select a client.");
+        if (!selectedClient || !currentClient) {
+            toast({
+                title: "No Client Selected",
+                description: "Please choose a client from the list before running automation.",
+                variant: "destructive",
+            });
+            return;
+        }
         automationMutation.mutate({ client: currentClient });
-    };
-
-    const handleDeleteRow = (rowId: string) => {
-        if (confirm('Delete this row?')) deleteMutation.mutate(rowId);
     };
 
     const filteredRows = useMemo(() => {
@@ -422,14 +458,35 @@ export default function ContentBriefsPage() {
                                                             <div className="text-[9px] text-muted-foreground mt-1 opacity-50 font-mono">{row.run_id?.substring(0, 8)}...</div>
                                                         </td>
                                                         <td className="px-4 py-3 text-center">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                                                onClick={() => handleDeleteRow(row.id)}
-                                                            >
-                                                                <Trash2 className="w-3.5 h-3.5" />
-                                                            </Button>
+                                                            <AlertDialog>
+                                                                <AlertDialogTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    >
+                                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                                    </Button>
+                                                                </AlertDialogTrigger>
+                                                                <AlertDialogContent>
+                                                                    <AlertDialogHeader>
+                                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                                        <AlertDialogDescription>
+                                                                            This action cannot be undone. This will permanently delete this row
+                                                                            from your local workspace history.
+                                                                        </AlertDialogDescription>
+                                                                    </AlertDialogHeader>
+                                                                    <AlertDialogFooter>
+                                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                        <AlertDialogAction
+                                                                            onClick={() => deleteMutation.mutate(row.id)}
+                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                        >
+                                                                            Delete
+                                                                        </AlertDialogAction>
+                                                                    </AlertDialogFooter>
+                                                                </AlertDialogContent>
+                                                            </AlertDialog>
                                                         </td>
                                                     </tr>
                                                 ))}
