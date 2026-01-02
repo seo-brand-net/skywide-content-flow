@@ -20,17 +20,23 @@ export const metadata: Metadata = {
   description: "Skywide Content Engine",
 };
 
-export default function RootLayout({
+import { createClient } from "@/utils/supabase/server";
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user ?? null;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
+        <Providers initialUser={user} initialSession={session}>
           <ClientGlobalLayout>
             {children}
           </ClientGlobalLayout>

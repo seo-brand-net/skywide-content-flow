@@ -8,7 +8,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { useState } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+import { User, Session } from "@supabase/supabase-js";
+
+export function Providers({
+    children,
+    initialUser = null,
+    initialSession = null
+}: {
+    children: React.ReactNode,
+    initialUser?: User | null,
+    initialSession?: Session | null
+}) {
     const [queryClient] = useState(() => new QueryClient());
 
     return (
@@ -20,7 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 disableTransitionOnChange
             >
                 <TooltipProvider>
-                    <AuthProvider>
+                    <AuthProvider initialUser={initialUser} initialSession={initialSession}>
                         {children}
                         <Toaster />
                         <Sonner />

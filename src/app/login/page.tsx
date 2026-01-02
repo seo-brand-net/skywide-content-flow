@@ -16,16 +16,8 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { user, signIn } = useAuth();
+    const { signIn } = useAuth();
     const router = useRouter();
-
-    // Redirect authenticated users
-    useEffect(() => {
-        const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
-        if (user && !storedResetState) {
-            router.push('/dashboard');
-        }
-    }, [user, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

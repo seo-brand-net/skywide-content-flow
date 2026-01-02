@@ -1,82 +1,36 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Logo } from '@/components/Logo';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabase';
 
-function ResetPasswordContent() {
+export default function ResetPassword() {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-
-    const { user, isPasswordReset } = useAuth();
+    const { resetPassword } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
 
-    useEffect(() => {
-        const handleRecoveryRedirect = async () => {
-            const urlParams = new URL(window.location.href).searchParams;
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const type = urlParams.get('type') || hashParams.get('type');
-            const code = urlParams.get('code') || hashParams.get('code');
-
-            if (type === 'recovery' && code) {
-                // Redirect directly to the dedicated update page with all params
-                router.push('/update-password' + window.location.search + window.location.hash);
-            }
-        };
-
-        handleRecoveryRedirect();
-    }, [router]);
-
-    // Redirect authenticated users to dashboard (but not during password reset)
-    useEffect(() => {
-        if (user && !isPasswordReset) {
-            router.push('/dashboard');
-        }
-    }, [user, router, isPasswordReset]);
-
     const handleRequestReset = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!email) {
-            return;
-        }
+        if (!email) return;
 
         setIsLoading(true);
-
         try {
-            // Import the custom password reset service
-            const { sendCustomPasswordResetEmail } = await import("@/services/passwordResetService");
-            const { error } = await sendCustomPasswordResetEmail(email);
-
-            if (error) {
-                console.error('Password reset failed:', error);
-                toast({
-                    title: "Reset Failed",
-                    description: error.message || "Could not send reset email. Please try again later.",
-                    variant: "destructive",
-                });
-            } else {
+            const { error } = await resetPassword(email);
+            if (!error) {
                 toast({
                     title: "Check your email",
                     description: "If an account exists for this email, you will receive a reset link shortly.",
                 });
             }
-        } catch (error: any) {
-            console.error('Unexpected error during password reset:', error);
-            toast({
-                title: "Error",
-                description: "An unexpected error occurred. Please try again.",
-                variant: "destructive",
-            });
         } finally {
             setIsLoading(false);
         }
@@ -121,9 +75,7 @@ function ResetPasswordContent() {
                                 className="w-full h-11 hover-glow"
                                 disabled={isLoading}
                             >
-                                {isLoading ? (
-                                    'Sending...'
-                                ) : (
+                                {isLoading ? 'Sending...' : (
                                     <div className="flex items-center justify-center">
                                         <Mail className="mr-2 h-4 w-4" />
                                         Send Reset Email
@@ -145,13 +97,5 @@ function ResetPasswordContent() {
                 </Card>
             </div>
         </div>
-    );
-}
-
-export default function ResetPassword() {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <ResetPasswordContent />
-        </Suspense>
     );
 }

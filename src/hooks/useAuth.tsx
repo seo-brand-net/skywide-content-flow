@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
@@ -9,8 +9,6 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  isPasswordReset: boolean;
-  setIsPasswordReset: (value: boolean) => void;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -20,116 +18,40 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isPasswordReset, setIsPasswordReset] = useState(false);
+export function AuthProvider({
+  children,
+  initialUser = null,
+  initialSession = null
+}: {
+  children: ReactNode,
+  initialUser?: User | null,
+  initialSession?: Session | null
+}) {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [session, setSession] = useState<Session | null>(initialSession);
+  const [loading, setLoading] = useState(!initialSession);
   const { toast } = useToast();
   const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
-    const storedResetState = sessionStorage.getItem('isPasswordReset');
-    if (storedResetState === 'true') {
-      setIsPasswordReset(true);
-    }
-  }, []);
-
-  useEffect(() => {
-
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, !!session);
-
-        // Check if this is a password reset flow
-        const urlParams = new URL(window.location.href).searchParams;
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const isResetFlow = urlParams.get('type') === 'recovery' ||
-          hashParams.get('type') === 'recovery' ||
-          event === 'PASSWORD_RECOVERY' ||
-          sessionStorage.getItem('isPasswordReset') === 'true';
-
-        if (isResetFlow && session) {
-          // Handle password reset landing
-          setSession(session);
-          setUser(null);
-          setIsPasswordReset(true);
-          sessionStorage.setItem('isPasswordReset', 'true');
-
-          // ONLY force redirect on fresh landing with token or event
-          const hasActualToken = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
-          if (hasActualToken || event === 'PASSWORD_RECOVERY') {
-            const currentPath = window.location.pathname;
-            if (currentPath !== '/update-password') {
-              router.push('/update-password' + window.location.search + window.location.hash);
-            }
-          }
-        } else if (event === 'SIGNED_OUT') {
-          // Handle sign out
-          setSession(null);
-          setUser(null);
-
-          // Only clear and redirect if NOT in a reset flow and NOT on a public page
-          // NOW INCLUDING /update-password
-          const isPublicPage = window.location.pathname === '/reset-password' ||
-            window.location.pathname === '/update-password' ||
-            window.location.pathname === '/';
-
-          if (!isResetFlow && !isPublicPage) {
-            setIsPasswordReset(false);
-            sessionStorage.removeItem('isPasswordReset');
-            router.push('/login');
-          }
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Always keep session in sync
-          setSession(session);
-
-          // Only update user if NOT in password reset mode
-          if (!isResetFlow && !sessionStorage.getItem('isPasswordReset')) {
-            setUser(session?.user ?? null);
-          }
-        }
+      async (event, currentSession) => {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
         setLoading(false);
+
+        if (event === 'SIGNED_IN') {
+          // Success handling if needed
+        } else if (event === 'SIGNED_OUT') {
+          router.push('/login');
+          router.refresh();
+        }
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const urlParams = new URL(window.location.href).searchParams;
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const urlHasReset = urlParams.get('type') === 'recovery' || hashParams.get('type') === 'recovery';
-      const storedResetState = sessionStorage.getItem('isPasswordReset') === 'true';
-
-      // Only treat it as a reset flow if we're on the right page or have a fresh token
-      const isOnResetPage = window.location.pathname === '/reset-password' || window.location.pathname === '/update-password';
-      const isResetFlow = urlHasReset || (storedResetState && isOnResetPage);
-
-      if (isResetFlow) {
-        setIsPasswordReset(true);
-        sessionStorage.setItem('isPasswordReset', 'true');
-
-        if (session) {
-          setSession(session);
-          setUser(null);
-        }
-
-        // Only redirect on fresh landing with actual token in URL, and not already on a target page
-        const isTargetPage = window.location.pathname === '/reset-password' || window.location.pathname === '/update-password';
-        if (urlHasReset && !isTargetPage) {
-          router.push('/update-password' + window.location.search + window.location.hash);
-        }
-      } else {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsPasswordReset(false);
-        if (!isOnResetPage) sessionStorage.removeItem('isPasswordReset');
-      }
-      setLoading(false);
-    });
-
     return () => subscription.unsubscribe();
-  }, [router]);
+  }, [supabase, router]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -149,6 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           title: "Welcome back!",
           description: "Successfully signed in.",
         });
+        router.push('/dashboard');
+        router.refresh();
       }
 
       return { error };
@@ -164,13 +88,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, displayName?: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             display_name: displayName || email.split('@')[0],
           }
@@ -203,61 +125,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Perform full sign out to clear cookies
       await supabase.auth.signOut();
-
-      // Clear local state
       setSession(null);
       setUser(null);
-
-      // Clear any auth data from local storage
-      const projectRef = process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0];
-      if (projectRef) {
-        localStorage.removeItem(`sb-${projectRef}-auth-token`);
-      }
-      localStorage.removeItem('supabase.auth.token');
+      router.push('/login');
+      router.refresh();
 
       toast({
         title: "Signed Out",
         description: "You have been successfully signed out.",
       });
-
-      router.push('/login');
     } catch (error: any) {
-      // Force cleanup even on error
-      setSession(null);
-      setUser(null);
-      router.push('/login');
-
       toast({
-        title: "Signed Out",
-        description: "You have been signed out.",
+        title: "Sign Out Error",
+        description: "An error occurred during sign out.",
+        variant: "destructive",
       });
     }
   };
 
   const resetPassword = async (email: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/update-password`; // Changed from /reset-password to /update-password
-
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl,
+      // Use the custom branded email via API route
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          resetUrl: `${window.location.origin}/auth/callback?next=/update-password`,
+        })
       });
 
-      if (error) {
+      const data = await response.json();
+
+      if (!response.ok) {
         toast({
           title: "Reset Failed",
-          description: error.message,
+          description: data.error || "Could not send reset email.",
           variant: "destructive",
         });
+        return { error: new Error(data.error) };
       } else {
         toast({
           title: "Reset Email Sent",
-          description: "Check your email for password reset instructions.",
+          description: "Check your email for custom password reset instructions.",
         });
       }
 
-      return { error };
+      return { error: null };
     } catch (error: any) {
       toast({
         title: "Reset Error",
@@ -270,34 +187,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updatePassword = async (password: string) => {
     try {
-      // Defensive check: Verify session exists before attempting update
-      let { data: { session: currentSession } } = await supabase.auth.getSession();
-
-      // If session is missing from client state but we HAVE it in our context, try re-hydrating
-      if (!currentSession && session) {
-        console.warn('Session missing from client, attempting re-hydration from context state...');
-        const { data, error: refreshError } = await supabase.auth.setSession({
-          access_token: session.access_token,
-          refresh_token: session.refresh_token
-        });
-        if (!refreshError && data.session) {
-          currentSession = data.session;
-          console.log('Re-hydration successful.');
-        } else {
-          console.error('Re-hydration failed:', refreshError);
-        }
-      }
-
-      if (!currentSession) {
-        console.error('Password update failed: Absolute session loss.');
-        toast({
-          title: "Session Lost",
-          description: "Your secure session was lost. Please click the link in your email again.",
-          variant: "destructive",
-        });
-        return { error: new Error('Auth session missing') };
-      }
-
       const { error } = await supabase.auth.updateUser({
         password: password
       });
@@ -309,19 +198,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           variant: "destructive",
         });
       } else {
-        // Get the latest session to ensure we have the updated user
-        const { data: { session: updatedSession } } = await supabase.auth.getSession();
-
-        // Clear password reset state and establish proper session
-        setIsPasswordReset(false);
-        setSession(updatedSession);
-        setUser(updatedSession?.user ?? null);
-        sessionStorage.removeItem('isPasswordReset');
-
         toast({
           title: "Password Updated",
           description: "Your password has been successfully updated.",
         });
+        router.push('/dashboard');
+        router.refresh();
       }
 
       return { error };
@@ -339,8 +221,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     session,
     loading,
-    isPasswordReset,
-    setIsPasswordReset,
     signIn,
     signUp,
     signOut,

@@ -29,7 +29,7 @@ export async function sendCustomPasswordResetEmail(email: string): Promise<{ err
       },
       body: JSON.stringify({
         email,
-        resetUrl: `${window.location.origin}/reset-password`,
+        resetUrl: `${window.location.origin}/auth/callback?next=/update-password`,
         userFullName,
       })
     });
@@ -42,7 +42,7 @@ export async function sendCustomPasswordResetEmail(email: string): Promise<{ err
       // Fallback to Supabase default email if API route fails
       console.log('Falling back to Supabase default email service...');
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
       });
 
       if (resetError) {

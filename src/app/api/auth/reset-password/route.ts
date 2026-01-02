@@ -23,13 +23,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
         }
 
+        // Determine the site URL
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
         // Generate a secure password reset link
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
             email: email,
             options: {
-                // ALWAYS use the dedicated update-password page for recovery links
-                redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/update-password`,
+                // redirectTo: Where the user should go AFTER Supabase verifies the link
+                redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
             },
         });
 
