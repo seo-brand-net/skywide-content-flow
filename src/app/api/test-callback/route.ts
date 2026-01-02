@@ -1,34 +1,60 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // Helper to update the database
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { request_id, audit_data } = body;
+        console.log('--- TEST CALLBACK RECEIVED ---');
+        console.log('Body:', JSON.stringify(body, null, 2));
+
+        const { request_id, audit_data, status: explicitStatus } = body;
 
         if (!request_id) {
+            console.error('Callback error: Missing request_id');
             return NextResponse.json({ error: 'Missing request_id' }, { status: 400 });
         }
 
-        console.log(`Received test callback for request: ${request_id}`);
+        console.log(`Processing callback for request: ${request_id} with status: ${explicitStatus || 'completed'}`);
 
-        // Update the database with the audit results
-        const { error } = await supabase
-            .from('content_requests')
+        // Parse audit data if it's a string
+        let processedAudit = audit_data;
+        if (typeof audit_data === 'string') {
+            try {
+                processedAudit = JSON.parse(audit_data);
+            } catch (e) {
+                console.log('Audit data is string, not JSON');
+            }
+        }
+
+        // Extract score if possible
+        const score = processedAudit?.alignment_score || processedAudit?.score || 0;
+        console.log(`Calculated score: ${score}`);
+
+        // Update the database with the audit results using Admin client to bypass RLS
+        const { data, error } = await supabaseAdmin
+            .from('test_results')
             .update({
-                webhook_response: audit_data,
-                webhook_sent: true,
-                status: 'complete'
+                audit_data: processedAudit,
+                score: score,
+                status: explicitStatus || 'completed'
             })
-            .eq('id', request_id);
+            .eq('request_id', request_id)
+            .select();
 
         if (error) {
             console.error('Database update error in callback:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ success: true });
+        if (!data || data.length === 0) {
+            console.warn(`No row found in test_results for request_id: ${request_id}`);
+        } else {
+            console.log(`Successfully updated test_results for ${request_id}`);
+        }
+
+        return NextResponse.json({ success: true, updated: data?.length || 0 });
     } catch (error) {
         console.error('Callback Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -46,9 +72,9 @@ export async function GET(request: Request) {
 
     try {
         const { data, error } = await supabase
-            .from('content_requests')
-            .select('webhook_response, status')
-            .eq('id', requestId)
+            .from('test_results')
+            .select('audit_data, status, score')
+            .eq('request_id', requestId)
             .single();
 
         if (error) {
@@ -57,7 +83,8 @@ export async function GET(request: Request) {
 
         return NextResponse.json({
             status: data.status,
-            data: data.webhook_response
+            data: data.audit_data,
+            score: data.score
         });
     } catch (error) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

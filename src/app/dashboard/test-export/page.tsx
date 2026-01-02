@@ -1,13 +1,14 @@
 "use client";
 
 import { useAuth } from '@/hooks/useAuth';
-import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle, PlayCircle, FileSearch } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, PlayCircle, FileSearch, History } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const EXPORT_PATHS = [
@@ -38,6 +39,23 @@ export default function TestExportPage() {
     const [isTesting, setIsTesting] = useState(false);
     const [results, setResults] = useState<TestResult[]>([]);
     const [overallProgress, setOverallProgress] = useState(0);
+    const [history, setHistory] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (user) fetchHistory();
+    }, [user]);
+
+    const fetchHistory = async () => {
+        const { data, error } = await supabase
+            .from('test_results')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (!error && data) {
+            setHistory(data);
+        }
+    };
 
     const getMockData = () => {
         const scenarios = [
@@ -74,6 +92,15 @@ export default function TestExportPage() {
         const requestId = crypto.randomUUID();
 
         try {
+            // 0. Pre-insert record for persistence
+            await supabase.from('test_results').insert({
+                request_id: requestId,
+                path_id: pathId,
+                article_title: mockData.title,
+                status: 'pending',
+                user_id: user?.id
+            });
+
             // 1. Trigger the workflow via the TEST proxy
             const triggerResponse = await fetch('/api/proxy-n8n-test', {
                 method: 'POST',
@@ -166,6 +193,7 @@ export default function TestExportPage() {
             title: "Testing Sequence Complete",
             description: "Diagnostic reports are ready for review.",
         });
+        fetchHistory();
     };
 
     return (
@@ -292,6 +320,60 @@ export default function TestExportPage() {
                             </CardContent>
                         </Card>
                     ))}
+                </div>
+
+                {/* History Section */}
+                <div className="pt-8 border-t border-border/50">
+                    <div className="flex items-center gap-3 mb-6">
+                        <History size={20} className="text-brand-blue-crayola" />
+                        <h2 className="text-xl font-bold text-foreground">Diagnostic History</h2>
+                    </div>
+
+                    <Card className="bg-card/20 border-border overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-muted/40 border-b border-border">
+                                    <tr>
+                                        <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Path</th>
+                                        <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Status</th>
+                                        <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Score</th>
+                                        <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/30">
+                                    {history.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground italic">
+                                                No previous diagnostics found.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        history.map((run) => (
+                                            <tr key={run.id} className="hover:bg-muted/20 transition-colors">
+                                                <td className="px-6 py-4 font-medium">
+                                                    {EXPORT_PATHS.find(p => p.id === run.path_id)?.name || run.path_id}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${run.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                            run.status === 'pending' ? 'bg-brand-blue-crayola/10 text-brand-blue-crayola' :
+                                                                'bg-rose-500/10 text-rose-500'
+                                                        }`}>
+                                                        {run.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="font-bold">{run.score || 0}%</span>
+                                                </td>
+                                                <td className="px-6 py-4 text-muted-foreground text-xs">
+                                                    {new Date(run.created_at).toLocaleString()}
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
                 </div>
             </div>
         </div>

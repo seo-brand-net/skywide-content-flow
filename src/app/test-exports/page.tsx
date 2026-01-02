@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Play, CheckCircle2, XCircle, Beaker, FileSearch } from "lucide-react";
+import { Loader2, Play, CheckCircle2, XCircle, Beaker, FileSearch, History } from "lucide-react";
 
 const TEST_PATHS = [
     { id: "openai_qa_loop", name: "OpenAI QA Loop", description: "OpenAI QA Validator loop" },
@@ -24,6 +25,23 @@ export default function TestExportsPage() {
     const [running, setRunning] = useState<string | null>(null);
     const [results, setResults] = useState<Record<string, any>>({});
     const [loadingAll, setLoadingAll] = useState(false);
+    const [history, setHistory] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (user) fetchHistory();
+    }, [user]);
+
+    const fetchHistory = async () => {
+        const { data, error } = await supabase
+            .from('test_results')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
+        if (!error && data) {
+            setHistory(data);
+        }
+    };
 
     const runTest = async (pathId: string) => {
         setRunning(pathId);
@@ -48,6 +66,15 @@ export default function TestExportsPage() {
                 user_id: user?.id || "test-user-id",
                 timestamp: new Date().toISOString()
             };
+
+            // 0. Pre-insert record for persistence
+            await supabase.from('test_results').insert({
+                request_id: requestId,
+                path_id: pathId,
+                article_title: payload.article_title,
+                status: 'pending',
+                user_id: user?.id
+            });
 
             // Trigger the workflow
             const triggerResponse = await fetch("/api/proxy-n8n-test", {
@@ -92,6 +119,7 @@ export default function TestExportsPage() {
                             title: `Diagnostic Success: ${pathId}`,
                             description: "Workflow results received via callback.",
                         });
+                        fetchHistory();
                     } else if (attempts >= maxAttempts) {
                         clearInterval(pollInterval);
                         setRunning(null);
@@ -257,6 +285,72 @@ export default function TestExportsPage() {
                         </div>
                     </div>
                 )}
+                {/* History Panel */}
+                <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                        <History size={20} className="text-brand-blue-crayola" />
+                        <h2 className="text-xl font-bold text-foreground uppercase tracking-tight">Recent Activity</h2>
+                    </div>
+
+                    <Card className="bg-card border-border overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-muted/50 border-b border-border text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                                    <tr>
+                                        <th className="px-6 py-4">Status</th>
+                                        <th className="px-6 py-4">Path</th>
+                                        <th className="px-6 py-4">Score</th>
+                                        <th className="px-6 py-4">Timestamp</th>
+                                        <th className="px-6 py-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/50">
+                                    {history.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground italic">
+                                                No diagnostic history found.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        history.map((run) => (
+                                            <tr key={run.id} className="hover:bg-muted/30 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    {run.status === 'completed' ? (
+                                                        <span className="flex items-center gap-2 text-emerald-500 font-bold">
+                                                            <CheckCircle2 size={14} /> Success
+                                                        </span>
+                                                    ) : run.status === 'pending' ? (
+                                                        <span className="flex items-center gap-2 text-brand-blue-crayola font-bold">
+                                                            <Loader2 size={14} className="animate-spin" /> Running
+                                                        </span>
+                                                    ) : (
+                                                        <span className="flex items-center gap-2 text-rose-500 font-bold">
+                                                            <XCircle size={14} /> Failed
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 font-medium text-foreground">
+                                                    {TEST_PATHS.find(p => p.id === run.path_id)?.name || run.path_id}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`font-black ${run.score >= 80 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                                                        {run.score || 0}%
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-muted-foreground">
+                                                    {new Date(run.created_at).toLocaleString()}
+                                                </td>
+                                                <td className="px-6 py-4 text-right underline decoration-brand-blue-crayola underline-offset-4 cursor-help text-brand-blue-crayola font-bold">
+                                                    View Details
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+                </div>
             </div>
         </div>
     );
