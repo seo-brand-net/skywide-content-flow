@@ -58,14 +58,7 @@ const CONFIG = {
   DEEP_SERP_ANALYSIS: true,
   
   // Debug
-  DEBUG: true,
-  
-  // Anthropic API Tier Limits (Free/Tier 1 defaults)
-  API_LIMITS: {
-    RPM: 5,        // Requests Per Minute
-    TPM: 40000,    // Tokens Per Minute
-    RPD: 1000      // Requests Per Day
-  }
+  DEBUG: true
 };
 
 /***** PAGE TYPE CONFIGURATIONS *****/
@@ -478,13 +471,12 @@ function ensureRequiredColumns(sheet) {
   const lastCol = sheet.getLastColumn();
   debugLog('COLUMN_CHECK_START', { sheetName: sheet.getName(), lastCol: lastCol });
   
-  let rawHeaders = [];
-  let normalizedHeaders = [];
-  
-  if (lastCol > 0) {
-    rawHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
-    normalizedHeaders = rawHeaders.map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
+  if (lastCol === 0) {
+    throw new Error(`Sheet "${sheet.getName()}" is empty. No headers found.`);
   }
+  
+  const rawHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const normalizedHeaders = rawHeaders.map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
   
   const debugInfo = rawHeaders.map((h, i) => `${i}: "${h}" -> "${normalizedHeaders[i]}"`).join(', ');
   debugLog('NORMALIZED_HEADERS_DETAIL', debugInfo);
@@ -506,18 +498,14 @@ function ensureRequiredColumns(sheet) {
   const toAdd = outputHeaders.filter(h => !normalizedHeaders.includes(h));
   
   if (toAdd.length > 0) {
-    const attachCol = Math.max(1, lastCol);
-    sheet.insertColumnsAfter(attachCol, toAdd.length);
-    const startCol = attachCol + 1;
+    sheet.insertColumnsAfter(rawHeaders.length, toAdd.length);
+    const startCol = rawHeaders.length + 1;
     sheet.getRange(1, startCol, 1, toAdd.length).setValues([toAdd]);
   }
 }
 
 function getHeaderMap(sheet) {
-  const lastCol = sheet.getLastColumn();
-  if (lastCol === 0) return {}; // Handle empty sheet gracefully
-  
-  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const map = {};
   headers.forEach((h, i) => {
     const key = String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_');
@@ -576,29 +564,18 @@ function getSheetFromUrl(ss, url) {
 
 /***** MAIN EXECUTION *****/
 function runBriefGeneration(overrideFolderId, workbookUrl) {
-  // === TRIGGER STATE HANDLING ===
-  // If no arguments, check if we were called by a background trigger
-  if (!overrideFolderId && !workbookUrl) {
-    const props = PropertiesService.getScriptProperties();
-    overrideFolderId = props.getProperty('BG_RUN_FOLDER_ID');
-    workbookUrl = props.getProperty('BG_RUN_WORKBOOK_URL');
-    
-    // Cleanup temporary state
-    props.deleteProperty('BG_RUN_FOLDER_ID');
-    props.deleteProperty('BG_RUN_WORKBOOK_URL');
-    
-    // Cleanup the trigger itself to keep list clean
-    const triggers = ScriptApp.getProjectTriggers();
-    triggers.forEach(t => {
-      if (t.getHandlerFunction() === 'runBriefGeneration') {
-        ScriptApp.deleteTrigger(t);
-      }
-    });
-    
-    debugLog('ASYNC_RUN_START', { folder: overrideFolderId, workbook: workbookUrl });
+  let ss = SpreadsheetApp.getActive();
+  if (!ss && workbookUrl) {
+    try {
+      ss = SpreadsheetApp.openByUrl(workbookUrl);
+      debugLog('TARGET_SS', `Opened by URL: "${ss.getName()}"`);
+    } catch (e) {
+      debugLog('TARGET_SS_ERROR', `Failed to open by URL: ${e.message}`);
+    }
   }
+  
+  if (!ss) throw new Error("Could not access spreadsheet. Use container-bound execution or provide a workbook URL.");
 
-  const ss = SpreadsheetApp.getActive();
   let sheet = null;
   
   // 1. Precise GID Discovery (Highest Priority)
@@ -610,7 +587,7 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
   // 2. Global Robust Discovery (Fallback)
   if (!sheet) {
     try {
-      sheet = discoverDataSheet();
+      sheet = discoverDataSheet(ss);
       debugLog('TARGET_SHEET', `Found by discovery: "${sheet.getName()}"`);
     } catch (e) {
       throw e;
@@ -654,6 +631,10 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
   targets.forEach(r => {
     sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
     sheet.getRange(r + 1, runIdCol + 1).setValue(runId);
+    
+    // NOTIFY DASHBOARD: Row started
+    const rowObj = rowToObject(data[r], headers);
+    notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
   
   // Process each row
@@ -690,9 +671,6 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
           notes: 'Synced from Master'
         });
       }
-
-      // === SUPABASE PERSISTENCY (Dashboard Sync) ===
-      updateSupabaseRow(rowObj, docUrl);
       
     } catch (e) {
       debugLog('ERROR', e);
@@ -700,6 +678,10 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue(
         String(e.message || e).substring(0, 1000)
       );
+      
+      // NOTIFY DASHBOARD: Row error
+      const rowObj = rowToObject(data[r], headers);
+      notifyDashboardStatus({ ...rowObj, status: 'ERROR', notes: e.toString() }, null);
     }
     
     // No additional delay needed between rows - calculateOptimalDelay() handles it
@@ -909,7 +891,7 @@ Your response must start with { and end with }. Nothing else.`;
           );
         }
       }
-
+      
       if (statusCode !== 200) {
         debugLog('CLAUDE_ERROR_BODY', responseText);
         
@@ -1701,21 +1683,45 @@ function createTimeTrigger() {
 function deleteAllTriggers() {
   const triggers = ScriptApp.getProjectTriggers();
   triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
+}
+
+function notifyDashboardStatus(rowObj, briefUrl) {
+  const props = PropertiesService.getScriptProperties();
+  const baseUrl = props.getProperty('DASHBOARD_URL'); // e.g., https://skywide-content-flow.vercel.app
+  const secret = props.getProperty('GAS_CALLBACK_SECRET');
   
-  SpreadsheetApp.getUi().alert(`Deleted ${triggers.length} trigger(s)`);
+  if (!baseUrl) {
+    debugLog('CALLBACK_SKIP', 'DASHBOARD_URL not set in Script Properties');
+    return;
+  }
+
+  const payload = {
+    client_id: rowObj.client_id,
+    primary_keyword: rowObj.primary_keyword,
+    status: rowObj.status || 'DONE',
+    brief_url: briefUrl || rowObj.brief_url || '',
+    run_id: rowObj.run_id,
+    notes: rowObj.notes || '',
+    secret: secret || ''
+  };
+
+  try {
+    const response = UrlFetchApp.fetch(`${baseUrl}/api/content-briefs/callback`, {
+      method: 'POST',
+      contentType: 'application/json',
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    debugLog('CALLBACK_RESPONSE', response.getContentText());
+  } catch (e) {
+    debugLog('CALLBACK_ERROR', e.toString());
+  }
 }
 
 /***** ONE-TIME SETUP *****/
 function setAnthropicKey(apiKey) {
   PropertiesService.getScriptProperties().setProperty('ANTHROPIC_API_KEY', apiKey);
   Logger.log('Anthropic API key saved');
-}
-
-function setSupabaseConfig(url, serviceRoleKey) {
-  const props = PropertiesService.getScriptProperties();
-  props.setProperty('SUPABASE_URL', url);
-  props.setProperty('SUPABASE_SERVICE_ROLE_KEY', serviceRoleKey);
-  Logger.log('Supabase config saved');
 }
 
 /***** WEB APP HANDLERS *****/
@@ -1731,8 +1737,9 @@ function doPost(e) {
     } else if (command === 'appendToClient') {
       result = appendToWorkbook(workbookUrl, params.formData);
     } else {
-      // Default: Trigger Brief Generation in Background (Async to avoid Vercel Timeouts)
-      result = triggerBackgroundRun(params.folderId, workbookUrl);
+      // Default: Trigger Brief Generation synchronously
+      result = runBriefGeneration(params.folderId, workbookUrl);
+      result = { status: "success", message: "Generation complete", result: getWorkbookData(workbookUrl) };
     }
     
     return ContentService.createTextOutput(JSON.stringify({ "status": "success", "result": result }))
@@ -1818,109 +1825,4 @@ function appendToWorkbook(workbookUrl, formData) {
     debugLog('APPEND_ERROR', e);
     return { status: "error", message: e.toString() };
   }
-}
-
-/**
- * Updates a row in the Supabase database
- */
-function updateSupabaseRow(rowObj, briefUrl) {
-  const props = PropertiesService.getScriptProperties();
-  const supabaseUrl = props.getProperty('SUPABASE_URL');
-  const supabaseKey = props.getProperty('SUPABASE_SERVICE_ROLE_KEY');
-  
-  if (!supabaseUrl || !supabaseKey) {
-    debugLog('SUPABASE_SYNC_SKIP', 'Missing credentials (SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY)');
-    return;
-  }
-
-  const clientId = rowObj.client_id;
-  const primaryKeyword = rowObj.primary_keyword;
-
-  if (!clientId || !primaryKeyword) {
-    debugLog('SUPABASE_SYNC_SKIP', 'Missing client_id or primary_keyword in row data');
-    return;
-  }
-
-  const payload = {
-    status: 'DONE',
-    brief_url: briefUrl,
-    run_id: rowObj.run_id,
-    notes: rowObj.notes || '',
-    updated_at: new Date().toISOString()
-  };
-
-  // Match by client_id and primary_keyword
-  const url = `${supabaseUrl}/rest/v1/workbook_rows?client_id=eq.${clientId}&primary_keyword=eq.${encodeURIComponent(primaryKeyword)}`;
-  
-  try {
-    const response = UrlFetchApp.fetch(url, {
-      method: 'PATCH',
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json'
-      },
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    });
-
-    const code = response.getResponseCode();
-    if (code >= 200 && code < 300) {
-      debugLog('SUPABASE_SYNC_SUCCESS', { keyword: primaryKeyword });
-    } else {
-      debugLog('SUPABASE_SYNC_ERROR', { code: code, body: response.getContentText() });
-    }
-  } catch (e) {
-    debugLog('SUPABASE_SYNC_EXCEPTION', e.toString());
-  }
-}
-
-/**
- * Schedules runBriefGeneration to run in the background
- * Returns immediately to caller (Next.js Proxy)
- */
-function triggerBackgroundRun(folderId, workbookUrl) {
-  try {
-    const props = PropertiesService.getScriptProperties();
-    
-    // Store params for the triggered instance
-    if (folderId) props.setProperty('BG_RUN_FOLDER_ID', folderId);
-    if (workbookUrl) props.setProperty('BG_RUN_WORKBOOK_URL', workbookUrl);
-    
-    // Create one-time trigger for 5 seconds from now
-    ScriptApp.newTrigger('runBriefGeneration')
-      .timeBased()
-      .after(5000)
-      .create();
-      
-    debugLog('ASYNC_TRIGGERED', { workbook: workbookUrl });
-    return { status: "success", message: "Background research engine triggered successfully" };
-  } catch (e) {
-    debugLog('TRIGGER_ERROR', e);
-    return { status: "error", message: "Failed to schedule background task: " + e.toString() };
-  }
-}
-
-/**
- * Calculates optimal delay between API calls based on tier limits
- * Prevents 429 errors during batch processing.
- */
-function calculateOptimalDelay() {
-  const rpm = CONFIG.API_LIMITS.RPM;
-  const tpm = CONFIG.API_LIMITS.TPM;
-  
-  // Calculate delay based on RPM (Requests Per Minute)
-  // 60,000ms / RPM = ms per request
-  const delayByRpm = (60000 / rpm) + 1000; // Add 1s buffer
-  
-  // For Tier 1/Free, TPM is usually the bottleneck for long briefs
-  // If we assume a brief + strategy is ~10-15k tokens (including research)
-  // we can only do ~2-3 per minute.
-  const estimatedTokensPerRun = 15000; 
-  const delayByTpm = (60000 / (tpm / estimatedTokensPerRun)) + 2000;
-  
-  const finalDelay = Math.max(delayByRpm, delayByTpm);
-  
-  debugLog('CALCULATE_DELAY', { rpm_delay: delayByRpm, tpm_delay: delayByTpm, chosen: finalDelay });
-  return finalDelay;
 }

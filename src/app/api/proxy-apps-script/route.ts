@@ -15,35 +15,22 @@ export async function POST(request: Request) {
 
         console.log('Target GAS URL:', googleAppsScriptUrl.substring(0, 30) + '...');
 
-        const response = await fetch(googleAppsScriptUrl, {
+        // FIRE AND FORGET: 
+        // We don't await the full execution to avoid Vercel timeouts.
+        // Google Apps Script will process the request and call our callback endpoint when finished.
+        fetch(googleAppsScriptUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(body),
             redirect: 'follow'
+        }).catch(err => console.error('Background GAS trigger error:', err));
+
+        return NextResponse.json({
+            status: 'triggered',
+            message: 'Automation initiated. The dashboard will update automatically when results are ready.'
         });
-
-        console.log('Apps Script Response Status:', response.status);
-
-        const data = await response.text();
-        let json;
-        try {
-            json = JSON.parse(data);
-        } catch {
-            json = { message: data };
-        }
-
-        if (!response.ok) {
-            console.error(`Apps Script Error (${response.status}):`, data);
-            return NextResponse.json({
-                error: 'Apps Script returned an error',
-                status: response.status,
-                details: json
-            }, { status: response.status });
-        }
-
-        return NextResponse.json(json);
     } catch (error: any) {
         console.error('Apps Script Proxy Catch Block:', error);
         return NextResponse.json({
