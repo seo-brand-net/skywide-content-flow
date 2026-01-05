@@ -14,6 +14,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (password: string) => Promise<{ error: any }>;
+  isPasswordReset: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,6 +31,7 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(initialUser);
   const [session, setSession] = useState<Session | null>(initialSession);
   const [loading, setLoading] = useState(!initialSession);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const supabase = createClient();
@@ -42,10 +44,13 @@ export function AuthProvider({
         setLoading(false);
 
         if (event === 'SIGNED_IN') {
-          // Success handling if needed
+          setIsPasswordReset(false);
         } else if (event === 'SIGNED_OUT') {
+          setIsPasswordReset(false);
           router.push('/login');
           router.refresh();
+        } else if (event === 'PASSWORD_RECOVERY') {
+          setIsPasswordReset(true);
         }
       }
     );
@@ -226,6 +231,7 @@ export function AuthProvider({
     signOut,
     resetPassword,
     updatePassword,
+    isPasswordReset,
   };
 
   return (
