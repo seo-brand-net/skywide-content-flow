@@ -58,7 +58,14 @@ const CONFIG = {
   DEEP_SERP_ANALYSIS: true,
   
   // Debug
-  DEBUG: true
+  DEBUG: true,
+  
+  // Anthropic API Tier Limits (Free/Tier 1 defaults)
+  API_LIMITS: {
+    RPM: 5,        // Requests Per Minute
+    TPM: 40000,    // Tokens Per Minute
+    RPD: 1000      // Requests Per Day
+  }
 };
 
 /***** PAGE TYPE CONFIGURATIONS *****/
@@ -569,6 +576,28 @@ function getSheetFromUrl(ss, url) {
 
 /***** MAIN EXECUTION *****/
 function runBriefGeneration(overrideFolderId, workbookUrl) {
+  // === TRIGGER STATE HANDLING ===
+  // If no arguments, check if we were called by a background trigger
+  if (!overrideFolderId && !workbookUrl) {
+    const props = PropertiesService.getScriptProperties();
+    overrideFolderId = props.getProperty('BG_RUN_FOLDER_ID');
+    workbookUrl = props.getProperty('BG_RUN_WORKBOOK_URL');
+    
+    // Cleanup temporary state
+    props.deleteProperty('BG_RUN_FOLDER_ID');
+    props.deleteProperty('BG_RUN_WORKBOOK_URL');
+    
+    // Cleanup the trigger itself to keep list clean
+    const triggers = ScriptApp.getProjectTriggers();
+    triggers.forEach(t => {
+      if (t.getHandlerFunction() === 'runBriefGeneration') {
+        ScriptApp.deleteTrigger(t);
+      }
+    });
+    
+    debugLog('ASYNC_RUN_START', { folder: overrideFolderId, workbook: workbookUrl });
+  }
+
   const ss = SpreadsheetApp.getActive();
   let sheet = null;
   
@@ -1702,13 +1731,8 @@ function doPost(e) {
     } else if (command === 'appendToClient') {
       result = appendToWorkbook(workbookUrl, params.formData);
     } else {
-      // Default: Trigger Brief Generation and return current state
-      result = runBriefGeneration(params.folderId, workbookUrl);
-      // After triggering generation, refresh the data to sync back to dashboard
-      result = {
-        generation: result,
-        result: getWorkbookData(workbookUrl)
-      };
+      // Default: Trigger Brief Generation in Background (Async to avoid Vercel Timeouts)
+      result = triggerBackgroundRun(params.folderId, workbookUrl);
     }
     
     return ContentService.createTextOutput(JSON.stringify({ "status": "success", "result": result }))
@@ -1849,4 +1873,54 @@ function updateSupabaseRow(rowObj, briefUrl) {
   } catch (e) {
     debugLog('SUPABASE_SYNC_EXCEPTION', e.toString());
   }
+}
+
+/**
+ * Schedules runBriefGeneration to run in the background
+ * Returns immediately to caller (Next.js Proxy)
+ */
+function triggerBackgroundRun(folderId, workbookUrl) {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    
+    // Store params for the triggered instance
+    if (folderId) props.setProperty('BG_RUN_FOLDER_ID', folderId);
+    if (workbookUrl) props.setProperty('BG_RUN_WORKBOOK_URL', workbookUrl);
+    
+    // Create one-time trigger for 5 seconds from now
+    ScriptApp.newTrigger('runBriefGeneration')
+      .timeBased()
+      .after(5000)
+      .create();
+      
+    debugLog('ASYNC_TRIGGERED', { workbook: workbookUrl });
+    return { status: "success", message: "Background research engine triggered successfully" };
+  } catch (e) {
+    debugLog('TRIGGER_ERROR', e);
+    return { status: "error", message: "Failed to schedule background task: " + e.toString() };
+  }
+}
+
+/**
+ * Calculates optimal delay between API calls based on tier limits
+ * Prevents 429 errors during batch processing.
+ */
+function calculateOptimalDelay() {
+  const rpm = CONFIG.API_LIMITS.RPM;
+  const tpm = CONFIG.API_LIMITS.TPM;
+  
+  // Calculate delay based on RPM (Requests Per Minute)
+  // 60,000ms / RPM = ms per request
+  const delayByRpm = (60000 / rpm) + 1000; // Add 1s buffer
+  
+  // For Tier 1/Free, TPM is usually the bottleneck for long briefs
+  // If we assume a brief + strategy is ~10-15k tokens (including research)
+  // we can only do ~2-3 per minute.
+  const estimatedTokensPerRun = 15000; 
+  const delayByTpm = (60000 / (tpm / estimatedTokensPerRun)) + 2000;
+  
+  const finalDelay = Math.max(delayByRpm, delayByTpm);
+  
+  debugLog('CALCULATE_DELAY', { rpm_delay: delayByRpm, tpm_delay: delayByTpm, chosen: finalDelay });
+  return finalDelay;
 }
