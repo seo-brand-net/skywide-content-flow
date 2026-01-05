@@ -322,39 +322,6 @@ RESEARCH PROTOCOL:
 CLIENT_DOMAIN will be replaced with actual domain before sending.`;
 
 // *** UTILITY FUNCTIONS *****/
-function logToDebugSheet(label, payload, responseData = null) {
-  try {
-    const ss = SpreadsheetApp.getActive();
-    let debugSheet = ss.getSheetByName('DEBUG_LOGS');
-    if (!debugSheet) {
-      debugSheet = ss.insertSheet('DEBUG_LOGS');
-      debugSheet.appendRow(['Timestamp', 'Label', 'Request Payload', 'Response Body']);
-      debugSheet.getRange(1, 1, 1, 4).setBold(true).setBackground('#f3f3f3');
-      debugSheet.setColumnWidth(3, 500);
-      debugSheet.setColumnWidth(4, 500);
-    }
-    
-    // Convert payloads to strings if needed
-    const reqStr = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2);
-    const resStr = responseData ? (typeof responseData === 'string' ? responseData : JSON.stringify(responseData, null, 2)) : 'N/A';
-    
-    debugSheet.insertRowAfter(1);
-    debugSheet.getRange(2, 1, 1, 4).setValues([[
-      new Date().toISOString(),
-      label,
-      reqStr.substring(0, 50000), // GAS limit safety
-      resStr.substring(0, 50000)
-    ]]);
-    
-    // Optional: cap sheet at 100 rows
-    if (debugSheet.getLastRow() > 105) {
-      debugSheet.deleteRows(100, debugSheet.getLastRow() - 100);
-    }
-  } catch (e) {
-    Logger.log('Error logging to Debug Sheet: ' + e);
-  }
-}
-
 function debugLog(label, data) {
   if (!CONFIG.DEBUG) return;
   const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
@@ -559,10 +526,8 @@ function rowToObject(row, headerMap) {
  * Global helper to find the sheet containing the 'url' column.
  * Essential for Web App context where getActiveSheet() is unreliable.
  */
-function discoverDataSheet(ssOverride) {
-  const ss = ssOverride || SpreadsheetApp.getActive();
-  if (!ss) throw new Error("No active spreadsheet found for discovery.");
-  
+function discoverDataSheet() {
+  const ss = SpreadsheetApp.getActive();
   let sheet = ss.getActiveSheet();
   
   function hasUrlColumn(sh) {
@@ -572,9 +537,9 @@ function discoverDataSheet(ssOverride) {
     return headers.includes('url');
   }
 
-  if (sheet && hasUrlColumn(sheet)) return sheet;
+  if (hasUrlColumn(sheet)) return sheet;
 
-  debugLog('SHEET_DISCOVERY', `Targeting spreadsheet "${ss.getName()}". Searching for 'url' column...`);
+  debugLog('SHEET_DISCOVERY', `Active sheet "${sheet.getName()}" lacks 'url' column. Searching all...`);
   const target = ss.getSheets().find(sh => hasUrlColumn(sh));
   
   if (!target) {
@@ -599,18 +564,7 @@ function getSheetFromUrl(ss, url) {
 
 /***** MAIN EXECUTION *****/
 function runBriefGeneration(overrideFolderId, workbookUrl) {
-  let ss = SpreadsheetApp.getActive();
-  if (!ss && workbookUrl) {
-    try {
-      ss = SpreadsheetApp.openByUrl(workbookUrl);
-      debugLog('TARGET_SS', `Opened by URL: "${ss.getName()}"`);
-    } catch (e) {
-      debugLog('TARGET_SS_ERROR', `Failed to open by URL: ${e.message}`);
-    }
-  }
-  
-  if (!ss) throw new Error("Could not access spreadsheet. Use container-bound execution or provide a workbook URL.");
-
+  const ss = SpreadsheetApp.getActive();
   let sheet = null;
   
   // 1. Precise GID Discovery (Highest Priority)
@@ -622,7 +576,7 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
   // 2. Global Robust Discovery (Fallback)
   if (!sheet) {
     try {
-      sheet = discoverDataSheet(ss);
+      sheet = discoverDataSheet();
       debugLog('TARGET_SHEET', `Found by discovery: "${sheet.getName()}"`);
     } catch (e) {
       throw e;
@@ -666,10 +620,6 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
   targets.forEach(r => {
     sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
     sheet.getRange(r + 1, runIdCol + 1).setValue(runId);
-    
-    // NOTIFY DASHBOARD (Single Path Persistence)
-    const rowObj = rowToObject(data[r], headers);
-    notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
   
   // Process each row
@@ -695,9 +645,6 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
 
-      // NOTIFY DASHBOARD (Single Path Persistence + Full Brief JSON)
-      notifyDashboardStatus(rowObj, docUrl, brief);
-
       // === CROSS-POSTING (Dual-Workbook Sync) ===
       const clientWorkbookUrl = rowObj['client_workbook'] || rowObj['workbook_url'];
       if (clientWorkbookUrl && String(clientWorkbookUrl).trim().startsWith('http')) {
@@ -716,18 +663,9 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue(
         String(e.message || e).substring(0, 1000)
       );
-      
-      // NOTIFY DASHBOARD: Row error
-      const rowObj = rowToObject(data[r], headers);
-      notifyDashboardStatus({ ...rowObj, status: 'ERROR', notes: e.toString() }, null);
     }
     
-    // Pacing between rows if multiple targets exist
-    if (targets.indexOf(r) < targets.length - 1) {
-      const delay = calculateOptimalDelay();
-      debugLog('BATCH_PACING', `Waiting ${delay/1000}s before next row...`);
-      Utilities.sleep(delay);
-    }
+    // No additional delay needed between rows - calculateOptimalDelay() handles it
   });
   
   safeAlert(
@@ -854,7 +792,7 @@ Your response must start with { and end with }. Nothing else.`;
   if (CONFIG.USE_WEB_SEARCH) {
     requestBody.tools = [
       {
-        type: 'web_search_20250124',
+        type: 'web_search_20250305',
         name: 'web_search'
       }
     ];
@@ -884,17 +822,15 @@ Your response must start with { and end with }. Nothing else.`;
     ];
     
     let briefText = '';
-    let maxTurns = 12;  // Increased from 5 to handle thorough research
+    let maxTurns = 5;  // Prevent infinite loops
     let currentTurn = 0;
     
     while (currentTurn < maxTurns) {
       currentTurn++;
       debugLog('CONVERSATION_TURN', `Turn ${currentTurn}/${maxTurns}`);
       
+      // Update request body with current conversation
       requestBody.messages = conversationMessages;
-      
-      // LOG EACH REQUEST TO DEBUG SHEET
-      logToDebugSheet(`TURN_${currentTurn}_REQ`, requestBody);
       
       // Audit conversation for protocol compliance
       const auditLog = conversationMessages.map((m, idx) => {
@@ -911,7 +847,7 @@ Your response must start with { and end with }. Nothing else.`;
         headers: {
           'x-api-key': apiKey.trim(),
           'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'web-search-2025-01-24'
+          'anthropic-beta': 'web-search-2025-03-05'
         },
         payload: JSON.stringify(requestBody)
       });
@@ -921,25 +857,23 @@ Your response must start with { and end with }. Nothing else.`;
       
       debugLog('CLAUDE RESPONSE CODE', statusCode);
       
-      // Handle rate limiting (429) or server overload (529)
-      if (statusCode === 429 || statusCode === 529) {
+      // Handle rate limiting (429)
+      if (statusCode === 429) {
         if (retryCount < MAX_RETRIES) {
           const waitTime = Math.pow(2, retryCount) * 30;
-          const errorType = statusCode === 429 ? 'RATE LIMIT' : 'SERVER OVERLOAD';
-          debugLog(`${errorType} HIT`, `Waiting ${waitTime} seconds before retry ${retryCount + 1}/${MAX_RETRIES}`);
-          Logger.log(`${errorType} error. Waiting ${waitTime} seconds before retry...`);
+          debugLog('RATE LIMIT HIT', `Waiting ${waitTime} seconds before retry ${retryCount + 1}/${MAX_RETRIES}`);
+          Logger.log(`Rate limit hit. Waiting ${waitTime} seconds before retry...`);
           Utilities.sleep(waitTime * 1000);
           return generateBriefWithClaude(strategy, retryCount + 1);
         } else {
-          const errorMsg = statusCode === 429 
-            ? `Rate limit exceeded after ${MAX_RETRIES} retries. Please wait a few minutes or upgrade your API tier.`
-            : `Anthropic servers are overloaded (529) after ${MAX_RETRIES} retries. Please try again in 5-10 minutes.`;
-          throw new Error(errorMsg);
+          throw new Error(
+            `Rate limit exceeded after ${MAX_RETRIES} retries. ` +
+            'Please wait a few minutes and try again, or upgrade your Anthropic API tier for higher limits.'
+          );
         }
       }
       
       if (statusCode !== 200) {
-        logToDebugSheet(`ERROR_${statusCode}`, requestBody, responseText);
         debugLog('CLAUDE_ERROR_BODY', responseText);
         
         // STABILIZATION: Selective retry on 400 protocol glitches
@@ -951,9 +885,6 @@ Your response must start with { and end with }. Nothing else.`;
         
         throw new Error(`Claude API error ${statusCode}: ${responseText}`);
       }
-
-      // Success log (sampled to avoid sheet bloat)
-      if (currentTurn === 1) logToDebugSheet('TURN_1_SUCCESS', requestBody, 'Check next log for response');
       
       const responseData = JSON.parse(responseText);
       
@@ -1734,98 +1665,7 @@ function deleteAllTriggers() {
   const triggers = ScriptApp.getProjectTriggers();
   triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
   
-  try {
-    SpreadsheetApp.getUi().alert(`Deleted ${triggers.length} trigger(s)`);
-  } catch (e) {
-    Logger.log(`Deleted ${triggers.length} triggers (no UI)`);
-  }
-}
-
-function deleteGenerationTrigger() {
-  const triggers = ScriptApp.getProjectTriggers();
-  triggers.forEach(trigger => {
-    if (trigger.getHandlerFunction() === 'asyncRunBriefGeneration') {
-      ScriptApp.deleteTrigger(trigger);
-    }
-  });
-}
-
-function asyncRunBriefGeneration() {
-  const userProps = PropertiesService.getUserProperties();
-  const folderId = userProps.getProperty('PENDING_FOLDER_ID');
-  const workbookUrl = userProps.getProperty('PENDING_WORKBOOK_URL');
-  
-  deleteGenerationTrigger();
-  runBriefGeneration(folderId, workbookUrl);
-}
-
-/**
- * Direct Supabase sync for real-time dashboard updates
- */
-function updateSupabaseRow(rowObj, briefUrl) {
-  const props = PropertiesService.getScriptProperties();
-  const supabaseUrl = props.getProperty('SUPABASE_URL');
-  const supabaseKey = props.getProperty('SUPABASE_SERVICE_ROLE_KEY');
-  
-  if (!supabaseUrl || !supabaseKey) return;
-
-  const payload = {
-    status: rowObj.status || 'DONE',
-    brief_url: briefUrl || rowObj.brief_url || '',
-    run_id: rowObj.run_id,
-    updated_at: new Date().toISOString()
-  };
-
-  const url = `${supabaseUrl}/rest/v1/workbook_rows?client_id=eq.${rowObj.client_id}&primary_keyword=eq.${encodeURIComponent(rowObj.primary_keyword)}`;
-  
-  try {
-    UrlFetchApp.fetch(url, {
-      method: 'PATCH',
-      headers: { 
-        'apikey': supabaseKey, 
-        'Authorization': `Bearer ${supabaseKey}`, 
-        'Content-Type': 'application/json' 
-      },
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    });
-  } catch (e) {
-    Logger.log('Supabase Sync Error: ' + e);
-  }
-}
-
-function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
-  const props = PropertiesService.getScriptProperties();
-  const baseUrl = props.getProperty('DASHBOARD_URL'); // e.g., https://skywide-content-flow.vercel.app
-  const secret = props.getProperty('GAS_CALLBACK_SECRET');
-  
-  if (!baseUrl) {
-    debugLog('CALLBACK_SKIP', 'DASHBOARD_URL not set in Script Properties');
-    return;
-  }
-
-  const payload = {
-    client_id: rowObj.client_id,
-    primary_keyword: rowObj.primary_keyword,
-    status: rowObj.status || 'DONE',
-    brief_url: briefUrl || rowObj.brief_url || '',
-    brief_data: briefData,
-    run_id: rowObj.run_id,
-    notes: rowObj.notes || '',
-    secret: secret || ''
-  };
-
-  try {
-    const response = UrlFetchApp.fetch(`${baseUrl}/api/content-briefs/callback`, {
-      method: 'POST',
-      contentType: 'application/json',
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    });
-    debugLog('CALLBACK_RESPONSE', response.getContentText());
-  } catch (e) {
-    debugLog('CALLBACK_ERROR', e.toString());
-  }
+  SpreadsheetApp.getUi().alert(`Deleted ${triggers.length} trigger(s)`);
 }
 
 /***** ONE-TIME SETUP *****/
@@ -1847,17 +1687,13 @@ function doPost(e) {
     } else if (command === 'appendToClient') {
       result = appendToWorkbook(workbookUrl, params.formData);
     } else {
-      // ASYNC TRIGGER: Prevent Timeouts
-      const userProps = PropertiesService.getUserProperties();
-      userProps.setProperty('PENDING_FOLDER_ID', params.folderId || '');
-      userProps.setProperty('PENDING_WORKBOOK_URL', workbookUrl || '');
-      
-      ScriptApp.newTrigger('asyncRunBriefGeneration')
-        .timeBased()
-        .after(1000)
-        .create();
-        
-      result = { status: "triggered", message: "Automation started in background" };
+      // Default: Trigger Brief Generation and return current state
+      result = runBriefGeneration(params.folderId, workbookUrl);
+      // After triggering generation, refresh the data to sync back to dashboard
+      result = {
+        generation: result,
+        result: getWorkbookData(workbookUrl)
+      };
     }
     
     return ContentService.createTextOutput(JSON.stringify({ "status": "success", "result": result }))
@@ -1880,7 +1716,7 @@ function getWorkbookData(workbookUrl) {
   // 2. Global Robust Discovery
   if (!sheet) {
     try {
-      sheet = discoverDataSheet(ss);
+      sheet = discoverDataSheet();
     } catch (e) {
       return { status: "error", message: e.message, rows: [] };
     }

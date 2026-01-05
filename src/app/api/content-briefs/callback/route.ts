@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { client_id, primary_keyword, status, brief_url, run_id, notes, secret } = body;
+        const { client_id, primary_keyword, status, brief_url, brief_data, run_id, notes, secret } = body;
 
         // Security check
         const expectedSecret = process.env.GAS_CALLBACK_SECRET;
@@ -25,6 +25,7 @@ export async function POST(request: Request) {
                 primary_keyword,
                 status: status || 'DONE',
                 brief_url,
+                brief_data,
                 run_id,
                 notes,
                 updated_at: new Date().toISOString()
