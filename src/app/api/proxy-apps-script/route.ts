@@ -15,22 +15,50 @@ export async function POST(request: Request) {
 
         console.log('Target GAS URL:', googleAppsScriptUrl.substring(0, 30) + '...');
 
-        // FIRE AND FORGET: 
-        // We don't await the full execution to avoid Vercel timeouts.
-        // Google Apps Script will process the request and call our callback endpoint when finished.
-        fetch(googleAppsScriptUrl, {
+        // Determine if we should wait for response or fire-and-forget
+        // runBriefGeneration is long-running, so we fire-and-forget to avoid Vercel timeouts.
+        const isAsync = body.command === 'runBriefGeneration' || !body.command;
+
+        if (isAsync) {
+            console.log('Using Async Fire-and-Forget for:', body.command || 'runBriefGeneration');
+            fetch(googleAppsScriptUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                redirect: 'follow'
+            }).catch(err => console.error('Background GAS trigger error:', err));
+
+            return NextResponse.json({
+                status: 'triggered',
+                message: 'Automation initiated. The dashboard will update automatically when results are ready.'
+            });
+        }
+
+        // For other commands (like getWorkbookData), we wait for the response
+        const response = await fetch(googleAppsScriptUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
             redirect: 'follow'
-        }).catch(err => console.error('Background GAS trigger error:', err));
-
-        return NextResponse.json({
-            status: 'triggered',
-            message: 'Automation initiated. The dashboard will update automatically when results are ready.'
         });
+
+        const data = await response.text();
+        let json;
+        try {
+            json = JSON.parse(data);
+        } catch {
+            json = { message: data };
+        }
+
+        if (!response.ok) {
+            return NextResponse.json({
+                error: 'Apps Script error',
+                status: response.status,
+                details: json
+            }, { status: response.status });
+        }
+
+        return NextResponse.json(json);
     } catch (error: any) {
         console.error('Apps Script Proxy Catch Block:', error);
         return NextResponse.json({
