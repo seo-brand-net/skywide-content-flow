@@ -94,7 +94,9 @@ export default function ContentBriefsPage() {
             if (error) throw error;
             return data as WorkbookRow[];
         },
-        enabled: !!selectedClient
+        enabled: !!selectedClient,
+        refetchInterval: 10000, // Senior Fix: Poll every 10s for background GAS activity
+        refetchIntervalInBackground: true
     });
 
     // Mutations
@@ -110,7 +112,8 @@ export default function ContentBriefsPage() {
                     command: 'runBriefGeneration',
                     workbookUrl: client.workbook_url,
                     spreadsheetId,
-                    folderId: client.folder_id
+                    folderId: client.folder_id,
+                    clientId: client.id
                 }),
             });
 
@@ -125,7 +128,7 @@ export default function ContentBriefsPage() {
                 description: "Deep content analysis has started for all new rows in the workbook.",
                 variant: "default",
             });
-            // 2. Trigger a sync to show the newest statuses
+            // 2. Trigger a SILENT sync to show the newest 'IN_PROGRESS' statuses immediately
             if (currentClient) syncMutation.mutate(currentClient);
         },
         onError: (error) => {

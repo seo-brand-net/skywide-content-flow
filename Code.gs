@@ -527,7 +527,7 @@ function ensureRequiredColumns(sheet) {
   });
   
   // Add output columns if missing
-  const outputHeaders = ['status', 'brief_url', 'run_id', 'notes'];
+  const outputHeaders = ['id', 'status', 'brief_url', 'run_id', 'notes'];
   const toAdd = outputHeaders.filter(h => !normalizedHeaders.includes(h));
   
   if (toAdd.length > 0) {
@@ -550,7 +550,8 @@ function getHeaderMap(sheet) {
 function rowToObject(row, headerMap) {
   const obj = {};
   Object.keys(headerMap).forEach(key => {
-    obj[key] = row[headerMap[key].index];
+    const idx = headerMap[key].index;
+    obj[key] = (row.length > idx) ? row[idx] : "";
   });
   return obj;
 }
@@ -598,7 +599,7 @@ function getSheetFromUrl(ss, url) {
 }
 
 /***** MAIN EXECUTION *****/
-function runBriefGeneration(overrideFolderId, workbookUrl) {
+function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
   let ss = SpreadsheetApp.getActive();
   if (!ss && workbookUrl) {
     try {
@@ -664,11 +665,23 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
   
   // Mark as in progress
   targets.forEach(r => {
+    // SENIOR FIX: Generate stable ID for the row if it doesn't exist
+    const idCol = headers['id']?.index;
+    let rowIdString = (idCol !== undefined) ? String(data[r][idCol]).trim() : '';
+    if (!rowIdString || rowIdString === '') {
+      rowIdString = Utilities.getUuid();
+      if (idCol !== undefined) {
+        sheet.getRange(r + 1, idCol + 1).setValue(rowIdString);
+      }
+    }
+
     sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
     sheet.getRange(r + 1, runIdCol + 1).setValue(runId);
     
     // NOTIFY DASHBOARD (Single Path Persistence)
     const rowObj = rowToObject(data[r], headers);
+    rowObj.id = rowIdString;
+    rowObj.client_id = rowObj.client_id || fallbackClientId; // Use in-flight client_id
     notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
   
@@ -695,8 +708,18 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
 
-      // NOTIFY DASHBOARD (Single Path Persistence + Full Brief JSON)
-      notifyDashboardStatus(rowObj, docUrl, brief);
+      // SENIOR FIX: Explicitly check for generated fields in the sheet to avoid stale rowObj
+      const freshRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      const freshRowObj = rowToObject(freshRowValues, headers);
+      
+      // Secondary fallback check for final notification
+      if (!freshRowObj.client_id && fallbackClientId) freshRowObj.client_id = fallbackClientId;
+      if (!freshRowObj.id) {
+        const idCol = headers['id']?.index;
+        freshRowObj.id = (idCol !== undefined) ? String(freshRowValues[idCol]).trim() : '';
+      }
+      
+      notifyDashboardStatus(freshRowObj, docUrl, brief);
 
       // === CROSS-POSTING (Dual-Workbook Sync) ===
       const clientWorkbookUrl = rowObj['client_workbook'] || rowObj['workbook_url'];
@@ -719,6 +742,15 @@ function runBriefGeneration(overrideFolderId, workbookUrl) {
       
       // NOTIFY DASHBOARD: Row error
       const rowObj = rowToObject(data[r], headers);
+      if (!rowObj.client_id && fallbackClientId) rowObj.client_id = fallbackClientId;
+      
+      // Ensure current row's ID is captured even on error
+      const idCol = headers['id']?.index;
+      if (!rowObj.id && idCol !== undefined) {
+        const freshId = sheet.getRange(r + 1, idCol + 1).getValue();
+        rowObj.id = freshId;
+      }
+
       notifyDashboardStatus({ ...rowObj, status: 'ERROR', notes: e.toString() }, null);
     }
     
@@ -854,7 +886,7 @@ Your response must start with { and end with }. Nothing else.`;
   if (CONFIG.USE_WEB_SEARCH) {
     requestBody.tools = [
       {
-        type: 'web_search_20250124',
+        type: 'web_search_20250305',
         name: 'web_search'
       }
     ];
@@ -911,7 +943,7 @@ Your response must start with { and end with }. Nothing else.`;
         headers: {
           'x-api-key': apiKey.trim(),
           'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'web-search-2025-01-24'
+          'anthropic-beta': 'web-search-2025-03-05'
         },
         payload: JSON.stringify(requestBody)
       });
@@ -1754,79 +1786,115 @@ function asyncRunBriefGeneration() {
   const userProps = PropertiesService.getUserProperties();
   const folderId = userProps.getProperty('PENDING_FOLDER_ID');
   const workbookUrl = userProps.getProperty('PENDING_WORKBOOK_URL');
+  const clientId = userProps.getProperty('PENDING_CLIENT_ID');
   
   deleteGenerationTrigger();
-  runBriefGeneration(folderId, workbookUrl);
+  runBriefGeneration(folderId, workbookUrl, clientId);
+}
+
+
+function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
+  // Path 1: Dashboard Callback (Non-blocking notification)
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const baseUrl = props.getProperty('DASHBOARD_URL');
+    const secret = props.getProperty('GAS_CALLBACK_SECRET');
+    
+    if (baseUrl && secret) {
+      const payload = {
+        id: (rowObj.id && rowObj.id !== '') ? rowObj.id : null,
+        client_id: (rowObj.client_id && rowObj.client_id !== '') ? rowObj.client_id : null,
+        primary_keyword: rowObj.primary_keyword,
+        status: rowObj.status || 'DONE',
+        brief_url: briefUrl || rowObj.brief_url || '',
+        brief_data: briefData,
+        run_id: rowObj.run_id,
+        notes: rowObj.notes,
+        secret: secret
+      };
+
+      if (payload.id || (payload.client_id && payload.primary_keyword)) {
+        UrlFetchApp.fetch(`${baseUrl}/api/content-briefs/callback`, {
+          method: 'POST',
+          contentType: 'application/json',
+          payload: JSON.stringify(payload),
+          muteHttpExceptions: true
+        });
+      }
+    }
+  } catch (e) {
+    debugLog('CALLBACK_UNHANDLED_ERROR', e.toString());
+  }
+
+  // Path 2: Direct Supabase Sync (Primary persistence, happens LAST to ensure final state)
+  syncToSupabaseDirect(rowObj, briefUrl, briefData);
 }
 
 /**
- * Direct Supabase sync for real-time dashboard updates
+ * Direct Supabase sync - bypasses Dashboard API for maximum speed/reliability
+ * Requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Script Properties
  */
-function updateSupabaseRow(rowObj, briefUrl) {
+function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
+  // Senior Debug Log: Inspect full row object before sync
+  debugLog('SUPABASE_SYNC_START', rowObj);
+
   const props = PropertiesService.getScriptProperties();
   const supabaseUrl = props.getProperty('SUPABASE_URL');
   const supabaseKey = props.getProperty('SUPABASE_SERVICE_ROLE_KEY');
   
-  if (!supabaseUrl || !supabaseKey) return;
-
-  const payload = {
-    status: rowObj.status || 'DONE',
-    brief_url: briefUrl || rowObj.brief_url || '',
-    run_id: rowObj.run_id,
-    updated_at: new Date().toISOString()
-  };
-
-  const url = `${supabaseUrl}/rest/v1/workbook_rows?client_id=eq.${rowObj.client_id}&primary_keyword=eq.${encodeURIComponent(rowObj.primary_keyword)}`;
-  
-  try {
-    UrlFetchApp.fetch(url, {
-      method: 'PATCH',
-      headers: { 
-        'apikey': supabaseKey, 
-        'Authorization': `Bearer ${supabaseKey}`, 
-        'Content-Type': 'application/json' 
-      },
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
-    });
-  } catch (e) {
-    Logger.log('Supabase Sync Error: ' + e);
-  }
-}
-
-function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
-  const props = PropertiesService.getScriptProperties();
-  const baseUrl = props.getProperty('DASHBOARD_URL'); // e.g., https://skywide-content-flow.vercel.app
-  const secret = props.getProperty('GAS_CALLBACK_SECRET');
-  
-  if (!baseUrl) {
-    debugLog('CALLBACK_SKIP', 'DASHBOARD_URL not set in Script Properties');
+  if (!supabaseUrl || !supabaseKey) {
+    debugLog('SUPABASE_DIRECT_SKIP', 'SUPABASE_URL/KEY not set.');
     return;
   }
 
+  // Ensure mandatory ID exists (Generated in runBriefGeneration)
+  if (!rowObj.id) {
+    debugLog('SUPABASE_DIRECT_MISSING_ID', 'row id missing from row object');
+    if (!rowObj.client_id || !rowObj.primary_keyword) {
+      debugLog('SUPABASE_DIRECT_ABORT', 'Cannot sync: Missing id and fallback identifiers');
+      return;
+    }
+  }
+
   const payload = {
-    client_id: rowObj.client_id,
+    id: (rowObj.id && rowObj.id !== '') ? rowObj.id : null,
+    client_id: (rowObj.client_id && rowObj.client_id !== '') ? rowObj.client_id : null,
     primary_keyword: rowObj.primary_keyword,
     status: rowObj.status || 'DONE',
     brief_url: briefUrl || rowObj.brief_url || '',
     brief_data: briefData,
     run_id: rowObj.run_id,
-    notes: rowObj.notes || '',
-    secret: secret || ''
+    notes: (rowObj.notes || '').toString().substring(0, 1000),
+    updated_at: new Date().toISOString()
   };
 
+  // Conflict target is now the UUID 'id' for maximum stability
+  const url = `${supabaseUrl}/rest/v1/workbook_rows?on_conflict=id`;
+
   try {
-    const response = UrlFetchApp.fetch(`${baseUrl}/api/content-briefs/callback`, {
+    const response = UrlFetchApp.fetch(url, {
       method: 'POST',
-      contentType: 'application/json',
+      headers: { 
+        'apikey': supabaseKey, 
+        'Authorization': `Bearer ${supabaseKey}`, 
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates' 
+      },
       payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
-    debugLog('CALLBACK_RESPONSE', response.getContentText());
+    
+    const code = response.getResponseCode();
+    if (code >= 200 && code < 300) {
+      debugLog('SUPABASE_DIRECT_SUCCESS', `Synced ID: ${rowObj.id} (${rowObj.primary_keyword})`);
+    } else {
+      debugLog('SUPABASE_DIRECT_FAIL', `Code ${code}: ${response.getContentText()}`);
+    }
   } catch (e) {
-    debugLog('CALLBACK_ERROR', e.toString());
+    debugLog('SUPABASE_DIRECT_ERROR', e.toString());
   }
 }
+
 
 /***** ONE-TIME SETUP *****/
 function setAnthropicKey(apiKey) {
@@ -1851,6 +1919,7 @@ function doPost(e) {
       const userProps = PropertiesService.getUserProperties();
       userProps.setProperty('PENDING_FOLDER_ID', params.folderId || '');
       userProps.setProperty('PENDING_WORKBOOK_URL', workbookUrl || '');
+      userProps.setProperty('PENDING_CLIENT_ID', params.clientId || ''); // Pass client_id from dashboard
       
       ScriptApp.newTrigger('asyncRunBriefGeneration')
         .timeBased()
