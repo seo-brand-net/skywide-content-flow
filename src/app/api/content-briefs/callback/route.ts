@@ -30,7 +30,7 @@ export async function POST(request: Request) {
                 notes,
                 updated_at: new Date().toISOString()
             }, {
-                onConflict: 'client_id,primary_keyword'
+                onConflict: 'id'
             });
 
         if (error) {

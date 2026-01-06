@@ -665,14 +665,12 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
   
   // Mark as in progress
   targets.forEach(r => {
-    // SENIOR FIX: Generate stable ID for the row if it doesn't exist
+    // SENIOR HISTORY FIX: Always generate a NEW ID for every run to preserve history
     const idCol = headers['id']?.index;
-    let rowIdString = (idCol !== undefined) ? String(data[r][idCol]).trim() : '';
-    if (!rowIdString || rowIdString === '') {
-      rowIdString = Utilities.getUuid();
-      if (idCol !== undefined) {
-        sheet.getRange(r + 1, idCol + 1).setValue(rowIdString);
-      }
+    const rowIdString = Utilities.getUuid();
+    
+    if (idCol !== undefined) {
+      sheet.getRange(r + 1, idCol + 1).setValue(rowIdString);
     }
 
     sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
@@ -680,7 +678,7 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
     
     // NOTIFY DASHBOARD (Single Path Persistence)
     const rowObj = rowToObject(data[r], headers);
-    rowObj.id = rowIdString;
+    rowObj.id = rowIdString; // Use the fresh UUID
     rowObj.client_id = rowObj.client_id || fallbackClientId; // Use in-flight client_id
     notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
@@ -995,14 +993,30 @@ Your response must start with { and end with }. Nothing else.`;
       // Add Claude's response to conversation
       let assistantContent = responseData.content;
       
-      // ===== WEB SEARCH BETA SAFETY: STRIP TEXT IF TOOLS USED =====
-      // To comply with the beta protocol and prevent Error 400, assistant messages 
-      // containing web_search tool calls must follow specific block rules in multi-turn.
-      const hasWebSearch = assistantContent.some(block => block.type === 'tool_use' && block.name === 'web_search');
+      // ===== WEB SEARCH BETA SAFETY: PROTOCOL STABILIZATION =====
+      // Handle the web_search-2025-03-05 beta types (server_tool_use and web_search_tool_result)
+      const hasWebSearch = assistantContent.some(block => 
+        (block.type === 'tool_use' && block.name === 'web_search') || 
+        (block.type === 'server_tool_use')
+      );
+      
       if (hasWebSearch) {
-        // If there are tool uses, the assistant message should ideally only contain those tool uses
-        // to avoid protocol conflicts between experimental and standard content blocks.
-        assistantContent = assistantContent.filter(block => block.type === 'tool_use');
+        // Protocol Stabilization: If Claude paused after a tool use but before a result,
+        // we must drop the orphaned use block to avoid Error 400 in the history of the next turn.
+        const lastBlock = assistantContent[assistantContent.length - 1];
+        if (responseData.stop_reason === 'pause_turn' && lastBlock && lastBlock.type === 'server_tool_use') {
+          debugLog('PROTOCOL_FIX', `Dropping orphaned server_tool_use ID: ${lastBlock.id}`);
+          assistantContent.pop();
+        }
+        
+        // Multi-Turn Compliance: Keep tool blocks and JSON text, but strip non-essential preamble
+        // if tools are present to ensure standard/experimental block consistency.
+        assistantContent = assistantContent.filter(block => 
+          block.type === 'tool_use' || 
+          block.type === 'server_tool_use' || 
+          block.type === 'web_search_tool_result' ||
+          (block.type === 'text' && block.text.trim().startsWith('{'))
+        );
       }
       
       conversationMessages.push({
