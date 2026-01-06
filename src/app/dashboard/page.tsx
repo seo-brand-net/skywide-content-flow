@@ -29,7 +29,7 @@ interface FormData {
 }
 
 export default function Dashboard() {
-    const { user } = useAuth();
+    const { user, displayName } = useAuth();
     const { isAdmin } = useUserRole(user?.id);
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -320,7 +320,7 @@ export default function Dashboard() {
                         Welcome to SKYWIDE Dashboard
                     </h1>
                     <p className="seobrand-description">
-                        Hello {user?.email}, submit your content creation requests below.
+                        Hello {displayName || user?.email}, submit your content creation requests below.
                     </p>
                 </div>
 

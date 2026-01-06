@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { client_id, primary_keyword, status, brief_url, brief_data, run_id, notes, secret } = body;
+        const { id, client_id, primary_keyword, status, brief_url, brief_data, run_id, notes, secret } = body;
 
         // Security check
         const expectedSecret = process.env.GAS_CALLBACK_SECRET;
@@ -21,6 +21,7 @@ export async function POST(request: Request) {
         const { error } = await supabaseAdmin
             .from('workbook_rows')
             .upsert({
+                id, // Use the ID provided by Apps Script for stable run tracking
                 client_id,
                 primary_keyword,
                 status: status || 'DONE',

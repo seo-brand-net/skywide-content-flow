@@ -8,6 +8,8 @@ import { useRouter } from 'next/navigation';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  profile: any | null;
+  displayName: string | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
@@ -30,6 +32,7 @@ export function AuthProvider({
 }) {
   const [user, setUser] = useState<User | null>(initialUser);
   const [session, setSession] = useState<Session | null>(initialSession);
+  const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(!initialSession);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
@@ -41,6 +44,13 @@ export function AuthProvider({
       async (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          fetchProfile(currentSession.user.id);
+        } else {
+          setProfile(null);
+        }
+
         setLoading(false);
 
         if (event === 'SIGNED_IN') {
@@ -57,6 +67,29 @@ export function AuthProvider({
 
     return () => subscription.unsubscribe();
   }, [supabase, router]);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (!error && data) {
+        setProfile(data);
+      }
+    } catch (e) {
+      console.error('Error fetching profile:', e);
+    }
+  };
+
+  const displayName = user ? (
+    profile?.display_name ||
+    user.user_metadata?.display_name ||
+    user.user_metadata?.full_name ||
+    user.email
+  ) : null;
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -225,6 +258,8 @@ export function AuthProvider({
   const value = {
     user,
     session,
+    profile,
+    displayName,
     loading,
     signIn,
     signUp,

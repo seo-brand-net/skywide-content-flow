@@ -2,66 +2,64 @@
  * ============================================================================
  * CLAUDE-POWERED SEO CONTENT BRIEF BUILDER
  * ============================================================================
- * Creates simplified, high-performance content briefs for AI content generation
- * Optimized for both traditional SEO and LLM optimization
+ * Version: 1.2.4
+ * Last Updated: 2025-01-06
  * 
- * Author: Mike (SEO & LLM Optimization Expert)
- * Version: 1.2.3
- * Last Updated: 2024-12-19
+ * CHANGELOG v1.2.4:
+ * - Added SERP analysis depth validation
+ * - Validates minimum 5 competitor pages analyzed
+ * - Validates word count variance (200-2000 word range)
+ * - Validates pattern specificity (not generic fluff)
+ * - Validates competitive gaps are identified
+ * - Validates SERP features are specific
  * 
  * CHANGELOG v1.2.3:
  * - Added multi-turn conversation support for tool use
  * - Handles pause_turn stop reason automatically
  * - Continues conversation until brief is generated
- * 
- * CHANGELOG v1.2.2:
- * - Improved rate limiting with intelligent token-based delays
- * - Automatic calculation of optimal delays based on API tier limits
- * - Better handling of batch processing without hitting rate limits
- * 
- * CHANGELOG v1.2.1:
- * - Enhanced error diagnostics for "No text content" errors
- * - Better detection of max_tokens and incomplete responses
- * 
- * CHANGELOG v1.2.0:
- * - Improved JSON parsing with regex extraction
- * - More reliable handling of Claude responses with preambles
- * - Better error messages for parsing failures
- * 
- * CHANGELOG v1.1.0:
- * - Added pre-flight web_search availability check
- * - Prevents wasted API credits on requests that will fail
- * - Provides immediate feedback when web_search is unavailable
  */
 
-/***** CONFIGURATION *****/
 const CONFIG = {
-  // Claude API Settings
   CLAUDE_MODEL: "claude-sonnet-4-20250514",
   CLAUDE_MAX_TOKENS: 24000,
-  
-  // Processing Settings
   MAX_ROWS_PER_RUN: 1,
-  SHEET_NAME: SpreadsheetApp.getActiveSheet().getName(),
-  
-  // Google Drive folder for output docs (paste folder ID or URL)
+  // SHEET_NAME is now dynamic or uses this as default
+  DEFAULT_SHEET_NAME: "Content Brief Automation",
   DOCS_FOLDER_ID: "1nk3KsqlCv5-ndsayI-K1EC8aJXqvoAVQ",
-  
-  // Link Settings
   MIN_INTERNAL_LINKS: 3,
   MAX_INTERNAL_LINKS: 8,
   MAX_EXTERNAL_LINKS: 4,
-  
-  // Feature Flags
   USE_WEB_SEARCH: true,
   VERIFY_EXTERNAL_LINKS: true,
   DEEP_SERP_ANALYSIS: true,
-  
-  // Debug
   DEBUG: true
 };
 
-/***** PAGE TYPE CONFIGURATIONS *****/
+/**
+ * Robustly opens a spreadsheet by URL or falls back to the active one.
+ * Essential for "Master Brain" (headless/standalone) context.
+ */
+function openWorkbook(url) {
+  if (url && url.trim().startsWith('http')) {
+    try {
+      const ss = SpreadsheetApp.openByUrl(url);
+      debugLog('OPEN_WORKBOOK', `Opened by URL: "${ss.getName()}"`);
+      return ss;
+    } catch (e) {
+      debugLog('OPEN_WORKBOOK_ERROR', `Failed to open by URL: ${e.message}`);
+    }
+  }
+  
+  const ss = SpreadsheetApp.getActive();
+  if (ss) {
+    debugLog('OPEN_WORKBOOK', `Using active spreadsheet: "${ss.getName()}"`);
+    return ss;
+  }
+  
+  throw new Error("Could not access spreadsheet. Please provide a valid workbook URL.");
+}
+
+
 const PAGE_TYPES = {
   'homepage': {
     requiresAnswerFirst: true,
@@ -100,7 +98,6 @@ const PAGE_TYPES = {
   }
 };
 
-/***** SYSTEM PROMPT FOR CLAUDE *****/
 const SYSTEM_PROMPT = `You are an expert SEO content strategist creating simplified, high-performance content briefs for AI content generation machines.
 
 Your briefs must be clear, actionable, and optimized for both traditional search engines and LLM-based search (AI Overviews, ChatGPT, Perplexity, etc.).
@@ -203,12 +200,62 @@ EXTERNAL LINKS:
 - Prefer: .gov, .edu, industry standards, trade organizations, research studies
 - Avoid: competitor commercial pages, spammy domains
 
-SERP ANALYSIS:
-- Analyze top 7 ranking pages for target keyword
-- Extract word count range (P25-P75, rounded to nearest 50)
-- Identify content patterns and topics they cover
-- Note competitive gaps we can exploit
-- Look for SERP features: Featured Snippets, PAA, Images, Videos
+MANDATORY SERP RESEARCH PROTOCOL:
+You MUST complete thorough SERP analysis before generating the brief. Briefs with insufficient research will be REJECTED.
+
+REQUIRED STEPS:
+1. Search for the primary keyword and analyze the top 7 ranking pages
+2. Use web_search to visit each of these pages individually
+3. Extract the actual word count from each page (use web_search to get content length)
+4. Calculate word count range using P25-P75 (25th to 75th percentile, rounded to nearest 50)
+5. Identify SPECIFIC content patterns (not generic descriptions)
+6. Note competitive gaps we can exploit
+7. Document SERP features with specific details
+
+MINIMUM REQUIREMENTS (YOUR BRIEF WILL BE REJECTED IF YOU DON'T MEET THESE):
+- Analyze AT LEAST 5 competitor pages (7 is ideal)
+- Word count range MUST have at least 200-word variance (e.g., "1800-2000" is TOO NARROW)
+- Maximum variance is 2000 words (if wider, you didn't analyze enough pages)
+- Identify AT LEAST 3 specific content patterns
+- Identify AT LEAST 1 competitive gap
+
+GOOD vs BAD PATTERN EXAMPLES:
+
+❌ BAD (Too generic - WILL BE REJECTED):
+- "Articles are comprehensive and detailed"
+- "Content is well-written"
+- "Pages have good structure"
+- "High-quality information"
+
+✅ GOOD (Specific and actionable - WILL BE ACCEPTED):
+- "6 out of 7 pages include pricing comparison tables with 8-12 products"
+- "All top-ranking pages use 6-8 H2 sections with average 300 words per section"
+- "5 out of 7 include expert quotes or citations (average 3-4 per article)"
+- "Top 3 pages feature video demonstrations (2-4 minutes each)"
+- "All pages include 'How to Choose' sections with 5-7 decision criteria"
+
+SERP FEATURES - BE SPECIFIC:
+
+❌ BAD (Vague - WILL BE REJECTED):
+- "Featured Snippets"
+- "People Also Ask"
+- "Images"
+
+✅ GOOD (Specific - WILL BE ACCEPTED):
+- "List-based Featured Snippet showing '7 Best [Product]' with prices"
+- "People Also Ask with 4 questions about pricing and durability"
+- "Image carousel with 6 product comparison images"
+
+SELF-CHECK BEFORE GENERATING JSON:
+Before you output the JSON brief, verify:
+□ Did I analyze 5+ competitor pages using web_search?
+□ Did I extract actual word counts (not guess)?
+□ Is my word count variance between 200-2000 words?
+□ Are my patterns specific with numbers/examples (not generic adjectives)?
+□ Did I identify at least 1 clear competitive gap?
+□ Are my SERP features described in detail?
+
+If you answer NO to any of these, DO MORE RESEARCH before generating the JSON.
 
 WEB SEARCH USAGE:
 - Use web_search tool to analyze SERPs for primary keyword
@@ -321,7 +368,6 @@ RESEARCH PROTOCOL:
 
 CLIENT_DOMAIN will be replaced with actual domain before sending.`;
 
-// *** UTILITY FUNCTIONS *****/
 function logToDebugSheet(label, payload, responseData = null) {
   try {
     const ss = SpreadsheetApp.getActive();
@@ -333,20 +379,15 @@ function logToDebugSheet(label, payload, responseData = null) {
       debugSheet.setColumnWidth(3, 500);
       debugSheet.setColumnWidth(4, 500);
     }
-    
-    // Convert payloads to strings if needed
     const reqStr = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2);
     const resStr = responseData ? (typeof responseData === 'string' ? responseData : JSON.stringify(responseData, null, 2)) : 'N/A';
-    
     debugSheet.insertRowAfter(1);
     debugSheet.getRange(2, 1, 1, 4).setValues([[
       new Date().toISOString(),
       label,
-      reqStr.substring(0, 50000), // GAS limit safety
+      reqStr.substring(0, 50000),
       resStr.substring(0, 50000)
     ]]);
-    
-    // Optional: cap sheet at 100 rows
     if (debugSheet.getLastRow() > 105) {
       debugSheet.deleteRows(100, debugSheet.getLastRow() - 100);
     }
@@ -362,9 +403,6 @@ function debugLog(label, data) {
   Logger.log(logMsg);
 }
 
-/**
- * Robust fetcher with retry for connectivity issues
- */
 function robustFetch(url, options, maxRetries = 2) {
   let lastError;
   for (let i = 0; i <= maxRetries; i++) {
@@ -384,17 +422,12 @@ function robustFetch(url, options, maxRetries = 2) {
   throw lastError;
 }
 
-/**
- * Safely shows an alert if UI is available, otherwise logs/throws for headless contexts
- */
 function safeAlert(message, title = 'Notification') {
   try {
     const ui = SpreadsheetApp.getUi();
     ui.alert(title, message, ui.ButtonSet.OK);
   } catch (e) {
     debugLog('HEADLESS_ALERT', `${title}: ${message}`);
-    // If it's a critical error (no rows found or web search missing), 
-    // throwing allows the Web App to signal failure to the dashboard.
     if (message.includes('unavailable') || message.includes('Missing required')) {
       throw new Error(message);
     }
@@ -431,45 +464,26 @@ function getSanitizedFolderId() {
   }
 }
 
-
-/**
- * Calculates optimal delay between API requests to stay under rate limits
- * Based on Tier 4 limits: 30k tokens/minute
- * Returns delay in milliseconds
- */
 function calculateOptimalDelay() {
   const RATE_LIMIT_CONFIG = {
-    TOKENS_PER_MINUTE: 30000,        // Tier 4 limit
-    ESTIMATED_INPUT_TOKENS: 8000,    // Conservative estimate for prompt + context
-    ESTIMATED_OUTPUT_TOKENS: 6000,   // Conservative estimate for brief JSON
-    SAFETY_MARGIN: 0.8               // Use only 80% of limit for safety
+    TOKENS_PER_MINUTE: 30000,
+    ESTIMATED_INPUT_TOKENS: 8000,
+    ESTIMATED_OUTPUT_TOKENS: 6000,
+    SAFETY_MARGIN: 0.8
   };
-  
-  // Calculate total tokens per request
-  const totalTokensPerRequest = RATE_LIMIT_CONFIG.ESTIMATED_INPUT_TOKENS + 
-                                 RATE_LIMIT_CONFIG.ESTIMATED_OUTPUT_TOKENS;
-  
-  // Calculate safe tokens per minute
-  const safeTokensPerMinute = RATE_LIMIT_CONFIG.TOKENS_PER_MINUTE * 
-                               RATE_LIMIT_CONFIG.SAFETY_MARGIN;
-  
-  // Calculate seconds to wait between requests
+  const totalTokensPerRequest = RATE_LIMIT_CONFIG.ESTIMATED_INPUT_TOKENS + RATE_LIMIT_CONFIG.ESTIMATED_OUTPUT_TOKENS;
+  const safeTokensPerMinute = RATE_LIMIT_CONFIG.TOKENS_PER_MINUTE * RATE_LIMIT_CONFIG.SAFETY_MARGIN;
   const secondsPerRequest = (60 / safeTokensPerMinute) * totalTokensPerRequest;
-  
-  // Convert to milliseconds and add small buffer
   const delayMs = Math.ceil(secondsPerRequest * 1000);
-  
   debugLog('RATE_LIMIT_CALC', {
     tokensPerRequest: totalTokensPerRequest,
     safeTokensPerMinute: safeTokensPerMinute,
     optimalDelaySeconds: secondsPerRequest.toFixed(1),
     delayMs: delayMs
   });
-  
   return delayMs;
 }
 
-/***** SPREADSHEET SETUP *****/
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('Content Briefs')
@@ -493,43 +507,31 @@ function showSetupDialog() {
       <li>Save and close</li>
     </ol>
     <p>Once set up, use the menu to generate briefs!</p>
-  `)
-    .setWidth(400)
-    .setHeight(300);
-  
+  `).setWidth(400).setHeight(300);
   SpreadsheetApp.getUi().showModalDialog(html, 'Setup Claude API Key');
 }
 
 function ensureRequiredColumns(sheet) {
   const lastCol = sheet.getLastColumn();
   debugLog('COLUMN_CHECK_START', { sheetName: sheet.getName(), lastCol: lastCol });
-  
   if (lastCol === 0) {
     throw new Error(`Sheet "${sheet.getName()}" is empty. No headers found.`);
   }
-  
   const rawHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   const normalizedHeaders = rawHeaders.map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
-  
   const debugInfo = rawHeaders.map((h, i) => `${i}: "${h}" -> "${normalizedHeaders[i]}"`).join(', ');
   debugLog('NORMALIZED_HEADERS_DETAIL', debugInfo);
-  
   const requiredHeaders = [
     'url', 'url_type', 'page_type', 'primary_keyword', 
     'secondary_keyword', 'longtail_keywords', 'location', 'intent'
   ];
-  
-  // Check required headers exist (case-insensitive & flexible spaces)
   requiredHeaders.forEach(header => {
     if (!normalizedHeaders.includes(header)) {
       throw new Error(`Missing required column: ${header}`);
     }
   });
-  
-  // Add output columns if missing
   const outputHeaders = ['id', 'status', 'brief_url', 'run_id', 'notes'];
   const toAdd = outputHeaders.filter(h => !normalizedHeaders.includes(h));
-  
   if (toAdd.length > 0) {
     sheet.insertColumnsAfter(rawHeaders.length, toAdd.length);
     const startCol = rawHeaders.length + 1;
@@ -556,38 +558,25 @@ function rowToObject(row, headerMap) {
   return obj;
 }
 
-/**
- * Global helper to find the sheet containing the 'url' column.
- * Essential for Web App context where getActiveSheet() is unreliable.
- */
 function discoverDataSheet(ssOverride) {
   const ss = ssOverride || SpreadsheetApp.getActive();
   if (!ss) throw new Error("No active spreadsheet found for discovery.");
-  
   let sheet = ss.getActiveSheet();
-  
   function hasUrlColumn(sh) {
     if (!sh || sh.getLastColumn() === 0) return false;
     const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
       .map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
     return headers.includes('url');
   }
-
   if (sheet && hasUrlColumn(sheet)) return sheet;
-
   debugLog('SHEET_DISCOVERY', `Targeting spreadsheet "${ss.getName()}". Searching for 'url' column...`);
   const target = ss.getSheets().find(sh => hasUrlColumn(sh));
-  
   if (!target) {
     throw new Error("Could not find a sheet with the required 'url' column in this workbook.");
   }
-  
   return target;
 }
 
-/**
- * Finds a specific sheet within a spreadsheet using the 'gid' parameter from a URL.
- */
 function getSheetFromUrl(ss, url) {
   if (!url) return null;
   const gidMatch = url.match(/[?#]gid=([0-9]+)/);
@@ -598,29 +587,15 @@ function getSheetFromUrl(ss, url) {
   return null;
 }
 
-/***** MAIN EXECUTION *****/
 function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
-  let ss = SpreadsheetApp.getActive();
-  if (!ss && workbookUrl) {
-    try {
-      ss = SpreadsheetApp.openByUrl(workbookUrl);
-      debugLog('TARGET_SS', `Opened by URL: "${ss.getName()}"`);
-    } catch (e) {
-      debugLog('TARGET_SS_ERROR', `Failed to open by URL: ${e.message}`);
-    }
-  }
-  
-  if (!ss) throw new Error("Could not access spreadsheet. Use container-bound execution or provide a workbook URL.");
-
+  const ss = openWorkbook(workbookUrl);
   let sheet = null;
   
-  // 1. Precise GID Discovery (Highest Priority)
   if (workbookUrl) {
     sheet = getSheetFromUrl(ss, workbookUrl);
     if (sheet) debugLog('TARGET_SHEET', `Found by GID: "${sheet.getName()}"`);
   }
   
-  // 2. Global Robust Discovery (Fallback)
   if (!sheet) {
     try {
       sheet = discoverDataSheet(ss);
@@ -631,25 +606,16 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
   }
 
   debugLog('TARGET_SHEET_FINAL', { name: sheet.getName(), lastCol: sheet.getLastColumn() });
-  
-  // Ensure all other columns exist
   ensureRequiredColumns(sheet);
-  
-  
   const headers = getHeaderMap(sheet);
   const data = sheet.getDataRange().getValues();
-  
   const statusCol = headers['status']?.index;
   const runIdCol = headers['run_id']?.index;
-  
   if (statusCol === undefined || runIdCol === undefined) {
     throw new Error('Missing required columns: status or run_id');
   }
-  
-  // Find rows to process
   const runId = `run_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
   const targets = [];
-  
   for (let r = 1; r < data.length; r++) {
     const status = String(data[r][statusCol] || '').toUpperCase().trim();
     if (status === '' || status === 'NEW') {
@@ -657,69 +623,47 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
       if (targets.length >= CONFIG.MAX_ROWS_PER_RUN) break;
     }
   }
-  
   if (targets.length === 0) {
     safeAlert('No new rows to process', 'Batch Information');
     return;
   }
-  
-  // Mark as in progress
   targets.forEach(r => {
-    // SENIOR HISTORY FIX: Always generate a NEW ID for every run to preserve history
     const idCol = headers['id']?.index;
     const rowIdString = Utilities.getUuid();
-    
     if (idCol !== undefined) {
       sheet.getRange(r + 1, idCol + 1).setValue(rowIdString);
     }
-
     sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
     sheet.getRange(r + 1, runIdCol + 1).setValue(runId);
-    
-    // NOTIFY DASHBOARD (Single Path Persistence)
     const rowObj = rowToObject(data[r], headers);
-    rowObj.id = rowIdString; // Use the fresh UUID
-    rowObj.client_id = rowObj.client_id || fallbackClientId; // Use in-flight client_id
+    rowObj.id = rowIdString;
+    rowObj.client_id = rowObj.client_id || fallbackClientId;
     notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
-  
-  // Process each row
   targets.forEach(r => {
     try {
       const rowObj = rowToObject(data[r], headers);
       const strategy = buildStrategy(rowObj);
-      
       debugLog('STRATEGY', strategy);
-      
       const brief = generateBriefWithClaude(strategy);
-      
       debugLog('BRIEF GENERATED', { 
         h1: brief.h1, 
         sections: brief.outline?.length,
         internal_links: brief.internal_links?.length,
         external_links: brief.external_links?.length
       });
-      
       const docUrl = renderBriefToGoogleDoc(brief, strategy, overrideFolderId);
-      
       sheet.getRange(r + 1, headers['brief_url'].index + 1).setValue(docUrl);
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
-
-      // SENIOR FIX: Explicitly check for generated fields in the sheet to avoid stale rowObj
       const freshRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
       const freshRowObj = rowToObject(freshRowValues, headers);
-      
-      // Secondary fallback check for final notification
       if (!freshRowObj.client_id && fallbackClientId) freshRowObj.client_id = fallbackClientId;
       if (!freshRowObj.id) {
         const idCol = headers['id']?.index;
         freshRowObj.id = (idCol !== undefined) ? String(freshRowValues[idCol]).trim() : '';
       }
-      
       notifyDashboardStatus(freshRowObj, docUrl, brief);
-
-      // === CROSS-POSTING (Dual-Workbook Sync) ===
       const clientWorkbookUrl = rowObj['client_workbook'] || rowObj['workbook_url'];
       if (clientWorkbookUrl && String(clientWorkbookUrl).trim().startsWith('http')) {
         debugLog('CROSS-POSTING', { to: clientWorkbookUrl });
@@ -730,55 +674,42 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
           notes: 'Synced from Master'
         });
       }
-      
     } catch (e) {
       debugLog('ERROR', e);
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('ERROR');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue(
         String(e.message || e).substring(0, 1000)
       );
-      
-      // NOTIFY DASHBOARD: Row error
       const rowObj = rowToObject(data[r], headers);
       if (!rowObj.client_id && fallbackClientId) rowObj.client_id = fallbackClientId;
-      
-      // Ensure current row's ID is captured even on error
       const idCol = headers['id']?.index;
       if (!rowObj.id && idCol !== undefined) {
         const freshId = sheet.getRange(r + 1, idCol + 1).getValue();
         rowObj.id = freshId;
       }
-
       notifyDashboardStatus({ ...rowObj, status: 'ERROR', notes: e.toString() }, null);
     }
-    
-    // Pacing between rows if multiple targets exist
     if (targets.indexOf(r) < targets.length - 1) {
       const delay = calculateOptimalDelay();
       debugLog('BATCH_PACING', `Waiting ${delay/1000}s before next row...`);
       Utilities.sleep(delay);
     }
   });
-  
   safeAlert(
     `Processed ${targets.length} row(s)\n\nCheck the 'status' and 'brief_url' columns for results.`,
     'Batch Complete'
   );
 }
 
-/***** STRATEGY BUILDER *****/
 function buildStrategy(row) {
   const clientDomain = extractDomain(row.url);
   const urlType = String(row.url_type || '').toLowerCase().trim();
   const pageType = String(row.page_type || 'blog page').toLowerCase().trim();
-  
-  // Validate page type
   if (!PAGE_TYPES[pageType]) {
     throw new Error(
       `Invalid page_type: "${pageType}". Must be one of: ${Object.keys(PAGE_TYPES).join(', ')}`
     );
   }
-  
   return {
     client_url: String(row.url || '').trim(),
     client_domain: clientDomain,
@@ -786,34 +717,24 @@ function buildStrategy(row) {
     is_existing: urlType === 'existing',
     page_type: pageType,
     page_config: PAGE_TYPES[pageType],
-    
-    // Keywords
     primary_keyword: String(row.primary_keyword || '').trim(),
     secondary_keyword: String(row.secondary_keyword || '').trim(),
     longtail_keywords: normalizeList(row.longtail_keywords),
-    
-    // Context
     location: String(row.location || '').trim(),
     intent: String(row.intent || 'informational').toLowerCase().trim()
   };
 }
 
-/***** CLAUDE API CALL *****/
 function generateBriefWithClaude(strategy, retryCount = 0) {
   const MAX_RETRIES = 3;
   const apiKey = PropertiesService.getScriptProperties().getProperty('ANTHROPIC_API_KEY');
-  
   if (!apiKey) {
     throw new Error(
       'Missing ANTHROPIC_API_KEY in Script Properties. ' +
       'Go to Project Settings > Script Properties and add your Claude API key.'
     );
   }
-  
-  // Build the system prompt with domain replacement
   const systemPrompt = SYSTEM_PROMPT.replace(/CLIENT_DOMAIN/g, strategy.client_domain);
-  
-  // Build the user message
   const userMessage = `Create a complete SEO content brief for AI content generation.
 
 STRATEGY DETAILS:
@@ -872,15 +793,12 @@ Return ONLY the JSON object. Do NOT include:
 
 Your response must start with { and end with }. Nothing else.`;
 
-  // Prepare the API request
   const requestBody = {
     model: CONFIG.CLAUDE_MODEL,
     max_tokens: CONFIG.CLAUDE_MAX_TOKENS,
     system: systemPrompt,
-    messages: [] // Will be populated in the loop
+    messages: []
   };
-  
-  // Add tools if web search is enabled
   if (CONFIG.USE_WEB_SEARCH) {
     requestBody.tools = [
       {
@@ -889,51 +807,36 @@ Your response must start with { and end with }. Nothing else.`;
       }
     ];
   }
-  
   debugLog('CLAUDE REQUEST', { model: CONFIG.CLAUDE_MODEL, has_tools: !!requestBody.tools, retry: retryCount });
-  
-  // Add intelligent delay to avoid rate limits
   if (retryCount === 0) {
     const optimalDelay = calculateOptimalDelay();
     debugLog('RATE_LIMIT_DELAY', `Waiting ${(optimalDelay / 1000).toFixed(1)}s before API call`);
     Utilities.sleep(optimalDelay);
   } else {
-    // On retries after rate limit hit, use exponential backoff
-    const retryDelay = Math.pow(2, retryCount - 1) * 30000; // 30s, 60s, 120s
+    const retryDelay = Math.pow(2, retryCount - 1) * 30000;
     debugLog('RETRY_DELAY', `Retry ${retryCount}: waiting ${retryDelay / 1000}s`);
     Utilities.sleep(retryDelay);
   }
-  
   try {
-    // Multi-turn conversation loop to handle tool use
     let conversationMessages = [
       {
         role: 'user',
         content: userMessage
       }
     ];
-    
     let briefText = '';
-    let maxTurns = 12;  // Increased from 5 to handle thorough research
+    let maxTurns = 12;
     let currentTurn = 0;
-    
     while (currentTurn < maxTurns) {
       currentTurn++;
       debugLog('CONVERSATION_TURN', `Turn ${currentTurn}/${maxTurns}`);
-      
       requestBody.messages = conversationMessages;
-      
-      // LOG EACH REQUEST TO DEBUG SHEET
       logToDebugSheet(`TURN_${currentTurn}_REQ`, requestBody);
-      
-      // Audit conversation for protocol compliance
       const auditLog = conversationMessages.map((m, idx) => {
         const types = Array.isArray(m.content) ? m.content.map(b => b.type).join(',') : 'string';
         return `[${idx}] ${m.role}: ${types}`;
       }).join(' | ');
       debugLog('CONVERSATION_AUDIT', auditLog);
-      
-      // Make the API call
       const response = robustFetch('https://api.anthropic.com/v1/messages', {
         method: 'post',
         contentType: 'application/json',
@@ -945,13 +848,9 @@ Your response must start with { and end with }. Nothing else.`;
         },
         payload: JSON.stringify(requestBody)
       });
-      
       const statusCode = response.getResponseCode();
       const responseText = response.getContentText();
-      
       debugLog('CLAUDE RESPONSE CODE', statusCode);
-      
-      // Handle rate limiting (429) or server overload (529)
       if (statusCode === 429 || statusCode === 529) {
         if (retryCount < MAX_RETRIES) {
           const waitTime = Math.pow(2, retryCount) * 30;
@@ -967,50 +866,31 @@ Your response must start with { and end with }. Nothing else.`;
           throw new Error(errorMsg);
         }
       }
-      
       if (statusCode !== 200) {
         logToDebugSheet(`ERROR_${statusCode}`, requestBody, responseText);
         debugLog('CLAUDE_ERROR_BODY', responseText);
-        
-        // STABILIZATION: Selective retry on 400 protocol glitches
         if (statusCode === 400 && responseText.includes('invalid_request_error') && retryCount < MAX_RETRIES) {
           debugLog('STABILIZATION_RETRY', 'Caught 400 protocol error. Retrying with fresh state...');
           Utilities.sleep(5000); 
           return generateBriefWithClaude(strategy, retryCount + 1);
         }
-        
         throw new Error(`Claude API error ${statusCode}: ${responseText}`);
       }
-
-      // Success log (sampled to avoid sheet bloat)
       if (currentTurn === 1) logToDebugSheet('TURN_1_SUCCESS', requestBody, 'Check next log for response');
-      
       const responseData = JSON.parse(responseText);
-      
       debugLog('RESPONSE_STOP_REASON', responseData.stop_reason);
       debugLog('RESPONSE_CONTENT_TYPES', responseData.content?.map(b => b.type).join(', '));
-      
-      // Add Claude's response to conversation
       let assistantContent = responseData.content;
-      
-      // ===== WEB SEARCH BETA SAFETY: PROTOCOL STABILIZATION =====
-      // Handle the web_search-2025-03-05 beta types (server_tool_use and web_search_tool_result)
       const hasWebSearch = assistantContent.some(block => 
         (block.type === 'tool_use' && block.name === 'web_search') || 
         (block.type === 'server_tool_use')
       );
-      
       if (hasWebSearch) {
-        // Protocol Stabilization: If Claude paused after a tool use but before a result,
-        // we must drop the orphaned use block to avoid Error 400 in the history of the next turn.
         const lastBlock = assistantContent[assistantContent.length - 1];
         if (responseData.stop_reason === 'pause_turn' && lastBlock && lastBlock.type === 'server_tool_use') {
           debugLog('PROTOCOL_FIX', `Dropping orphaned server_tool_use ID: ${lastBlock.id}`);
           assistantContent.pop();
         }
-        
-        // Multi-Turn Compliance: Keep tool blocks and JSON text, but strip non-essential preamble
-        // if tools are present to ensure standard/experimental block consistency.
         assistantContent = assistantContent.filter(block => 
           block.type === 'tool_use' || 
           block.type === 'server_tool_use' || 
@@ -1018,13 +898,10 @@ Your response must start with { and end with }. Nothing else.`;
           (block.type === 'text' && block.text.trim().startsWith('{'))
         );
       }
-      
       conversationMessages.push({
         role: 'assistant',
         content: assistantContent
       });
-      
-      // Handle Tool Use (Multi-turn Research)
       const toolUses = assistantContent.filter(block => block.type === 'tool_use');
       if (toolUses.length > 0) {
         debugLog('TOOL_USE_DETECTED', `Claude requested ${toolUses.length} tools`);
@@ -1042,91 +919,60 @@ Your response must start with { and end with }. Nothing else.`;
             content: "Success"
           };
         });
-        
         conversationMessages.push({
           role: 'user',
           content: toolResults
         });
-        
-        // STABILIZATION: Inter-turn research delay
         debugLog('STABILIZATION', 'Turn complete. Pacing 2s before next turn...');
         Utilities.sleep(2000);
-        
-        continue; // Proceed to next turn with the results
+        continue;
       }
-      
-      // Check if Claude finished with text content
       const textBlocks = assistantContent.filter(block => block.type === 'text');
       if (textBlocks.length > 0) {
         briefText = textBlocks.map(block => block.text).join('\n');
         debugLog('TEXT_CONTENT_FOUND', `Found ${briefText.length} chars of text`);
-        break;  // We got the brief, exit loop
+        break;
       }
-      
-      // If stop_reason is 'pause_turn', continue the conversation
       if (responseData.stop_reason === 'pause_turn') {
         debugLog('PAUSE_TURN_DETECTED', 'Continuing conversation...');
-        
-        // Add a user message to continue
         conversationMessages.push({
           role: 'user',
           content: 'Please continue and provide the complete JSON brief now.'
         });
-        
-        // Continue to next turn
         continue;
       }
-      
-      // If stop_reason is 'end_turn' but no text, something's wrong
       if (responseData.stop_reason === 'end_turn') {
         debugLog('END_TURN_NO_TEXT', 'Claude ended turn but provided no text content');
         break;
       }
-      
-      // If stop_reason is 'max_tokens', we ran out of space
       if (responseData.stop_reason === 'max_tokens') {
         throw new Error(
           'Claude response was cut off due to max_tokens limit. ' +
           'Try increasing CLAUDE_MAX_TOKENS in CONFIG or simplifying the request.'
         );
       }
-      
-      // Any other stop reason
       debugLog('UNEXPECTED_STOP_REASON', responseData.stop_reason);
       break;
     }
-    
-    // After loop, check if we got text
     if (!briefText) {
-      // Enhanced diagnostics
       const lastResponse = conversationMessages[conversationMessages.length - 1];
       const contentTypes = lastResponse.content?.map(b => b.type) || [];
-      
       debugLog('NO_TEXT_AFTER_TURNS', {
         totalTurns: currentTurn,
         lastContentTypes: contentTypes,
         conversationLength: conversationMessages.length
       });
-      
       throw new Error(
         `No text content after ${currentTurn} conversation turns. ` +
         'Last content types: ' + contentTypes.join(', ') + '. ' +
         'This may indicate Claude is stuck in tool use or the brief generation failed.'
       );
     }
-    
     debugLog('BRIEF TEXT LENGTH', briefText.length);
-    
-    // Parse the JSON from the response (using robust parser)
     const brief = parseClaudeResponse(briefText);
-    
-    // Validate the brief
     validateBrief(brief, strategy);
-    
     return brief;
-    
   } catch (error) {
-    // If it's a rate limit error in the catch and we haven't exceeded retries, retry
     if (error.message && error.message.includes('rate_limit') && retryCount < MAX_RETRIES) {
       const waitTime = Math.pow(2, retryCount) * 30;
       debugLog('RATE LIMIT ERROR', `Waiting ${waitTime} seconds before retry ${retryCount + 1}/${MAX_RETRIES}`);
@@ -1134,27 +980,18 @@ Your response must start with { and end with }. Nothing else.`;
       Utilities.sleep(waitTime * 1000);
       return generateBriefWithClaude(strategy, retryCount + 1);
     }
-    
-    // Otherwise, throw the error
     throw error;
   }
 }
 
-/***** RESPONSE PARSING - IMPROVED VERSION *****/
 function parseClaudeResponse(text) {
   let cleaned = text.trim();
-  
-  // Remove markdown code blocks if present
   if (cleaned.startsWith('```json')) {
     cleaned = cleaned.replace(/^```json\s*/i, '').replace(/\s*```\s*$/, '');
   } else if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```\s*$/, '');
   }
-  
-  // ===== NEW APPROACH: Extract JSON object directly using regex =====
-  // This is more reliable than trying to detect and remove preambles
   const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-  
   if (!jsonMatch) {
     debugLog('JSON_EXTRACTION_FAILED', 'No JSON object found in response');
     throw new Error(
@@ -1163,11 +1000,8 @@ function parseClaudeResponse(text) {
       'First 500 chars:\n' + cleaned.substring(0, 500)
     );
   }
-  
   let jsonStr = jsonMatch[0];
   debugLog('JSON_EXTRACTED', `Successfully extracted JSON object (${jsonStr.length} chars)`);
-  
-  // ===== ATTEMPT 1: Parse as-is =====
   try {
     const parsed = JSON.parse(jsonStr);
     debugLog('JSON_PARSE_SUCCESS', 'Parsed on first attempt');
@@ -1175,14 +1009,11 @@ function parseClaudeResponse(text) {
   } catch (e) {
     debugLog('JSON_PARSE_ATTEMPT_1_FAILED', e.message);
   }
-  
-  // ===== ATTEMPT 2: Clean common JSON issues =====
   let cleanedJson = jsonStr
-    .replace(/\/\/.*$/gm, '')                    // Remove // comments
-    .replace(/\/\*[\s\S]*?\*\//g, '')           // Remove /* */ comments
-    .replace(/,(\s*[}\]])/g, '$1')              // Remove trailing commas
-    .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '"$1":');  // Quote unquoted keys
-  
+    .replace(/\/\/.*$/gm, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/,(\s*[}\]])/g, '$1')
+    .replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '"$1":');
   try {
     const parsed = JSON.parse(cleanedJson);
     debugLog('JSON_PARSE_SUCCESS', 'Parsed after cleaning (attempt 2)');
@@ -1190,11 +1021,7 @@ function parseClaudeResponse(text) {
   } catch (e) {
     debugLog('JSON_PARSE_ATTEMPT_2_FAILED', e.message);
   }
-  
-  // ===== ATTEMPT 3: Fix quote inconsistencies (CAREFUL) =====
-  // Only fix property values with single quotes, not apostrophes in content
   let quoteFix = cleanedJson.replace(/:\s*'([^']*?)'/g, ': "$1"');
-  
   try {
     const parsed = JSON.parse(quoteFix);
     debugLog('JSON_PARSE_SUCCESS', 'Parsed after quote fixing (attempt 3)');
@@ -1202,14 +1029,11 @@ function parseClaudeResponse(text) {
   } catch (e) {
     debugLog('JSON_PARSE_ATTEMPT_3_FAILED', e.message);
   }
-  
-  // ===== ALL ATTEMPTS FAILED =====
   debugLog('JSON_PARSE_ALL_FAILED', {
     extractedJsonLength: jsonStr.length,
     firstChars: jsonStr.substring(0, 300),
     lastChars: jsonStr.substring(Math.max(0, jsonStr.length - 200))
   });
-  
   throw new Error(
     'Failed to parse Claude response as JSON after 3 attempts.\n\n' +
     'Extracted JSON preview (first 500 chars):\n' +
@@ -1219,29 +1043,111 @@ function parseClaudeResponse(text) {
   );
 }
 
-/***** VALIDATION *****/
+function validateSerpAnalysis(brief, strategy) {
+  const serp = brief.serp_analysis;
+  const clientResearch = brief.client_research;
+  const pagesAnalyzed = clientResearch.pages_analyzed?.length || 0;
+  if (pagesAnalyzed < 5) {
+    throw new Error(
+      `Insufficient SERP research: Only ${pagesAnalyzed} pages analyzed. ` +
+      'Minimum 5 competitor pages required for quality analysis.'
+    );
+  }
+  const wordCountPattern = /(\d+)-(\d+)/;
+  const match = brief.word_count_range.match(wordCountPattern);
+  if (!match) {
+    throw new Error(
+      'Invalid word count range format. Must be "X-Y words" based on competitor analysis.'
+    );
+  }
+  const min = parseInt(match[1]);
+  const max = parseInt(match[2]);
+  const variance = max - min;
+  if (variance < 200) {
+    throw new Error(
+      `Word count range too narrow (${variance} words). ` +
+      'Suggests insufficient competitor analysis. Expected variance of at least 200-400 words.'
+    );
+  }
+  if (variance > 2000) {
+    Logger.log(
+      `WARNING: Very wide word count range (${variance} words). ` +
+      'This suggests high variance in competitor content or shallow analysis.'
+    );
+  }
+  const patterns = serp.top_ranking_patterns || [];
+  if (patterns.length < 3) {
+    throw new Error(
+      `Insufficient SERP pattern analysis: Only ${patterns.length} patterns identified. ` +
+      'Expected at least 3 specific content patterns from top-ranking pages.'
+    );
+  }
+  const genericPatterns = [
+    'comprehensive', 'detailed', 'well-written', 'high-quality', 
+    'good content', 'informative', 'helpful'
+  ];
+  const specificPatternCount = patterns.filter(pattern => {
+    const lowerPattern = pattern.toLowerCase();
+    return !genericPatterns.some(generic => 
+      lowerPattern.includes(generic) && lowerPattern.length < 50
+    );
+  }).length;
+  if (specificPatternCount < 2) {
+    Logger.log(
+      'WARNING: SERP patterns appear generic. Expected specific, actionable insights ' +
+      '(e.g., "All top 5 include pricing tables", "Average of 8 H2 sections").'
+    );
+  }
+  const gaps = serp.competitive_gaps || [];
+  if (gaps.length === 0) {
+    Logger.log(
+      'WARNING: No competitive gaps identified. This suggests incomplete SERP analysis.'
+    );
+  }
+  const features = serp.serp_features || [];
+  if (features.length > 0) {
+    const vagueFeaturesCount = features.filter(f => {
+      const lower = f.toLowerCase();
+      return lower === 'featured snippets' || 
+             lower === 'paa' || 
+             lower === 'people also ask' ||
+             lower === 'images' ||
+             lower === 'videos';
+    }).length;
+    if (vagueFeaturesCount === features.length) {
+      Logger.log(
+        'WARNING: SERP features are vague. Expected specific details ' +
+        '(e.g., "List-based Featured Snippet with 5 items", not just "Featured Snippets").'
+      );
+    }
+  }
+  debugLog('SERP ANALYSIS VALIDATED', {
+    pages_analyzed: pagesAnalyzed,
+    word_count_variance: variance,
+    pattern_count: patterns.length,
+    specific_patterns: specificPatternCount,
+    gaps_identified: gaps.length,
+    serp_features: features.length
+  });
+}
+
 function validateBrief(brief, strategy) {
   const required = [
     'h1', 'title', 'meta_title', 'meta_description',
     'word_count_range', 'outline', 'keyword_strategy', 'internal_links', 'external_links', 
-    'faq_analysis', 'client_research'
+    'faq_analysis', 'client_research', 'serp_analysis'
   ];
-  
   required.forEach(field => {
     if (!brief[field]) {
       throw new Error(`Missing required field in brief: ${field}`);
     }
   });
-  
-  // Validate client_research
   if (!brief.client_research.pages_analyzed || brief.client_research.pages_analyzed.length === 0) {
     throw new Error(
       'CRITICAL: No client pages were analyzed. This likely means web_search tool was unavailable. ' +
       'Brief cannot be generated without web research. Please try again in a few minutes.'
     );
   }
-  
-  // Check if the brief mentions web_search being unavailable
   const briefString = JSON.stringify(brief).toLowerCase();
   if (briefString.includes('web_search') && briefString.includes('unavailable')) {
     throw new Error(
@@ -1249,38 +1155,27 @@ function validateBrief(brief, strategy) {
       'Brief cannot be generated without web research. Please try again in a few minutes.'
     );
   }
-  
-  // Validate outline has H1 and AFP guidance
   const h1Section = brief.outline.find(section => section.level === 1);
   const afpSection = brief.outline.find(section => section.is_afp_guidance);
-  
   if (!h1Section) {
     Logger.log('WARNING: No H1 found in outline');
   }
-  
   if (!afpSection) {
     Logger.log('WARNING: No AFP guidance found in outline');
   }
-  
-  // Validate H1 includes primary keyword
   const h1Lower = brief.h1.toLowerCase();
   const primaryLower = strategy.primary_keyword.toLowerCase();
   if (!h1Lower.includes(primaryLower)) {
     Logger.log(`WARNING: H1 "${brief.h1}" doesn't include primary keyword "${strategy.primary_keyword}"`);
   }
-  
-  // Validate FAQ analysis
   if (brief.faq_analysis.include_faq === undefined) {
     throw new Error('Missing faq_analysis.include_faq boolean');
   }
-  
-  // If FAQ is included in outline, validate question count
   const faqSection = brief.outline.find(section => section.is_faq_section);
   if (faqSection) {
     const questionCount = faqSection.faq_questions?.length || 0;
     const maxQuestions = strategy.page_type === 'blog page' ? 8 : 5;
     const minQuestions = 3;
-    
     if (questionCount < minQuestions) {
       Logger.log(`WARNING: FAQ section has only ${questionCount} questions (minimum ${minQuestions})`);
     }
@@ -1289,8 +1184,6 @@ function validateBrief(brief, strategy) {
       faqSection.faq_questions = faqSection.faq_questions.slice(0, maxQuestions);
     }
   }
-  
-  // Validate internal links count
   const internalCount = brief.internal_links?.length || 0;
   if (internalCount < CONFIG.MIN_INTERNAL_LINKS) {
     throw new Error(
@@ -1300,20 +1193,16 @@ function validateBrief(brief, strategy) {
   if (internalCount > CONFIG.MAX_INTERNAL_LINKS) {
     brief.internal_links = brief.internal_links.slice(0, CONFIG.MAX_INTERNAL_LINKS);
   }
-  
-  // Validate external links count
   if (brief.external_links?.length > CONFIG.MAX_EXTERNAL_LINKS) {
     brief.external_links = brief.external_links.slice(0, CONFIG.MAX_EXTERNAL_LINKS);
   }
-  
-  // Trim meta fields if needed
   if (brief.meta_title.length > 60) {
     brief.meta_title = brief.meta_title.substring(0, 60);
   }
   if (brief.meta_description.length > 160) {
     brief.meta_description = brief.meta_description.substring(0, 160);
   }
-  
+  validateSerpAnalysis(brief, strategy);
   debugLog('BRIEF VALIDATED', {
     h1_length: brief.h1.length,
     has_afp_guidance: !!afpSection,
@@ -1326,12 +1215,9 @@ function validateBrief(brief, strategy) {
   });
 }
 
-/***** GOOGLE DOC RENDERING *****/
 function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   const docName = `Brief - ${brief.title} - ${new Date().toISOString().slice(0, 10)}`;
   const doc = DocumentApp.create(docName);
-  
-  // Prioritize folderId: 1. Passed from Dashboard, 2. Global Config, 3. Root
   const folderId = overrideFolderId || getSanitizedFolderId();
   if (folderId) {
     try {
@@ -1342,42 +1228,28 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       debugLog('Folder move failed', e.message);
     }
   }
-  
   const body = doc.getBody();
   body.clear();
-  
-  // Add title
   addHeading(body, brief.title, DocumentApp.ParagraphHeading.TITLE);
   body.appendParagraph('');
-  
-  // === SECTION 1: KEYWORD USAGE INSTRUCTIONS ===
   addHeading(body, 'Keyword Usage Instructions', DocumentApp.ParagraphHeading.HEADING1);
-  
   body.appendParagraph('Usage Requirements:').setBold(true).setFontSize(11);
   body.appendParagraph('');
-  
-  // Add bullets without bold
   const usageItems = [
     brief.keyword_strategy.primary_usage,
     brief.keyword_strategy.secondary_usage,
     brief.keyword_strategy.longtail_distribution
   ];
-  
   usageItems.forEach(item => {
     body.appendListItem(item)
       .setGlyphType(DocumentApp.GlyphType.BULLET)
       .setBold(false)
       .setFontSize(11);
   });
-  
   body.appendParagraph('');
-  
-  // === SECTION 2: CONTENT OUTLINE ===
   addHeading(body, 'Content Outline', DocumentApp.ParagraphHeading.HEADING1);
   body.appendParagraph(`Target Word Count: ${brief.word_count_range}`).setItalic(true);
   body.appendParagraph('');
-  
-  // Show FAQ analysis if FAQ is included
   if (brief.faq_analysis.include_faq) {
     body.appendParagraph('Note: FAQ section is included in this outline based on competitor analysis and SERP features.')
       .setItalic(true)
@@ -1385,9 +1257,7 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       .setForegroundColor('#666666');
     body.appendParagraph('');
   }
-  
   brief.outline.forEach((section, idx) => {
-    // Handle H1
     if (section.level === 1) {
       body.appendParagraph(`H1: ${brief.h1}`)
         .setBold(true)
@@ -1395,8 +1265,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       body.appendParagraph('');
       return;
     }
-    
-    // Handle AFP Guidance
     if (section.is_afp_guidance) {
       body.appendParagraph(`${strategy.page_config.answerFirstLabel} (${strategy.page_config.answerFirstLength})`)
         .setBold(true)
@@ -1412,11 +1280,7 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       body.appendParagraph('');
       return;
     }
-    
-    // Handle regular sections
     const headingMarker = section.level === 2 ? 'H2' : 'H3';
-    
-    // Section heading - bold but clean
     if (section.is_faq_section) {
       body.appendParagraph(`${headingMarker}: ${section.heading}`)
         .setBold(true)
@@ -1426,29 +1290,21 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
         .setBold(true)
         .setFontSize(12);
     }
-    
-    // Word count estimate - gray, italic, smaller
     if (section.word_count_estimate) {
       body.appendParagraph(`Target: ${section.word_count_estimate}`)
         .setItalic(true)
         .setFontSize(9)
         .setForegroundColor('#666666');
     }
-    
-    // Guidance - normal text
     body.appendParagraph(section.guidance)
       .setFontSize(11)
       .setBold(false);
-    
-    // Keywords - gray, small, italic
     if (section.keywords_to_include?.length > 0) {
       body.appendParagraph(`Keywords to include: ${section.keywords_to_include.join(', ')}`)
         .setFontSize(9)
         .setForegroundColor('#666666')
         .setItalic(true);
     }
-    
-    // If this is FAQ section, show the questions
     if (section.is_faq_section && section.faq_questions?.length > 0) {
       body.appendParagraph('');
       body.appendParagraph('FAQ Questions:')
@@ -1465,50 +1321,36 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
           .setBold(false);
       });
     }
-    
     body.appendParagraph('');
   });
-  
-  // === SECTION 3: STYLE GUIDELINES ===
   addHeading(body, 'Style Guidelines', DocumentApp.ParagraphHeading.HEADING1);
-  
   const styleItems = [
     `Tone: ${brief.style_guidelines.tone}`,
     `Reading Level: ${brief.style_guidelines.reading_level}`,
     `Sentence Structure: ${brief.style_guidelines.sentence_structure}`,
     `Formatting: ${brief.style_guidelines.formatting_notes}`
   ];
-  
   styleItems.forEach(item => {
     body.appendListItem(item)
       .setGlyphType(DocumentApp.GlyphType.BULLET)
       .setBold(false)
       .setFontSize(11);
   });
-  
   body.appendParagraph('');
-  
-  // === SEPARATOR FOR STRATEGIST SECTION ===
   body.appendHorizontalRule();
   body.appendParagraph('');
-  
-  // Make strategist header very prominent
   const strategistHeader = body.appendParagraph('STRATEGIST SECTION');
   strategistHeader.setHeading(DocumentApp.ParagraphHeading.HEADING1);
   strategistHeader.setBold(true);
   strategistHeader.setFontSize(16);
   strategistHeader.setForegroundColor('#cc0000');
-  
   body.appendParagraph('The following sections are for the strategist/editorial team and should NOT be passed to the AI content machine.')
     .setItalic(true)
     .setFontSize(10)
     .setForegroundColor('#cc0000');
   body.appendParagraph('');
-  
-  // === CLIENT RESEARCH (Strategist) ===
   if (brief.client_research) {
     addHeading(body, 'Client Research', DocumentApp.ParagraphHeading.HEADING2);
-    
     if (brief.client_research.pages_analyzed?.length > 0) {
       body.appendParagraph('Pages Analyzed:').setBold(true).setFontSize(11);
       brief.client_research.pages_analyzed.forEach(url => {
@@ -1521,7 +1363,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       });
       body.appendParagraph('');
     }
-    
     if (brief.client_research.key_facts?.length > 0) {
       body.appendParagraph('Key Facts Found:').setBold(true).setFontSize(11);
       brief.client_research.key_facts.forEach(fact => {
@@ -1532,7 +1373,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       });
       body.appendParagraph('');
     }
-    
     if (brief.client_research.products_services?.length > 0) {
       body.appendParagraph('Products & Services:').setBold(true).setFontSize(11);
       brief.client_research.products_services.forEach(item => {
@@ -1543,7 +1383,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       });
       body.appendParagraph('');
     }
-    
     if (brief.client_research.competitive_advantages?.length > 0) {
       body.appendParagraph('Competitive Advantages:').setBold(true).setFontSize(11);
       brief.client_research.competitive_advantages.forEach(adv => {
@@ -1555,11 +1394,8 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       body.appendParagraph('');
     }
   }
-  
-  // === SERP ANALYSIS (Strategist) ===
   if (brief.serp_analysis) {
     addHeading(body, 'SERP Analysis', DocumentApp.ParagraphHeading.HEADING2);
-    
     if (brief.serp_analysis.top_ranking_patterns?.length > 0) {
       body.appendParagraph('Top Ranking Content Patterns:').setBold(true).setFontSize(11);
       brief.serp_analysis.top_ranking_patterns.forEach(pattern => {
@@ -1570,7 +1406,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       });
       body.appendParagraph('');
     }
-    
     if (brief.serp_analysis.competitive_gaps?.length > 0) {
       body.appendParagraph('Competitive Gaps to Exploit:').setBold(true).setFontSize(11);
       brief.serp_analysis.competitive_gaps.forEach(gap => {
@@ -1581,7 +1416,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       });
       body.appendParagraph('');
     }
-    
     if (brief.serp_analysis.serp_features?.length > 0) {
       body.appendParagraph('SERP Features Present:').setBold(true).setFontSize(11);
       brief.serp_analysis.serp_features.forEach(feature => {
@@ -1593,44 +1427,33 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       body.appendParagraph('');
     }
   }
-  
-  // === FAQ ANALYSIS (Strategist - only if NOT included) ===
   if (!brief.faq_analysis.include_faq) {
     addHeading(body, 'FAQ Analysis (Not Included)', DocumentApp.ParagraphHeading.HEADING2);
-    
     const faqItems = [
       `Competitors have FAQ: ${brief.faq_analysis.competitors_have_faq ? 'Yes' : 'No'}`,
       `PAA boxes present: ${brief.faq_analysis.paa_boxes_present ? 'Yes' : 'No'}`,
       `Featured snippet opportunity: ${brief.faq_analysis.featured_snippet_opportunity ? 'Yes' : 'No'}`
     ];
-    
     faqItems.forEach(item => {
       body.appendListItem(item)
         .setGlyphType(DocumentApp.GlyphType.BULLET)
         .setBold(false)
         .setFontSize(11);
     });
-    
     body.appendParagraph(`Rationale: ${brief.faq_analysis.rationale}`)
       .setItalic(true)
       .setFontSize(10);
     body.appendParagraph('');
   }
-  
-  // === INTERNAL LINKS (Strategist) ===
   addHeading(body, 'Internal Links (For Editorial Team)', DocumentApp.ParagraphHeading.HEADING2);
   body.appendParagraph('The following internal links should be added during content editing:')
     .setFontSize(10)
     .setItalic(true);
   body.appendParagraph('');
-  
   brief.internal_links.forEach((link, idx) => {
-    // Anchor text - bold
     body.appendParagraph(`${idx + 1}. Anchor Text: "${link.anchor}"`)
       .setBold(true)
       .setFontSize(11);
-    
-    // Show original URL with status - color coded
     const statusIndicator = link.url_status === '200' ? ' (VERIFIED)' : ' (404 - NOT FOUND)';
     const urlColor = link.url_status === '200' ? '#006600' : '#cc0000';
     body.appendParagraph(`   URL: ${link.url}${statusIndicator}`)
@@ -1638,8 +1461,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       .setFontSize(9)
       .setBold(false)
       .setForegroundColor(urlColor);
-    
-    // Show alternative if exists
     if (link.alternative_url) {
       const altStatusIndicator = link.alternative_status === '200' ? ' (VERIFIED)' : ' (ISSUE)';
       const altColor = link.alternative_status === '200' ? '#006600' : '#cc6600';
@@ -1649,40 +1470,29 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
         .setBold(false)
         .setForegroundColor(altColor);
     }
-    
-    // Placement and rationale - normal text
     body.appendParagraph(`   Placement: ${link.placement}`)
       .setFontSize(10)
       .setBold(false);
     body.appendParagraph(`   Rationale: ${link.rationale}`)
       .setFontSize(10)
       .setBold(false);
-    
-    // Show verification note if exists
     if (link.verification_note) {
       body.appendParagraph(`   NOTE: ${link.verification_note}`)
         .setItalic(true)
         .setFontSize(9)
         .setForegroundColor('#0066cc');
     }
-    
     body.appendParagraph('');
   });
-  
-  // === EXTERNAL LINKS (Strategist) ===
   addHeading(body, 'External Links (For Editorial Team)', DocumentApp.ParagraphHeading.HEADING2);
   body.appendParagraph('The following external links should be added during content editing:')
     .setFontSize(10)
     .setItalic(true);
   body.appendParagraph('');
-  
   brief.external_links.forEach((link, idx) => {
-    // Anchor text - bold
     body.appendParagraph(`${idx + 1}. Anchor Text: "${link.anchor}"`)
       .setBold(true)
       .setFontSize(11);
-    
-    // Show original URL with status - color coded
     const statusIndicator = link.url_status === 'verified' ? ' (VERIFIED)' : ' (BROKEN/INACCESSIBLE)';
     const urlColor = link.url_status === 'verified' ? '#006600' : '#cc0000';
     body.appendParagraph(`   URL: ${link.url}${statusIndicator}`)
@@ -1690,8 +1500,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       .setFontSize(9)
       .setBold(false)
       .setForegroundColor(urlColor);
-    
-    // Show alternative if exists
     if (link.alternative_url) {
       const altStatusIndicator = link.alternative_status === 'verified' ? ' (VERIFIED)' : ' (ISSUE)';
       const altColor = link.alternative_status === 'verified' ? '#006600' : '#cc6600';
@@ -1701,8 +1509,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
         .setBold(false)
         .setForegroundColor(altColor);
     }
-    
-    // Placement, domain authority, rationale - normal text
     body.appendParagraph(`   Placement: ${link.placement}`)
       .setFontSize(10)
       .setBold(false);
@@ -1712,21 +1518,15 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
     body.appendParagraph(`   Rationale: ${link.rationale}`)
       .setFontSize(10)
       .setBold(false);
-    
-    // Show verification note if exists
     if (link.verification_note) {
       body.appendParagraph(`   NOTE: ${link.verification_note}`)
         .setItalic(true)
         .setFontSize(9)
         .setForegroundColor('#0066cc');
     }
-    
     body.appendParagraph('');
   });
-  
-  // === TARGET KEYWORDS (Strategist) ===
   addHeading(body, 'Target Keywords Reference', DocumentApp.ParagraphHeading.HEADING2);
-  
   const keywordItems = [
     `Primary Keyword: ${strategy.primary_keyword}`,
     `Secondary Keyword: ${strategy.secondary_keyword}`,
@@ -1736,28 +1536,22 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
     `Intent: ${strategy.intent}`,
     `URL: ${strategy.client_url} (${strategy.is_existing ? 'existing page' : 'new page'})`
   ].filter(Boolean);
-  
   keywordItems.forEach(item => {
     body.appendListItem(item)
       .setGlyphType(DocumentApp.GlyphType.BULLET)
       .setBold(false)
       .setFontSize(11);
   });
-  
   body.appendParagraph('');
-  
-  // === FOOTER NOTES ===
   body.appendHorizontalRule();
   body.appendParagraph('Notes for AI Content Machine:').setBold(true);
   body.appendParagraph('This brief is optimized for AI content generation. Follow all instructions precisely.');
   body.appendParagraph('Do NOT include internal links, external links, meta data, or SERP analysis in the generated content.');
   body.appendParagraph('Those elements are handled by the editorial team after content generation.');
-  
   doc.saveAndClose();
   return doc.getUrl();
 }
 
-/***** DOCUMENT FORMATTING HELPERS *****/
 function addHeading(body, text, level) {
   body.appendParagraph(text).setHeading(level);
 }
@@ -1766,20 +1560,17 @@ function addBullet(body, text) {
   body.appendListItem(text).setGlyphType(DocumentApp.GlyphType.BULLET);
 }
 
-/***** TRIGGER MANAGEMENT *****/
 function createTimeTrigger() {
   ScriptApp.newTrigger('runBriefGeneration')
     .timeBased()
     .everyMinutes(10)
     .create();
-  
   SpreadsheetApp.getUi().alert('Auto-run trigger created (every 10 minutes)');
 }
 
 function deleteAllTriggers() {
   const triggers = ScriptApp.getProjectTriggers();
   triggers.forEach(trigger => ScriptApp.deleteTrigger(trigger));
-  
   try {
     SpreadsheetApp.getUi().alert(`Deleted ${triggers.length} trigger(s)`);
   } catch (e) {
@@ -1801,19 +1592,15 @@ function asyncRunBriefGeneration() {
   const folderId = userProps.getProperty('PENDING_FOLDER_ID');
   const workbookUrl = userProps.getProperty('PENDING_WORKBOOK_URL');
   const clientId = userProps.getProperty('PENDING_CLIENT_ID');
-  
   deleteGenerationTrigger();
   runBriefGeneration(folderId, workbookUrl, clientId);
 }
 
-
 function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
-  // Path 1: Dashboard Callback (Non-blocking notification)
   try {
     const props = PropertiesService.getScriptProperties();
     const baseUrl = props.getProperty('DASHBOARD_URL');
     const secret = props.getProperty('GAS_CALLBACK_SECRET');
-    
     if (baseUrl && secret) {
       const payload = {
         id: (rowObj.id && rowObj.id !== '') ? rowObj.id : null,
@@ -1826,7 +1613,6 @@ function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
         notes: rowObj.notes,
         secret: secret
       };
-
       if (payload.id || (payload.client_id && payload.primary_keyword)) {
         UrlFetchApp.fetch(`${baseUrl}/api/content-briefs/callback`, {
           method: 'POST',
@@ -1839,29 +1625,18 @@ function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
   } catch (e) {
     debugLog('CALLBACK_UNHANDLED_ERROR', e.toString());
   }
-
-  // Path 2: Direct Supabase Sync (Primary persistence, happens LAST to ensure final state)
   syncToSupabaseDirect(rowObj, briefUrl, briefData);
 }
 
-/**
- * Direct Supabase sync - bypasses Dashboard API for maximum speed/reliability
- * Requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Script Properties
- */
 function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
-  // Senior Debug Log: Inspect full row object before sync
   debugLog('SUPABASE_SYNC_START', rowObj);
-
   const props = PropertiesService.getScriptProperties();
   const supabaseUrl = props.getProperty('SUPABASE_URL');
   const supabaseKey = props.getProperty('SUPABASE_SERVICE_ROLE_KEY');
-  
   if (!supabaseUrl || !supabaseKey) {
     debugLog('SUPABASE_DIRECT_SKIP', 'SUPABASE_URL/KEY not set.');
     return;
   }
-
-  // Ensure mandatory ID exists (Generated in runBriefGeneration)
   if (!rowObj.id) {
     debugLog('SUPABASE_DIRECT_MISSING_ID', 'row id missing from row object');
     if (!rowObj.client_id || !rowObj.primary_keyword) {
@@ -1869,7 +1644,6 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
       return;
     }
   }
-
   const payload = {
     id: (rowObj.id && rowObj.id !== '') ? rowObj.id : null,
     client_id: (rowObj.client_id && rowObj.client_id !== '') ? rowObj.client_id : null,
@@ -1881,10 +1655,7 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
     notes: (rowObj.notes || '').toString().substring(0, 1000),
     updated_at: new Date().toISOString()
   };
-
-  // Conflict target is now the UUID 'id' for maximum stability
   const url = `${supabaseUrl}/rest/v1/workbook_rows?on_conflict=id`;
-
   try {
     const response = UrlFetchApp.fetch(url, {
       method: 'POST',
@@ -1897,7 +1668,6 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
       payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
-    
     const code = response.getResponseCode();
     if (code >= 200 && code < 300) {
       debugLog('SUPABASE_DIRECT_SUCCESS', `Synced ID: ${rowObj.id} (${rowObj.primary_keyword})`);
@@ -1909,40 +1679,32 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
   }
 }
 
-
-/***** ONE-TIME SETUP *****/
 function setAnthropicKey(apiKey) {
   PropertiesService.getScriptProperties().setProperty('ANTHROPIC_API_KEY', apiKey);
   Logger.log('Anthropic API key saved');
 }
 
-/***** WEB APP HANDLERS *****/
 function doPost(e) {
   try {
     const params = JSON.parse(e.postData.contents);
     const command = params.command || 'runBriefGeneration';
     const workbookUrl = params.workbookUrl;
-    
     let result;
     if (command === 'getWorkbookData') {
       result = getWorkbookData(workbookUrl);
     } else if (command === 'appendToClient') {
       result = appendToWorkbook(workbookUrl, params.formData);
     } else {
-      // ASYNC TRIGGER: Prevent Timeouts
       const userProps = PropertiesService.getUserProperties();
       userProps.setProperty('PENDING_FOLDER_ID', params.folderId || '');
       userProps.setProperty('PENDING_WORKBOOK_URL', workbookUrl || '');
-      userProps.setProperty('PENDING_CLIENT_ID', params.clientId || ''); // Pass client_id from dashboard
-      
+      userProps.setProperty('PENDING_CLIENT_ID', params.clientId || '');
       ScriptApp.newTrigger('asyncRunBriefGeneration')
         .timeBased()
         .after(1000)
         .create();
-        
       result = { status: "triggered", message: "Automation started in background" };
     }
-    
     return ContentService.createTextOutput(JSON.stringify({ "status": "success", "result": result }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
@@ -1952,15 +1714,13 @@ function doPost(e) {
 }
 
 function getWorkbookData(workbookUrl) {
-  const ss = workbookUrl ? SpreadsheetApp.openByUrl(workbookUrl) : SpreadsheetApp.getActive();
+  const ss = openWorkbook(workbookUrl);
   let sheet = null;
   
-  // 1. Precise GID Discovery
   if (workbookUrl) {
     sheet = getSheetFromUrl(ss, workbookUrl);
   }
-  
-  // 2. Global Robust Discovery
+
   if (!sheet) {
     try {
       sheet = discoverDataSheet(ss);
@@ -1968,57 +1728,39 @@ function getWorkbookData(workbookUrl) {
       return { status: "error", message: e.message, rows: [] };
     }
   }
-  
   const data = sheet.getDataRange().getValues();
   const headerMap = getHeaderMap(sheet);
   const rows = [];
-  
   for (let i = 1; i < data.length; i++) {
     const rowObj = rowToObject(data[i], headerMap);
     if (rowObj.primary_keyword) rows.push(rowObj);
   }
-  
   debugLog('DATASYNC_SUCCESS', { count: rows.length, sheet: sheet.getName() });
   return { count: rows.length, sheet: sheet.getName(), rows: rows };
 }
 
-/**
- * Appends or updates a row in a specific workbook/sheet
- */
 function appendToWorkbook(workbookUrl, formData) {
   try {
-    const ss = SpreadsheetApp.openByUrl(workbookUrl);
+    const ss = openWorkbook(workbookUrl);
     
-    // Try to targeting specific sheet from URL, or fallback to name, or default
     let sheet = getSheetFromUrl(ss, workbookUrl);
     if (!sheet) {
-      sheet = ss.getSheetByName('Content Brief Automation') || ss.getSheets()[0];
+      sheet = ss.getSheetByName(CONFIG.DEFAULT_SHEET_NAME) || ss.getSheets()[0];
     }
-
     ensureRequiredColumns(sheet);
     const headerMap = getHeaderMap(sheet);
-    
-    // Check if row already exists (by run_id or URL if applicable)
-    // For now, simpler implementation: just append. 
-    // In future: findRow(sheet, run_id) if we want to update.
-
     const newRow = new Array(Object.keys(headerMap).length).fill('');
     Object.keys(headerMap).forEach(header => {
-      // Try multiple field names (snake_case, Space Case)
       const value = formData[header] || 
                     formData[header.replace(/\s+/g, '_').toLowerCase()] ||
                     formData[header.replace(/_/g, ' ')];
-      
       if (value !== undefined) {
         newRow[headerMap[header].index] = value;
       }
     });
-
-    // Special status override
     if (headerMap['status']) {
       newRow[headerMap['status'].index] = formData.status || 'NEW';
     }
-
     sheet.appendRow(newRow);
     debugLog('APPEND_SUCCESS', { workbook: ss.getName(), sheet: sheet.getName() });
     return { status: "success", message: `Appended row to ${ss.getName()}` };
