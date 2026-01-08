@@ -2,8 +2,15 @@
  * ============================================================================
  * CLAUDE-POWERED SEO CONTENT BRIEF BUILDER
  * ============================================================================
- * Version: 1.2.4
- * Last Updated: 2025-01-06
+ * Version: 1.2.5
+ * Last Updated: 2025-01-07
+ * 
+ * CHANGELOG v1.2.5:
+ * - Added comprehensive quality scoring system (0-100)
+ * - Scores SERP analysis depth, content outline, link quality, keyword strategy, FAQ analysis
+ * - Visual quality score display at top of Google Doc
+ * - Quality score stored in spreadsheet for tracking
+ * - Detailed breakdown shows exactly what scored well/poorly
  * 
  * CHANGELOG v1.2.4:
  * - Added SERP analysis depth validation
@@ -139,7 +146,11 @@ CRITICAL OUTPUT REQUIREMENTS:
 KEYWORD USAGE RULES:
 - Primary keyword: MUST appear in H1 exactly as provided
 - Secondary keyword: Use at least 2x in content, especially in H2s
-- Long-tail keywords: Distribute naturally throughout (1x each minimum)
+- Long-tail keywords: CRITICAL - You MUST distribute ALL longtail keywords throughout the outline
+  * Each longtail keyword should appear in keywords_to_include for at least one outline section
+  * Distribute longtails across different H2/H3 sections (don't cluster in one section)
+  * Use the most relevant longtail for each section topic
+  * If a longtail doesn't fit naturally in any section, explain why in keyword_strategy.longtail_distribution
 - First 150-200 words must include: Primary + Secondary + at least one long-tail
 
 CONTENT STRUCTURE BY PAGE TYPE:
@@ -312,9 +323,9 @@ Return ONLY a JSON object with this exact structure:
     "rationale": "string - explanation of FAQ decision"
   },
   "keyword_strategy": {
-    "primary_usage": "string - where/how to use primary keyword",
-    "secondary_usage": "string - where/how to use secondary keyword",
-    "longtail_distribution": "string - how to distribute long-tails"
+  "primary_usage": "string - where/how to use primary keyword",
+  "secondary_usage": "string - where/how to use secondary keyword",
+  "longtail_distribution": "string - MUST explain how EACH longtail keyword is distributed across outline sections. If any longtail is not included, explain why it doesn't fit the content naturally."
   },
   "style_guidelines": {
     "tone": "string",
@@ -530,7 +541,7 @@ function ensureRequiredColumns(sheet) {
       throw new Error(`Missing required column: ${header}`);
     }
   });
-  const outputHeaders = ['id', 'status', 'brief_url', 'run_id', 'notes'];
+  const outputHeaders = ['id', 'status', 'brief_url', 'run_id', 'notes', 'quality_score'];
   const toAdd = outputHeaders.filter(h => !normalizedHeaders.includes(h));
   if (toAdd.length > 0) {
     sheet.insertColumnsAfter(rawHeaders.length, toAdd.length);
@@ -640,9 +651,16 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
     rowObj.client_id = rowObj.client_id || fallbackClientId;
     notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
+  
+  // Guarantee ID persistence before processing starts
+  SpreadsheetApp.flush();
+
   targets.forEach(r => {
     try {
-      const rowObj = rowToObject(data[r], headers);
+      // READ FRESH DATA: data[r] is stale because IDs/Status were updated above
+      const freshRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      const rowObj = rowToObject(freshRowValues, headers);
+      
       const strategy = buildStrategy(rowObj);
       debugLog('STRATEGY', strategy);
       const brief = generateBriefWithClaude(strategy);
@@ -656,14 +674,24 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
       sheet.getRange(r + 1, headers['brief_url'].index + 1).setValue(docUrl);
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
-      const freshRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
-      const freshRowObj = rowToObject(freshRowValues, headers);
-      if (!freshRowObj.client_id && fallbackClientId) freshRowObj.client_id = fallbackClientId;
-      if (!freshRowObj.id) {
-        const idCol = headers['id']?.index;
-        freshRowObj.id = (idCol !== undefined) ? String(freshRowValues[idCol]).trim() : '';
+      
+      let finalQualityScore = null;
+      if (headers['quality_score']) {
+        finalQualityScore = brief.quality_score.total_score;
+        sheet.getRange(r + 1, headers['quality_score'].index + 1).setValue(finalQualityScore);
       }
-      notifyDashboardStatus(freshRowObj, docUrl, brief);
+
+      // Re-read fresh values for final dashboard notification
+      const finalRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      const finalRowObj = rowToObject(finalRowValues, headers);
+      
+      if (!finalRowObj.client_id && fallbackClientId) finalRowObj.client_id = fallbackClientId;
+      if (!finalRowObj.id) {
+        const idCol = headers['id']?.index;
+        finalRowObj.id = (idCol !== undefined) ? String(finalRowValues[idCol]).trim() : '';
+      }
+      
+      notifyDashboardStatus(finalRowObj, docUrl, brief);
       const clientWorkbookUrl = rowObj['client_workbook'] || rowObj['workbook_url'];
       if (clientWorkbookUrl && String(clientWorkbookUrl).trim().startsWith('http')) {
         debugLog('CROSS-POSTING', { to: clientWorkbookUrl });
@@ -970,6 +998,7 @@ Your response must start with { and end with }. Nothing else.`;
     }
     debugLog('BRIEF TEXT LENGTH', briefText.length);
     const brief = parseClaudeResponse(briefText);
+    validateLongtailDistribution(brief, strategy);
     validateBrief(brief, strategy);
     return brief;
   } catch (error) {
@@ -1041,6 +1070,41 @@ function parseClaudeResponse(text) {
     'Last 300 chars:\n' +
     jsonStr.substring(Math.max(0, jsonStr.length - 300))
   );
+}
+
+function validateLongtailDistribution(brief, strategy) {
+  if (strategy.longtail_keywords.length === 0) {
+    // No longtails provided - skip check
+    return;
+  }
+  
+  const longtailsInOutline = strategy.longtail_keywords.filter(lt => {
+    const ltLower = lt.toLowerCase();
+    return brief.outline.some(s => 
+      s.keywords_to_include && 
+      s.keywords_to_include.some(k => k.toLowerCase().includes(ltLower))
+    );
+  }).length;
+  
+  const distributionRate = longtailsInOutline / strategy.longtail_keywords.length;
+  const minimumRequired = Math.ceil(strategy.longtail_keywords.length * 0.7);
+  
+  debugLog('LONGTAIL_CHECK', {
+    provided: strategy.longtail_keywords.length,
+    distributed: longtailsInOutline,
+    rate: (distributionRate * 100).toFixed(0) + '%',
+    minimumRequired: minimumRequired
+  });
+  
+  if (distributionRate < 0.7) {
+    throw new Error(
+      `LONGTAIL DISTRIBUTION FAILURE: Only ${longtailsInOutline}/${strategy.longtail_keywords.length} longtail keywords were distributed in the outline. ` +
+      `Minimum required: ${minimumRequired}/${strategy.longtail_keywords.length} (70%). ` +
+      `\n\nProvided longtails: ${strategy.longtail_keywords.join(', ')}` +
+      `\n\nEach longtail MUST appear in at least one section's keywords_to_include array. ` +
+      `This is a CRITICAL requirement - the brief will be regenerated.`
+    );
+  }
 }
 
 function validateSerpAnalysis(brief, strategy) {
@@ -1131,6 +1195,209 @@ function validateSerpAnalysis(brief, strategy) {
   });
 }
 
+function calculateQualityScore(brief, strategy) {
+  let score = 0;
+  let breakdown = {
+    serp_analysis: { score: 0, max: 30, details: [] },
+    content_outline: { score: 0, max: 25, details: [] },
+    link_quality: { score: 0, max: 20, details: [] },
+    keyword_strategy: { score: 0, max: 15, details: [] },
+    faq_analysis: { score: 0, max: 10, details: [] }
+  };
+  
+  const pagesAnalyzed = brief.client_research.pages_analyzed?.length || 0;
+  const patterns = brief.serp_analysis.top_ranking_patterns || [];
+  const gaps = brief.serp_analysis.competitive_gaps || [];
+  const features = brief.serp_analysis.serp_features || [];
+  
+  const wordCountPattern = /(\d+)-(\d+)/;
+  const match = brief.word_count_range.match(wordCountPattern);
+  const variance = match ? (parseInt(match[2]) - parseInt(match[1])) : 0;
+  
+  if (pagesAnalyzed >= 5) {
+  breakdown.serp_analysis.score += 20;
+  breakdown.serp_analysis.details.push('✓ Analyzed ' + pagesAnalyzed + ' pages (20pts - threshold met)');
+} else {
+  breakdown.serp_analysis.details.push('✗ Only ' + pagesAnalyzed + ' pages analyzed - minimum 5 required (0pts)');
+}
+  
+  if (variance >= 500 && variance <= 1500) {
+    breakdown.serp_analysis.score += 10;
+    breakdown.serp_analysis.details.push('✓ Optimal word count variance: ' + variance + ' words (10pts)');
+  } else if (variance >= 200 && variance <= 2000) {
+    breakdown.serp_analysis.score += 5;
+    breakdown.serp_analysis.details.push('✓ Acceptable word count variance: ' + variance + ' words (5pts)');
+  } else {
+    breakdown.serp_analysis.details.push('✗ Poor word count variance: ' + variance + ' words (0pts)');
+  }
+  
+  const genericPatterns = ['comprehensive', 'detailed', 'well-written', 'high-quality', 'good content', 'informative', 'helpful'];
+  const specificPatternCount = patterns.filter(pattern => {
+    const lowerPattern = pattern.toLowerCase();
+    return !genericPatterns.some(generic => lowerPattern.includes(generic) && lowerPattern.length < 50);
+  }).length;
+  
+  if (specificPatternCount >= 3) {
+  breakdown.serp_analysis.score += 10;
+  breakdown.serp_analysis.details.push('✓ ' + specificPatternCount + ' specific patterns identified (10pts - threshold met)');
+} else {
+  breakdown.serp_analysis.details.push('✗ Only ' + specificPatternCount + ' specific patterns - minimum 3 required (0pts)');
+}
+  
+  const outlineSections = brief.outline.filter(s => s.level === 2 || s.level === 3).length;
+  if (outlineSections >= 11) {
+    breakdown.content_outline.score += 20;
+    breakdown.content_outline.details.push('✓ Comprehensive outline: ' + outlineSections + ' sections (20pts)');
+  } else if (outlineSections >= 8) {
+    breakdown.content_outline.score += 15;
+    breakdown.content_outline.details.push('✓ Strong outline: ' + outlineSections + ' sections (15pts)');
+  } else if (outlineSections >= 5) {
+    breakdown.content_outline.score += 10;
+    breakdown.content_outline.details.push('✓ Adequate outline: ' + outlineSections + ' sections (10pts)');
+  } else {
+    breakdown.content_outline.score += 5;
+    breakdown.content_outline.details.push('○ Minimal outline: ' + outlineSections + ' sections (5pts)');
+  }
+  
+  const sectionsWithGuidance = brief.outline.filter(s => 
+    s.guidance && s.guidance.length > 50 && 
+    s.keywords_to_include && s.keywords_to_include.length > 0
+  ).length;
+  
+  if (sectionsWithGuidance >= outlineSections * 0.9) {
+    breakdown.content_outline.score += 5;
+    breakdown.content_outline.details.push('✓ All sections well-detailed (5pts)');
+  } else if (sectionsWithGuidance >= outlineSections * 0.7) {
+    breakdown.content_outline.score += 3;
+    breakdown.content_outline.details.push('○ Most sections detailed (3pts)');
+  } else {
+    breakdown.content_outline.details.push('✗ Many sections lack detail (0pts)');
+  }
+  
+  const internalVerified = brief.internal_links.filter(l => l.url_status === '200').length;
+  const internalTotal = brief.internal_links.length;
+  
+  if (internalVerified === internalTotal && internalTotal >= 5) {
+    breakdown.link_quality.score += 10;
+    breakdown.link_quality.details.push('✓ All ' + internalTotal + ' internal links verified (10pts)');
+  } else if (internalVerified >= internalTotal * 0.8) {
+    breakdown.link_quality.score += 7;
+    breakdown.link_quality.details.push('○ ' + internalVerified + '/' + internalTotal + ' internal links verified (7pts)');
+  } else {
+    breakdown.link_quality.score += 4;
+    breakdown.link_quality.details.push('✗ Only ' + internalVerified + '/' + internalTotal + ' internal links verified (4pts)');
+  }
+  
+  const externalVerified = brief.external_links.filter(l => l.url_status === 'verified').length;
+  const externalHighAuth = brief.external_links.filter(l => 
+    l.url_status === 'verified' && l.domain_authority === 'high'
+  ).length;
+  const externalTotal = brief.external_links.length;
+  
+  if (externalVerified === externalTotal && externalHighAuth >= externalTotal * 0.5) {
+    breakdown.link_quality.score += 10;
+    breakdown.link_quality.details.push('✓ All external links verified, ' + externalHighAuth + ' high authority (10pts)');
+  } else if (externalVerified >= externalTotal * 0.75) {
+    breakdown.link_quality.score += 7;
+    breakdown.link_quality.details.push('○ ' + externalVerified + '/' + externalTotal + ' external links verified (7pts)');
+  } else {
+    breakdown.link_quality.score += 4;
+    breakdown.link_quality.details.push('✗ Only ' + externalVerified + '/' + externalTotal + ' external links verified (4pts)');
+  }
+  
+  const h1Lower = brief.h1.toLowerCase();
+  const primaryLower = strategy.primary_keyword.toLowerCase();
+  if (h1Lower.includes(primaryLower)) {
+    breakdown.keyword_strategy.score += 5;
+    breakdown.keyword_strategy.details.push('✓ Primary keyword in H1 (5pts)');
+  } else {
+    breakdown.keyword_strategy.details.push('✗ Primary keyword NOT in H1 (0pts)');
+  }
+  
+  const afpSection = brief.outline.find(s => s.is_afp_guidance);
+  if (afpSection && afpSection.guidance.toLowerCase().includes(primaryLower)) {
+    breakdown.keyword_strategy.score += 5;
+    breakdown.keyword_strategy.details.push('✓ Primary keyword in AFP guidance (5pts)');
+  } else if (afpSection) {
+    breakdown.keyword_strategy.details.push('✗ Primary keyword NOT in AFP guidance (0pts)');
+  }
+  
+  const longtailsUsed = strategy.longtail_keywords.length;
+  const longtailsInOutline = strategy.longtail_keywords.filter(lt => {
+    const ltLower = lt.toLowerCase();
+    return brief.outline.some(s => 
+      s.keywords_to_include && 
+      s.keywords_to_include.some(k => k.toLowerCase().includes(ltLower))
+    );
+  }).length;
+  
+  if (longtailsUsed > 0) {
+    const percentage = longtailsInOutline / longtailsUsed;
+    if (percentage >= 0.9) {
+      breakdown.keyword_strategy.score += 5;
+      breakdown.keyword_strategy.details.push('✓ All longtail keywords distributed (' + longtailsInOutline + '/' + longtailsUsed + ') (5pts)');
+    } else if (percentage >= 0.7) {
+      breakdown.keyword_strategy.score += 3;
+      breakdown.keyword_strategy.details.push('⚠ ' + longtailsInOutline + '/' + longtailsUsed + ' longtail keywords distributed (3pts - below target)');
+    } else {
+      breakdown.keyword_strategy.score += 1;
+      breakdown.keyword_strategy.details.push('✗ Only ' + longtailsInOutline + '/' + longtailsUsed + ' longtail keywords distributed (1pt - CRITICAL ISSUE)');
+    }
+  } else {
+    breakdown.keyword_strategy.score += 5;
+    breakdown.keyword_strategy.details.push('○ No longtail keywords provided (5pts - N/A)');
+  }
+  
+  if (brief.faq_analysis.rationale && brief.faq_analysis.rationale.length > 20) {
+    breakdown.faq_analysis.score += 5;
+    breakdown.faq_analysis.details.push('✓ Clear FAQ decision rationale (5pts)');
+  } else {
+    breakdown.faq_analysis.details.push('✗ Weak FAQ rationale (0pts)');
+  }
+  
+  const faqSection = brief.outline.find(s => s.is_faq_section);
+  if (brief.faq_analysis.include_faq && faqSection) {
+    const questionCount = faqSection.faq_questions?.length || 0;
+    if (questionCount >= 5) {
+      breakdown.faq_analysis.score += 5;
+      breakdown.faq_analysis.details.push('✓ ' + questionCount + ' quality FAQ questions (5pts)');
+    } else if (questionCount >= 3) {
+      breakdown.faq_analysis.score += 3;
+      breakdown.faq_analysis.details.push('○ ' + questionCount + ' FAQ questions (3pts)');
+    } else {
+      breakdown.faq_analysis.details.push('✗ Only ' + questionCount + ' FAQ questions (0pts)');
+    }
+  } else if (!brief.faq_analysis.include_faq) {
+    breakdown.faq_analysis.score += 5;
+    breakdown.faq_analysis.details.push('✓ FAQ correctly excluded with rationale (5pts)');
+  }
+  
+  breakdown.serp_analysis.score = Math.min(breakdown.serp_analysis.score, breakdown.serp_analysis.max);
+  breakdown.content_outline.score = Math.min(breakdown.content_outline.score, breakdown.content_outline.max);
+  breakdown.link_quality.score = Math.min(breakdown.link_quality.score, breakdown.link_quality.max);
+  breakdown.keyword_strategy.score = Math.min(breakdown.keyword_strategy.score, breakdown.keyword_strategy.max);
+  breakdown.faq_analysis.score = Math.min(breakdown.faq_analysis.score, breakdown.faq_analysis.max);
+
+  score = breakdown.serp_analysis.score + 
+          breakdown.content_outline.score + 
+          breakdown.link_quality.score + 
+          breakdown.keyword_strategy.score + 
+          breakdown.faq_analysis.score;
+  
+  let rating = 'POOR';
+  if (score >= 90) rating = 'EXCELLENT';
+  else if (score >= 80) rating = 'VERY GOOD';
+  else if (score >= 70) rating = 'GOOD';
+  else if (score >= 60) rating = 'ACCEPTABLE';
+  
+  return {
+    total_score: score,
+    max_score: 100,
+    rating: rating,
+    breakdown: breakdown
+  };
+}
+
 function validateBrief(brief, strategy) {
   const required = [
     'h1', 'title', 'meta_title', 'meta_description',
@@ -1202,7 +1469,12 @@ function validateBrief(brief, strategy) {
   if (brief.meta_description.length > 160) {
     brief.meta_description = brief.meta_description.substring(0, 160);
   }
+  
   validateSerpAnalysis(brief, strategy);
+  
+  const qualityScore = calculateQualityScore(brief, strategy);
+  brief.quality_score = qualityScore;
+  
   debugLog('BRIEF VALIDATED', {
     h1_length: brief.h1.length,
     has_afp_guidance: !!afpSection,
@@ -1211,7 +1483,8 @@ function validateBrief(brief, strategy) {
     internal_links: internalCount,
     external_links: brief.external_links.length,
     faq_included: brief.faq_analysis.include_faq,
-    faq_questions: faqSection?.faq_questions?.length || 0
+    faq_questions: faqSection?.faq_questions?.length || 0,
+    quality_score: qualityScore.total_score
   });
 }
 
@@ -1232,6 +1505,61 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   body.clear();
   addHeading(body, brief.title, DocumentApp.ParagraphHeading.TITLE);
   body.appendParagraph('');
+  
+  const qs = brief.quality_score;
+  const stars = qs.rating === 'EXCELLENT' ? '⭐⭐⭐⭐⭐' :
+                qs.rating === 'VERY GOOD' ? '⭐⭐⭐⭐' :
+                qs.rating === 'GOOD' ? '⭐⭐⭐' :
+                qs.rating === 'ACCEPTABLE' ? '⭐⭐' : '⭐';
+  
+  body.appendParagraph('═'.repeat(60))
+    .setFontFamily('Courier New')
+    .setFontSize(10)
+    .setForegroundColor('#666666');
+  
+  const scoreLine = body.appendParagraph(`BRIEF QUALITY SCORE: ${qs.total_score}/100 ${stars}`);
+  scoreLine.setBold(true).setFontSize(14).setForegroundColor('#0066cc');
+  
+  const ratingLine = body.appendParagraph(`Rating: ${qs.rating}`);
+  ratingLine.setItalic(true).setFontSize(11).setForegroundColor('#0066cc');
+  
+  body.appendParagraph('═'.repeat(60))
+    .setFontFamily('Courier New')
+    .setFontSize(10)
+    .setForegroundColor('#666666');
+  
+  body.appendParagraph('');
+  
+  body.appendParagraph('Quality Breakdown:').setBold(true).setFontSize(11);
+  body.appendParagraph('');
+  
+  Object.keys(qs.breakdown).forEach(category => {
+    const cat = qs.breakdown[category];
+    const catName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    body.appendParagraph(`${catName}: ${cat.score}/${cat.max}`)
+      .setBold(true)
+      .setFontSize(10)
+      .setForegroundColor(cat.score >= cat.max * 0.8 ? '#006600' : '#cc6600');
+    
+    cat.details.forEach(detail => {
+      body.appendParagraph('  ' + detail)
+        .setFontFamily('Courier New')
+        .setFontSize(9)
+        .setIndentStart(18);
+    });
+    
+    body.appendParagraph('');
+  });
+  
+  body.appendParagraph('═'.repeat(60))
+    .setFontFamily('Courier New')
+    .setFontSize(10)
+    .setForegroundColor('#666666');
+  
+  body.appendParagraph('');
+  body.appendParagraph('');
+  
   addHeading(body, 'Keyword Usage Instructions', DocumentApp.ParagraphHeading.HEADING1);
   body.appendParagraph('Usage Requirements:').setBold(true).setFontSize(11);
   body.appendParagraph('');
@@ -1609,6 +1937,7 @@ function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
         status: rowObj.status || 'DONE',
         brief_url: briefUrl || rowObj.brief_url || '',
         brief_data: briefData,
+        quality_score: rowObj.quality_score || (briefData ? briefData.quality_score?.total_score : null),
         run_id: rowObj.run_id,
         notes: rowObj.notes,
         secret: secret
@@ -1651,6 +1980,7 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
     status: rowObj.status || 'DONE',
     brief_url: briefUrl || rowObj.brief_url || '',
     brief_data: briefData,
+    quality_score: rowObj.quality_score || (briefData ? briefData.quality_score?.total_score : null),
     run_id: rowObj.run_id,
     notes: (rowObj.notes || '').toString().substring(0, 1000),
     updated_at: new Date().toISOString()

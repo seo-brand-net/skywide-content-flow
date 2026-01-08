@@ -164,6 +164,7 @@ export default function ContentBriefsPage() {
                     if (!key) return;
 
                     uniqueRows.set(key, {
+                        id: r.id || undefined, // Include ID if it exists in the sheet
                         client_id: client.id,
                         url: r.url,
                         url_type: r.url_type,
@@ -176,7 +177,8 @@ export default function ContentBriefsPage() {
                         status: r.status || 'DONE',
                         brief_url: r.brief_url,
                         run_id: r.run_id,
-                        notes: r.notes
+                        notes: r.notes,
+                        quality_score: r.quality_score
                     });
                 });
 
@@ -185,7 +187,7 @@ export default function ContentBriefsPage() {
                 if (dbRows.length > 0) {
                     const { error: upsertError } = await supabase
                         .from('workbook_rows')
-                        .upsert(dbRows, { onConflict: 'client_id,primary_keyword' });
+                        .upsert(dbRows, { onConflict: 'id' });
 
                     if (upsertError) throw upsertError;
                 }
