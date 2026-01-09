@@ -2383,16 +2383,14 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
     debugLog('SUPABASE_DIRECT_SKIP', 'SUPABASE_URL/KEY not set.');
     return;
   }
-  if (!rowObj.id) {
-    debugLog('SUPABASE_DIRECT_MISSING_ID', 'row id missing from row object');
-    if (!rowObj.client_id || !rowObj.primary_keyword) {
-      debugLog('SUPABASE_DIRECT_ABORT', 'Cannot sync: Missing id and fallback identifiers');
-      return;
-    }
+  
+  if (!rowObj.client_id || !rowObj.primary_keyword) {
+    debugLog('SUPABASE_DIRECT_ABORT', 'Cannot sync: Missing client_id or primary_keyword');
+    return;
   }
+  
   const payload = {
-    id: (rowObj.id && rowObj.id !== '') ? rowObj.id : null,
-    client_id: (rowObj.client_id && rowObj.client_id !== '') ? rowObj.client_id : null,
+    client_id: rowObj.client_id,
     primary_keyword: rowObj.primary_keyword,
     status: rowObj.status || 'DONE',
     brief_url: briefUrl || rowObj.brief_url || '',
@@ -2401,22 +2399,58 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
     notes: (rowObj.notes || '').toString().substring(0, 1000),
     updated_at: new Date().toISOString()
   };
-  const url = `${supabaseUrl}/rest/v1/workbook_rows?on_conflict=id`;
+
   try {
-    const response = UrlFetchApp.fetch(url, {
-      method: 'POST',
+    // First, check if a row with this client_id + primary_keyword exists
+    const checkUrl = `${supabaseUrl}/rest/v1/workbook_rows?client_id=eq.${encodeURIComponent(rowObj.client_id)}&primary_keyword=eq.${encodeURIComponent(rowObj.primary_keyword)}&select=id`;
+    const checkResponse = UrlFetchApp.fetch(checkUrl, {
+      method: 'GET',
       headers: { 
         'apikey': supabaseKey, 
-        'Authorization': `Bearer ${supabaseKey}`, 
-        'Content-Type': 'application/json',
-        'Prefer': 'resolution=merge-duplicates' 
+        'Authorization': `Bearer ${supabaseKey}`
       },
-      payload: JSON.stringify(payload),
       muteHttpExceptions: true
     });
+    
+    const existingRows = JSON.parse(checkResponse.getContentText());
+    
+    let response;
+    if (existingRows && existingRows.length > 0) {
+      // Row exists - UPDATE it
+      const existingId = existingRows[0].id;
+      const updateUrl = `${supabaseUrl}/rest/v1/workbook_rows?id=eq.${existingId}`;
+      response = UrlFetchApp.fetch(updateUrl, {
+        method: 'PATCH',
+        headers: { 
+          'apikey': supabaseKey, 
+          'Authorization': `Bearer ${supabaseKey}`, 
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      });
+      debugLog('SUPABASE_UPDATE', `Updated ID: ${existingId} (${rowObj.primary_keyword})`);
+    } else {
+      // Row doesn't exist - INSERT it
+      const insertUrl = `${supabaseUrl}/rest/v1/workbook_rows`;
+      response = UrlFetchApp.fetch(insertUrl, {
+        method: 'POST',
+        headers: { 
+          'apikey': supabaseKey, 
+          'Authorization': `Bearer ${supabaseKey}`, 
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      });
+      debugLog('SUPABASE_INSERT', `Inserted new row for: ${rowObj.primary_keyword}`);
+    }
+    
     const code = response.getResponseCode();
     if (code >= 200 && code < 300) {
-      debugLog('SUPABASE_DIRECT_SUCCESS', `Synced ID: ${rowObj.id} (${rowObj.primary_keyword})`);
+      debugLog('SUPABASE_DIRECT_SUCCESS', `Synced: ${rowObj.primary_keyword}`);
     } else {
       debugLog('SUPABASE_DIRECT_FAIL', `Code ${code}: ${response.getContentText()}`);
     }

@@ -166,6 +166,7 @@ export default function ContentBriefsPage() {
 
     const syncMutation = useMutation({
         mutationFn: async (client: Client) => {
+            // Just fetch workbook data - Apps Script handles all database syncing
             const response = await fetch('/api/proxy-apps-script', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -178,71 +179,13 @@ export default function ContentBriefsPage() {
             const result = await response.json();
             if (!response.ok || result.status === 'error') throw new Error(result.message || 'Sync failed');
 
-            const rows = result.result.rows;
-            if (rows && rows.length > 0) {
-                // Deduplicate by primary_keyword to avoid Supabase upsert conflicts
-                const uniqueRows = new Map();
-
-                rows.forEach((r: any) => {
-                    const key = r.primary_keyword?.trim();
-                    if (!key) return;
-
-                    uniqueRows.set(key, {
-                        id: r.id || undefined, // Include ID if it exists in the sheet
-                        client_id: client.id,
-                        url: r.url,
-                        url_type: r.url_type,
-                        page_type: r.page_type,
-                        primary_keyword: key,
-                        secondary_keyword: r.secondary_keyword,
-                        longtail_keywords: r.longtail_keywords,
-                        location: r.location,
-                        intent: r.intent,
-                        status: r.status || 'DONE',
-                        brief_url: r.brief_url,
-                        run_id: r.run_id,
-                        notes: r.notes,
-                        quality_score: r.quality_score
-                    });
-                });
-
-                const dbRows = Array.from(uniqueRows.values());
-
-                if (dbRows.length > 0) {
-                    // Separate rows with IDs (updates) from rows without (inserts)
-                    const rowsToUpdate = dbRows.filter((r: any) => r.id);
-                    const rowsToInsert = dbRows.filter((r: any) => !r.id).map((r: any) => {
-                        // Remove undefined 'id' before inserting
-                        const { id, ...rest } = r;
-                        return rest;
-                    });
-
-                    // Update existing rows
-                    for (const row of rowsToUpdate) {
-                        const { id, ...updatePayload } = row;
-                        const { error: updateError } = await supabase
-                            .from('workbook_rows')
-                            .update(updatePayload)
-                            .eq('id', id);
-                        if (updateError) console.error('Update error:', updateError);
-                    }
-
-                    // Insert new rows
-                    if (rowsToInsert.length > 0) {
-                        const { error: insertError } = await supabase
-                            .from('workbook_rows')
-                            .insert(rowsToInsert);
-                        if (insertError) throw insertError;
-                    }
-                }
-            }
             return result;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
             toast({
                 title: "Sync Complete",
-                description: "Workbook data is now up to date with the latest changes.",
+                description: "Workbook data refreshed from the spreadsheet.",
             });
         },
         onError: (error) => {
