@@ -16,24 +16,36 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        console.log(`Callback received for keyword: ${primary_keyword}, Status: ${status}`);
+        console.log(`Callback received for keyword: ${primary_keyword}, Status: ${status}, ID: ${id || 'NEW'}`);
 
-        const { error } = await supabaseAdmin
-            .from('workbook_rows')
-            .upsert({
-                id, // Use the ID provided by Apps Script for stable run tracking
-                client_id,
-                primary_keyword,
-                status: status || 'DONE',
-                brief_url,
-                brief_data,
-                quality_score, // Track the quality score for this run
-                run_id,
-                notes,
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'id'
-            });
+        const payload = {
+            client_id,
+            primary_keyword,
+            status: status || 'DONE',
+            brief_url,
+            brief_data,
+            quality_score,
+            run_id,
+            notes,
+            updated_at: new Date().toISOString()
+        };
+
+        let error;
+
+        if (id) {
+            // Row has an ID: Update the existing record
+            const { error: updateError } = await supabaseAdmin
+                .from('workbook_rows')
+                .update(payload)
+                .eq('id', id);
+            error = updateError;
+        } else {
+            // New row: Insert a new record (DB will generate the ID)
+            const { error: insertError } = await supabaseAdmin
+                .from('workbook_rows')
+                .insert(payload);
+            error = insertError;
+        }
 
         if (error) {
             console.error('Database update error:', error);
@@ -46,3 +58,4 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Internal Server Error', message: error.message }, { status: 500 });
     }
 }
+

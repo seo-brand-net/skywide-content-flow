@@ -94,10 +94,34 @@ export default function ContentBriefsPage() {
             if (error) throw error;
             return data as WorkbookRow[];
         },
-        enabled: !!selectedClient,
-        refetchInterval: 10000, // Senior Fix: Poll every 10s for background GAS activity
-        refetchIntervalInBackground: true
+        enabled: !!selectedClient
     });
+
+    // Realtime subscription for instant workbook updates
+    useEffect(() => {
+        if (!selectedClient) return;
+
+        const channel = supabase
+            .channel(`workbook_rows_realtime_${selectedClient}`)
+            .on('postgres_changes', {
+                event: '*', // Listen for INSERT, UPDATE, DELETE
+                schema: 'public',
+                table: 'workbook_rows',
+                filter: `client_id=eq.${selectedClient}`
+            }, (payload) => {
+                console.log('Realtime update received:', payload.eventType);
+                // Invalidate the cache to trigger a refetch
+                queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
+            })
+            .subscribe((status) => {
+                console.log('Realtime subscription status:', status);
+            });
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [selectedClient, queryClient]);
+
 
     // Mutations
     const automationMutation = useMutation({
@@ -185,11 +209,31 @@ export default function ContentBriefsPage() {
                 const dbRows = Array.from(uniqueRows.values());
 
                 if (dbRows.length > 0) {
-                    const { error: upsertError } = await supabase
-                        .from('workbook_rows')
-                        .upsert(dbRows, { onConflict: 'id' });
+                    // Separate rows with IDs (updates) from rows without (inserts)
+                    const rowsToUpdate = dbRows.filter((r: any) => r.id);
+                    const rowsToInsert = dbRows.filter((r: any) => !r.id).map((r: any) => {
+                        // Remove undefined 'id' before inserting
+                        const { id, ...rest } = r;
+                        return rest;
+                    });
 
-                    if (upsertError) throw upsertError;
+                    // Update existing rows
+                    for (const row of rowsToUpdate) {
+                        const { id, ...updatePayload } = row;
+                        const { error: updateError } = await supabase
+                            .from('workbook_rows')
+                            .update(updatePayload)
+                            .eq('id', id);
+                        if (updateError) console.error('Update error:', updateError);
+                    }
+
+                    // Insert new rows
+                    if (rowsToInsert.length > 0) {
+                        const { error: insertError } = await supabase
+                            .from('workbook_rows')
+                            .insert(rowsToInsert);
+                        if (insertError) throw insertError;
+                    }
                 }
             }
             return result;

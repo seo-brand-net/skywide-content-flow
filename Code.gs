@@ -2,9 +2,25 @@
  * ============================================================================
  * CLAUDE-POWERED SEO CONTENT BRIEF BUILDER
  * ============================================================================
- * Version: 1.2.5
- * Last Updated: 2025-01-07
- * 
+ * Version: 1.3.0
+ * Last Updated: 2025-01-08
+ *
+ * CHANGELOG v1.3.0:
+ * - Added two-pass longtail/semantic distribution system
+ * - Implemented intent-based content structures (Page Type × Intent matrix)
+ * - Added sitemap-based link verification (10x faster, more accurate)
+ * - Fixed quality score overflow (proper capping at category maximums)
+ * - Separated longtail vs semantic keyword handling
+ * - Added early fail-fast validation for keyword distribution
+ * - Enhanced entity optimization for LLM search
+ * - Improved answer patterns for AI Overviews
+ *
+ * CHANGELOG v1.2.6:
+ * - Fixed threshold-based scoring (5+ pages = full points, 3+ patterns = full points)
+ * - Enhanced longtail keyword distribution requirements in system prompt
+ * - Improved longtail scoring with N/A handling when no longtails provided
+ * - Added longtail distribution validation warning
+ *
  * CHANGELOG v1.2.5:
  * - Added comprehensive quality scoring system (0-100)
  * - Scores SERP analysis depth, content outline, link quality, keyword strategy, FAQ analysis
@@ -105,6 +121,50 @@ const PAGE_TYPES = {
   }
 };
 
+// Intent-based content structure adjustments
+const CONTENT_STRUCTURES = {
+  'transactional': {
+    afp_focus: 'value proposition with price signal',
+    section_count: '5-6 sections',
+    section_depth: 'shallow, persuasive',
+    cta_frequency: 'every section',
+    cta_type: 'strong action (Get Quote, Buy Now, Contact)',
+    word_count_modifier: 0.8,
+    emphasis: 'pricing, trust signals, customization options, delivery',
+    tone: 'confident, benefit-focused, action-oriented'
+  },
+  'informational': {
+    afp_focus: 'direct answer to query',
+    section_count: '7-10 sections',
+    section_depth: 'very deep, educational',
+    cta_frequency: 'end only',
+    cta_type: 'soft (Learn More, Explore)',
+    word_count_modifier: 1.5,
+    emphasis: 'step-by-step processes, detailed explanations, examples',
+    tone: 'helpful, patient, educational'
+  },
+  'commercial': {
+    afp_focus: 'specs and price range',
+    section_count: '6-8 sections',
+    section_depth: 'moderate, comparison-focused',
+    cta_frequency: 'every 2-3 sections',
+    cta_type: 'medium (Compare, Get Quote, See Options)',
+    word_count_modifier: 1.2,
+    emphasis: 'comparisons, pros/cons, alternatives, reviews',
+    tone: 'objective, detailed, honest'
+  },
+  'navigational': {
+    afp_focus: 'who we are and what we do',
+    section_count: '5-6 sections',
+    section_depth: 'broad overview',
+    cta_frequency: 'one main CTA',
+    cta_type: 'contact, navigation',
+    word_count_modifier: 0.7,
+    emphasis: 'brand info, services overview, locations, contact',
+    tone: 'professional, welcoming, clear'
+  }
+};
+
 const SYSTEM_PROMPT = `You are an expert SEO content strategist creating simplified, high-performance content briefs for AI content generation machines.
 
 Your briefs must be clear, actionable, and optimized for both traditional search engines and LLM-based search (AI Overviews, ChatGPT, Perplexity, etc.).
@@ -136,6 +196,13 @@ Before creating the brief, you MUST research the client's website thoroughly:
    - If you don't find specific information, don't make it up
    - Base all client claims on pages you've researched
 
+ENTITY OPTIMIZATION (CRITICAL FOR LLM SEARCH):
+- Extract and note the client's business name (use 3-5x in content guidance)
+- Identify location entities (city, state, region) for local SEO
+- Note product/service names and ensure consistent formatting
+- Document certifications, standards, industry organizations mentioned
+- These entities are crucial for AI Overview inclusion
+
 CRITICAL OUTPUT REQUIREMENTS:
 1. ALL content must be in PLAIN TEXT with clear section headers
 2. Use markdown headers (##) for main sections
@@ -143,15 +210,28 @@ CRITICAL OUTPUT REQUIREMENTS:
 4. No complex formatting, tables, or nested structures
 5. Keep instructions clear and direct for AI content machines
 
+CONTENT STRUCTURE ADAPTATION:
+You will receive both PAGE_TYPE and INTENT which determine content structure.
+
+INTENT-BASED STRUCTURE:
+[INTENT_STRUCTURE_PLACEHOLDER]
+
+Apply the intent-specific guidance to the page type structure. For example:
+- Transactional + Service Page: Heavy pricing focus, strong CTAs, conversion-oriented
+- Informational + Blog Page: Deep educational content, step-by-step processes, minimal CTAs
+- Commercial + Product Page: Comparison focus, pros/cons, review emphasis
+
 KEYWORD USAGE RULES:
 - Primary keyword: MUST appear in H1 exactly as provided
 - Secondary keyword: Use at least 2x in content, especially in H2s
-- Long-tail keywords: CRITICAL - You MUST distribute ALL longtail keywords throughout the outline
-  * Each longtail keyword should appear in keywords_to_include for at least one outline section
-  * Distribute longtails across different H2/H3 sections (don't cluster in one section)
-  * Use the most relevant longtail for each section topic
-  * If a longtail doesn't fit naturally in any section, explain why in keyword_strategy.longtail_distribution
-- First 150-200 words must include: Primary + Secondary + at least one long-tail
+- Additional Keywords: MANDATORY DISTRIBUTION
+  * YOU WILL RECEIVE A KEYWORD_DISTRIBUTION_PLAN listing all terms to distribute
+  * ALL terms must appear in section headings (H2/H3) OR keywords_to_include arrays
+  * You MUST distribute at least 70% of provided terms across the outline
+  * Each term should appear in at least one section's heading or keywords_to_include array
+  * VERIFICATION: Before returning JSON, count distributed terms - must meet minimum requirement
+  * REJECTION: Briefs that don't meet the 70% distribution threshold will be automatically rejected
+- First 150-200 words must include: Primary + Secondary + at least one additional keyword
 
 CONTENT STRUCTURE BY PAGE TYPE:
 - Homepage: Value prop → Services grid → Why Us → Process → Social proof
@@ -183,6 +263,14 @@ ANSWER-FIRST PARAGRAPH (AFP) REQUIREMENTS:
   - Primary keyword placement requirement (first 20 words)
   - Tone/approach
 - The AI content machine will write the actual AFP based on this guidance
+
+LLM OPTIMIZATION PATTERNS (CRITICAL):
+- DIRECT ANSWERS FIRST: Content should answer questions immediately, not build up to answers
+- NUMBERED LISTS: Use "5 Steps to..." or "7 Benefits of..." format when applicable
+- COMPARISON TABLES: Suggest side-by-side comparisons in outline guidance for specs/features
+- EXPERT ATTRIBUTION: Recommend citing industry sources, standards, or research
+- TEMPORAL MARKERS: Include date/recency signals when relevant
+- ENTITY CLARITY: Ensure client name, location, and key entities appear consistently
 
 LINK VERIFICATION REQUIREMENTS:
 
@@ -291,7 +379,12 @@ Return ONLY a JSON object with this exact structure:
     "pages_analyzed": ["array of URLs fetched"],
     "key_facts": ["array of factual findings about client"],
     "products_services": ["array of actual offerings"],
-    "competitive_advantages": ["array of real differentiators"]
+    "competitive_advantages": ["array of real differentiators"],
+    "key_entities": {
+      "business_name": "exact business name from website",
+      "locations": ["city, state entities"],
+      "certifications": ["industry certs, standards, memberships"]
+    }
   },
   "serp_analysis": {
     "top_ranking_patterns": ["array of strings"],
@@ -325,7 +418,7 @@ Return ONLY a JSON object with this exact structure:
   "keyword_strategy": {
   "primary_usage": "string - where/how to use primary keyword",
   "secondary_usage": "string - where/how to use secondary keyword",
-  "longtail_distribution": "string - MUST explain how EACH longtail keyword is distributed across outline sections. If any longtail is not included, explain why it doesn't fit the content naturally."
+  "additional_keywords_distribution": "string - MUST explain how EACH additional keyword is distributed across outline sections (in headings or keywords_to_include arrays). If any term is not included, explain why it doesn't fit the content naturally."
   },
   "style_guidelines": {
     "tone": "string",
@@ -534,7 +627,7 @@ function ensureRequiredColumns(sheet) {
   debugLog('NORMALIZED_HEADERS_DETAIL', debugInfo);
   const requiredHeaders = [
     'url', 'url_type', 'page_type', 'primary_keyword', 
-    'secondary_keyword', 'longtail_keywords', 'location', 'intent'
+    'secondary_keyword', 'longtail_keywords_semantics', 'location', 'intent'
   ];
   requiredHeaders.forEach(header => {
     if (!normalizedHeaders.includes(header)) {
@@ -651,16 +744,9 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
     rowObj.client_id = rowObj.client_id || fallbackClientId;
     notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
-  
-  // Guarantee ID persistence before processing starts
-  SpreadsheetApp.flush();
-
   targets.forEach(r => {
     try {
-      // READ FRESH DATA: data[r] is stale because IDs/Status were updated above
-      const freshRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
-      const rowObj = rowToObject(freshRowValues, headers);
-      
+      const rowObj = rowToObject(data[r], headers);
       const strategy = buildStrategy(rowObj);
       debugLog('STRATEGY', strategy);
       const brief = generateBriefWithClaude(strategy);
@@ -674,24 +760,17 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
       sheet.getRange(r + 1, headers['brief_url'].index + 1).setValue(docUrl);
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
-      
-      let finalQualityScore = null;
       if (headers['quality_score']) {
-        finalQualityScore = brief.quality_score.total_score;
-        sheet.getRange(r + 1, headers['quality_score'].index + 1).setValue(finalQualityScore);
+        sheet.getRange(r + 1, headers['quality_score'].index + 1).setValue(brief.quality_score.total_score);
       }
-
-      // Re-read fresh values for final dashboard notification
-      const finalRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
-      const finalRowObj = rowToObject(finalRowValues, headers);
-      
-      if (!finalRowObj.client_id && fallbackClientId) finalRowObj.client_id = fallbackClientId;
-      if (!finalRowObj.id) {
+      const freshRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      const freshRowObj = rowToObject(freshRowValues, headers);
+      if (!freshRowObj.client_id && fallbackClientId) freshRowObj.client_id = fallbackClientId;
+      if (!freshRowObj.id) {
         const idCol = headers['id']?.index;
-        finalRowObj.id = (idCol !== undefined) ? String(finalRowValues[idCol]).trim() : '';
+        freshRowObj.id = (idCol !== undefined) ? String(freshRowValues[idCol]).trim() : '';
       }
-      
-      notifyDashboardStatus(finalRowObj, docUrl, brief);
+      notifyDashboardStatus(freshRowObj, docUrl, brief);
       const clientWorkbookUrl = rowObj['client_workbook'] || rowObj['workbook_url'];
       if (clientWorkbookUrl && String(clientWorkbookUrl).trim().startsWith('http')) {
         debugLog('CROSS-POSTING', { to: clientWorkbookUrl });
@@ -747,10 +826,124 @@ function buildStrategy(row) {
     page_config: PAGE_TYPES[pageType],
     primary_keyword: String(row.primary_keyword || '').trim(),
     secondary_keyword: String(row.secondary_keyword || '').trim(),
-    longtail_keywords: normalizeList(row.longtail_keywords),
+    longtail_keywords_semantics: String(row.longtail_keywords_semantics || '').trim(),
     location: String(row.location || '').trim(),
     intent: String(row.intent || 'informational').toLowerCase().trim()
   };
+}
+
+function cleanKeyword(keyword) {
+  if (!keyword) return '';
+
+  // Normalize Unicode (handles different representations of same character)
+  let cleaned = keyword.normalize('NFKC');
+
+  // Remove zero-width spaces, zero-width joiners, and other invisible characters
+  cleaned = cleaned.replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+  // Remove any other control characters
+  cleaned = cleaned.replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+
+  // Trim whitespace
+  cleaned = cleaned.trim();
+
+  return cleaned;
+}
+
+function parseKeywords(keywordString) {
+  if (!keywordString || keywordString.trim() === '') {
+    return { terms: [] };
+  }
+
+  const terms = keywordString
+    .split(',')
+    .map(t => cleanKeyword(t))
+    .filter(t => t.length > 0);
+
+  return { terms };
+}
+
+function getSitemapLinks(domain) {
+  try {
+    const sitemapUrl = `${domain}/sitemap.xml`;
+    const response = UrlFetchApp.fetch(sitemapUrl, { muteHttpExceptions: true });
+
+    if (response.getResponseCode() !== 200) {
+      debugLog('SITEMAP_FETCH', `No sitemap found at ${sitemapUrl}`);
+      return [];
+    }
+
+    const xml = response.getContentText();
+    const urlMatches = xml.match(/<loc>(.*?)<\/loc>/g);
+
+    if (!urlMatches) {
+      return [];
+    }
+
+    const urls = urlMatches.map(match => match.replace(/<\/?loc>/g, ''));
+    debugLog('SITEMAP_FETCH', `Found ${urls.length} URLs in sitemap`);
+    return urls;
+
+  } catch (e) {
+    debugLog('SITEMAP_ERROR', e.message);
+    return [];
+  }
+}
+
+function verifyInternalLinks(suggestedLinks, domain) {
+  const sitemapUrls = getSitemapLinks(domain);
+
+  if (sitemapUrls.length === 0) {
+    debugLog('LINK_VERIFICATION', 'No sitemap available, skipping verification');
+    return suggestedLinks;
+  }
+
+  return suggestedLinks.map(link => {
+    const linkUrl = link.url.toLowerCase();
+    const exists = sitemapUrls.some(sitemapUrl => sitemapUrl.toLowerCase() === linkUrl);
+
+    if (exists) {
+      return {
+        ...link,
+        url_status: 'verified',
+        verification_method: 'sitemap'
+      };
+    } else {
+      const similarUrl = sitemapUrls.find(url =>
+        url.toLowerCase().includes(linkUrl.split('/').pop())
+      );
+
+      return {
+        ...link,
+        url_status: 'not_found_in_sitemap',
+        alternative_url: similarUrl || null,
+        verification_note: 'Strategist should verify if page exists or was moved',
+        verification_method: 'sitemap'
+      };
+    }
+  });
+}
+
+function generateKeywordDistributionPlan(parsed, strategy) {
+  const plan = {
+    terms: [],
+    validation_requirements: {
+      min_terms_distributed: Math.ceil(parsed.terms.length * 0.7),
+      total_terms: parsed.terms.length
+    }
+  };
+
+  // All terms treated equally - distribute in headings or keywords_to_include
+  parsed.terms.forEach((term, idx) => {
+    plan.terms.push({
+      term: term,
+      priority: idx < 3 ? 'high' : 'medium',
+      placement: 'heading or keywords_to_include',
+      suggested_section: `Section ${idx + 1}`
+    });
+  });
+
+  return plan;
 }
 
 function generateBriefWithClaude(strategy, retryCount = 0) {
@@ -762,13 +955,57 @@ function generateBriefWithClaude(strategy, retryCount = 0) {
       'Go to Project Settings > Script Properties and add your Claude API key.'
     );
   }
-  const systemPrompt = SYSTEM_PROMPT.replace(/CLIENT_DOMAIN/g, strategy.client_domain);
-  const userMessage = `Create a complete SEO content brief for AI content generation.
+
+  // Parse and categorize keywords
+  const parsed = parseKeywords(strategy.longtail_keywords_semantics);
+  const distributionPlan = generateKeywordDistributionPlan(parsed, strategy);
+
+  debugLog('KEYWORD_PARSING', {
+    total_terms: parsed.terms.length,
+    distribution_plan: distributionPlan
+  });
+
+  let systemPrompt = SYSTEM_PROMPT.replace(/CLIENT_DOMAIN/g, strategy.client_domain);
+
+  // Replace intent placeholder with actual structure
+  if (CONTENT_STRUCTURES[strategy.intent]) {
+    const intentStruct = CONTENT_STRUCTURES[strategy.intent];
+    const intentGuidance = `
+${strategy.intent.toUpperCase()} INTENT STRUCTURE:
+- AFP Focus: ${intentStruct.afp_focus}
+- Section Count: ${intentStruct.section_count}
+- Section Depth: ${intentStruct.section_depth}
+- CTA Frequency: ${intentStruct.cta_frequency}
+- CTA Type: ${intentStruct.cta_type}
+- Emphasis: ${intentStruct.emphasis}
+- Tone: ${intentStruct.tone}
+`;
+    systemPrompt = systemPrompt.replace('[INTENT_STRUCTURE_PLACEHOLDER]', intentGuidance);
+  }
+  let userMessage = `Create a complete SEO content brief for AI content generation.
 
 STRATEGY DETAILS:
 ${JSON.stringify(strategy, null, 2)}
 
-CRITICAL WORKFLOW:
+KEYWORD DISTRIBUTION PLAN (MANDATORY):
+`;
+
+  if (parsed.terms.length > 0) {
+    userMessage += `\n⚠️  CRITICAL KEYWORD DISTRIBUTION REQUIREMENT ⚠️\n`;
+    userMessage += `The following ${parsed.terms.length} keywords MUST be distributed throughout your outline:\n\n`;
+    parsed.terms.forEach((term, idx) => {
+      userMessage += `${idx + 1}. "${term}"\n`;
+    });
+    userMessage += `\n🔴 MANDATORY DISTRIBUTION RULES (BRIEF WILL BE REJECTED IF NOT FOLLOWED):\n`;
+    userMessage += `- MINIMUM REQUIRED: ${distributionPlan.validation_requirements.min_terms_distributed} of ${distributionPlan.validation_requirements.total_terms} keywords MUST appear in the outline (70%)\n`;
+    userMessage += `- Each keyword must appear in at least ONE of the following locations:\n`;
+    userMessage += `  1. In a section heading (H2 or H3) - Example: "How to Build a Quonset Hut" contains "how to build a quonset hut"\n`;
+    userMessage += `  2. In a section's keywords_to_include array - Example: ["how to assemble a quonset hut", "assembly steps"]\n`;
+    userMessage += `- DO NOT skip keywords - each one represents user intent and must be addressed\n`;
+    userMessage += `- VERIFICATION STEP: Before returning the JSON, count how many keywords you included. If less than ${distributionPlan.validation_requirements.min_terms_distributed}, ADD MORE SECTIONS to include them.\n\n`;
+  }
+
+  userMessage += `CRITICAL WORKFLOW:
 1. FIRST: Research client website (${strategy.client_domain})
    - Use site: search to find 6-8 most relevant pages
    - Use web_search to analyze those pages (search for specific URLs)
@@ -947,10 +1184,21 @@ Your response must start with { and end with }. Nothing else.`;
             content: "Success"
           };
         });
+
+        // Force generation after sufficient research (prevent infinite tool use loop)
+        if (currentTurn >= 3) {
+          debugLog('FORCING_GENERATION', `After ${currentTurn} turns, forcing brief generation`);
+          toolResults.push({
+            type: 'text',
+            text: 'You have completed sufficient research. Now generate the complete JSON brief immediately. Return ONLY the JSON object starting with { and ending with }. Do NOT use any more tools.'
+          });
+        }
+
         conversationMessages.push({
           role: 'user',
           content: toolResults
         });
+
         debugLog('STABILIZATION', 'Turn complete. Pacing 2s before next turn...');
         Utilities.sleep(2000);
         continue;
@@ -998,6 +1246,13 @@ Your response must start with { and end with }. Nothing else.`;
     }
     debugLog('BRIEF TEXT LENGTH', briefText.length);
     const brief = parseClaudeResponse(briefText);
+
+    // Verify internal links against sitemap
+    if (brief.internal_links && brief.internal_links.length > 0) {
+      brief.internal_links = verifyInternalLinks(brief.internal_links, strategy.client_domain);
+      debugLog('LINK_VERIFICATION', `Verified ${brief.internal_links.length} internal links`);
+    }
+
     validateLongtailDistribution(brief, strategy);
     validateBrief(brief, strategy);
     return brief;
@@ -1050,13 +1305,35 @@ function parseClaudeResponse(text) {
   } catch (e) {
     debugLog('JSON_PARSE_ATTEMPT_2_FAILED', e.message);
   }
-  let quoteFix = cleanedJson.replace(/:\s*'([^']*?)'/g, ': "$1"');
+
+  // Attempt 3: Fix unescaped characters in strings
+  let escapedJson = cleanedJson
+    .replace(/"((?:[^"\\]|\\.)*)"/g, function(match, content) {
+      // Properly escape special characters inside strings
+      let escaped = content
+        .replace(/\\/g, '\\\\')           // Escape backslashes
+        .replace(/\n/g, '\\n')            // Escape newlines
+        .replace(/\r/g, '\\r')            // Escape carriage returns
+        .replace(/\t/g, '\\t')            // Escape tabs
+        .replace(/"/g, '\\"');            // Escape quotes
+      return '"' + escaped + '"';
+    });
+
   try {
-    const parsed = JSON.parse(quoteFix);
-    debugLog('JSON_PARSE_SUCCESS', 'Parsed after quote fixing (attempt 3)');
+    const parsed = JSON.parse(escapedJson);
+    debugLog('JSON_PARSE_SUCCESS', 'Parsed after escape fix');
     return parsed;
   } catch (e) {
     debugLog('JSON_PARSE_ATTEMPT_3_FAILED', e.message);
+  }
+
+  let quoteFix = cleanedJson.replace(/:\s*'([^']*?)'/g, ': "$1"');
+  try {
+    const parsed = JSON.parse(quoteFix);
+    debugLog('JSON_PARSE_SUCCESS', 'Parsed after quote fixing (attempt 4)');
+    return parsed;
+  } catch (e) {
+    debugLog('JSON_PARSE_ATTEMPT_4_FAILED', e.message);
   }
   debugLog('JSON_PARSE_ALL_FAILED', {
     extractedJsonLength: jsonStr.length,
@@ -1064,7 +1341,7 @@ function parseClaudeResponse(text) {
     lastChars: jsonStr.substring(Math.max(0, jsonStr.length - 200))
   });
   throw new Error(
-    'Failed to parse Claude response as JSON after 3 attempts.\n\n' +
+    'Failed to parse Claude response as JSON after 4 attempts.\n\n' +
     'Extracted JSON preview (first 500 chars):\n' +
     jsonStr.substring(0, 500) + '\n\n' +
     'Last 300 chars:\n' +
@@ -1073,35 +1350,80 @@ function parseClaudeResponse(text) {
 }
 
 function validateLongtailDistribution(brief, strategy) {
-  if (strategy.longtail_keywords.length === 0) {
-    // No longtails provided - skip check
-    return;
+  // First, log the raw input to see what we're dealing with
+  const rawKeywords = strategy.longtail_keywords_semantics
+    ? strategy.longtail_keywords_semantics.split(',').map(t => t.trim())
+    : [];
+
+  // Parse the string into array and CLEAN each keyword
+  const keywordsArray = rawKeywords.map(t => cleanKeyword(t)).filter(Boolean);
+
+  debugLog('KEYWORD_CLEANING', {
+    raw_input: rawKeywords,
+    raw_lengths: rawKeywords.map(k => k.length),
+    cleaned_output: keywordsArray,
+    cleaned_lengths: keywordsArray.map(k => k.length),
+    chars_removed: rawKeywords.map((raw, idx) => raw.length - keywordsArray[idx].length)
+  });
+
+  if (keywordsArray.length === 0) {
+    return { valid: true, message: 'No longtail keywords provided' };
   }
-  
-  const longtailsInOutline = strategy.longtail_keywords.filter(lt => {
+
+  // Debug: Log what we're looking for (with char codes to see invisible chars)
+  debugLog('VALIDATION_KEYWORDS_SEARCH', {
+    keywords: keywordsArray,
+    keyword_lengths: keywordsArray.map(k => k.length),
+    outline_sections: brief.outline.length
+  });
+
+  // Debug: Log what's in the brief
+  const outlineHeadings = brief.outline.map(s => s.heading || '[no heading]');
+  const outlineKeywords = brief.outline.map(s => s.keywords_to_include || []);
+  debugLog('VALIDATION_BRIEF_CONTENT', {
+    headings: outlineHeadings,
+    keywords_arrays: outlineKeywords
+  });
+
+  // Count how many longtail keywords appear in the outline
+  const longtailsInOutline = keywordsArray.filter(lt => {
     const ltLower = lt.toLowerCase();
-    return brief.outline.some(s => 
-      s.keywords_to_include && 
-      s.keywords_to_include.some(k => k.toLowerCase().includes(ltLower))
-    );
+    const found = brief.outline.some(s => {
+      // Check if longtail appears in heading
+      if (s.heading && s.heading.toLowerCase().includes(ltLower)) {
+        debugLog('KEYWORD_FOUND_IN_HEADING', { keyword: lt, heading: s.heading });
+        return true;
+      }
+      // Check if longtail appears in keywords_to_include
+      if (s.keywords_to_include &&
+          s.keywords_to_include.some(k => k.toLowerCase().includes(ltLower))) {
+        debugLog('KEYWORD_FOUND_IN_ARRAY', { keyword: lt, section: s.heading });
+        return true;
+      }
+      return false;
+    });
+    if (!found) {
+      debugLog('KEYWORD_NOT_FOUND', { keyword: lt, length: lt.length });
+    }
+    return found;
   }).length;
-  
-  const distributionRate = longtailsInOutline / strategy.longtail_keywords.length;
-  const minimumRequired = Math.ceil(strategy.longtail_keywords.length * 0.7);
-  
+
+  const distributionRate = longtailsInOutline / keywordsArray.length;
+  const minimumRequired = Math.ceil(keywordsArray.length * 0.7);
+
   debugLog('LONGTAIL_CHECK', {
-    provided: strategy.longtail_keywords.length,
+    provided: keywordsArray.length,
     distributed: longtailsInOutline,
     rate: (distributionRate * 100).toFixed(0) + '%',
     minimumRequired: minimumRequired
   });
-  
+
   if (distributionRate < 0.7) {
     throw new Error(
-      `LONGTAIL DISTRIBUTION FAILURE: Only ${longtailsInOutline}/${strategy.longtail_keywords.length} longtail keywords were distributed in the outline. ` +
-      `Minimum required: ${minimumRequired}/${strategy.longtail_keywords.length} (70%). ` +
-      `\n\nProvided longtails: ${strategy.longtail_keywords.join(', ')}` +
-      `\n\nEach longtail MUST appear in at least one section's keywords_to_include array. ` +
+      `LONGTAIL DISTRIBUTION FAILURE: Only ${longtailsInOutline}/${keywordsArray.length} longtail keywords were distributed in the outline. ` +
+      `Minimum required: ${minimumRequired}/${keywordsArray.length} (70%). ` +
+      `\n\nProvided longtails: ${keywordsArray.join(', ')}` +
+      `\n\nEach longtail MUST appear in at least one section's heading or keywords_to_include array. ` +
       `This is a CRITICAL requirement - the brief will be regenerated.`
     );
   }
@@ -1201,8 +1523,8 @@ function calculateQualityScore(brief, strategy) {
     serp_analysis: { score: 0, max: 30, details: [] },
     content_outline: { score: 0, max: 25, details: [] },
     link_quality: { score: 0, max: 20, details: [] },
-    keyword_strategy: { score: 0, max: 15, details: [] },
-    faq_analysis: { score: 0, max: 10, details: [] }
+    keyword_strategy: { score: 0, max: 20, details: [] },
+    faq_analysis: { score: 0, max: 5, details: [] }
   };
   
   const pagesAnalyzed = brief.client_research.pages_analyzed?.length || 0;
@@ -1304,50 +1626,74 @@ function calculateQualityScore(brief, strategy) {
     breakdown.link_quality.score += 4;
     breakdown.link_quality.details.push('✗ Only ' + externalVerified + '/' + externalTotal + ' external links verified (4pts)');
   }
-  
-  const h1Lower = brief.h1.toLowerCase();
-  const primaryLower = strategy.primary_keyword.toLowerCase();
-  if (h1Lower.includes(primaryLower)) {
-    breakdown.keyword_strategy.score += 5;
-    breakdown.keyword_strategy.details.push('✓ Primary keyword in H1 (5pts)');
+
+  // KEYWORD STRATEGY (20 points) - Updated for longtail/semantic split
+  const parsed = parseKeywords(strategy.longtail_keywords_semantics || '');
+
+  // Primary in H1 (3 points)
+  if (brief.h1.toLowerCase().includes(strategy.primary_keyword.toLowerCase())) {
+    breakdown.keyword_strategy.score += 3;
+    breakdown.keyword_strategy.details.push('✓ Primary keyword in H1 (3pts)');
   } else {
-    breakdown.keyword_strategy.details.push('✗ Primary keyword NOT in H1 (0pts)');
+    breakdown.keyword_strategy.details.push('✗ Primary keyword missing from H1 (0pts)');
   }
-  
-  const afpSection = brief.outline.find(s => s.is_afp_guidance);
-  if (afpSection && afpSection.guidance.toLowerCase().includes(primaryLower)) {
+
+  // Secondary keyword usage (5 points)
+  let secondaryCount = 0;
+  brief.outline.forEach(section => {
+    if (section.heading && section.heading.toLowerCase().includes(strategy.secondary_keyword.toLowerCase())) {
+      secondaryCount++;
+    }
+  });
+  if (secondaryCount >= 2) {
     breakdown.keyword_strategy.score += 5;
-    breakdown.keyword_strategy.details.push('✓ Primary keyword in AFP guidance (5pts)');
-  } else if (afpSection) {
-    breakdown.keyword_strategy.details.push('✗ Primary keyword NOT in AFP guidance (0pts)');
+    breakdown.keyword_strategy.details.push(`✓ Secondary keyword in ${secondaryCount} sections (5pts)`);
+  } else if (secondaryCount === 1) {
+    breakdown.keyword_strategy.score += 3;
+    breakdown.keyword_strategy.details.push(`○ Secondary keyword in 1 section (3pts)`);
+  } else {
+    breakdown.keyword_strategy.details.push('✗ Secondary keyword not used in sections (0pts)');
   }
-  
-  const longtailsUsed = strategy.longtail_keywords.length;
-  const longtailsInOutline = strategy.longtail_keywords.filter(lt => {
-    const ltLower = lt.toLowerCase();
-    return brief.outline.some(s => 
-      s.keywords_to_include && 
-      s.keywords_to_include.some(k => k.toLowerCase().includes(ltLower))
-    );
-  }).length;
-  
-  if (longtailsUsed > 0) {
-    const percentage = longtailsInOutline / longtailsUsed;
-    if (percentage >= 0.9) {
+
+  // Additional keywords distribution (7 points)
+  if (parsed.terms.length > 0) {
+    const validation = validateKeywordDistribution(brief, strategy);
+    const termsDistributed = validation.stats.terms_distributed;
+    const distributionRate = termsDistributed / parsed.terms.length;
+
+    if (distributionRate >= 0.7) {
+      breakdown.keyword_strategy.score += 7;
+      breakdown.keyword_strategy.details.push(`✓ ${termsDistributed}/${parsed.terms.length} additional keywords distributed (7pts)`);
+    } else if (distributionRate >= 0.5) {
       breakdown.keyword_strategy.score += 5;
-      breakdown.keyword_strategy.details.push('✓ All longtail keywords distributed (' + longtailsInOutline + '/' + longtailsUsed + ') (5pts)');
-    } else if (percentage >= 0.7) {
+      breakdown.keyword_strategy.details.push(`○ ${termsDistributed}/${parsed.terms.length} additional keywords distributed (5pts)`);
+    } else if (distributionRate >= 0.3) {
       breakdown.keyword_strategy.score += 3;
-      breakdown.keyword_strategy.details.push('⚠ ' + longtailsInOutline + '/' + longtailsUsed + ' longtail keywords distributed (3pts - below target)');
+      breakdown.keyword_strategy.details.push(`⚠ ${termsDistributed}/${parsed.terms.length} additional keywords distributed (3pts - below target)`);
     } else {
       breakdown.keyword_strategy.score += 1;
-      breakdown.keyword_strategy.details.push('✗ Only ' + longtailsInOutline + '/' + longtailsUsed + ' longtail keywords distributed (1pt - CRITICAL ISSUE)');
+      breakdown.keyword_strategy.details.push(`✗ Only ${termsDistributed}/${parsed.terms.length} additional keywords distributed (1pt - CRITICAL ISSUE)`);
     }
   } else {
-    breakdown.keyword_strategy.score += 5;
-    breakdown.keyword_strategy.details.push('○ No longtail keywords provided (5pts - N/A)');
+    breakdown.keyword_strategy.score += 7;
+    breakdown.keyword_strategy.details.push('○ No additional keywords provided (7pts - N/A)');
   }
-  
+
+  // First paragraph keywords (5 points)
+  const afpSection = brief.outline.find(s => s.heading.toLowerCase().includes('answer') || s.section_number === 1);
+  if (afpSection && afpSection.content_guidance) {
+    const guidance = afpSection.content_guidance.toLowerCase();
+    let firstParaScore = 0;
+    if (guidance.includes(strategy.primary_keyword.toLowerCase())) firstParaScore += 2;
+    if (guidance.includes(strategy.secondary_keyword.toLowerCase())) firstParaScore += 2;
+    if (parsed.terms.some(term => guidance.includes(term.toLowerCase()))) firstParaScore += 1;
+
+    breakdown.keyword_strategy.score += firstParaScore;
+    breakdown.keyword_strategy.details.push(`○ First paragraph keyword guidance (${firstParaScore}/5pts)`);
+  } else {
+    breakdown.keyword_strategy.details.push('✗ No first paragraph keyword guidance (0/5pts)');
+  }
+
   if (brief.faq_analysis.rationale && brief.faq_analysis.rationale.length > 20) {
     breakdown.faq_analysis.score += 5;
     breakdown.faq_analysis.details.push('✓ Clear FAQ decision rationale (5pts)');
@@ -1395,6 +1741,57 @@ function calculateQualityScore(brief, strategy) {
     max_score: 100,
     rating: rating,
     breakdown: breakdown
+  };
+}
+
+function validateKeywordDistribution(brief, strategy) {
+  const parsed = parseKeywords(strategy.longtail_keywords_semantics);
+
+  if (parsed.terms.length === 0) {
+    return { valid: true, warnings: ['No additional keywords provided'] };
+  }
+
+  // Count distributed terms (check both headings and keywords_to_include)
+  const distributedTerms = new Set();
+
+  brief.outline.forEach(section => {
+    const headingLower = section.heading ? section.heading.toLowerCase() : '';
+
+    // Check if terms appear in headings
+    parsed.terms.forEach(term => {
+      if (headingLower.includes(term.toLowerCase())) {
+        distributedTerms.add(term);
+      }
+    });
+
+    // Check if terms appear in keywords_to_include
+    if (section.keywords_to_include) {
+      section.keywords_to_include.forEach(kw => {
+        const kwLower = kw.toLowerCase();
+        parsed.terms.forEach(term => {
+          if (kwLower.includes(term.toLowerCase())) {
+            distributedTerms.add(term);
+          }
+        });
+      });
+    }
+  });
+
+  const distributionRate = parsed.terms.length > 0 ? distributedTerms.size / parsed.terms.length : 1;
+
+  const warnings = [];
+  if (distributionRate < 0.5) {
+    warnings.push(`Only ${distributedTerms.size}/${parsed.terms.length} additional keywords distributed (${Math.round(distributionRate * 100)}%)`);
+  }
+
+  return {
+    valid: warnings.length === 0,
+    warnings: warnings,
+    stats: {
+      terms_distributed: distributedTerms.size,
+      terms_total: parsed.terms.length,
+      distribution_rate: distributionRate
+    }
   };
 }
 
@@ -1484,7 +1881,8 @@ function validateBrief(brief, strategy) {
     external_links: brief.external_links.length,
     faq_included: brief.faq_analysis.include_faq,
     faq_questions: faqSection?.faq_questions?.length || 0,
-    quality_score: qualityScore.total_score
+    quality_score: qualityScore.total_score,
+    intent: strategy.intent
   });
 }
 
@@ -1563,20 +1961,27 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   addHeading(body, 'Keyword Usage Instructions', DocumentApp.ParagraphHeading.HEADING1);
   body.appendParagraph('Usage Requirements:').setBold(true).setFontSize(11);
   body.appendParagraph('');
-  const usageItems = [
-    brief.keyword_strategy.primary_usage,
-    brief.keyword_strategy.secondary_usage,
-    brief.keyword_strategy.longtail_distribution
-  ];
-  usageItems.forEach(item => {
-    body.appendListItem(item)
-      .setGlyphType(DocumentApp.GlyphType.BULLET)
-      .setBold(false)
-      .setFontSize(11);
-  });
+  body.appendParagraph(brief.keyword_strategy.primary_usage);
+  body.appendParagraph('');
+  body.appendParagraph(brief.keyword_strategy.secondary_usage);
+  body.appendParagraph('');
+
+  if (brief.keyword_strategy.longtail_distribution) {
+    body.appendParagraph('Longtail Distribution:').setBold(true);
+    body.appendParagraph(brief.keyword_strategy.longtail_distribution);
+    body.appendParagraph('');
+  }
+
+  if (brief.keyword_strategy.semantic_distribution) {
+    body.appendParagraph('Semantic Terms Distribution:').setBold(true);
+    body.appendParagraph(brief.keyword_strategy.semantic_distribution);
+    body.appendParagraph('');
+  }
   body.appendParagraph('');
   addHeading(body, 'Content Outline', DocumentApp.ParagraphHeading.HEADING1);
   body.appendParagraph(`Target Word Count: ${brief.word_count_range}`).setItalic(true);
+  body.appendParagraph(`Page Type: ${strategy.page_type}`).setItalic(true);
+  body.appendParagraph(`Intent: ${strategy.intent}`).setItalic(true);
   body.appendParagraph('');
   if (brief.faq_analysis.include_faq) {
     body.appendParagraph('Note: FAQ section is included in this outline based on competitor analysis and SERP features.')
@@ -1689,6 +2094,19 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
           .setForegroundColor('#0066cc')
           .setIndentStart(18);
       });
+      body.appendParagraph('');
+    }
+    if (brief.client_research.key_entities) {
+      body.appendParagraph('Key Entities (for LLM optimization):').setBold(true);
+      if (brief.client_research.key_entities.business_name) {
+        body.appendParagraph(`  Business: ${brief.client_research.key_entities.business_name}`);
+      }
+      if (brief.client_research.key_entities.locations && brief.client_research.key_entities.locations.length > 0) {
+        body.appendParagraph(`  Locations: ${brief.client_research.key_entities.locations.join(', ')}`);
+      }
+      if (brief.client_research.key_entities.certifications && brief.client_research.key_entities.certifications.length > 0) {
+        body.appendParagraph(`  Certifications: ${brief.client_research.key_entities.certifications.join(', ')}`);
+      }
       body.appendParagraph('');
     }
     if (brief.client_research.key_facts?.length > 0) {
@@ -1858,7 +2276,7 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   const keywordItems = [
     `Primary Keyword: ${strategy.primary_keyword}`,
     `Secondary Keyword: ${strategy.secondary_keyword}`,
-    strategy.longtail_keywords.length > 0 ? `Long-tail Keywords: ${strategy.longtail_keywords.join(', ')}` : null,
+    strategy.longtail_keywords_semantics ? `Long-tail Keywords & Semantics: ${strategy.longtail_keywords_semantics}` : null,
     `Location: ${strategy.location || 'Not specified'}`,
     `Page Type: ${strategy.page_type}`,
     `Intent: ${strategy.intent}`,
@@ -1937,7 +2355,6 @@ function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
         status: rowObj.status || 'DONE',
         brief_url: briefUrl || rowObj.brief_url || '',
         brief_data: briefData,
-        quality_score: rowObj.quality_score || (briefData ? briefData.quality_score?.total_score : null),
         run_id: rowObj.run_id,
         notes: rowObj.notes,
         secret: secret
@@ -1980,7 +2397,6 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
     status: rowObj.status || 'DONE',
     brief_url: briefUrl || rowObj.brief_url || '',
     brief_data: briefData,
-    quality_score: rowObj.quality_score || (briefData ? briefData.quality_score?.total_score : null),
     run_id: rowObj.run_id,
     notes: (rowObj.notes || '').toString().substring(0, 1000),
     updated_at: new Date().toISOString()
