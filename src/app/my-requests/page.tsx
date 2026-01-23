@@ -34,6 +34,7 @@ interface ContentRequest {
     webhook_sent: boolean | null;
     webhook_response: string | null;
     user_id: string;
+    current_run_id: string | null;
     profiles?: {
         full_name: string;
         email: string;
@@ -92,7 +93,8 @@ export default function MyRequests() {
             webhook_response,
             created_at,
             updated_at,
-            user_id
+            user_id,
+            current_run_id
           `, { count: 'exact' })
                     .order('created_at', { ascending: false })
                     .range(from, to);
@@ -152,7 +154,8 @@ export default function MyRequests() {
             webhook_response,
             created_at,
             updated_at,
-            user_id
+            user_id,
+            current_run_id
           `, { count: 'exact' })
                     .eq('user_id', user?.id)
                     .order('created_at', { ascending: false })
