@@ -4,11 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { run_id: string } }
+    { params }: { params: Promise<{ run_id: string }> }
 ) {
     try {
         const supabase = createRouteHandlerClient({ cookies });
-        const { run_id } = params;
+        const { run_id } = await params;
 
         // Get current user
         const { data: { user }, error: userError } = await supabase.auth.getUser();

@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase';
 import { useEffect } from 'react';
 import { AddClientModal } from '@/components/clients/AddClientModal';
 import { useToast } from "@/hooks/use-toast";
+import { usePusherBriefUpdates } from '@/hooks/usePusherBriefUpdates';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -68,6 +69,8 @@ export default function ContentBriefsPage() {
     const queryClient = useQueryClient();
     const [selectedClient, setSelectedClient] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
+    const [generatingBriefs, setGeneratingBriefs] = useState(false);
+    const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
 
     // Queries
     const { data: clients = [], isLoading: isLoadingClients } = useQuery({
@@ -109,18 +112,78 @@ export default function ContentBriefsPage() {
                 table: 'workbook_rows',
                 filter: `client_id=eq.${selectedClient}`
             }, (payload) => {
-                console.log('Realtime update received:', payload.eventType);
+                console.log('Supabase Realtime update received:', payload.eventType, payload.new);
+
+                // FALLBACK: Reset loading state if any brief completes (works even if Pusher fails)
+                if (payload.eventType === 'UPDATE' && payload.new) {
+                    const updatedRow = payload.new as WorkbookRow;
+                    if (updatedRow.status === 'DONE' || updatedRow.status === 'ERROR') {
+                        console.log('[Fallback] Brief completed via Supabase realtime, resetting loading state');
+                        const duration = generationStartTime
+                            ? Math.round((Date.now() - generationStartTime) / 1000)
+                            : 0;
+
+                        setGeneratingBriefs(false);
+                        setGenerationStartTime(null);
+
+                        toast({
+                            title: updatedRow.status === 'DONE' ? "✨ Content Brief Generated!" : "Generation Failed",
+                            description: updatedRow.status === 'DONE'
+                                ? `Successfully created brief for "${updatedRow.primary_keyword}" in ${duration}s`
+                                : updatedRow.notes || "An error occurred during brief generation",
+                            variant: updatedRow.status === 'DONE' ? "default" : "destructive",
+                        });
+                    }
+                }
+
                 // Invalidate the cache to trigger a refetch
                 queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
             })
             .subscribe((status) => {
-                console.log('Realtime subscription status:', status);
+                console.log('Supabase Realtime subscription status:', status);
             });
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [selectedClient, queryClient]);
+    }, [selectedClient, queryClient, generationStartTime, toast]);
+
+    // Pusher real-time brief status updates
+    const pusherUpdates = usePusherBriefUpdates(selectedClient);
+
+    useEffect(() => {
+        if (pusherUpdates.length === 0) return;
+
+        const latestUpdate = pusherUpdates[pusherUpdates.length - 1];
+        console.log('Processing Pusher update:', latestUpdate);
+
+        // Check if generation completed
+        if (latestUpdate.status === 'DONE' || latestUpdate.status === 'ERROR') {
+            const duration = generationStartTime
+                ? Math.round((Date.now() - generationStartTime) / 1000)
+                : 0;
+
+            setGeneratingBriefs(false);
+            setGenerationStartTime(null);
+
+            if (latestUpdate.status === 'DONE') {
+                toast({
+                    title: "✨ Content Brief Generated!",
+                    description: `Successfully created brief for "${latestUpdate.primary_keyword}" in ${duration}s`,
+                    variant: "default",
+                });
+            } else {
+                toast({
+                    title: "Generation Failed",
+                    description: latestUpdate.notes || "An error occurred during brief generation",
+                    variant: "destructive",
+                });
+            }
+
+            // Refresh the table
+            queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
+        }
+    }, [pusherUpdates, generationStartTime, toast, queryClient, selectedClient]);
 
 
     // Mutations
@@ -147,9 +210,11 @@ export default function ContentBriefsPage() {
             return result;
         },
         onSuccess: () => {
+            setGeneratingBriefs(true);
+            setGenerationStartTime(Date.now());
             toast({
-                title: "Research Engine Triggered",
-                description: "Deep content analysis has started for all new rows in the workbook.",
+                title: "🚀 Research Engine Started",
+                description: "Deep content analysis is now running. You'll be notified when complete.",
                 variant: "default",
             });
             // 2. Trigger a SILENT sync to show the newest 'IN_PROGRESS' statuses immediately
@@ -319,12 +384,12 @@ export default function ContentBriefsPage() {
                                             <Button
                                                 className="w-full h-12 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold text-sm shadow-lg shadow-brand-blue-crayola/20"
                                                 onClick={handleRunAutomation}
-                                                disabled={automationMutation.isPending}
+                                                disabled={automationMutation.isPending || generatingBriefs}
                                             >
-                                                {automationMutation.isPending ? (
+                                                {(automationMutation.isPending || generatingBriefs) ? (
                                                     <span className="flex items-center gap-2">
                                                         <RefreshCw className="w-4 h-4 animate-spin" />
-                                                        Processing Workbook...
+                                                        {automationMutation.isPending ? 'Starting...' : 'Generating Brief...'}
                                                     </span>
                                                 ) : (
                                                     <span className="flex items-center gap-2">

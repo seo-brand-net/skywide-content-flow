@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import Pusher from 'pusher';
+
+const pusher = new Pusher({
+    appId: process.env.NEXT_PUBLIC_PUSHER_APP_ID!,
+    key: process.env.NEXT_PUBLIC_PUSHER_KEY!,
+    secret: process.env.PUSHER_SECRET!,
+    cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+    useTLS: true,
+});
 
 export async function POST(request: Request) {
     try {
@@ -50,6 +59,22 @@ export async function POST(request: Request) {
         if (error) {
             console.error('Database update error:', error);
             return NextResponse.json({ error: 'Database update failed', details: error }, { status: 500 });
+        }
+
+        // Broadcast to Pusher for real-time UI updates
+        try {
+            await pusher.trigger(`client-${client_id}`, 'brief-status-update', {
+                id,
+                client_id,
+                primary_keyword,
+                status: status || 'DONE',
+                brief_url,
+                notes,
+            });
+            console.log(`Pusher event broadcast to client-${client_id}:`, { status, primary_keyword });
+        } catch (pusherError) {
+            console.error('Pusher broadcast error:', pusherError);
+            // Don't fail the request if Pusher fails - database update is more important
         }
 
         return NextResponse.json({ success: true, message: 'Database updated successfully' });
