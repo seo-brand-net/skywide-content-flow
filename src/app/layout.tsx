@@ -28,8 +28,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Get session separately if needed for initial state
   const { data: { session } } = await supabase.auth.getSession();
-  const user = session?.user ?? null;
 
   return (
     <html lang="en" suppressHydrationWarning>

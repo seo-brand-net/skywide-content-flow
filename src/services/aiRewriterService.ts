@@ -103,6 +103,7 @@ export async function uploadDocument(file: File): Promise<{ text: string; fileNa
   const formData = new FormData();
   formData.append('file', file);
 
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
   const { data: { session } } = await supabase.auth.getSession();
 
   const response = await fetch(
@@ -132,6 +133,7 @@ export async function streamChat(
   onComplete: () => void,
   onError: (error: string) => void
 ): Promise<void> {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
   const { data: { session } } = await supabase.auth.getSession();
 
   try {
