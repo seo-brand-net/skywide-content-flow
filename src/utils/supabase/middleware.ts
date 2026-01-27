@@ -56,7 +56,8 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Auth routes handling
-    if (user && (path.startsWith('/login') || path.startsWith('/register'))) {
+    // We allow authenticated users to access /register so they can complete invitation setup
+    if (user && path.startsWith('/login')) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
