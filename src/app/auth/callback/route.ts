@@ -1,6 +1,7 @@
-import { createClient } from "@/utils/supabase/server"
+import { createServerClient } from "@supabase/ssr"
 import { NextResponse } from "next/server"
 import { type EmailOtpType } from '@supabase/supabase-js'
+import { cookies } from "next/headers"
 
 /**
  * PRODUCTION AUTH CALLBACK
@@ -33,13 +34,34 @@ export async function GET(request: Request) {
         return NextResponse.redirect(redirectTarget)
     }
 
-    const supabase = await createClient()
+    const cookieStore = await cookies()
+    const response = NextResponse.next()
+
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll()
+                },
+                setAll(cookiesToSet) {
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        cookieStore.set(name, value, options)
+                    )
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        response.cookies.set(name, value, options)
+                    )
+                },
+            },
+        }
+    )
 
     // 0. Check for existing session (Handles cases where Supabase already verified the user)
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     if (session && !sessionError) {
         console.log('✅ [AUTH CALLBACK] Existing session found, proceeding to:', next)
-        return redirectToNext(request, origin, next)
+        return redirectToNext(request, origin, next, response)
     }
 
     // 1. Handle token_hash verification (Most stable for Resend/Custom Emails)
@@ -52,7 +74,7 @@ export async function GET(request: Request) {
 
         if (!verifyError) {
             console.log('✅ [AUTH CALLBACK] Token verified successfully. Redirecting to:', next)
-            return redirectToNext(request, origin, next)
+            return redirectToNext(request, origin, next, response)
         } else {
             console.error('❌ [AUTH CALLBACK] Token verification error:', verifyError.message, verifyError)
             const errorUrl = `${origin}/login?error=verification_failed&message=${encodeURIComponent(verifyError.message)}`
@@ -68,7 +90,7 @@ export async function GET(request: Request) {
 
         if (!exchangeError) {
             console.log('✅ [AUTH CALLBACK] Code exchanged successfully')
-            return redirectToNext(request, origin, next)
+            return redirectToNext(request, origin, next, response)
         } else {
             console.error('❌ [AUTH CALLBACK] Code exchange error:', exchangeError.message)
             return NextResponse.redirect(`${origin}/login?error=exchange_error&message=${encodeURIComponent(exchangeError.message)}`)
@@ -82,7 +104,7 @@ export async function GET(request: Request) {
 /**
  * Helper to handle cross-origin redirects correctly on Vercel
  */
-function redirectToNext(request: Request, origin: string, next: string) {
+function redirectToNext(request: Request, origin: string, next: string, response: NextResponse) {
     const forwardedHost = request.headers.get('x-forwarded-host')
     const forwardedProto = request.headers.get('x-forwarded-proto') || 'https'
 
@@ -97,7 +119,18 @@ function redirectToNext(request: Request, origin: string, next: string) {
     try {
         const redirectUrl = new URL(next, baseUrl)
         console.log('🚀 [AUTH CALLBACK] Final Redirect URL:', redirectUrl.toString())
-        return NextResponse.redirect(redirectUrl.toString())
+
+        // Create the redirect response
+        const finalRedirect = NextResponse.redirect(redirectUrl.toString())
+
+        // IMPORTANT: Copy over all cookies from the response object we used for verification
+        // This is what persists the session!
+        response.cookies.getAll().forEach(cookie => {
+            const { name, value, ...options } = cookie
+            finalRedirect.cookies.set(name, value, options)
+        })
+
+        return finalRedirect
     } catch (e) {
         console.error('❌ [AUTH CALLBACK] Failed to construct redirect URL:', e)
         return NextResponse.redirect(`${baseUrl}${next.startsWith('/') ? '' : '/'}${next}`)
