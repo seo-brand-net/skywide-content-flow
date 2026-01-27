@@ -9,10 +9,12 @@ export async function GET(request: Request) {
     const next = searchParams.get('next') ?? '/dashboard'
 
     if (code) {
+        console.log('AUTH CALLBACK: Code received:', code.substring(0, 10) + '...');
         const supabase = await createClient()
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
+            console.log('AUTH CALLBACK: Session exchanged successfully. Redirecting to:', next);
             // Priority: URL origin > x-forwarded-host > fallback
             let baseUrl = origin;
             const forwardedHost = request.headers.get('x-forwarded-host');
@@ -26,7 +28,7 @@ export async function GET(request: Request) {
             const redirectUrl = new URL(next, baseUrl);
             return NextResponse.redirect(redirectUrl.toString());
         } else {
-            console.error('Auth callback exchange error:', error);
+            console.error('AUTH CALLBACK Error: Failed to exchange code for session:', error.message, error.status);
         }
     }
 

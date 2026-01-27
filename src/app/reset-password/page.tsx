@@ -20,11 +20,10 @@ export default function ResetPassword() {
 
     const handleRequestReset = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email) return;
-
+        const trimmedEmail = email.trim();
         setIsLoading(true);
         try {
-            const { error } = await resetPassword(email);
+            const { error } = await resetPassword(trimmedEmail);
             if (!error) {
                 toast({
                     title: "Check your email",

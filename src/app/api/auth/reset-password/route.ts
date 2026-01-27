@@ -13,35 +13,29 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // 1. Generate the recovery link securely
-        // First, check if the user exists to give a better error
-        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
-        const user = userData?.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-
-        if (!user) {
-            console.error(`API ROUTE: User ${email} not found in Supabase Auth for project ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
-            return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
-        }
-
+        const cleanEmail = email.trim().toLowerCase();
         // Determine the site URL
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
         // Generate a secure password reset link
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
-            email: email,
+            email: cleanEmail,
             options: {
-                // redirectTo: Where the user should go AFTER Supabase verifies the link
                 redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
             },
         });
 
         if (linkError) {
             console.error('Failed to generate recovery link:', linkError);
+            if (linkError.message.includes('User not found')) {
+                return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
+            }
             return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
 
         const recoveryLink = linkData.properties.action_link;
+        console.log(`API ROUTE: Recovery link generated for ${cleanEmail}: ${recoveryLink}`);
 
         // 2. Send email via Resend
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
@@ -49,7 +43,7 @@ export async function POST(request: Request) {
 
         const { data: resendData, error: emailError } = await resend.emails.send({
             from: `SKYWIDE <${fromEmail}>`,
-            to: [email],
+            to: [cleanEmail],
             subject: 'Reset Your SKYWIDE Password',
             html: `
                 <!DOCTYPE html>
