@@ -17,7 +17,6 @@ export default function UpdatePasswordPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [isInternalLoading, setIsInternalLoading] = useState(true);
 
     const { updatePassword, session, loading: authLoading } = useAuth();
     const router = useRouter();
@@ -47,25 +46,7 @@ export default function UpdatePasswordPage() {
         }
     };
 
-    // Handle initial loading and hash fragment detection
-    useEffect(() => {
-        // Run once on mount
-        const hasToken = window.location.hash.includes('access_token') ||
-            window.location.search.includes('type=recovery');
-
-        // If there's a token, give Supabase more time to process it
-        if (hasToken) {
-            const timer = setTimeout(() => setIsInternalLoading(false), 2000);
-            return () => clearTimeout(timer);
-        } else {
-            setIsInternalLoading(false);
-        }
-    }, []); // Empty dependency array - run only once on mount
-
-
-    const isActuallyLoading = authLoading || isInternalLoading;
-
-    if (isActuallyLoading) {
+    if (authLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-cyan"></div>

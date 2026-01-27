@@ -22,7 +22,7 @@ export async function POST(request: Request) {
             type: 'recovery',
             email: cleanEmail,
             options: {
-                redirectTo: `${siteUrl}/update-password`,
+                redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
             },
         });
 
@@ -101,7 +101,13 @@ export async function POST(request: Request) {
         console.log('API ROUTE: Resend Success! Message ID:', resendData?.id);
         return NextResponse.json({ success: true, messageId: resendData?.id });
     } catch (error: any) {
-        console.error('Reset Password API Error:', error);
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+        console.error('Reset Password API Error:', {
+            message: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+        });
+        return NextResponse.json({
+            error: 'An unexpected error occurred. Please try again later.'
+        }, { status: 500 });
     }
 }
