@@ -28,9 +28,12 @@ export async function POST(request: Request) {
         });
 
         if (linkError) {
-            console.error('Failed to generate invitation link:', linkError);
+            console.error('API ROUTE: Failed to generate invitation link:', linkError);
             return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
+
+        // Log properties for debugging
+        console.log('API ROUTE: Link properties keys:', Object.keys(linkData.properties || {}));
 
         // Determine the site URL for the callback
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
@@ -50,10 +53,20 @@ export async function POST(request: Request) {
 
         // CRITICAL: Construct our own link using the token_hash
         // This goes to our server-side callback, which verifies the token and redirects to /register
-        const tokenHash = (linkData.properties as any).token_hash;
+        const properties = linkData.properties as any;
+        const tokenHash = properties?.token_hash || properties?.hashed_token;
+
+        if (!tokenHash) {
+            console.error('API ROUTE: token_hash not found in linkData.properties', { properties });
+            return NextResponse.json({ error: 'Failed to extract invitation token' }, { status: 500 });
+        }
+
         const inviteLink = `${siteUrl}/auth/callback?token_hash=${tokenHash}&type=invite&next=/register`;
 
-        console.log('Generated invitation token_hash link:', inviteLink);
+        console.log('API ROUTE: Constructed invitation link:', {
+            hasTokenHash: !!tokenHash,
+            target: inviteLink
+        });
 
         // 2. Send email via Resend
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
