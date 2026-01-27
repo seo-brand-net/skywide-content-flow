@@ -22,66 +22,88 @@ function RegisterContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { user, session } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const token = searchParams.get('token');
-    const { invitation, loading, error } = useInvitationToken(token);
+    const { invitation: dbInvitation, loading, error } = useInvitationToken(token);
 
-    // Redirect authenticated users to dashboard
-    useEffect(() => {
-        if (user) {
-            router.push('/dashboard');
-        }
-    }, [user, router]);
+    // Construct invitation from session if user is logged in
+    const invitation: any = user ? {
+        id: user.id,
+        email: user.email || '',
+        full_name: user.user_metadata?.full_name || '',
+        role: user.user_metadata?.role || 'user',
+        status: 'accepted',
+        created_at: new Date().toISOString(),
+        expires_at: new Date().toISOString(),
+        token: 'native_invite'
+    } : dbInvitation;
 
     const handleRegistration = async (formData: RegistrationFormData) => {
-        if (!invitation || !token) return;
+        if (!invitation) return;
 
         setIsSubmitting(true);
 
         try {
-            // Call Server API to register (handles auto-confirm)
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: invitation.email,
-                    password: formData.password,
-                    role: invitation.role,
-                    fullName: invitation.full_name,
-                    token: token
-                })
-            });
+            if (user) {
+                // If user is already authenticated (via native invite callback)
+                // Just update their password
+                const { error: updateError } = await supabase.auth.updateUser({
+                    password: formData.password
+                });
 
-            const data = await response.json();
+                if (updateError) throw updateError;
 
-            if (!response.ok) {
-                if (response.status === 409) { // Conflict / Already Registered
-                    toast({
-                        title: "Account Already Exists",
-                        description: "An account with this email already exists. Please sign in instead.",
-                        variant: "destructive",
-                    });
-                    router.push('/login');
-                    return;
+                toast({
+                    title: "Registration Complete!",
+                    description: "Your account is now fully set up. Welcome to SKYWIDE!",
+                });
+
+                router.push('/dashboard');
+            } else {
+                // Fallback for old/manual token-based registration if no session exists
+                if (!token) throw new Error('No invitation token found');
+
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: invitation.email,
+                        password: formData.password,
+                        role: (invitation as any).role,
+                        fullName: (invitation as any).full_name,
+                        token: token
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    if (response.status === 409) {
+                        toast({
+                            title: "Account Already Exists",
+                            description: "An account with this email already exists. Please sign in instead.",
+                            variant: "destructive",
+                        });
+                        router.push('/login');
+                        return;
+                    }
+                    throw new Error(data.error || 'Registration failed');
                 }
-                throw new Error(data.error || 'Registration failed');
+
+                toast({
+                    title: "Account Created Successfully!",
+                    description: `Welcome to SKYWIDE! You can now sign in.`,
+                });
+
+                router.push('/login');
             }
-
-            toast({
-                title: "Account Created Successfully!",
-                description: `Welcome to SKYWIDE Content Dashboard! You can now sign in immediately.`,
-            });
-
-            // Redirect to login page
-            router.push('/login');
-
         } catch (error: any) {
             console.error('Registration error:', error);
             toast({
                 title: "Registration Failed",
-                description: error.message || 'Failed to create account. Please try again.',
+                description: error.message || 'Failed to complete registration.',
                 variant: "destructive",
             });
         } finally {
@@ -89,7 +111,8 @@ function RegisterContent() {
         }
     };
 
-    if (loading) {
+    // If we have a session, we don't need to wait for token validation
+    if (loading && !user) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center p-4">
                 <Card className="w-full max-w-md">

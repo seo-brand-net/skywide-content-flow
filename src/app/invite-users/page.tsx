@@ -45,81 +45,42 @@ export default function InviteUsers() {
         setSubmitting(true);
 
         try {
-            // Check for existing user or pending invitation
-            const { data: existingUser, error: userError } = await supabase
-                .from('profiles')
-                .select('id, email')
-                .eq('email', formData.email)
-                .maybeSingle();
+            // Call our new invitation API
+            const response = await fetch('/api/auth/invite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: formData.email,
+                    fullName: formData.fullName,
+                    role: formData.role
+                })
+            });
 
-            if (userError && userError.code !== 'PGRST116') {
-                console.error('Profile query error:', userError);
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to send invitation');
             }
 
-            if (existingUser) {
-                toast({
-                    title: "User Already Exists",
-                    description: "A user with this email address already exists.",
-                    variant: "destructive",
-                });
-                return;
-            }
+            toast({
+                title: "Invitation Sent!",
+                description: `Invitation sent successfully to ${formData.email}. They will receive an email with instructions.`,
+            });
 
-            const { data: pendingInvitation, error: invitationError } = await supabase
-                .from('user_invitations')
-                .select('id, email, status')
-                .eq('email', formData.email)
-                .eq('status', 'pending')
-                .maybeSingle();
-
-            if (invitationError && invitationError.code !== 'PGRST116') {
-                console.error('Invitation query error:', invitationError);
-            }
-
-            if (pendingInvitation) {
-                toast({
-                    title: "Invitation Already Sent",
-                    description: "A pending invitation already exists for this email address.",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            // Generate secure token and expiration date
-            const token = crypto.randomUUID();
-            const expiresAt = new Date();
-            expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
-
-            // Save invitation to database
-            const { error } = await supabase
-                .from('user_invitations')
-                .insert([{
+            // We still keep the user_invitations table for UI tracking
+            // Use Supabase client to sync if needed, or just refresh the list
+            // Assuming the server handled the profile creation, we might want to manually insert into user_invitations for UI tracking
+            try {
+                await supabase.from('user_invitations').upsert([{
                     invited_by: user!.id,
                     email: formData.email,
                     full_name: formData.fullName,
                     role: formData.role,
-                    token: token,
-                    expires_at: expiresAt.toISOString(),
-                    status: 'pending'
-                }]);
-
-            if (error) throw error;
-
-            // Send invitation email
-            try {
-                await sendInvitationEmail(formData.email, formData.fullName, formData.role, token);
-
-                toast({
-                    title: "Invitation Sent!",
-                    description: `Invitation sent successfully to ${formData.email}. They will receive an email with registration instructions.`,
-                });
-            } catch (emailError: any) {
-                console.error('Email sending failed:', emailError);
-                toast({
-                    title: "Invitation Saved",
-                    description: `Invitation saved but email failed to send to ${formData.email}. You can resend it from the table below.`,
-                    variant: "destructive",
-                });
+                    status: 'pending',
+                    token: 'native_invite' // Indicating it's a native invite
+                }], { onConflict: 'email' });
+            } catch (syncError) {
+                console.warn('Sync to user_invitations failed:', syncError);
             }
 
             // Refresh invitations list
@@ -139,7 +100,20 @@ export default function InviteUsers() {
 
     const handleResendInvitation = async (invitation: Invitation) => {
         try {
-            await sendInvitationEmail(invitation.email, invitation.full_name, invitation.role, invitation.token);
+            const response = await fetch('/api/auth/invite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: invitation.email,
+                    fullName: invitation.full_name,
+                    role: invitation.role
+                })
+            });
+
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.error || 'Failed to resend invitation');
+            }
 
             toast({
                 title: "Invitation Resent!",
@@ -149,7 +123,7 @@ export default function InviteUsers() {
             console.error('Error resending invitation:', error);
             toast({
                 title: "Error",
-                description: "Failed to resend invitation email.",
+                description: error.message || "Failed to resend invitation email.",
                 variant: "destructive",
             });
         }

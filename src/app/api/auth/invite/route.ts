@@ -5,62 +5,71 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_PASSWORD_RESET_API_KEY);
 
 export async function POST(request: Request) {
-    console.log('API ROUTE: Reset password request received');
+    console.log('API ROUTE: Invitation request received');
     try {
-        const { email, resetUrl, userFullName } = await request.json();
+        const body = await request.json();
+        const { email, fullName, role } = body;
 
-        if (!email || !resetUrl) {
+        if (!email || !fullName || !role) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // 1. Generate the recovery link securely
-        // First, check if the user exists to give a better error
-        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
-        const user = userData?.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-
-        if (!user) {
-            console.error(`API ROUTE: User ${email} not found in Supabase Auth for project ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
-            return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
-        }
-
-        // Determine the site URL
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
-        // Generate a secure password reset link
-        // Generate a secure password reset link
+        // 1. Generate the invitation link securely via Supabase Admin
+        // This creates an 'identity' in auth.users but the user is not yet verified/active
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'recovery',
+            type: 'invite',
             email: email,
+            options: {
+                data: {
+                    full_name: fullName,
+                    role: role,
+                }
+            }
         });
 
         if (linkError) {
-            console.error('Failed to generate recovery link:', linkError);
+            console.error('Failed to generate invitation link:', linkError);
             return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
 
+        // Determine the site URL for the callback
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+        // Update the Profile Role immediately (since the trigger doesn't handle role from metadata yet)
+        const userId = (linkData as any).user?.id;
+        if (userId) {
+            const { error: profileError } = await supabaseAdmin
+                .from('profiles')
+                .update({ role: role })
+                .eq('id', userId);
+
+            if (profileError) {
+                console.warn('Warning: Could not update profile role immediately:', profileError.message);
+            }
+        }
+
         // CRITICAL: Construct our own link using the token_hash
-        // This bypasses the Supabase redirect and goes straight to our server-side callback
+        // This goes to our server-side callback, which verifies the token and redirects to /register
         const tokenHash = (linkData.properties as any).token_hash;
-        const recoveryLink = `${siteUrl}/auth/callback?token_hash=${tokenHash}&type=recovery&next=/update-password`;
+        const inviteLink = `${siteUrl}/auth/callback?token_hash=${tokenHash}&type=invite&next=/register`;
 
-        console.log('Generated token_hash link:', recoveryLink);
-
+        console.log('Generated invitation token_hash link:', inviteLink);
 
         // 2. Send email via Resend
         const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-        console.log(`API ROUTE: Attempting to send from ${fromEmail} to ${email}`);
+        console.log(`API ROUTE: Attempting to send invitation from ${fromEmail} to ${email}`);
 
         const { data: resendData, error: emailError } = await resend.emails.send({
             from: `SKYWIDE <${fromEmail}>`,
             to: [email],
-            subject: 'Reset Your SKYWIDE Password',
+            subject: 'You have been invited to SKYWIDE',
             html: `
                 <!DOCTYPE html>
                 <html>
                 <head>
                     <meta charset="utf-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Reset Your Password</title>
+                    <title>Invitation to SKYWIDE</title>
                 </head>
                 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #ffffff; background-color: #1a1a1a; margin: 0; padding: 0;">
                     <div style="max-width: 600px; margin: 40px auto; padding: 0 20px;">
@@ -70,24 +79,22 @@ export async function POST(request: Request) {
                                 <p style="color: #888; font-size: 14px; margin: 0; text-transform: uppercase; letter-spacing: 1px;">POWERED BY SEOBRAND AI</p>
                             </div>
                             <div style="margin-bottom: 32px;">
-                                <h2 style="color: #ffffff; font-size: 24px; font-weight: 600; margin: 0 0 16px 0;">Reset Your Password</h2>
-                                ${userFullName ? `<p style="color: #cccccc; font-size: 16px; margin: 0 0 24px 0;">Hello ${userFullName},</p>` : ''}
+                                <h2 style="color: #ffffff; font-size: 24px; font-weight: 600; margin: 0 0 16px 0;">Welcome to SKYWIDE</h2>
+                                <p style="color: #cccccc; font-size: 16px; margin: 0 0 24px 0;">Hello ${fullName},</p>
                                 <p style="color: #cccccc; font-size: 16px; margin: 0 0 24px 0;">
-                                    We received a request to reset your password for your SKYWIDE account. Click the button below to create a new password.
+                                    You have been invited to join the SKYWIDE Content Dashboard as a <strong>${role}</strong>. 
+                                    Click the button below to accept your invitation and set up your account.
                                 </p>
                             </div>
                             <div style="margin: 32px 0;">
-                                <a href="${recoveryLink}"
+                                <a href="${inviteLink}"
                                     style="display: inline-block; background: linear-gradient(135deg, #06b6d4, #0891b2); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; border: none; cursor: pointer;">
-                                    Reset Password
+                                    Accept Invitation
                                 </a>
                             </div>
                             <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #333;">
-                                <p style="color: #888; font-size: 14px; margin: 0 0 8px 0;">
-                                    If you didn't request this password reset, you can safely ignore this email.
-                                </p>
                                 <p style="color: #888; font-size: 14px; margin: 0;">
-                                    This link will expire in 24 hours for security reasons.
+                                    This invitation link will expire in 7 days for security reasons.
                                 </p>
                             </div>
                             <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #333;">
@@ -110,7 +117,7 @@ export async function POST(request: Request) {
         console.log('API ROUTE: Resend Success! Message ID:', resendData?.id);
         return NextResponse.json({ success: true, messageId: resendData?.id });
     } catch (error: any) {
-        console.error('Reset Password API Error:', error);
+        console.error('Invitation API Error:', error);
         return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
     }
 }
