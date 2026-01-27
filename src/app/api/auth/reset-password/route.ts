@@ -30,6 +30,9 @@ export async function POST(request: Request) {
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
             email: email,
+            options: {
+                redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
+            },
         });
 
         if (linkError) {
@@ -37,24 +40,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
 
-        // CRITICAL: Extract the hash from action_link to avoid PKCE transformation
-        // The action_link contains the full URL with hash tokens, but goes through Supabase's server
-        // We need to extract just the hash portion and append it to our callback URL directly
-        const actionLink = linkData.properties.action_link;
-        console.log('Generated action_link:', actionLink);
+        // Use action_link directly - our new server callback handles code exchange properly
+        const recoveryLink = linkData.properties.action_link;
+        console.log('API ROUTE: Generated recovery link');
 
-        // Extract hash from the action link (everything after #)
-        const hashMatch = actionLink.match(/#(.+)$/);
-        const hashFragment = hashMatch ? hashMatch[1] : '';
-
-        if (!hashFragment) {
-            console.error('No hash fragment found in action_link:', actionLink);
-            return NextResponse.json({ error: 'Failed to extract authentication token' }, { status: 500 });
-        }
-
-        // Construct direct link to our callback with the hash tokens
-        const recoveryLink = `${siteUrl}/auth/callback#${hashFragment}`;
-        console.log('Constructed recovery link:', recoveryLink);
 
 
         // 2. Send email via Resend
