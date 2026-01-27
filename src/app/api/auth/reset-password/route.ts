@@ -27,12 +27,13 @@ export async function POST(request: Request) {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
         // Generate a secure password reset link
+        // Generate a secure password reset link
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
             email: email,
             options: {
-                redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
-            },
+                redirectTo: `${siteUrl}/auth/callback?next=/update-password`
+            }
         });
 
         if (linkError) {
@@ -40,10 +41,9 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
 
-        // Use action_link directly - our new server callback handles code exchange properly
+        // The action_link now points to Supabase, which will then redirect to our server-side callback
         const recoveryLink = linkData.properties.action_link;
-        console.log('API ROUTE: Generated recovery link');
-
+        console.log('Recovery link (Supabase verify URL):', recoveryLink);
 
 
         // 2. Send email via Resend

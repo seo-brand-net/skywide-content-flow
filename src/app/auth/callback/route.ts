@@ -1,54 +1,51 @@
-import { createClient } from '@/utils/supabase/server';
-import { NextResponse } from 'next/server';
+import { createClient } from "@/utils/supabase/server"
+import { NextResponse } from "next/server"
 
+/**
+ * PRODUCTION AUTH CALLBACK
+ * This route handles the server-side exchange of a temporary auth 'code'
+ * for a persistent user session/cookie.
+ */
 export async function GET(request: Request) {
-    const requestUrl = new URL(request.url);
-    const code = requestUrl.searchParams.get('code');
-    const next = requestUrl.searchParams.get('next') || '/dashboard';
-    const origin = requestUrl.origin;
+    const { searchParams, origin } = new URL(request.url)
+    const code = searchParams.get("code")
+    const next = searchParams.get("next") ?? "/dashboard"
+    const error = searchParams.get("error")
+    const error_description = searchParams.get("error_description")
 
-    console.log('[AUTH CALLBACK] Request received:', {
-        code: code?.substring(0, 10) + '...',
-        next,
-        origin
-    });
+    console.log('🔐 [AUTH CALLBACK] Triggered', { code: !!code, next, error })
+
+    if (error) {
+        console.error('❌ [AUTH CALLBACK] Supabase returned error:', error, error_description)
+        return NextResponse.redirect(`${origin}/login?error=${error}&description=${encodeURIComponent(error_description || '')}`)
+    }
 
     if (code) {
-        const supabase = await createClient();
+        const supabase = await createClient()
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
-        console.log('[AUTH CALLBACK] Exchanging code for session...');
+        if (!exchangeError) {
+            console.log('✅ [AUTH CALLBACK] Session exchanged successfully')
 
-        // CRITICAL: Server-side code exchange - no PKCE issues!
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            const forwardedHost = request.headers.get('x-forwarded-host')
+            const forwardedProto = request.headers.get('x-forwarded-proto') || 'https'
 
-        if (!error && data.session) {
-            console.log('[AUTH CALLBACK] ✅ Session created for:', data.user.email);
+            // If we're on Vercel, use the forwarded host to avoid cross-origin redirect issues
+            let baseUrl = origin
+            if (forwardedHost && !origin.includes('localhost')) {
+                baseUrl = `${forwardedProto}://${forwardedHost}`
+            }
 
-            // Session is now in cookies, redirect to destination
-            const redirectUrl = `${origin}${next}`;
-            console.log('[AUTH CALLBACK] Redirecting to:', redirectUrl);
+            const redirectUrl = new URL(next, baseUrl)
+            console.log('🚀 [AUTH CALLBACK] Redirecting to:', redirectUrl.toString())
 
-            return NextResponse.redirect(redirectUrl);
+            return NextResponse.redirect(redirectUrl.toString())
         } else {
-            console.error('[AUTH CALLBACK] ❌ Code exchange failed:', error);
-            return NextResponse.redirect(
-                `${origin}/auth/error?error=${encodeURIComponent(error?.message || 'Unknown error')}`
-            );
+            console.error('❌ [AUTH CALLBACK] Token exchange error:', exchangeError.message)
+            return NextResponse.redirect(`${origin}/login?error=exchange_error&message=${encodeURIComponent(exchangeError.message)}`)
         }
     }
 
-    // Check for error params from Supabase
-    const error = requestUrl.searchParams.get('error');
-    const errorDescription = requestUrl.searchParams.get('error_description');
-
-    if (error) {
-        console.error('[AUTH CALLBACK] ❌ Error in URL:', error, errorDescription);
-        return NextResponse.redirect(
-            `${origin}/auth/error?error=${encodeURIComponent(errorDescription || error)}`
-        );
-    }
-
-    // No code, no error - invalid callback
-    console.error('[AUTH CALLBACK] ❌ No code or error in URL');
-    return NextResponse.redirect(`${origin}/login?error=invalid_callback`);
+    console.error('❌ [AUTH CALLBACK] No code found in URL')
+    return NextResponse.redirect(`${origin}/login?error=no_code`)
 }
