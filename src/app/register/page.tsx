@@ -125,7 +125,8 @@ function RegisterContent() {
         );
     }
 
-    if (error || !invitation) {
+    // CRITICAL: If we have a user, we ignore the token error because we're doing session-based set-password
+    if ((error && !user) || (!invitation && !user)) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center p-4">
                 <Card className="w-full max-w-md">
