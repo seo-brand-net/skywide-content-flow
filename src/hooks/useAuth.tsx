@@ -191,8 +191,7 @@ export function AuthProvider({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email,
-          resetUrl: `${window.location.origin}/auth/callback?next=/update-password`,
+          email
         })
       });
 
