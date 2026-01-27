@@ -16,14 +16,31 @@ export async function GET(request: Request) {
     const error = searchParams.get("error")
     const error_description = searchParams.get("error_description")
 
-    console.log('🔐 [AUTH CALLBACK] Triggered', { code: !!code, token_hash: !!token_hash, type, next, error })
+    console.log('🔐 [AUTH CALLBACK] Triggered', {
+        url: request.url,
+        code: !!code,
+        token_hash: !!token_hash,
+        type,
+        next,
+        error,
+        origin
+    })
 
     if (error) {
         console.error('❌ [AUTH CALLBACK] Supabase returned error:', error, error_description)
-        return NextResponse.redirect(`${origin}/login?error=${error}&description=${encodeURIComponent(error_description || '')}`)
+        const redirectTarget = `${origin}/login?error=${error}&description=${encodeURIComponent(error_description || '')}`
+        console.log('🚀 [AUTH CALLBACK] Redirecting to error page:', redirectTarget)
+        return NextResponse.redirect(redirectTarget)
     }
 
     const supabase = await createClient()
+
+    // 0. Check for existing session (Handles cases where Supabase already verified the user)
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    if (session && !sessionError) {
+        console.log('✅ [AUTH CALLBACK] Existing session found, proceeding to:', next)
+        return redirectToNext(request, origin, next)
+    }
 
     // 1. Handle token_hash verification (Most stable for Resend/Custom Emails)
     if (token_hash && type) {
@@ -34,11 +51,13 @@ export async function GET(request: Request) {
         })
 
         if (!verifyError) {
-            console.log('✅ [AUTH CALLBACK] Token verified successfully')
+            console.log('✅ [AUTH CALLBACK] Token verified successfully. Redirecting to:', next)
             return redirectToNext(request, origin, next)
         } else {
-            console.error('❌ [AUTH CALLBACK] Token verification error:', verifyError.message)
-            return NextResponse.redirect(`${origin}/login?error=verification_failed&message=${encodeURIComponent(verifyError.message)}`)
+            console.error('❌ [AUTH CALLBACK] Token verification error:', verifyError.message, verifyError)
+            const errorUrl = `${origin}/login?error=verification_failed&message=${encodeURIComponent(verifyError.message)}`
+            console.log('🚀 [AUTH CALLBACK] Redirecting to:', errorUrl)
+            return NextResponse.redirect(errorUrl)
         }
     }
 
@@ -56,8 +75,8 @@ export async function GET(request: Request) {
         }
     }
 
-    console.error('❌ [AUTH CALLBACK] No valid authentication method found in URL')
-    return NextResponse.redirect(`${origin}/login?error=no_auth_method`)
+    console.error('❌ [AUTH CALLBACK] No valid authentication method found in URL and no active session')
+    return NextResponse.redirect(`${origin}/login?error=no_auth_method&next=${encodeURIComponent(next)}`)
 }
 
 /**
@@ -68,11 +87,19 @@ function redirectToNext(request: Request, origin: string, next: string) {
     const forwardedProto = request.headers.get('x-forwarded-proto') || 'https'
 
     let baseUrl = origin
+
+    // In Next.js App Router, request.url's origin might be internal. 
+    // We prefer the origin from the URL object if it's not localhost, or the forwarded host.
     if (forwardedHost && !origin.includes('localhost')) {
         baseUrl = `${forwardedProto}://${forwardedHost}`
     }
 
-    const redirectUrl = new URL(next, baseUrl)
-    console.log('🚀 [AUTH CALLBACK] Redirecting to:', redirectUrl.toString())
-    return NextResponse.redirect(redirectUrl.toString())
+    try {
+        const redirectUrl = new URL(next, baseUrl)
+        console.log('🚀 [AUTH CALLBACK] Final Redirect URL:', redirectUrl.toString())
+        return NextResponse.redirect(redirectUrl.toString())
+    } catch (e) {
+        console.error('❌ [AUTH CALLBACK] Failed to construct redirect URL:', e)
+        return NextResponse.redirect(`${baseUrl}${next.startsWith('/') ? '' : '/'}${next}`)
+    }
 }

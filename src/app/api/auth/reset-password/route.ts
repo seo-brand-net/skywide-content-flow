@@ -27,10 +27,10 @@ export async function POST(request: Request) {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
         // Generate a secure password reset link
-        // Generate a secure password reset link
         const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
             type: 'recovery',
             email: email,
+            options: { redirectTo: resetUrl } // Use the provided resetUrl as the redirect target
         });
 
         if (linkError) {
@@ -38,12 +38,19 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
 
+        // Log properties for debugging (Wait, I'll log them safely)
+        console.log('API ROUTE: Link properties keys:', Object.keys(linkData.properties || {}));
+
         // CRITICAL: Construct our own link using the token_hash
-        // This bypasses the Supabase redirect and goes straight to our server-side callback
-        const tokenHash = (linkData.properties as any).token_hash;
+        // If token_hash isn't where we expect, we'll try other locations
+        const properties = linkData.properties as any;
+        const tokenHash = properties.token_hash || properties.hashed_token;
         const recoveryLink = `${siteUrl}/auth/callback?token_hash=${tokenHash}&type=recovery&next=/update-password`;
 
-        console.log('Generated token_hash link:', recoveryLink);
+        console.log('API ROUTE: Constructed reset link:', {
+            hasTokenHash: !!tokenHash,
+            target: recoveryLink
+        });
 
 
         // 2. Send email via Resend
