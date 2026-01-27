@@ -55,12 +55,13 @@ export default function UpdatePasswordPage() {
 
         // If there's a token, give Supabase more time to process it
         if (hasToken) {
-            const timer = setTimeout(() => setIsInternalLoading(false), 1500);
+            const timer = setTimeout(() => setIsInternalLoading(false), 2000);
             return () => clearTimeout(timer);
         } else {
             setIsInternalLoading(false);
         }
-    }, [authLoading]);
+    }, []); // Empty dependency array - run only once on mount
+
 
     const isActuallyLoading = authLoading || isInternalLoading;
 
