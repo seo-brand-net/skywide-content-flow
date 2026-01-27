@@ -7,9 +7,9 @@ const resend = new Resend(process.env.RESEND_PASSWORD_RESET_API_KEY);
 export async function POST(request: Request) {
     console.log('API ROUTE: Reset password request received');
     try {
-        const { email, resetUrl, userFullName } = await request.json();
+        const { email, userFullName } = await request.json();
 
-        if (!email || !resetUrl) {
+        if (!email) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
