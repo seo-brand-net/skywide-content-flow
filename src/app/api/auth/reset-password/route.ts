@@ -14,37 +14,34 @@ export async function POST(request: Request) {
         }
 
         // 1. Generate the recovery link securely
-        // First, check if the user exists to give a better error
-        const { data: userData, error: userError } = await supabaseAdmin.auth.admin.listUsers();
-        const user = userData?.users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        // Generate a secure password reset link
+        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+            type: 'recovery',
+            email: email,
+            options: { redirectTo: resetUrl }
+        });
 
-        if (!user) {
-            console.error(`API ROUTE: User ${email} not found in Supabase Auth for project ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
-            return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
+        if (linkError) {
+            console.error('API ROUTE: Failed to generate recovery link:', linkError);
+            if (linkError.message.toLowerCase().includes('not found') || linkError.message.toLowerCase().includes('does not exist')) {
+                return NextResponse.json({ error: 'User with this email not found' }, { status: 404 });
+            }
+            return NextResponse.json({ error: linkError.message }, { status: 500 });
         }
 
         // Determine the site URL
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-        // Generate a secure password reset link
-        const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'recovery',
-            email: email,
-            options: { redirectTo: resetUrl } // Use the provided resetUrl as the redirect target
-        });
+        // CRITICAL: Construct our own link using the token_hash
+        // This bypasses the Supabase redirect and goes straight to our server-side callback
+        const properties = linkData.properties as any;
+        const tokenHash = properties?.token_hash || properties?.hashed_token;
 
-        if (linkError) {
-            console.error('Failed to generate recovery link:', linkError);
-            return NextResponse.json({ error: linkError.message }, { status: 500 });
+        if (!tokenHash) {
+            console.error('API ROUTE: token_hash not found in linkData.properties', { properties });
+            return NextResponse.json({ error: 'Failed to extract verification token' }, { status: 500 });
         }
 
-        // Log properties for debugging (Wait, I'll log them safely)
-        console.log('API ROUTE: Link properties keys:', Object.keys(linkData.properties || {}));
-
-        // CRITICAL: Construct our own link using the token_hash
-        // If token_hash isn't where we expect, we'll try other locations
-        const properties = linkData.properties as any;
-        const tokenHash = properties.token_hash || properties.hashed_token;
         const recoveryLink = `${siteUrl}/auth/callback?token_hash=${tokenHash}&type=recovery&next=/update-password`;
 
         console.log('API ROUTE: Constructed reset link:', {
