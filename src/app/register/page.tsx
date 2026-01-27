@@ -27,6 +27,7 @@ function RegisterContent() {
 
     const token = searchParams.get('token');
     const { invitation, loading, error } = useInvitationToken(token);
+    const { signIn } = useAuth();
 
     // Redirect authenticated users to dashboard
     useEffect(() => {
@@ -71,11 +72,22 @@ function RegisterContent() {
 
             toast({
                 title: "Account Created Successfully!",
-                description: `Welcome to SKYWIDE Content Dashboard! You can now sign in immediately.`,
+                description: `Welcome to SKYWIDE Content Dashboard! Signing you in...`,
             });
 
-            // Redirect to login page
-            router.push('/login');
+            // Auto-login after successful registration
+            const { error: signInError } = await signIn(invitation.email, formData.password);
+
+            if (signInError) {
+                console.error('Auto-login failed:', signInError);
+                toast({
+                    title: "Auto-login Failed",
+                    description: "Account created but sign-in failed. Please log in manually.",
+                    variant: "destructive",
+                });
+                router.push('/login');
+            }
+            // If signIn succeeds, it will handle the redirect to dashboard
 
         } catch (error: any) {
             console.error('Registration error:', error);
