@@ -22,7 +22,7 @@ export async function POST(request: Request) {
             type: 'recovery',
             email: cleanEmail,
             options: {
-                redirectTo: `${siteUrl}/auth/callback?next=/update-password`,
+                redirectTo: `${siteUrl}/update-password`,
             },
         });
 
