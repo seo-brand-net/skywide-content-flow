@@ -329,8 +329,8 @@ export default function MyRequests() {
                         </h1>
                         <p className="text-muted-foreground">
                             {userRole === 'admin'
-                                ? `Total ${totalCount} content requests across all users`
-                                : `You have submitted ${totalCount} content requests`}
+                                ? `Managing ${totalCount} content ${totalCount === 1 ? 'request' : 'requests'} across the system`
+                                : `You have ${totalCount} content ${totalCount === 1 ? 'request' : 'requests'} in your history`}
                         </p>
                     </div>
                 </div>

@@ -40,8 +40,26 @@ export function AuthProvider({
   const supabase = createClient();
 
   useEffect(() => {
+    console.log('[Auth] 🔐 Initializing auth listener');
+
+    // 1. Initial manual check to ensure sync
+    const checkInitialSession = async () => {
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      if (currentSession) {
+        console.log('[Auth] Found existing session on mount');
+        setSession(currentSession);
+        setUser(currentSession.user);
+        fetchProfile(currentSession.user.id);
+      }
+      setLoading(false);
+    };
+    checkInitialSession();
+
+    // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        console.log(`[Auth] 🔄 Event received: ${event}`);
+
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
@@ -57,15 +75,38 @@ export function AuthProvider({
           setIsPasswordReset(false);
         } else if (event === 'SIGNED_OUT') {
           setIsPasswordReset(false);
-          router.push('/login');
-          router.refresh();
+          // Only redirect if we are on a protected route
+          // This prevents infinite loops if login page itself triggers a mount event
+          const protectedPaths = ['/dashboard', '/research', '/content-briefs', '/analytics', '/settings'];
+          const isProtected = protectedPaths.some(p => window.location.pathname.startsWith(p));
+
+          if (isProtected) {
+            console.log('[Auth] 🚪 User signed out, redirecting to login');
+            router.push('/login');
+          }
         } else if (event === 'PASSWORD_RECOVERY') {
           setIsPasswordReset(true);
+        } else if (event === 'TOKEN_REFRESHED') {
+          console.log('[Auth] ✨ Token refreshed successfully');
+        } else if (event === 'INITIAL_SESSION') {
+          console.log('[Auth] 🔑 Initial session established');
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    // 3. Keep-alive Heartbeat (proactively refresh session every 10 mins)
+    const heartbeat = setInterval(async () => {
+      if (session) {
+        console.log('[Auth] 💓 Heartbeat: Checking session health...');
+        const { data, error } = await supabase.auth.getSession();
+        if (error) console.error('[Auth] Heartbeat error:', error);
+      }
+    }, 10 * 60 * 1000); // 10 minutes
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(heartbeat);
+    };
   }, [supabase, router]);
 
   const fetchProfile = async (userId: string) => {

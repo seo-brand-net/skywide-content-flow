@@ -2,8 +2,51 @@
  * ============================================================================
  * CLAUDE-POWERED SEO CONTENT BRIEF BUILDER
  * ============================================================================
- * Version: 1.5.0
- * Last Updated: 2025-01-20
+ * Version: 1.6.0
+ * Last Updated: 2025-01-27
+ *
+ * CHANGELOG v1.6.0:
+ * 
+ * INTERNAL LINKING OVERHAUL:
+ * - REMOVED: URL cap limit - all filtered URLs are now sent to Claude
+ *   * Product filtering makes this safe (no more 12,000 product URLs)
+ * - ADDED: E-commerce product page filtering
+ *   * Automatically skips child sitemaps with "product" in filename
+ *   * New column: product_page_path - user can specify product URL pattern (e.g., "/products/")
+ *   * If product link would be valuable, Claude recommends product type without specific URL
+ * - ADDED: Intent-based filtering for transactional/commercial pages
+ *   * Skips entire blog/post sitemaps (sitemap-level filtering)
+ *   * Filters out informational URLs that slip through (URL-level filtering):
+ *     - Blog/news/articles/posts/resources/guides content
+ *     - About/team/our-story/leadership pages
+ *     - FAQ/help-center/support pages
+ *   * Keeps users at bottom of funnel for conversion-focused pages
+ * - UNCHANGED: Informational/navigational/hybrid intents still get all page types
+ * - REMOVED: Distributed sampling logic (no longer needed with filtering)
+ * - REMOVED: URL categorization by path patterns (was law-firm specific, not reliable)
+ * - CHANGED: Internal link target is now 10 (minimum 5)
+ * - IMPROVED: Stricter instructions to Claude to NEVER invent URLs
+ * - IMPROVED: Semantic relevance emphasized over keyword matching
+ * 
+ * EXTERNAL LINKING IMPROVEMENTS:
+ * - CHANGED: Now provides 10 external link suggestions (strategist chooses best 2-4)
+ * - ADDED: Simple anchor text requirement - no keyword-stuffed anchors
+ *   * Good: "according to Moz", "this Harvard study", "per ABA guidelines"
+ *   * Bad: "comprehensive law firm SEO best practices guide"
+ * - CHANGED: .gov/.edu links only when genuinely relevant - don't force them
+ * - IMPROVED: Anchor text must accurately describe destination page content
+ * 
+ * KEYWORD USAGE INSTRUCTIONS:
+ * - ADDED: "Use once in conclusion paragraph" for primary keyword
+ * - CHANGED: "Requirements" renamed to "Longtail/Semantic Keywords Requirements"
+ * 
+ * SITEMAP FETCHING:
+ * - CHANGED: No longer limited to first 3 child sitemaps
+ * - ADDED: 30-second timeout safeguard (SITEMAP_FETCH_TIMEOUT_MS)
+ * - ADDED: Automatic skipping of product sitemaps for e-commerce sites
+ * 
+ * GOOGLE DOC SHARING:
+ * - ADDED: Documents automatically set to "Anyone with link can edit"
  *
  * CHANGELOG v1.5.0:
  * - ADDED: Comprehensive Local SEO optimization when location is provided
@@ -204,9 +247,11 @@ const CONFIG = {
   // SHEET_NAME is now dynamic or uses this as default
   DEFAULT_SHEET_NAME: "Content Brief Automation",
   DOCS_FOLDER_ID: "1nk3KsqlCv5-ndsayI-K1EC8aJXqvoAVQ",
-  MIN_INTERNAL_LINKS: 3,
-  MAX_INTERNAL_LINKS: 8,
-  MAX_EXTERNAL_LINKS: 4,
+  MIN_INTERNAL_LINKS: 5,
+  TARGET_INTERNAL_LINKS: 10,
+  MAX_INTERNAL_LINKS: 10,
+  MAX_EXTERNAL_LINKS: 10,
+  SITEMAP_FETCH_TIMEOUT_MS: 30000,
   USE_WEB_SEARCH: true,
   VERIFY_EXTERNAL_LINKS: true,
   DEEP_SERP_ANALYSIS: true,
@@ -424,6 +469,127 @@ function parseIntent(intentString) {
   };
 }
 
+/**
+ * Checks if the intent is a hybrid format (e.g., "transactional/informational")
+ * Used to determine if blog/informational content should be included in internal links
+ */
+function isHybridIntent(intent) {
+  const intentData = parseIntent(intent);
+  return intentData.isHybrid;
+}
+
+/**
+ * Checks if the intent requires filtering out blog/informational content
+ * Returns true for pure transactional or commercial intents
+ * Returns false for informational, navigational, or any hybrid intent
+ */
+function shouldExcludeBlogContent(intent) {
+  const intentData = parseIntent(intent);
+  
+  // Hybrid intents allow mixed content (user has mixed mindset)
+  if (intentData.isHybrid) {
+    return false;
+  }
+  
+  // Pure transactional or commercial = exclude blogs (don't send users back down funnel)
+  if (intentData.primary === 'transactional' || intentData.primary === 'commercial') {
+    return true;
+  }
+  
+  // Informational or navigational = include everything
+  return false;
+}
+
+/**
+ * Filters sitemap URLs based on intent
+ * - Transactional/Commercial: Excludes blog/news/resource/article pages
+ * - Informational/Navigational/Hybrid: Includes all page types
+ */
+function filterUrlsByIntent(urls, intent) {
+  if (!shouldExcludeBlogContent(intent)) {
+    debugLog('INTENT_FILTER', `Intent "${intent}" allows all content types - no filtering applied`);
+    return urls;
+  }
+  
+  // Patterns that indicate informational content - exclude for transactional/commercial intent
+  // These pages don't support conversion and send users back up the funnel
+  const informationalPatterns = [
+    // Blog/news content
+    /\/blog\//i,
+    /\/blogs\//i,
+    /\/news\//i,
+    /\/articles?\//i,
+    /\/posts?\//i,
+    /\/resources?\//i,
+    /\/insights?\//i,
+    /\/guides?\//i,
+    /\/tips\//i,
+    /\/advice\//i,
+    /\/learn\//i,
+    /\/education\//i,
+    /\/library\//i,
+    /\/knowledge\//i,
+    /\/how-to\//i,
+    /\/what-is\//i,
+    /\/understanding\//i,
+    // About/team pages
+    /\/about\//i,
+    /\/about-us\//i,
+    /\/our-team\//i,
+    /\/our-story\//i,
+    /\/who-we-are\//i,
+    /\/meet-the-team\//i,
+    /\/leadership\//i,
+    /\/team\//i,
+    /\/staff\//i,
+    // FAQ pages
+    /\/faq\//i,
+    /\/faqs\//i,
+    /\/frequently-asked/i,
+    /\/questions\//i,
+    /\/help-center\//i,
+    /\/support\//i
+  ];
+  
+  const filteredUrls = urls.filter(url => {
+    const urlLower = url.toLowerCase();
+    const isInformationalContent = informationalPatterns.some(pattern => pattern.test(urlLower));
+    return !isInformationalContent;
+  });
+  
+  debugLog('INTENT_FILTER', {
+    intent: intent,
+    original_count: urls.length,
+    filtered_count: filteredUrls.length,
+    removed: urls.length - filteredUrls.length,
+    reason: 'Transactional/Commercial intent - informational content excluded'
+  });
+  
+  return filteredUrls;
+}
+
+/**
+ * Filters URLs by product page path
+ * Used when user provides a product_page_path in the spreadsheet
+ */
+function filterProductUrls(urls, productPagePath) {
+  if (!productPagePath || productPagePath.trim() === '') {
+    return urls;
+  }
+  
+  const productPath = productPagePath.trim().toLowerCase();
+  const filtered = urls.filter(url => !url.toLowerCase().includes(productPath));
+  
+  debugLog('PRODUCT_URL_FILTER', {
+    product_path: productPath,
+    before: urls.length,
+    after: filtered.length,
+    removed: urls.length - filtered.length
+  });
+  
+  return filtered;
+}
+
 const SYSTEM_PROMPT = `You are an expert SEO content strategist creating simplified, high-performance content briefs for AI content generation machines.
 
 Your briefs must be clear, actionable, and optimized for both traditional search engines and LLM-based search (AI Overviews, ChatGPT, Perplexity, etc.).
@@ -434,12 +600,12 @@ Before creating the brief, you MUST research the client's website thoroughly:
 1. DISCOVER CLIENT PAGES:
    - Use web_search with "site:CLIENT_DOMAIN" to find relevant pages
    - Focus on: homepage, about, services, products, features pages
-   - Identify the 6-8 most relevant pages based on the brief topic (prioritize quality over quantity)
+   - Identify the 5-6 most relevant pages based on the brief topic
 
-2. ANALYZE CLIENT PAGES:
-   - Use web_search to visit and analyze those pages
-   - When you search for a specific URL, web_search will return content from that page
-   - Extract factual information:
+2. ANALYZE CLIENT PAGES WITH WEB_FETCH:
+   - Use web_fetch on 3-5 of the most relevant client pages to read their ACTUAL content
+   - web_fetch gives you the full page content - use this for accurate information extraction
+   - Extract factual information from the fetched content:
      * Products and services offered
      * Features and specifications
      * Certifications and awards
@@ -468,9 +634,9 @@ Before creating the brief, you MUST research the client's website thoroughly:
    - Use this information as GROUND TRUTH for the brief
 
 3. NEVER HALLUCINATE CLIENT INFORMATION:
-   - Only reference facts found on the client's actual website
+   - Only reference facts found on the client's actual website via web_fetch
    - If you don't find specific information, don't make it up
-   - Base all client claims on pages you've researched
+   - Base all client claims on pages you've actually fetched and read
 
 ENTITY OPTIMIZATION (CRITICAL FOR LLM SEARCH):
 - Extract and note the client's business name (use 3-5x in content guidance)
@@ -566,23 +732,93 @@ INTERNAL LINKS (PRE-VERIFIED FROM SITEMAP):
 - All URLs in the provided list are verified and live on the client website
 - NO need to use web_search to verify internal links - they are pre-verified
 - If no sitemap URLs are provided, fall back to site: search and verify with web_search
-- All internal links must be contextually relevant to the content section
-- Minimum 3, maximum 8 per brief
-- Prioritize: service/practice area pages > relevant blog posts > location pages
+- Select links that are CONTEXTUALLY and SEMANTICALLY relevant to the page topic
+  * This includes directly related topics AND semantically related topics
+  * Think about what topics a user interested in the primary keyword would also want to explore
+  * Don't just match keywords - consider the user journey and related concepts
+- Target: 10 internal links per brief (minimum 5)
+- NOTE: For transactional/commercial intent pages, blog content is pre-filtered out
+  (We don't want to send conversion-ready users back to informational content)
+- NOTE: For e-commerce sites, product page URLs are pre-filtered out
+  If a specific product link would add value, note this in recommendations with the product type and reasoning (no URL needed)
+- CRITICAL: NEVER invent or guess URLs. If a URL is not in the provided list, do not include it.
 - Avoid: tag pages, search results, archives, author pages (these are pre-filtered)
 
 EXTERNAL LINKS:
-- After generating external link suggestions, VERIFY each URL with web_search
-- Search for the exact URL to check if it's accessible and contains relevant content
-- If URL is broken or inaccessible:
-  * Search for an alternative authoritative source
-  * Provide BOTH the original suggestion AND the alternative
-  * Format: Include both url_status and alternative_url in JSON
-  * Include verification_note for strategist to verify
-- Maximum 4 per brief
-- Prefer: .gov, .edu, industry standards, trade organizations, research studies
-- Avoid: competitor commercial pages, spammy domains
-- LOCAL SEO: If location is provided, include 1-2 local authority links:
+- Provide 10 external link suggestions - the strategist will choose the best 2-4
+
+SOURCE SELECTION (CRITICAL):
+- Search for authoritative sources RELEVANT TO THE PRIMARY KEYWORD TOPIC
+- Sources should support, validate, or provide additional context for the content being created
+- Examples of good source types (adapt to the specific topic):
+  * Official documentation and guidelines (.gov, .edu when relevant to topic)
+  * Industry associations and trade organizations for the specific field
+  * Research studies and data from reputable sources
+  * Well-known industry publications in that vertical
+  * Established brands/companies known for expertise in that topic area
+- For legal topics: ABA, state bar associations, legal research sites, court resources
+- For medical/health topics: CDC, NIH, medical journals, health organizations
+- For marketing/SEO topics: Moz, Ahrefs, Search Engine Journal, HubSpot
+- For technical topics: Official documentation, engineering associations, technical standards
+- For local topics: State .gov sites, county resources, local institutions
+
+SOURCE PRIORITIES:
+- .gov and .edu links are valuable BUT only if genuinely relevant to the topic
+- Do NOT force a .gov/.edu link if there isn't one that truly fits the content
+- A relevant industry publication is better than an irrelevant .gov link
+- Prefer: Topic-relevant industry publications, research studies, trade organizations, .gov/.edu (when relevant)
+- Avoid: Direct competitors offering the same service as the client, spammy domains, low-authority sites
+
+MANDATORY URL VERIFICATION PROCESS (YOU MUST FOLLOW THIS):
+Step 1: Use web_search to find a specific article/page (NOT just the homepage)
+  - Search for specific content related to the topic, not just the source name
+  - Look for the EXACT URL in the search results
+  - Copy the FULL URL path from search results, not just the domain
+
+Step 2: Use web_fetch on EVERY external link URL (MANDATORY)
+  - You MUST call web_fetch for each external link before including it
+  - Do NOT skip web_fetch - it is required for all external links
+  - Use the exact URL from search results, not the homepage
+
+Step 3: Based on web_fetch result:
+  - If web_fetch SUCCEEDS: Set url_status to "verified" - use the exact URL
+  - If web_fetch FAILS: Search for a different/correct URL, try web_fetch again
+  - If STILL fails after retry: Set url_status to "suggested" with verification_note
+
+VERIFICATION_NOTE FORMAT (CRITICAL):
+When url_status is "suggested", the verification_note must be a SHORT, SPECIFIC Google search query that the strategist can copy-paste directly into Google to find the exact page.
+
+GOOD verification_note examples (specific, searchable):
+  - "ABA Model Rule 7.3 attorney advertising"
+  - "Moz what is domain authority"
+  - "Google Search Console performance report guide"
+  - "CDC hand hygiene guidelines healthcare"
+
+BAD verification_note examples (too vague or conversational):
+  - "Official ABA website for legal profession standards"
+  - "Find the Google documentation about search"
+  - "Moz SEO resources"
+  - "Search for CDC guidelines"
+
+The verification_note should be specific enough to return the exact page as a top Google result.
+
+IMPORTANT: Do NOT default to homepage URLs. Search for SPECIFIC pages:
+  - BAD: Using a homepage URL with a note to "search for [specific topic]"
+  - GOOD: Using the exact article/page URL verified via web_fetch
+
+The goal is to have MOST external links verified (url_status: "verified"). 
+Only use "suggested" status as a last resort when web_fetch fails after multiple attempts.
+
+ANCHOR TEXT RULES (CRITICAL - FOLLOW EXACTLY):
+- Use SHORT, SIMPLE anchor text - maximum 3-4 words
+- Anchor text should reference the SOURCE, not describe the topic
+- GOOD examples: "according to [source name]", "this [organization] guideline", "per official documentation", "[source] reports"
+- BAD examples: Keyword phrases describing what the page is about
+- The anchor should tell users WHO said it, not WHAT it's about
+- Brand names and simple source references are preferred
+- NEVER use the topic keywords as the anchor text
+
+LOCAL SEO: If location is provided, include 1-2 local authority links:
   * State .gov websites (agencies, regulations, licensing boards)
   * County/city government sites
   * Local courts or legal resources (for law-related content)
@@ -594,14 +830,19 @@ MANDATORY SERP RESEARCH PROTOCOL:
 You MUST complete thorough SERP analysis before generating the brief. Briefs with insufficient research will be REJECTED.
 
 REQUIRED STEPS:
-1. Search for the primary keyword and analyze the top 7 ranking pages
-2. Use web_search to visit each of these pages individually
-3. Extract the actual word count from each page (use web_search to get content length)
-4. Calculate word count range using P25-P75 (25th to 75th percentile, rounded to nearest 50)
-5. COUNT THE H2/H3 SECTIONS on each competitor page - this determines your outline structure
-6. Identify SPECIFIC content patterns (not generic descriptions)
-7. Note competitive gaps we can exploit
+1. Use web_search for the primary keyword to find the top ranking pages
+2. Use web_fetch on the top 5 competitor pages to read their ACTUAL content
+3. From the fetched content, COUNT the actual word count on each page
+4. From the fetched content, COUNT the actual H2/H3 sections on each page
+5. Calculate word count range using P25-P75 (25th to 75th percentile, rounded to nearest 50)
+6. Identify SPECIFIC content patterns from the actual page content (not guessed from snippets)
+7. Note competitive gaps based on what's actually missing from competitor pages
 8. Document SERP features with specific details
+
+WHY WEB_FETCH IS REQUIRED FOR SERP ANALYSIS:
+- web_search only gives you snippets - you cannot accurately count words or sections from snippets
+- web_fetch gives you the full page content so you can actually count and analyze
+- Your word counts and section counts MUST be based on real data from web_fetch, not estimates
 
 SECTION COUNT CALCULATION (CRITICAL):
 - Count the number of H2 and H3 headings on EACH of the top 5-7 competitor pages
@@ -822,15 +1063,13 @@ Return ONLY a JSON object with this exact structure:
   ],
   "external_links": [
     {
-      "anchor": "string",
-      "url": "string - original URL suggestion",
-      "url_status": "string - 'verified' or 'broken'",
-      "alternative_url": "string or null - if original was broken",
-      "alternative_status": "string or null",
+      "anchor": "string - SIMPLE anchor text only (brand name, 'this study', 'read more') - NOT keyword-stuffed",
+      "url": "string - URL verified with web_fetch or best available URL",
+      "url_status": "string - 'verified' (web_fetch succeeded) or 'suggested' (needs manual verification)",
       "placement": "string - where in content",
       "rationale": "string",
       "domain_authority": "string - high/medium/low",
-      "verification_note": "string or null - note for strategist if issues"
+      "verification_note": "string or null - if 'suggested', provide a short specific Google search query to find the exact page"
     }
   ]
 }
@@ -840,7 +1079,7 @@ RULES:
 2. NEVER invent facts about the client - use only researched information
 3. For INTERNAL links: If sitemap URLs are provided, select from that list and set url_status to "200" (pre-verified)
 4. For INTERNAL links: Only use web_search to verify if NO sitemap URLs are provided
-5. For EXTERNAL links: ALWAYS verify using web_search
+5. For EXTERNAL links: Use web_search to find sources, then web_fetch to verify URLs
 4. ALWAYS use web_search to analyze SERPs and find links
 5. ONLY return real, verified URLs - no placeholders or tool IDs
 6. Keep internal links between MIN and MAX (3-8)
@@ -1035,7 +1274,11 @@ function ensureRequiredColumns(sheet) {
     'url', 'url_type', 'page_type', 'primary_keyword', 
     'secondary_keyword', 'longtail_keywords_semantics', 'location', 'intent'
   ];
+  const urlAliases = ['url', 'target_url', 'target-url', 'website_url'];
+  const hasUrl = normalizedHeaders.some(h => urlAliases.includes(h));
+  
   requiredHeaders.forEach(header => {
+    if (header === 'url' && hasUrl) return; // Skip if any alias exists
     if (!normalizedHeaders.includes(header)) {
       throw new Error(`Missing required column: ${header}`);
     }
@@ -1076,7 +1319,8 @@ function discoverDataSheet(ssOverride) {
     if (!sh || sh.getLastColumn() === 0) return false;
     const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
       .map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
-    return headers.includes('url');
+    const urlAliases = ['url', 'target_url', 'target-url', 'website_url'];
+    return headers.some(h => urlAliases.includes(h));
   }
   if (sheet && hasUrlColumn(sheet)) return sheet;
   debugLog('SHEET_DISCOVERY', `Targeting spreadsheet "${ss.getName()}". Searching for 'url' column...`);
@@ -1097,7 +1341,7 @@ function getSheetFromUrl(ss, url) {
   return null;
 }
 
-function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
+function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, overrideUserId) {
   const ss = openWorkbook(workbookUrl);
   let sheet = null;
   
@@ -1148,11 +1392,18 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
     const rowObj = rowToObject(data[r], headers);
     rowObj.id = rowIdString;
     rowObj.client_id = rowObj.client_id || fallbackClientId;
+    rowObj.user_id = overrideUserId || rowObj.user_id || '';
     notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
   targets.forEach(r => {
     try {
       const rowObj = rowToObject(data[r], headers);
+      if (!rowObj.id) {
+        const idCol = headers['id']?.index;
+        rowObj.id = (idCol !== undefined) ? sheet.getRange(r + 1, idCol + 1).getValue() : '';
+      }
+      rowObj.user_id = overrideUserId || rowObj.user_id || '';
+      
       const strategy = buildStrategy(rowObj);
       debugLog('STRATEGY', strategy);
       const brief = generateBriefWithClaude(strategy);
@@ -1163,7 +1414,13 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
         external_links: brief.external_links?.length
       });
       const docUrl = renderBriefToGoogleDoc(brief, strategy, overrideFolderId);
-      sheet.getRange(r + 1, headers['brief_url'].index + 1).setValue(docUrl);
+      debugLog('DOC_URL_CAPTURE', docUrl);
+      
+      const briefUrlCol = headers['brief_url']?.index;
+      if (briefUrlCol !== undefined) {
+        sheet.getRange(r + 1, briefUrlCol + 1).setValue(docUrl);
+      }
+      
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
       if (headers['quality_score']) {
@@ -1172,10 +1429,12 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
       const freshRowValues = sheet.getRange(r + 1, 1, 1, sheet.getLastColumn()).getValues()[0];
       const freshRowObj = rowToObject(freshRowValues, headers);
       if (!freshRowObj.client_id && fallbackClientId) freshRowObj.client_id = fallbackClientId;
-      if (!freshRowObj.id) {
-        const idCol = headers['id']?.index;
-        freshRowObj.id = (idCol !== undefined) ? String(freshRowValues[idCol]).trim() : '';
-      }
+      if (!freshRowObj.user_id) freshRowObj.user_id = rowObj.user_id;
+      if (!freshRowObj.id) freshRowObj.id = rowObj.id;
+      
+      // Ensure brief_url is populated in the object even if sheet update is slow or column is weird
+      freshRowObj.brief_url = docUrl || freshRowObj.brief_url || '';
+      
       notifyDashboardStatus(freshRowObj, docUrl, brief);
       const clientWorkbookUrl = rowObj['client_workbook'] || rowObj['workbook_url'];
       if (clientWorkbookUrl && String(clientWorkbookUrl).trim().startsWith('http')) {
@@ -1195,6 +1454,7 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
       );
       const rowObj = rowToObject(data[r], headers);
       if (!rowObj.client_id && fallbackClientId) rowObj.client_id = fallbackClientId;
+      rowObj.user_id = overrideUserId || rowObj.user_id || '';
       const idCol = headers['id']?.index;
       if (!rowObj.id && idCol !== undefined) {
         const freshId = sheet.getRange(r + 1, idCol + 1).getValue();
@@ -1215,8 +1475,9 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId) {
 }
 
 function buildStrategy(row) {
-  debugLog('BUILD_STRATEGY_INPUT', { url: row.url, primary_keyword: row.primary_keyword });
-  const clientDomain = extractDomain(row.url);
+  const targetUrl = row.url || row.target_url || row['target-url'] || row.website_url || '';
+  debugLog('BUILD_STRATEGY_INPUT', { url: targetUrl, primary_keyword: row.primary_keyword });
+  const clientDomain = extractDomain(targetUrl);
   
   if (!clientDomain) {
     debugLog('BUILD_STRATEGY_WARNING', `Could not extract domain from URL: "${row.url}"`);
@@ -1229,12 +1490,33 @@ function buildStrategy(row) {
     );
   }
   
+  const intent = String(row.intent || 'informational').toLowerCase().trim();
+  const productPagePath = String(row.product_page_path || '').trim();
+  
   // Fetch and filter sitemap URLs upfront for internal linking
-  debugLog('SITEMAP_PREFETCH', `Fetching sitemap for ${clientDomain}`);
-  const sitemapData = fetchAndFilterSitemap(clientDomain);
+  // Pass intent so we can skip blog sitemaps for transactional/commercial intent
+  // Pass product_page_path to filter out e-commerce product pages
+  debugLog('SITEMAP_PREFETCH', `Fetching sitemap for ${clientDomain}${productPagePath ? `, filtering out product path: ${productPagePath}` : ''}${shouldExcludeBlogContent(intent) ? ', skipping blog sitemaps' : ''}`);
+  const sitemapData = fetchAndFilterSitemap(clientDomain, productPagePath, intent);
+  
+  // Apply intent-based filtering to sitemap URLs (catches any blog URLs from non-blog sitemaps)
+  // Transactional/Commercial = exclude blog/informational content (don't send users back down funnel)
+  // Informational/Navigational/Hybrid = include all content types
+  if (sitemapData.all_filtered_urls.length > 0) {
+    const originalCount = sitemapData.all_filtered_urls.length;
+    sitemapData.all_filtered_urls = filterUrlsByIntent(sitemapData.all_filtered_urls, intent);
+    sitemapData.total_after_intent_filter = sitemapData.all_filtered_urls.length;
+    
+    debugLog('INTENT_FILTER_APPLIED', {
+      intent: intent,
+      before: originalCount,
+      after: sitemapData.all_filtered_urls.length,
+      removed: originalCount - sitemapData.all_filtered_urls.length
+    });
+  }
   
   return {
-    client_url: String(row.url || '').trim(),
+    client_url: String(targetUrl).trim(),
     client_domain: clientDomain,
     url_type: urlType,
     is_existing: urlType === 'existing',
@@ -1244,7 +1526,8 @@ function buildStrategy(row) {
     secondary_keyword: String(row.secondary_keyword || '').trim(),
     longtail_keywords_semantics: String(row.longtail_keywords_semantics || '').trim(),
     location: String(row.location || '').trim(),
-    intent: String(row.intent || 'informational').toLowerCase().trim(),
+    intent: intent,
+    product_page_path: productPagePath,
     sitemap_data: sitemapData
   };
 }
@@ -1387,27 +1670,43 @@ function getSitemapUrlsFromRobots(baseUrl) {
 /**
  * Fetches sitemap and filters/categorizes URLs for internal linking
  * Returns pre-verified URLs that Claude can pick from
+ * 
+ * v1.6.0 Changes:
+ * - Removed arbitrary "first 3 sitemaps" limit
+ * - Added timeout handling (stops after SITEMAP_FETCH_TIMEOUT_MS)
+ * - Fetches ALL child sitemaps until timeout or completion
+ * - Ensures relevant pages aren't missed due to sitemap order
+ * - Skips child sitemaps with "product" in filename (e-commerce)
+ * - Skips child sitemaps with "blog" or "post" in filename for transactional/commercial intent
  */
-function fetchAndFilterSitemap(domain) {
+function fetchAndFilterSitemap(domain, productPagePath, intent) {
+  const startTime = Date.now();
+  const skipBlogSitemaps = shouldExcludeBlogContent(intent);
   const result = {
     total_found: 0,
     total_after_filter: 0,
     sitemap_source: null,
-    urls_by_category: {
-      services: [],
-      practice_areas: [],
-      locations: [],
-      blog: [],
-      about: [],
-      other: []
-    },
-    all_filtered_urls: []
+    all_filtered_urls: [],
+    fetch_timeout_reached: false,
+    product_urls_removed: 0,
+    blog_sitemaps_skipped: 0
   };
   
   // Handle empty or invalid domain
   if (!domain || domain.trim() === '') {
     debugLog('SITEMAP_ERROR', 'Empty domain provided, skipping sitemap fetch');
     return result;
+  }
+  
+  // Helper to check if we've exceeded timeout
+  function isTimedOut() {
+    const elapsed = Date.now() - startTime;
+    if (elapsed >= CONFIG.SITEMAP_FETCH_TIMEOUT_MS) {
+      debugLog('SITEMAP_TIMEOUT', `Timeout reached after ${elapsed}ms - proceeding with URLs collected so far`);
+      result.fetch_timeout_reached = true;
+      return true;
+    }
+    return false;
   }
   
   try {
@@ -1436,6 +1735,8 @@ function fetchAndFilterSitemap(domain) {
       debugLog('SITEMAP_FALLBACK', 'No sitemaps in robots.txt, trying common locations...');
       
       for (const path of commonSitemapPaths) {
+        if (isTimedOut()) break;
+        
         const testUrl = baseUrl + path;
         try {
           const testResponse = UrlFetchApp.fetch(testUrl, { muteHttpExceptions: true });
@@ -1461,12 +1762,15 @@ function fetchAndFilterSitemap(domain) {
     
     result.sitemap_source = sitemapUrls[0];
     
-    // Step 3: Fetch and parse sitemap(s)
+    // Step 3: Fetch and parse sitemap(s) - NO ARBITRARY LIMIT, use timeout instead
     let allUrls = [];
+    let sitemapsProcessed = 0;
     
-    // Process each sitemap URL (limit to first 3 to avoid timeout)
-    for (const sitemapUrl of sitemapUrls.slice(0, 3)) {
+    for (const sitemapUrl of sitemapUrls) {
+      if (isTimedOut()) break;
+      
       debugLog('SITEMAP_PROCESSING', sitemapUrl);
+      sitemapsProcessed++;
       
       try {
         const response = UrlFetchApp.fetch(sitemapUrl, { muteHttpExceptions: true });
@@ -1482,17 +1786,45 @@ function fetchAndFilterSitemap(domain) {
         const sitemapIndexMatches = xml.match(/<sitemap>[\s\S]*?<loc>(.*?)<\/loc>[\s\S]*?<\/sitemap>/g);
         
         if (sitemapIndexMatches && sitemapIndexMatches.length > 0) {
-          // This is a sitemap index - fetch child sitemaps (limit to first 3 to avoid timeout)
+          // This is a sitemap index - fetch ALL child sitemaps (no arbitrary limit)
           debugLog('SITEMAP_INDEX', `Found sitemap index with ${sitemapIndexMatches.length} child sitemaps`);
+          
           const childSitemapUrls = sitemapIndexMatches
-            .slice(0, 3)
             .map(match => {
               const locMatch = match.match(/<loc>(.*?)<\/loc>/);
               return locMatch ? locMatch[1] : null;
             })
-            .filter(url => url);
+            .filter(url => url)
+            .filter(url => {
+              const urlLower = url.toLowerCase();
+              
+              // Skip child sitemaps with "product" in the filename (e-commerce product sitemaps)
+              if (urlLower.includes('product')) {
+                debugLog('SITEMAP_SKIP_PRODUCT', `Skipping product sitemap: ${url}`);
+                return false;
+              }
+              
+              // Skip child sitemaps with "blog" or "post" in filename for transactional/commercial intent
+              if (skipBlogSitemaps) {
+                if (urlLower.includes('blog') || urlLower.includes('post')) {
+                  debugLog('SITEMAP_SKIP_BLOG', `Skipping blog/post sitemap (transactional/commercial intent): ${url}`);
+                  result.blog_sitemaps_skipped++;
+                  return false;
+                }
+              }
+              
+              return true;
+            });
           
+          debugLog('SITEMAP_INDEX_FILTERED', `${childSitemapUrls.length} child sitemaps after filtering`);
+          
+          let childSitemapsProcessed = 0;
           for (const childUrl of childSitemapUrls) {
+            if (isTimedOut()) {
+              debugLog('SITEMAP_CHILD_TIMEOUT', `Processed ${childSitemapsProcessed}/${childSitemapUrls.length} child sitemaps before timeout`);
+              break;
+            }
+            
             try {
               const childResponse = UrlFetchApp.fetch(childUrl, { muteHttpExceptions: true });
               if (childResponse.getResponseCode() === 200) {
@@ -1502,11 +1834,15 @@ function fetchAndFilterSitemap(domain) {
                   const childUrls = childUrlMatches.map(match => match.replace(/<\/?loc>/g, ''));
                   allUrls = allUrls.concat(childUrls);
                 }
+                childSitemapsProcessed++;
               }
             } catch (e) {
               debugLog('CHILD_SITEMAP_ERROR', e.message);
             }
           }
+          
+          debugLog('SITEMAP_INDEX_COMPLETE', `Processed ${childSitemapsProcessed}/${childSitemapUrls.length} child sitemaps, collected ${allUrls.length} URLs`);
+          
         } else {
           // Regular sitemap - extract URLs directly
           const urlMatches = xml.match(/<loc>(.*?)<\/loc>/g);
@@ -1520,8 +1856,9 @@ function fetchAndFilterSitemap(domain) {
       }
     }
 
+    const fetchDuration = Date.now() - startTime;
     result.total_found = allUrls.length;
-    debugLog('SITEMAP_FETCH', `Found ${allUrls.length} total URLs`);
+    debugLog('SITEMAP_FETCH', `Found ${allUrls.length} total URLs in ${fetchDuration}ms (${sitemapsProcessed} sitemaps processed)`);
 
     // Filter out junk URLs
     const excludePatterns = [
@@ -1551,7 +1888,7 @@ function fetchAndFilterSitemap(domain) {
       /#/,  // Anchor links
     ];
 
-    const filteredUrls = allUrls.filter(url => {
+    let filteredUrls = allUrls.filter(url => {
       // Must be same domain
       if (!url.toLowerCase().includes(domain.toLowerCase().replace(/^https?:\/\//, ''))) {
         return false;
@@ -1560,37 +1897,30 @@ function fetchAndFilterSitemap(domain) {
       return !excludePatterns.some(pattern => pattern.test(url));
     });
 
+    debugLog('SITEMAP_FILTER', `${filteredUrls.length} URLs after junk filtering (removed ${allUrls.length - filteredUrls.length} junk URLs)`);
+
+    // Filter out product page URLs if product_page_path is provided
+    if (productPagePath && productPagePath.trim() !== '') {
+      const productPath = productPagePath.trim().toLowerCase();
+      const beforeProductFilter = filteredUrls.length;
+      
+      filteredUrls = filteredUrls.filter(url => {
+        const urlLower = url.toLowerCase();
+        return !urlLower.includes(productPath);
+      });
+      
+      result.product_urls_removed = beforeProductFilter - filteredUrls.length;
+      debugLog('PRODUCT_FILTER', {
+        product_path: productPath,
+        before: beforeProductFilter,
+        after: filteredUrls.length,
+        removed: result.product_urls_removed
+      });
+    }
+
     result.total_after_filter = filteredUrls.length;
     result.all_filtered_urls = filteredUrls;
-    debugLog('SITEMAP_FILTER', `${filteredUrls.length} URLs after filtering`);
-
-    // Categorize URLs
-    filteredUrls.forEach(url => {
-      const urlLower = url.toLowerCase();
-      
-      if (/\/(service|services|what-we-do)\//i.test(urlLower)) {
-        result.urls_by_category.services.push(url);
-      } else if (/\/(practice-area|practice-areas|areas-of-practice|legal-services)\//i.test(urlLower)) {
-        result.urls_by_category.practice_areas.push(url);
-      } else if (/\/(location|locations|office|offices|areas-served|service-area)\//i.test(urlLower)) {
-        result.urls_by_category.locations.push(url);
-      } else if (/\/(blog|news|articles|resources|insights|posts)\//i.test(urlLower)) {
-        result.urls_by_category.blog.push(url);
-      } else if (/\/(about|about-us|our-team|attorneys|team|staff|who-we-are)\//i.test(urlLower)) {
-        result.urls_by_category.about.push(url);
-      } else {
-        result.urls_by_category.other.push(url);
-      }
-    });
-
-    debugLog('SITEMAP_CATEGORIZED', {
-      services: result.urls_by_category.services.length,
-      practice_areas: result.urls_by_category.practice_areas.length,
-      locations: result.urls_by_category.locations.length,
-      blog: result.urls_by_category.blog.length,
-      about: result.urls_by_category.about.length,
-      other: result.urls_by_category.other.length
-    });
+    debugLog('SITEMAP_FINAL', `${filteredUrls.length} URLs ready for Claude`);
 
     return result;
 
@@ -1938,9 +2268,25 @@ ${JSON.stringify(strategyForDisplay, null, 2)}
   userMessage += `🔗 AVAILABLE INTERNAL LINKS (PRE-VERIFIED FROM SITEMAP) 🔗\n`;
   userMessage += `════════════════════════════════════════════════════════════\n\n`;
   
-  if (strategy.sitemap_data && strategy.sitemap_data.total_after_filter > 0) {
-    userMessage += `We have pre-fetched ${strategy.sitemap_data.total_after_filter} verified URLs from the client sitemap.\n`;
-    userMessage += `⚠️ IMPORTANT: ONLY select internal links from this list. These URLs are verified and live.\n\n`;
+  if (strategy.sitemap_data && strategy.sitemap_data.all_filtered_urls.length > 0) {
+    userMessage += `We have pre-fetched ${strategy.sitemap_data.all_filtered_urls.length} verified URLs from the client sitemap.\n`;
+    
+    // Note if intent filtering was applied
+    if (shouldExcludeBlogContent(strategy.intent)) {
+      userMessage += `📋 NOTE: This is a ${strategy.intent} intent page - informational content has been filtered out:\n`;
+      userMessage += `   - Blog/post sitemaps were skipped entirely\n`;
+      userMessage += `   - About, FAQ, team, and other informational pages were excluded\n`;
+      userMessage += `   (We keep users at the bottom of the funnel for conversion-focused pages.)\n`;
+    }
+    
+    // Note if product pages were filtered out
+    if (strategy.sitemap_data.product_urls_removed > 0) {
+      userMessage += `📋 NOTE: ${strategy.sitemap_data.product_urls_removed} product page URLs were filtered out.\n`;
+      userMessage += `   If a specific product link would be valuable for this content, describe the type of product and why in your suggestions (without a specific URL).\n`;
+    }
+    
+    userMessage += `\n⚠️ CRITICAL: You MUST ONLY select internal links from this list. DO NOT invent or guess URLs.\n`;
+    userMessage += `If a URL is not in this list, it does not exist. Do not make up URLs under any circumstances.\n\n`;
     
     // Show all filtered URLs as a simple flat list
     userMessage += `AVAILABLE PAGES (${strategy.sitemap_data.all_filtered_urls.length} total):\n`;
@@ -1950,49 +2296,69 @@ ${JSON.stringify(strategyForDisplay, null, 2)}
     userMessage += `\n`;
     
     userMessage += `INTERNAL LINK SELECTION RULES:\n`;
-    userMessage += `1. Select ${CONFIG.MIN_INTERNAL_LINKS}-${CONFIG.MAX_INTERNAL_LINKS} links from the list above\n`;
-    userMessage += `2. Choose links contextually relevant to "${strategy.primary_keyword}"\n`;
+    userMessage += `1. Select ${CONFIG.TARGET_INTERNAL_LINKS} internal links from the list above (minimum ${CONFIG.MIN_INTERNAL_LINKS})\n`;
+    userMessage += `2. Choose links that are CONTEXTUALLY and SEMANTICALLY relevant to "${strategy.primary_keyword}"\n`;
+    userMessage += `   - This includes directly related topics AND semantically related topics\n`;
+    userMessage += `   - Example: For "truck accident lawyer", relevant links include truck accidents, commercial vehicle injuries, wrongful death, FMCSA regulations, etc.\n`;
+    userMessage += `   - Don't just match keywords - think about what topics a user interested in "${strategy.primary_keyword}" would also want to explore\n`;
     userMessage += `3. All URLs above are PRE-VERIFIED - set url_status to "200" for all selected links\n`;
-    userMessage += `4. DO NOT invent URLs that are not in the list above\n`;
-    userMessage += `5. DO NOT use web_search to verify these internal links - they are already verified\n\n`;
+    userMessage += `4. NEVER invent URLs - if a page isn't in the list above, do not include it\n`;
+    userMessage += `5. DO NOT use web_search to find or verify internal links - only use the list provided\n`;
+    if (strategy.sitemap_data.product_urls_removed > 0) {
+      userMessage += `6. If a specific product page link would add value, note this in your recommendations with the product type and reasoning (no URL needed)\n`;
+    }
+    userMessage += `\n`;
   } else {
     userMessage += `⚠️ No sitemap found for ${strategy.client_domain}.\n`;
     userMessage += `You will need to use site:${strategy.client_domain} search to discover internal link candidates.\n`;
-    userMessage += `Verify each discovered URL with web_search before including.\n\n`;
+    userMessage += `Verify each discovered URL with web_search before including.\n`;
+    userMessage += `Target: ${CONFIG.TARGET_INTERNAL_LINKS} internal links (minimum ${CONFIG.MIN_INTERNAL_LINKS})\n\n`;
   }
   userMessage += `════════════════════════════════════════════════════════════\n\n`;
 
   userMessage += `CRITICAL WORKFLOW:
 1. FIRST: Research client website (${strategy.client_domain})
-   - Use site: search to find 6-8 most relevant pages
-   - Use web_search to analyze those pages (search for specific URLs)
-   - Extract factual information about client offerings
+   - Use web_search with site: to find relevant pages
+   - Use web_fetch on 3-5 of the most relevant pages to read actual content
+   - Extract factual information from the fetched pages
    
 2. THEN: Analyze SERPs for "${strategy.primary_keyword}"
-   - Find top ranking pages
-   - Identify content patterns and gaps
+   - Use web_search to find top ranking pages
+   - Use web_fetch on top 5 competitor pages to read their actual content
+   - Count actual word counts and section counts from fetched content
+   - Identify content patterns and gaps from what you actually read
    
 3. THEN: Select internal links from PRE-VERIFIED list above
-   - Choose ${CONFIG.MIN_INTERNAL_LINKS}-${CONFIG.MAX_INTERNAL_LINKS} relevant URLs from the sitemap lists provided
+   - Choose ${CONFIG.TARGET_INTERNAL_LINKS} relevant URLs from the sitemap list provided (minimum ${CONFIG.MIN_INTERNAL_LINKS})
+   - Select pages that are contextually AND semantically relevant to the topic
    - DO NOT use site: search for internal links - they are already provided
    - All URLs in the list are verified and live
    
 4. THEN: Find external link suggestions
-   - Verify external links with web_search
-   - Provide alternatives for any broken/404 links
+   - Search for 10 authoritative sources RELEVANT TO THE PRIMARY KEYWORD TOPIC
+   - Search for SPECIFIC articles/pages, not just homepages
+   - Copy the EXACT full URL from search results
+   - MANDATORY: Use web_fetch on EVERY external link URL to verify it exists
+   - If web_fetch succeeds: set url_status to "verified"
+   - If web_fetch fails: search for correct URL, retry web_fetch
+   - Only use "suggested" status with verification_note as LAST RESORT after web_fetch fails
+   - Goal: MOST external links should be "verified", not "suggested"
+   - Use SIMPLE anchor text (brand names, "read more", "this study") - NOT keyword-stuffed anchors
+   - AVOID linking to competitors offering the same service as the client
    
 5. FINALLY: Create the complete JSON brief in this response
    - Do NOT pause or wait after research
    - Generate the full JSON brief immediately
 
 REQUIREMENTS:
-1. Research 6-8 most relevant pages from ${strategy.client_domain} using web_search
-2. Use only REAL facts found on client site - never hallucinate
-3. Select ${CONFIG.MIN_INTERNAL_LINKS}-${CONFIG.MAX_INTERNAL_LINKS} internal links FROM THE PRE-VERIFIED LIST ABOVE
-4. Find up to ${CONFIG.MAX_EXTERNAL_LINKS} verified external links
-5. Verify EXTERNAL link URLs using web_search (internal links are pre-verified)
-6. Base word count on actual top-ranking pages
-7. Provide specific, actionable guidance for AI content machines
+1. Use web_fetch on 3-5 client pages to extract real facts
+2. Use web_fetch on top 5 competitor pages for accurate SERP analysis
+3. Use only REAL facts found via web_fetch - never hallucinate
+4. Select ${CONFIG.TARGET_INTERNAL_LINKS} internal links FROM THE PRE-VERIFIED LIST ABOVE (minimum ${CONFIG.MIN_INTERNAL_LINKS})
+5. Find ${CONFIG.MAX_EXTERNAL_LINKS} external links - MUST use web_fetch on each URL
+6. Use simple, natural anchor text for external links (brand names, "this study", etc.)
+7. Base word count on actual competitor pages you fetched
+8. Provide specific, actionable guidance for AI content machines
 
 CONTENT OUTLINE STRUCTURE:
 - First item: H1 (level: 1)
@@ -2030,6 +2396,10 @@ Your response must start with { and end with }. Nothing else.`;
       {
         type: 'web_search_20250305',
         name: 'web_search'
+      },
+      {
+        type: 'web_fetch_20250910',
+        name: 'web_fetch'
       }
     ];
   }
@@ -2070,7 +2440,7 @@ Your response must start with { and end with }. Nothing else.`;
         headers: {
           'x-api-key': apiKey.trim(),
           'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'web-search-2025-03-05'
+          'anthropic-beta': 'web-search-2025-03-05,web-fetch-2025-09-10'
         },
         payload: JSON.stringify(requestBody)
       });
@@ -2107,11 +2477,11 @@ Your response must start with { and end with }. Nothing else.`;
       debugLog('RESPONSE_STOP_REASON', responseData.stop_reason);
       debugLog('RESPONSE_CONTENT_TYPES', responseData.content?.map(b => b.type).join(', '));
       let assistantContent = responseData.content;
-      const hasWebSearch = assistantContent.some(block => 
-        (block.type === 'tool_use' && block.name === 'web_search') || 
+      const hasWebTools = assistantContent.some(block => 
+        (block.type === 'tool_use' && (block.name === 'web_search' || block.name === 'web_fetch')) || 
         (block.type === 'server_tool_use')
       );
-      if (hasWebSearch) {
+      if (hasWebTools) {
         const lastBlock = assistantContent[assistantContent.length - 1];
         if (responseData.stop_reason === 'pause_turn' && lastBlock && lastBlock.type === 'server_tool_use') {
           debugLog('PROTOCOL_FIX', `Dropping orphaned server_tool_use ID: ${lastBlock.id}`);
@@ -2122,6 +2492,7 @@ Your response must start with { and end with }. Nothing else.`;
           block.type === 'tool_use' || 
           block.type === 'server_tool_use' || 
           block.type === 'web_search_tool_result' ||
+          block.type === 'web_fetch_tool_result' ||
           block.type === 'text'
         );
       }
@@ -2138,6 +2509,13 @@ Your response must start with { and end with }. Nothing else.`;
               type: 'tool_result',
               tool_use_id: toolUse.id,
               content: [{ type: 'web_search_tool_result' }]
+            };
+          }
+          if (toolUse.name === 'web_fetch') {
+            return {
+              type: 'tool_result',
+              tool_use_id: toolUse.id,
+              content: [{ type: 'web_fetch_tool_result' }]
             };
           }
           return {
@@ -3269,11 +3647,11 @@ function calculateQualityScore(brief, strategy) {
   const internalVerified = internalLinks.filter(l => l.url_status === '200' || l.url_status === 'verified').length;
   const internalTotal = internalLinks.length;
   
-  // Internal links (5 points)
-  if (internalTotal >= 5 && internalVerified === internalTotal) {
+  // Internal links (5 points) - Updated for new target of 10
+  if (internalTotal >= 8 && internalVerified === internalTotal) {
     breakdown.link_quality.score += 5;
     breakdown.link_quality.details.push(`✓ ${internalTotal} internal links, all verified (5pts)`);
-  } else if (internalTotal >= 3 && internalVerified >= internalTotal * 0.8) {
+  } else if (internalTotal >= 5 && internalVerified >= internalTotal * 0.8) {
     breakdown.link_quality.score += 3;
     breakdown.link_quality.details.push(`○ ${internalVerified}/${internalTotal} internal links verified (3pts)`);
   } else {
@@ -3281,20 +3659,21 @@ function calculateQualityScore(brief, strategy) {
     breakdown.link_quality.details.push(`✗ ${internalVerified}/${internalTotal} internal links verified (1pt)`);
   }
 
-  // External links (5 points)
+  // External links (5 points) - verified via web_fetch preferred, suggested acceptable
   const externalVerified = externalLinks.filter(l => l.url_status === 'verified').length;
-  const externalHighAuth = externalLinks.filter(l => l.url_status === 'verified' && l.domain_authority === 'high').length;
+  const externalValid = externalLinks.filter(l => l.url_status === 'verified' || l.url_status === 'suggested').length;
+  const externalHighAuth = externalLinks.filter(l => (l.url_status === 'verified' || l.url_status === 'suggested') && l.domain_authority === 'high').length;
   const externalTotal = externalLinks.length;
   
-  if (externalTotal >= 2 && externalVerified === externalTotal && externalHighAuth >= 1) {
+  if (externalTotal >= 2 && externalVerified >= externalTotal * 0.5 && externalHighAuth >= 1) {
     breakdown.link_quality.score += 5;
-    breakdown.link_quality.details.push(`✓ ${externalTotal} external links, ${externalHighAuth} high authority (5pts)`);
-  } else if (externalTotal >= 1 && externalVerified >= externalTotal * 0.75) {
+    breakdown.link_quality.details.push(`✓ ${externalVerified}/${externalTotal} verified, ${externalHighAuth} high authority (5pts)`);
+  } else if (externalTotal >= 1 && externalValid >= externalTotal * 0.75) {
     breakdown.link_quality.score += 3;
-    breakdown.link_quality.details.push(`○ ${externalVerified}/${externalTotal} external links verified (3pts)`);
+    breakdown.link_quality.details.push(`○ ${externalVerified} verified, ${externalValid - externalVerified} suggested of ${externalTotal} (3pts)`);
   } else {
     breakdown.link_quality.score += 1;
-    breakdown.link_quality.details.push(`✗ ${externalVerified}/${externalTotal} external links verified (1pt)`);
+    breakdown.link_quality.details.push(`✗ ${externalValid}/${externalTotal} external links valid (1pt)`);
   }
 
   // ============================================================
@@ -3552,16 +3931,25 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   const docName = `Brief - ${brief.title} - ${new Date().toISOString().slice(0, 10)}`;
   const doc = DocumentApp.create(docName);
   const folderId = overrideFolderId || getSanitizedFolderId();
-  const file = DriveApp.getFileById(doc.getId());
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
   if (folderId) {
     try {
+      const file = DriveApp.getFileById(doc.getId());
       DriveApp.getFolderById(folderId).addFile(file);
       DriveApp.getRootFolder().removeFile(file);
     } catch (e) {
       debugLog('Folder move failed', e.message);
     }
   }
+  
+  // Set sharing permissions: Anyone with the link can edit
+  try {
+    const file = DriveApp.getFileById(doc.getId());
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.EDIT);
+    debugLog('SHARING_SET', 'Document set to "Anyone with link can edit"');
+  } catch (e) {
+    debugLog('SHARING_FAILED', e.message);
+  }
+  
   const body = doc.getBody();
   body.clear();
   addHeading(body, brief.title, DocumentApp.ParagraphHeading.TITLE);
@@ -3633,7 +4021,8 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   const primaryReqs = [
     'Use in H1 exactly as written',
     'Include in first 20 words of the opening paragraph',
-    'Use 5-7 times naturally throughout the content'
+    'Use 5-7 times naturally throughout the content',
+    'Use once in conclusion paragraph'
   ];
   primaryReqs.forEach(req => {
     body.appendListItem(req)
@@ -3680,7 +4069,7 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
     });
     body.appendParagraph('');
     
-    body.appendParagraph('Requirements:').setBold(true).setFontSize(10);
+    body.appendParagraph('Longtail/Semantic Keywords Requirements:').setBold(true).setFontSize(10);
     const longtailReqs = [
       'Use each keyword at least once naturally in the content',
       'Preferred: Incorporate into H2/H3 subheadings where it fits naturally',
@@ -3989,25 +4378,18 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
     body.appendParagraph(`${idx + 1}. Anchor Text: "${link.anchor}"`)
       .setBold(true)
       .setFontSize(11);
-    const statusIndicator = link.url_status === 'verified' ? ' (VERIFIED)' : ' (BROKEN/INACCESSIBLE)';
-    const urlColor = link.url_status === 'verified' ? '#006600' : '#cc0000';
+    const isVerified = link.url_status === 'verified';
+    const statusIndicator = isVerified ? ' (VERIFIED)' : ' (SUGGESTED - VERIFY BEFORE USE)';
+    const urlColor = isVerified ? '#006600' : '#0066cc'; // Green for verified, blue for suggested
     body.appendParagraph(`   URL: ${link.url}${statusIndicator}`)
       .setFontFamily('Courier New')
       .setFontSize(9)
       .setBold(false)
       .setForegroundColor(urlColor);
-    if (link.alternative_url) {
-      const altStatusIndicator = link.alternative_status === 'verified' ? ' (VERIFIED)' : ' (ISSUE)';
-      const altColor = link.alternative_status === 'verified' ? '#006600' : '#cc6600';
-      body.appendParagraph(`   ALTERNATIVE: ${link.alternative_url}${altStatusIndicator}`)
-        .setFontFamily('Courier New')
-        .setFontSize(9)
-        .setBold(false)
-        .setForegroundColor(altColor);
-    }
     body.appendParagraph(`   Placement: ${link.placement}`)
       .setFontSize(10)
-      .setBold(false);
+      .setBold(false)
+      .setForegroundColor('#000000');
     body.appendParagraph(`   Domain Authority: ${link.domain_authority || 'Not specified'}`)
       .setFontSize(10)
       .setBold(false);
@@ -4015,12 +4397,15 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
       .setFontSize(10)
       .setBold(false);
     if (link.verification_note) {
-      body.appendParagraph(`   NOTE: ${link.verification_note}`)
+      body.appendParagraph(`   ⚠️ SEARCH: ${link.verification_note}`)
         .setItalic(true)
         .setFontSize(9)
-        .setForegroundColor('#0066cc');
+        .setForegroundColor('#cc6600');
     }
-    body.appendParagraph('');
+    body.appendParagraph('')
+      .setForegroundColor('#000000')
+      .setItalic(false)
+      .setFontSize(11);
   });
   addHeading(body, 'Target Keywords Reference', DocumentApp.ParagraphHeading.HEADING2);
   const keywordItems = [
@@ -4088,8 +4473,9 @@ function asyncRunBriefGeneration() {
   const folderId = userProps.getProperty('PENDING_FOLDER_ID');
   const workbookUrl = userProps.getProperty('PENDING_WORKBOOK_URL');
   const clientId = userProps.getProperty('PENDING_CLIENT_ID');
+  const userId = userProps.getProperty('PENDING_USER_ID');
   deleteGenerationTrigger();
-  runBriefGeneration(folderId, workbookUrl, clientId);
+  runBriefGeneration(folderId, workbookUrl, clientId, userId);
 }
 
 function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
@@ -4101,7 +4487,10 @@ function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
       const payload = {
         id: (rowObj.id && rowObj.id !== '') ? rowObj.id : null,
         client_id: (rowObj.client_id && rowObj.client_id !== '') ? rowObj.client_id : null,
+        url: rowObj.url || rowObj.target_url || rowObj['target-url'] || rowObj.website_url || null, // Robust URL capture
         primary_keyword: rowObj.primary_keyword,
+        secondary_keyword: rowObj.secondary_keyword || null,
+        longtail_keywords: rowObj.longtail_keywords_semantics || rowObj.longtail || rowObj.longtail_keywords || null,
         status: rowObj.status || 'DONE',
         brief_url: briefUrl || rowObj.brief_url || '',
         brief_data: briefData,
@@ -4109,6 +4498,10 @@ function notifyDashboardStatus(rowObj, briefUrl, briefData = null) {
         notes: rowObj.notes,
         secret: secret
       };
+      
+      if (rowObj.user_id) {
+        payload.user_id = rowObj.user_id;
+      }
       if (payload.id || (payload.client_id && payload.primary_keyword)) {
         UrlFetchApp.fetch(`${baseUrl}/api/content-briefs/callback`, {
           method: 'POST',
@@ -4143,7 +4536,10 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
   const payload = {
     id: (rowObj.id && rowObj.id !== '') ? rowObj.id : null,
     client_id: (rowObj.client_id && rowObj.client_id !== '') ? rowObj.client_id : null,
+    url: rowObj.url || rowObj.target_url || rowObj['target-url'] || rowObj.website_url || null, // Robust URL capture
     primary_keyword: rowObj.primary_keyword,
+    secondary_keyword: rowObj.secondary_keyword || null,
+    longtail_keywords: rowObj.longtail_keywords_semantics || rowObj.longtail || rowObj.longtail_keywords || null,
     status: rowObj.status || 'DONE',
     brief_url: briefUrl || rowObj.brief_url || '',
     brief_data: briefData,
@@ -4151,6 +4547,10 @@ function syncToSupabaseDirect(rowObj, briefUrl, briefData = null) {
     notes: (rowObj.notes || '').toString().substring(0, 1000),
     updated_at: new Date().toISOString()
   };
+
+  if (rowObj.user_id) {
+    payload.user_id = rowObj.user_id;
+  }
   const url = `${supabaseUrl}/rest/v1/workbook_rows?on_conflict=id`;
   try {
     const response = UrlFetchApp.fetch(url, {
@@ -4195,11 +4595,59 @@ function doPost(e) {
       userProps.setProperty('PENDING_FOLDER_ID', params.folderId || '');
       userProps.setProperty('PENDING_WORKBOOK_URL', workbookUrl || '');
       userProps.setProperty('PENDING_CLIENT_ID', params.clientId || '');
-      ScriptApp.newTrigger('asyncRunBriefGeneration')
-        .timeBased()
-        .after(1000)
-        .create();
-      result = { status: "triggered", message: "Automation started in background" };
+      userProps.setProperty('PENDING_USER_ID', params.userId || params.user_id || '');
+
+      // NEW: Pre-scan for data presence to avoid "fake" success messages
+      let count = 0;
+      try {
+        const ss = openWorkbook(workbookUrl);
+        let targetSheet = getSheetFromUrl(ss, workbookUrl);
+        
+        if (!targetSheet) {
+          try {
+            targetSheet = discoverDataSheet(ss);
+            debugLog('PRE_SCAN_DISCOVERY', `Found sheet: "${targetSheet.getName()}"`);
+          } catch (e) {
+            // Fallback to first sheet if discovery fails
+            targetSheet = ss.getSheets()[0];
+          }
+        }
+
+        const rows = targetSheet.getDataRange().getValues();
+        const headerMap = getHeaderMap(targetSheet);
+        const statusCol = headerMap['status']?.index;
+        
+        if (statusCol !== undefined) {
+          for (let i = 1; i < rows.length; i++) {
+            const rowStatus = String(rows[i][statusCol] || '').toUpperCase().trim();
+            if (rowStatus === '' || rowStatus === 'NEW') {
+              count++;
+            }
+          }
+        }
+      } catch (e) {
+        debugLog('PRE_SCAN_ERROR', e.toString());
+        // If we can't open at all, let the trigger try anyway (fallback)
+        count = 1; 
+      }
+
+      if (count === 0) {
+        result = { 
+          status: "error", 
+          code: "NO_NEW_ROWS",
+          message: "No rows with status 'NEW' or empty status were found in the workbook." 
+        };
+      } else {
+        ScriptApp.newTrigger('asyncRunBriefGeneration')
+          .timeBased()
+          .after(1000)
+          .create();
+        result = { 
+          status: "triggered", 
+          count: count,
+          message: `Automation started for ${count} keyword(s).` 
+        };
+      }
     }
     return ContentService.createTextOutput(JSON.stringify({ "status": "success", "result": result }))
       .setMimeType(ContentService.MimeType.JSON);

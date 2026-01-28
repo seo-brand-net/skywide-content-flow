@@ -20,18 +20,34 @@ export async function POST(request: Request) {
         const isAsync = body.command === 'runBriefGeneration' || !body.command;
 
         if (isAsync) {
-            console.log('Using Async Fire-and-Forget for:', body.command || 'runBriefGeneration');
-            fetch(googleAppsScriptUrl, {
+            console.log('Using Reliable Trigger (Awaited) for:', body.command || 'runBriefGeneration');
+            const response = await fetch(googleAppsScriptUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
                 redirect: 'follow'
-            }).catch(err => console.error('Background GAS trigger error:', err));
-
-            return NextResponse.json({
-                status: 'triggered',
-                message: 'Automation initiated. The dashboard will update automatically when results are ready.'
             });
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                throw new Error(`Apps Script rejected the trigger: ${errorData}`);
+            }
+
+            const data = await response.text();
+            let json;
+            try {
+                json = JSON.parse(data);
+            } catch {
+                json = { status: 'error', message: data };
+            }
+
+            // If GAS returned a specific result status (like error for no rows), relay it.
+            // Our doPost returns { status: "success", result: { status: "triggered", ... } }
+            if (json.status === 'success' && json.result) {
+                return NextResponse.json(json.result);
+            }
+
+            return NextResponse.json(json);
         }
 
         // For other commands (like getWorkbookData), we wait for the response

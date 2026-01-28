@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { getPusherClient } from '@/lib/pusher/client';
 
 interface BriefStatusUpdate {
@@ -13,47 +13,33 @@ interface BriefStatusUpdate {
     longtail_keywords?: string;
 }
 
-export function usePusherBriefUpdates(clientId: string | null, onUpdate?: (data: BriefStatusUpdate) => void) {
+export function usePusherGlobalBriefUpdates() {
     const [updates, setUpdates] = useState<BriefStatusUpdate[]>([]);
 
-    // Use a ref for the callback to prevent unnecessary re-subscriptions 
-    // when the user passes a non-memoized function
-    const onUpdateRef = useRef(onUpdate);
-
     useEffect(() => {
-        onUpdateRef.current = onUpdate;
-    }, [onUpdate]);
-
-    useEffect(() => {
-        if (!clientId) {
-            console.log('[Pusher] No clientId, skipping subscription');
-            return;
-        }
-
-        console.log('[Pusher] 🛰️ Subscribing to client channel:', clientId);
+        console.log('[Pusher Global] 🛰️ Subscribing to global content brief updates channel');
 
         const pusher = getPusherClient();
 
-        // Subscribe to client-specific channel
-        const channelName = `client-${clientId}`;
+        // Subscribe to global activity channel
+        const channelName = 'content-briefs-activity';
         const channel = pusher.subscribe(channelName);
 
         // Listen for brief status updates
         const updateHandler = (data: BriefStatusUpdate) => {
-            console.log(`[Pusher] 📨 Event received on ${channelName}:`, data);
+            console.log('[Pusher Global] 📨 Activity update received:', data);
             setUpdates(prev => [...prev, data]);
-            if (onUpdateRef.current) onUpdateRef.current(data);
         };
 
         channel.bind('brief-status-update', updateHandler);
 
         return () => {
-            console.log(`[Pusher] 🧹 Unsubscribing from ${channelName}`);
+            console.log('[Pusher Global] 🧹 Unsubscribing from global channel');
             channel.unbind('brief-status-update', updateHandler);
             pusher.unsubscribe(channelName);
             // DO NOT disconnect here, let the singleton persist
         };
-    }, [clientId]);
+    }, []);
 
     return updates;
 }

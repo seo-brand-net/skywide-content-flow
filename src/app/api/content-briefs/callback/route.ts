@@ -13,8 +13,11 @@ const pusher = new Pusher({
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { id, client_id, primary_keyword, status, brief_url, brief_data, quality_score, run_id, notes, secret } = body;
-
+        const {
+            id, client_id, url, primary_keyword, secondary_keyword, longtail_keywords,
+            status, brief_url, brief_data, quality_score, run_id, notes,
+            user_id, userId, secret
+        } = body;
         // Security check
         const expectedSecret = process.env.GAS_CALLBACK_SECRET;
         if (expectedSecret && secret !== expectedSecret) {
@@ -25,11 +28,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        console.log(`Callback received for keyword: ${primary_keyword}, Status: ${status}, ID: ${id || 'NEW'}`);
+        const effectiveUserId = user_id || userId;
 
-        const payload = {
+        console.log(`Callback received for keyword: ${primary_keyword}, Status: ${status}, ID: ${id || 'NEW'}, User: ${effectiveUserId}`);
+
+        const payload: any = {
             client_id,
+            url,
             primary_keyword,
+            secondary_keyword,
+            longtail_keywords,
             status: status || 'DONE',
             brief_url,
             brief_data,
@@ -38,6 +46,10 @@ export async function POST(request: Request) {
             notes,
             updated_at: new Date().toISOString()
         };
+
+        if (effectiveUserId) {
+            payload.user_id = effectiveUserId;
+        }
 
         let error;
 
@@ -63,15 +75,25 @@ export async function POST(request: Request) {
 
         // Broadcast to Pusher for real-time UI updates
         try {
-            await pusher.trigger(`client-${client_id}`, 'brief-status-update', {
+            const pusherPayload = {
                 id,
                 client_id,
                 primary_keyword,
                 status: status || 'DONE',
                 brief_url,
                 notes,
-            });
-            console.log(`Pusher event broadcast to client-${client_id}:`, { status, primary_keyword });
+                user_id: effectiveUserId,
+                secondary_keyword,
+                longtail_keywords
+            };
+
+            // Client-specific channel (for the generation page)
+            await pusher.trigger(`client-${client_id}`, 'brief-status-update', pusherPayload);
+
+            // Global activity channel (for the global activity log)
+            await pusher.trigger('content-briefs-activity', 'brief-status-update', pusherPayload);
+
+            console.log(`Pusher event broadcast to client-${client_id} and global activity log:`, { status, primary_keyword });
         } catch (pusherError) {
             console.error('Pusher broadcast error:', pusherError);
             // Don't fail the request if Pusher fails - database update is more important
