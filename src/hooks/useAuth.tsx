@@ -44,9 +44,16 @@ export function AuthProvider({
   const supabase = createClient();
 
   const fetchProfile = async (userId: string) => {
-    // Only show loading state if we don't have a profile yet to prevent focus-induced flickering
+    if (!userId) {
+      setIsProfileLoading(false);
+      return;
+    }
+
+    // Only show loading state if we don't have a profile yet
     if (!profile) setIsProfileLoading(true);
+
     try {
+      console.log(`[Auth] 📋 Fetching profile for ${userId}...`);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -55,9 +62,11 @@ export function AuthProvider({
 
       if (!error && data) {
         setProfile(data);
+      } else if (error) {
+        console.error('[Auth] ❌ Profile fetch error:', error);
       }
     } catch (e) {
-      console.error('Error fetching profile:', e);
+      console.error('[Auth] ❌ Unexpected profile error:', e);
     } finally {
       setIsProfileLoading(false);
     }
@@ -68,12 +77,17 @@ export function AuthProvider({
 
     // 1. Initial manual check to ensure sync
     const checkInitialSession = async () => {
+      console.log('[Auth] 🔍 Checking initial session...');
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+
       if (currentSession) {
         console.log('[Auth] Found existing session on mount');
         setSession(currentSession);
         setUser(currentSession.user);
         await fetchProfile(currentSession.user.id);
+      } else {
+        console.log('[Auth] No session found on mount');
+        setIsProfileLoading(false);
       }
       setLoading(false);
       setIsInitialLoading(false);
@@ -248,8 +262,8 @@ export function AuthProvider({
       });
 
       console.log('[Auth] 🔄 Redirecting to /login...');
-      router.push('/login');
-      router.refresh();
+      // Force a hard navigation to destroy all memory context
+      window.location.replace('/login');
     } catch (error: any) {
       console.error('[Auth] ❌ SignOut error:', error);
       toast({
