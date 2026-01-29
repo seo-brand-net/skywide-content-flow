@@ -165,6 +165,10 @@ export function AuthProvider({
           setUser(currentSession?.user ?? null);
 
           if (currentSession?.user) {
+            if (event === 'TOKEN_REFRESHED') {
+              console.log('[Auth] 🔑 Token refreshed. Refreshing data...');
+              queryClient.invalidateQueries();
+            }
             await fetchProfile(currentSession.user.id);
           } else if (event === 'SIGNED_OUT') {
             setProfile(null);
@@ -198,20 +202,46 @@ export function AuthProvider({
     const checkSession = async () => {
       if (sessionRef.current) {
         console.log('[Auth] 💓 Heartbeat/Focus: Checking session health...');
+
+        // Proactive Refresh: If session expires in < 10 mins, force refresh
+        const expiresAt = sessionRef.current.expires_at;
+        const now = Math.floor(Date.now() / 1000);
+        const buffer = 10 * 60; // 10 minutes
+
+        if (expiresAt && (expiresAt - now) < buffer) {
+          console.log('[Auth] 🕒 Session near expiry, forcing refresh...');
+          const { data: { session: refreshed }, error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshed) {
+            setSession(refreshed);
+            sessionRef.current = refreshed;
+            return;
+          }
+        }
+
         const { data: { session: freshSession }, error } = await supabase.auth.getSession();
 
-        if (freshSession && freshSession.access_token !== sessionRef.current?.access_token) {
-          console.log('[Auth] 🔄 Session refreshed via background check');
-          setSession(freshSession);
-          sessionRef.current = freshSession;
-          setUser(freshSession.user);
+        if (freshSession) {
+          if (freshSession.access_token !== sessionRef.current?.access_token) {
+            console.log('[Auth] 🔄 Session refreshed via background check');
+            setSession(freshSession);
+            sessionRef.current = freshSession;
+            setUser(freshSession.user);
+          }
+        } else {
+          // If we had a session but now we don't, and there's no transient error
+          // it means the session or refresh token has likely expired.
+          console.warn('[Auth] ⚠️ Session lost during health check. Clearing state.');
+          setSession(null);
+          sessionRef.current = null;
+          setUser(null);
+          setProfile(null);
         }
 
         if (error) console.error('[Auth] Health check error:', error);
       }
     };
 
-    const heartbeat = setInterval(checkSession, 5 * 60 * 1000); // 5 minutes
+    const heartbeat = setInterval(checkSession, 2 * 60 * 1000); // 2 minutes (proactive)
 
     const handleFocusSync = () => {
       if (document.visibilityState === 'visible') {
