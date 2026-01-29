@@ -38,8 +38,9 @@ export function useContentRequests(options: {
     const supabase = createClient();
 
     const queryKey = ['content_requests', { currentPage, pageSize, userRole, userId }];
-    const isActuallyEnabled = enabled && !!userRole && (userRole === 'admin' || !!userId) && !authError;
 
+    // Proactive display: Fire if enabled is true (which means we have a userId).
+    const isActuallyEnabled = enabled && !!userId;
     return useQuery({
         queryKey,
         queryFn: async () => {

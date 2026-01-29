@@ -44,8 +44,10 @@ export function useWorkbookRows(options: {
     const supabase = createClient();
 
     const queryKey = ['workbook_rows', { currentPage, pageSize, statusFilter, userRole, userId }];
-    const isActuallyEnabled = enabled && !!userRole && (userRole === 'admin' || !!userId) && !authError;
 
+    // Proactive display: Fire if enabled is true (which means we have a userId).
+    // Don't wait for the specific 'userRole' to be resolved unless absolutely necessary.
+    const isActuallyEnabled = enabled && !!userId;
     return useQuery({
         queryKey,
         queryFn: async () => {
