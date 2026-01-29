@@ -3,13 +3,14 @@ import { useAuth } from './useAuth';
 export function useUserRole(userId?: string) {
     const { profile, loading, isProfileLoading, isInitialLoading } = useAuth();
 
-    // If we have a profile, use its role, otherwise default to 'user'
-    // profile.role is expected to be 'admin', 'user', etc.
-    const userRole = profile?.role || 'user';
-    const isAdmin = userRole === 'admin';
-
+    // Combined loading state
     const roleLoading = loading || isProfileLoading;
-    const isResolved = !loading && !isProfileLoading && !!profile;
+
+    // CRITICAL: If we are loading the role, we return null. 
+    // This forces the Sidebar/UI to show skeletons instead of defaulting to 'user'.
+    const userRole = profile?.role || (roleLoading ? null : 'user');
+    const isAdmin = userRole === 'admin';
+    const isResolved = !roleLoading && !!profile;
 
     return {
         userRole,

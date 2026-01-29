@@ -36,8 +36,8 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(initialUser);
   const [session, setSession] = useState<Session | null>(initialSession);
   const [profile, setProfile] = useState<any | null>(null);
-  const [loading, setLoading] = useState(!initialSession);
-  const [isProfileLoading, setIsProfileLoading] = useState(!!initialSession);
+  const [loading, setLoading] = useState(true); // Always start as loading to avoid flashes
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
@@ -46,8 +46,6 @@ export function AuthProvider({
   // Memoize supabase client to prevent unnecessary useEffect re-runs
   const supabase = useMemo(() => createClient(), []);
 
-  const hasLoadedProfile = useRef(false);
-  const sessionRef = useRef<Session | null>(initialSession);
 
   const fetchProfile = async (userId: string) => {
     if (!userId) {
@@ -79,54 +77,65 @@ export function AuthProvider({
   };
 
   useEffect(() => {
+    let isMounted = true;
     console.log('[Auth] 🔐 Initializing auth listener');
 
-    // 1. Initial manual check to ensure sync
-    const checkInitialSession = async () => {
-      console.log('[Auth] 🔍 Checking initial session...');
-      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+    const initialize = async () => {
+      try {
+        console.log('[Auth] 🔍 Checking initial session...');
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
 
-      setSession(currentSession);
-      sessionRef.current = currentSession;
-      setUser(currentSession?.user ?? null);
+        if (!isMounted) return;
 
-      if (currentSession) {
-        console.log('[Auth] Initial session sync successful');
-        await fetchProfile(currentSession.user.id);
-      } else {
-        console.log('[Auth] No session found during initial check');
-        setIsProfileLoading(false);
-      }
-      setLoading(false);
-      setIsInitialLoading(false);
-    };
-    checkInitialSession();
-
-
-    // 2. Listen for auth changes
-    const isMounted = { current: true };
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        if (!isMounted.current) return;
-
-        console.log(`[Auth] 🔄 Event received: ${event}`);
-
-        // IGNORE null events on INITIAL_SESSION if we already have a session from the manual check
-        if (!currentSession && event === 'INITIAL_SESSION' && sessionRef.current) {
-          console.log('[Auth] 🛡️ Guard: Ignoring stale null initialization');
-          return;
+        if (error) {
+          console.warn('[Auth] Session check warning:', error.message);
+          if (error.message?.includes('refresh_token_not_found')) {
+            localStorage.clear();
+          }
         }
 
         setSession(currentSession);
-        sessionRef.current = currentSession;
+        setUser(currentSession?.user ?? null);
+
+        if (currentSession?.user) {
+          console.log('[Auth] Found existing session, fetching profile...');
+          await fetchProfile(currentSession.user.id);
+        } else {
+          console.log('[Auth] No session found during initial check');
+          setProfile(null);
+          setIsProfileLoading(false);
+        }
+      } catch (e) {
+        console.error('[Auth] Initialization error:', e);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          setIsInitialLoading(false);
+        }
+      }
+    };
+
+    initialize();
+
+    // 2. Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        if (!isMounted) return;
+
+        console.log(`[Auth] 🔄 Event received: ${event}`);
+
+        setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
           await fetchProfile(currentSession.user.id);
-        } else if (event === 'SIGNED_OUT') {
+        } else {
           setProfile(null);
           setIsProfileLoading(false);
+        }
 
+        if (event === 'SIGNED_OUT') {
+          // Standard check for protected routes
           const protectedPaths = [
             '/dashboard',
             '/research',
@@ -150,21 +159,9 @@ export function AuthProvider({
       }
     );
 
-    // 3. Keep-alive Heartbeat
-    const heartbeat = setInterval(async () => {
-      if (sessionRef.current) {
-        console.log('[Auth] 💓 Heartbeat: Checking session health...');
-        const { data: { session: freshSession }, error } = await supabase.auth.getSession();
-        if (freshSession) {
-          sessionRef.current = freshSession;
-        }
-        if (error) console.error('[Auth] Heartbeat error:', error);
-      }
-    }, 10 * 60 * 1000); // 10 minutes
-
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
-      clearInterval(heartbeat);
     };
   }, [supabase, router]);
 
