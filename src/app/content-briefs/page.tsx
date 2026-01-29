@@ -39,7 +39,7 @@ export default function ContentBriefActivityLog() {
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
-    const { userRole, isAdmin, loading: roleLoading } = useUserRole(user?.id);
+    const { userRole, isAdmin, loading: roleLoading, authError } = useUserRole(user?.id);
 
     // UI State
     const [searchTerm, setSearchTerm] = useState('');
@@ -164,6 +164,12 @@ export default function ContentBriefActivityLog() {
             <div className="max-w-7xl mx-auto">
                 <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
+                        {authError && (
+                            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-500 text-sm">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                                <p>{authError}</p>
+                            </div>
+                        )}
                         <h1 className="text-3xl font-bold text-foreground mb-2">
                             Research History
                             {userRole === 'admin' && (

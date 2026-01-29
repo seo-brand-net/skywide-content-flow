@@ -1,7 +1,7 @@
 import { useAuth } from './useAuth';
 
 export function useUserRole(userId?: string) {
-    const { profile, loading, isProfileLoading, isInitialLoading } = useAuth();
+    const { profile, loading, isProfileLoading, isInitialLoading, authError } = useAuth();
 
     // If we are loading, we don't know the role yet.
     // Defaulting to 'user' while loading can cause flickering/redirect loops for admins.
@@ -16,6 +16,7 @@ export function useUserRole(userId?: string) {
         profileLoading: isProfileLoading,
         isInitialLoading,
         isResolved,
+        authError,
         roleLoading: loading || isProfileLoading,
         isRolePending: loading || isProfileLoading
     };

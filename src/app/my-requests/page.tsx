@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { Eye, Clock, User, ExternalLink, Search, Loader2 } from 'lucide-react';
+import { Eye, Clock, User, ExternalLink, Search, Loader2, AlertCircle } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -24,7 +24,7 @@ import {
 
 export default function MyRequests() {
     const { user } = useAuth();
-    const { userRole, loading: roleLoading } = useUserRole(user?.id);
+    const { userRole, loading: roleLoading, authError } = useUserRole(user?.id);
 
     // UI State
     const [searchTerm, setSearchTerm] = useState('');
@@ -186,6 +186,12 @@ export default function MyRequests() {
             <div className="max-w-7xl mx-auto">
                 <div className="mb-8 flex justify-between items-center">
                     <div>
+                        {authError && (
+                            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-500 text-sm">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                                <p>{authError}</p>
+                            </div>
+                        )}
                         <h1 className="text-3xl font-bold text-foreground mb-2">
                             My Requests
                             {userRole === 'admin' && (

@@ -20,6 +20,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (password: string) => Promise<{ error: any }>;
   isPasswordReset: boolean;
+  authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,6 +43,7 @@ export function AuthProvider({
   const [isProfileLoading, setIsProfileLoading] = useState(!!initialSession && !initialProfile);
   const [isInitialLoading, setIsInitialLoading] = useState(!initialProfile);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -62,6 +64,7 @@ export function AuthProvider({
 
     // Only show loading state if we don't have a profile yet or it's forced
     if (!profile || force) setIsProfileLoading(true);
+    setAuthError(null);
 
     try {
       console.log(`[Auth] 📋 Fetching profile for ${userId} (force: ${force})...`);
@@ -77,6 +80,7 @@ export function AuthProvider({
         hasLoadedProfile.current = true;
       } else if (error) {
         console.error('[Auth] ❌ Profile fetch error:', error.message);
+        setAuthError(`Profile resolution failed: ${error.message}`);
       }
     } catch (e) {
       console.error('[Auth] ❌ Unexpected profile error:', e);
@@ -197,16 +201,20 @@ export function AuthProvider({
 
     const heartbeat = setInterval(checkSession, 5 * 60 * 1000); // 5 minutes
 
-    const handleFocus = () => {
-      console.log('[Auth] 🪟 Window focused, checking session stability');
-      checkSession();
+    const handleFocusSync = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Auth] 👁️ Tab visible/focused, checking session stability');
+        checkSession();
+      }
     };
-    window.addEventListener('focus', handleFocus);
+    window.addEventListener('focus', handleFocusSync);
+    window.addEventListener('visibilitychange', handleFocusSync);
 
     // 4. Safety threshold: If nothing has resolved in 6 seconds, force clear loading states
     const safetyTimer = setTimeout(() => {
       if (loading || isInitialLoading || isProfileLoading) {
         console.warn('[Auth] 🚨 Safety timeout: Forcing resolve due to inactivity');
+        setAuthError('Identity resolution timed out. Some features may be restricted.');
         setLoading(false);
         setIsInitialLoading(false);
         setIsProfileLoading(false);
@@ -216,7 +224,8 @@ export function AuthProvider({
     return () => {
       subscription.unsubscribe();
       clearInterval(heartbeat);
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('focus', handleFocusSync);
+      window.removeEventListener('visibilitychange', handleFocusSync);
       clearTimeout(safetyTimer);
     };
   }, [supabase, router, loading, isInitialLoading, isProfileLoading]);
@@ -329,6 +338,8 @@ export function AuthProvider({
     }
   };
 
+  const setAuthErrorManual = (msg: string | null) => setAuthError(msg);
+
   const resetPassword = async (email: string) => {
     try {
       // Use the custom branded email via API route
@@ -416,6 +427,7 @@ export function AuthProvider({
     resetPassword,
     updatePassword,
     isPasswordReset,
+    authError,
   };
 
   return (

@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/utils/supabase/client';
+import { useAuth } from './useAuth';
 
 export interface WorkbookRow {
     id: string;
@@ -39,10 +40,11 @@ export function useWorkbookRows(options: {
     enabled: boolean;
 }) {
     const { currentPage, pageSize, statusFilter, userRole, userId, enabled } = options;
+    const { authError } = useAuth();
     const supabase = createClient();
 
     const queryKey = ['workbook_rows', { currentPage, pageSize, statusFilter, userRole, userId }];
-    const isActuallyEnabled = enabled && !!userRole && (userRole === 'admin' || !!userId);
+    const isActuallyEnabled = enabled && !!userRole && (userRole === 'admin' || !!userId) && !authError;
 
     return useQuery({
         queryKey,
@@ -94,7 +96,7 @@ export function useWorkbookRows(options: {
         enabled: isActuallyEnabled,
         placeholderData: (previousData) => {
             if (!isActuallyEnabled && previousData) {
-                console.log('[useWorkbookRows] ⏸️ Query disabled, providing cached placeholderData');
+                console.log('[useWorkbookRows] ⏸️ Query disabled/blocked, providing cached placeholderData', { authError });
             }
             return previousData;
         },
