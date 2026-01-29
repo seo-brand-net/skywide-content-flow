@@ -51,17 +51,20 @@ export function AuthProvider({
   const hasLoadedProfile = useRef(false);
   const sessionRef = useRef<Session | null>(initialSession);
 
-  const fetchProfile = async (userId: string) => {
-    if (!userId || isProfileLoading || (profile?.id === userId && !hasLoadedProfile.current)) {
-      if (!userId) setIsProfileLoading(false);
+  const fetchProfile = async (userId: string, force = false) => {
+    if (!userId) {
+      setIsProfileLoading(false);
       return;
     }
 
-    // Only show loading state if we don't have a profile yet
-    if (!profile) setIsProfileLoading(true);
+    // Skip if already loading and not forced
+    if (isProfileLoading && !force) return;
+
+    // Only show loading state if we don't have a profile yet or it's forced
+    if (!profile || force) setIsProfileLoading(true);
 
     try {
-      console.log(`[Auth] 📋 Fetching profile for ${userId}...`);
+      console.log(`[Auth] 📋 Fetching profile for ${userId} (force: ${force})...`);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -69,15 +72,17 @@ export function AuthProvider({
         .single();
 
       if (!error && data) {
+        console.log('[Auth] ✅ Profile resolved:', data.email, data.role);
         setProfile(data);
         hasLoadedProfile.current = true;
       } else if (error) {
-        console.error('[Auth] ❌ Profile fetch error:', error);
+        console.error('[Auth] ❌ Profile fetch error:', error.message);
       }
     } catch (e) {
       console.error('[Auth] ❌ Unexpected profile error:', e);
     } finally {
       setIsProfileLoading(false);
+      setIsInitialLoading(false);
     }
   };
 
@@ -173,17 +178,30 @@ export function AuthProvider({
       }
     );
 
-    // 3. Keep-alive Heartbeat
-    const heartbeat = setInterval(async () => {
+    // 3. Keep-alive Heartbeat & Focus Sync
+    const checkSession = async () => {
       if (sessionRef.current) {
-        console.log('[Auth] 💓 Heartbeat: Checking session health...');
+        console.log('[Auth] 💓 Heartbeat/Focus: Checking session health...');
         const { data: { session: freshSession }, error } = await supabase.auth.getSession();
-        if (freshSession) {
+
+        if (freshSession && freshSession.access_token !== sessionRef.current?.access_token) {
+          console.log('[Auth] 🔄 Session refreshed via background check');
+          setSession(freshSession);
           sessionRef.current = freshSession;
+          setUser(freshSession.user);
         }
-        if (error) console.error('[Auth] Heartbeat error:', error);
+
+        if (error) console.error('[Auth] Health check error:', error);
       }
-    }, 10 * 60 * 1000); // 10 minutes
+    };
+
+    const heartbeat = setInterval(checkSession, 5 * 60 * 1000); // 5 minutes
+
+    const handleFocus = () => {
+      console.log('[Auth] 🪟 Window focused, checking session stability');
+      checkSession();
+    };
+    window.addEventListener('focus', handleFocus);
 
     // 4. Safety threshold: If nothing has resolved in 6 seconds, force clear loading states
     const safetyTimer = setTimeout(() => {
@@ -198,6 +216,7 @@ export function AuthProvider({
     return () => {
       subscription.unsubscribe();
       clearInterval(heartbeat);
+      window.removeEventListener('focus', handleFocus);
       clearTimeout(safetyTimer);
     };
   }, [supabase, router, loading, isInitialLoading, isProfileLoading]);

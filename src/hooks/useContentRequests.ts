@@ -35,58 +35,78 @@ export function useContentRequests(options: {
     const { currentPage, pageSize, userRole, userId, enabled } = options;
     const supabase = createClient();
 
+    const queryKey = ['content_requests', { currentPage, pageSize, userRole, userId }];
+    const isActuallyEnabled = enabled && !!userRole && (userRole === 'admin' || !!userId);
+
     return useQuery({
-        queryKey: ['content_requests', { currentPage, pageSize, userRole, userId }],
+        queryKey,
         queryFn: async () => {
-            console.log('[useContentRequests] Fetching...', { userRole, currentPage, pageSize });
+            console.log('[useContentRequests] 🔍 Fetching...', {
+                userRole,
+                userId,
+                currentPage,
+                from: (currentPage - 1) * pageSize,
+                to: (currentPage - 1) * pageSize + pageSize - 1
+            });
             const from = (currentPage - 1) * pageSize;
             const to = from + pageSize - 1;
 
+            let result;
             if (userRole === 'admin') {
-                const { data, error, count } = await supabase
+                result = await supabase
                     .from('content_requests')
                     .select('*', { count: 'exact' })
                     .order('created_at', { ascending: false })
                     .range(from, to);
-
-                if (error) throw error;
-
-                // Fetch profiles for admins
-                if (data && data.length > 0) {
-                    const userIds = [...new Set(data.map((req: any) => req.user_id))];
-                    const { data: profilesData, error: profilesError } = await supabase
-                        .from('profiles')
-                        .select('id, full_name, email, role')
-                        .in('id', userIds);
-
-                    if (profilesError) {
-                        console.error('Error fetching profiles:', profilesError);
-                        return { requests: data as ContentRequest[], totalCount: count || 0 };
-                    }
-
-                    const profilesMap = new Map(profilesData.map((p: any) => [p.id, p]));
-                    const requestsWithProfiles = data.map((req: any) => ({
-                        ...req,
-                        profiles: profilesMap.get(req.user_id) || undefined
-                    }));
-
-                    return { requests: requestsWithProfiles as ContentRequest[], totalCount: count || 0 };
-                }
-                return { requests: [], totalCount: 0 };
             } else {
-                const { data, error, count } = await supabase
+                result = await supabase
                     .from('content_requests')
                     .select('*', { count: 'exact' })
                     .eq('user_id', userId)
                     .order('created_at', { ascending: false })
                     .range(from, to);
-
-                if (error) throw error;
-                return { requests: (data || []) as ContentRequest[], totalCount: count || 0 };
             }
+
+            const { data, error, count } = result;
+
+            if (error) {
+                console.error('[useContentRequests] ❌ Supabase Fetch Error:', error.message, error.code);
+                throw error;
+            }
+
+            // Fetch profiles for admins if needed
+            if (userRole === 'admin' && data && data.length > 0) {
+                const userIds = [...new Set(data.map((req: any) => req.user_id))];
+                const { data: profilesData, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, email, role')
+                    .in('id', userIds);
+
+                if (profilesError) {
+                    console.error('[useContentRequests] ⚠️ Profiles Fetch Error:', profilesError.message);
+                    return { requests: data as ContentRequest[], totalCount: count || 0 };
+                }
+
+                const profilesMap = new Map(profilesData.map((p: any) => [p.id, p]));
+                const requestsWithProfiles = data.map((req: any) => ({
+                    ...req,
+                    profiles: profilesMap.get(req.user_id) || undefined
+                }));
+
+                console.log('[useContentRequests] ✅ Admin fetch resolved with profiles');
+                return { requests: requestsWithProfiles as ContentRequest[], totalCount: count || 0 };
+            }
+
+            console.log(`[useContentRequests] ✅ Fetch resolved (${data?.length || 0} rows)`);
+            return { requests: (data || []) as ContentRequest[], totalCount: count || 0 };
         },
-        enabled: enabled && !!userRole && (userRole === 'admin' || !!userId),
-        placeholderData: (previousData) => previousData, // keepPreviousData replacement in v5
+        enabled: isActuallyEnabled,
+        placeholderData: (previousData) => {
+            if (!isActuallyEnabled && previousData) {
+                console.log('[useContentRequests] ⏸️ Query disabled, providing cached placeholderData');
+            }
+            return previousData;
+        },
         staleTime: 1000 * 30, // 30 seconds
     });
 }

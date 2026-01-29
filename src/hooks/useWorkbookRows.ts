@@ -41,10 +41,19 @@ export function useWorkbookRows(options: {
     const { currentPage, pageSize, statusFilter, userRole, userId, enabled } = options;
     const supabase = createClient();
 
+    const queryKey = ['workbook_rows', { currentPage, pageSize, statusFilter, userRole, userId }];
+    const isActuallyEnabled = enabled && !!userRole && (userRole === 'admin' || !!userId);
+
     return useQuery({
-        queryKey: ['workbook_rows', { currentPage, pageSize, statusFilter, userRole, userId }],
+        queryKey,
         queryFn: async () => {
-            console.log('[useWorkbookRows] Fetching...', { statusFilter, currentPage, pageSize });
+            console.log('[useWorkbookRows] 🔍 Fetching...', {
+                statusFilter,
+                userRole,
+                userId,
+                currentPage,
+                pageSize
+            });
             const from = (currentPage - 1) * pageSize;
             const to = from + pageSize - 1;
 
@@ -74,11 +83,21 @@ export function useWorkbookRows(options: {
                 .order('created_at', { ascending: false })
                 .range(from, to);
 
-            if (error) throw error;
+            if (error) {
+                console.error('[useWorkbookRows] ❌ Supabase Fetch Error:', error.message, error.code);
+                throw error;
+            }
+
+            console.log(`[useWorkbookRows] ✅ Fetch resolved (${data?.length || 0} rows)`);
             return { rows: (data as any) as WorkbookRow[], totalCount: count || 0 };
         },
-        enabled: enabled && !!userRole && (userRole === 'admin' || !!userId),
-        placeholderData: (previousData) => previousData,
+        enabled: isActuallyEnabled,
+        placeholderData: (previousData) => {
+            if (!isActuallyEnabled && previousData) {
+                console.log('[useWorkbookRows] ⏸️ Query disabled, providing cached placeholderData');
+            }
+            return previousData;
+        },
         staleTime: 1000 * 30, // 30 seconds
     });
 }
