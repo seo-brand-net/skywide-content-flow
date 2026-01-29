@@ -67,7 +67,10 @@ export default function ContentBriefActivityLog() {
 
     const rows = queryData?.rows || [];
     const totalCount = queryData?.totalCount || 0;
-    const loading = roleLoading || isInitialLoading || (isQueryLoading && !isPlaceholderData);
+
+    // Only block if we have NO user detected yet.
+    const isAuthResolving = !user && (roleLoading || isInitialLoading);
+    const loading = isAuthResolving || (isQueryLoading && !isPlaceholderData);
     const isInternalLoading = isQueryLoading || isPlaceholderData;
     const error = queryError ? (queryError as any).message : null;
 

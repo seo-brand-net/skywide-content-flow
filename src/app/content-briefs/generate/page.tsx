@@ -117,7 +117,7 @@ export default function ContentBriefsPage() {
         retry: 2,
     });
 
-    const isAppLoading = roleLoading || isInitialLoading;
+    const isAppLoading = !user && (roleLoading || isInitialLoading);
 
     // Pusher real-time brief status updates with HIGH PERFORMANCE inline cache updates
     usePusherBriefUpdates(selectedClient, (update) => {

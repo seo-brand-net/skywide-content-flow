@@ -97,17 +97,15 @@ export function AuthProvider({
     }
   };
 
-  const isInitialized = useRef(false);
 
   useEffect(() => {
-    if (isInitialized.current) return;
-    isInitialized.current = true;
-
+    const isMounted = { current: true };
     console.log('[Auth] 🔐 Initializing auth listener');
 
     // 1. Initial manual check to ensure sync
     const checkInitialSession = async () => {
       try {
+        if (!isMounted.current) return;
         console.log('[Auth] 🔍 Checking initial session...');
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
 
@@ -147,7 +145,6 @@ export function AuthProvider({
 
 
     // 2. Listen for auth changes
-    const isMounted = { current: true };
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: any, currentSession: any) => {
         if (!isMounted.current) return;
@@ -271,6 +268,7 @@ export function AuthProvider({
     }, 12000);
 
     return () => {
+      isMounted.current = false;
       subscription.unsubscribe();
       clearInterval(heartbeat);
       window.removeEventListener('focus', handleFocusSync);

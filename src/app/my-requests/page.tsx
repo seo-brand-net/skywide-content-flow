@@ -49,7 +49,11 @@ export default function MyRequests() {
 
     const requests = queryData?.requests || [];
     const totalCount = queryData?.totalCount || 0;
-    const loading = roleLoading || isInitialLoading || (isQueryLoading && !isPlaceholderData);
+
+    // Improved loading logic: Only block everything if we have NO user session.
+    // Otherwise, let the data query handle the skeletons.
+    const isAuthResolving = !user && (roleLoading || isInitialLoading);
+    const loading = isAuthResolving || (isQueryLoading && !isPlaceholderData);
     const isInternalLoading = isQueryLoading || isPlaceholderData;
     const error = queryError ? (queryError as any).message : null;
 
