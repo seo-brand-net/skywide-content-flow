@@ -2,8 +2,8 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useContentRequests, ContentRequest } from '@/hooks/useContentRequests';
 import { useEffect, useState, useMemo } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,173 +21,37 @@ import {
     SelectValue
 } from '@/components/ui/select';
 
-interface ContentRequest {
-    id: string;
-    article_title: string;
-    title_audience: string;
-    seo_keywords: string;
-    article_type: string;
-    client_name: string;
-    creative_brief: string;
-    status: string;
-    created_at: string;
-    updated_at: string;
-    webhook_sent: boolean | null;
-    webhook_response: string | null;
-    user_id: string;
-    current_run_id: string | null;
-    profiles?: {
-        full_name: string;
-        email: string;
-        role: string;
-    };
-}
 
 export default function MyRequests() {
     const { user } = useAuth();
     const { userRole, loading: roleLoading } = useUserRole(user?.id);
-    const supabase = createClient();
-    const [requests, setRequests] = useState<ContentRequest[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [selectedRequest, setSelectedRequest] = useState<ContentRequest | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
 
-    // Pagination state
+    // UI State
+    const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalCount, setTotalCount] = useState(0);
-    const [isInternalLoading, setIsInternalLoading] = useState(false);
+    const [selectedRequest, setSelectedRequest] = useState<ContentRequest | null>(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-    useEffect(() => {
-        console.log('[My Requests] Effect triggered:', { user: !!user, userRole, roleLoading });
-        if (user && userRole && !roleLoading) {
-            console.log('[My Requests] Fetching requests...');
-            fetchRequests();
-        } else {
-            console.log('[My Requests] Waiting for:', {
-                hasUser: !!user,
-                hasRole: !!userRole,
-                roleLoading
-            });
-        }
-    }, [user, userRole, roleLoading, currentPage, pageSize]);
+    // React Query for data fetching
+    const {
+        data: queryData,
+        isLoading: isQueryLoading,
+        error: queryError,
+        isPlaceholderData
+    } = useContentRequests({
+        currentPage,
+        pageSize,
+        userRole,
+        userId: user?.id,
+        enabled: !roleLoading
+    });
 
-    const fetchRequests = async () => {
-        console.log('[My Requests] fetchRequests started');
-        setIsInternalLoading(true);
-        try {
-            const from = (currentPage - 1) * pageSize;
-            const to = from + pageSize - 1;
-            console.log('[My Requests] Fetching for role:', userRole, 'range:', from, '-', to);
-
-            if (userRole === 'admin') {
-                console.log('[My Requests] Admin path - fetching all requests');
-                // For admin users, fetch content requests with user profiles in a single query
-                const { data, error, count } = await supabase
-                    .from('content_requests')
-                    .select(`
-            id,
-            article_title,
-            title_audience,
-            seo_keywords,
-            client_name,
-            article_type,
-            creative_brief,
-            status,
-            webhook_sent,
-            webhook_response,
-            created_at,
-            updated_at,
-            user_id,
-            current_run_id
-          `, { count: 'exact' })
-                    .order('created_at', { ascending: false })
-                    .range(from, to);
-
-                console.log('[My Requests] Query result:', { dataCount: data?.length, error, totalCount: count });
-                if (error) throw error;
-                setTotalCount(count || 0);
-
-                // If we have requests, fetch user profiles for them
-                if (data && data.length > 0) {
-                    const userIds = [...new Set(data.map((req: any) => req.user_id))];
-                    console.log('[My Requests] Fetching profiles for', userIds.length, 'users');
-
-                    const { data: profilesData, error: profilesError } = await supabase
-                        .from('profiles')
-                        .select('id, full_name, email, role')
-                        .in('id', userIds);
-
-                    if (profilesError) {
-                        console.error('Error fetching profiles:', profilesError);
-                        setRequests(data as ContentRequest[]);
-                    } else if (profilesData) {
-                        // Create a map for efficient lookup
-                        const profilesMap = new Map<string, any>(
-                            profilesData.map((profile: any) => [profile.id, profile])
-                        );
-
-                        // Merge profile data with requests
-                        const requestsWithProfiles: ContentRequest[] = data.map((request: any) => ({
-                            ...request,
-                            profiles: profilesMap.get(request.user_id) ? {
-                                full_name: profilesMap.get(request.user_id)!.full_name || '',
-                                email: profilesMap.get(request.user_id)!.email || '',
-                                role: profilesMap.get(request.user_id)!.role || 'user'
-                            } : undefined
-                        }));
-
-                        console.log('[My Requests] Setting', requestsWithProfiles.length, 'requests with profiles');
-                        setRequests(requestsWithProfiles);
-                    } else {
-                        setRequests(data as ContentRequest[]);
-                    }
-                } else {
-                    console.log('[My Requests] No data returned, setting empty array');
-                    setRequests([]);
-                }
-            } else {
-                console.log('[My Requests] User path - fetching own requests for user:', user?.id);
-                // For regular users, only fetch their own requests
-                const { data: requestsData, error: requestsError, count } = await supabase
-                    .from('content_requests')
-                    .select(`
-            id,
-            article_title,
-            title_audience,
-            seo_keywords,
-            client_name,
-            article_type,
-            creative_brief,
-            status,
-            webhook_sent,
-            webhook_response,
-            created_at,
-            updated_at,
-            user_id,
-            current_run_id
-          `, { count: 'exact' })
-                    .eq('user_id', user?.id)
-                    .order('created_at', { ascending: false })
-                    .range(from, to);
-
-                console.log('[My Requests] User query result:', { dataCount: requestsData?.length, error: requestsError, totalCount: count });
-                if (requestsError) throw requestsError;
-                setRequests(requestsData || []);
-                setTotalCount(count || 0);
-            }
-            console.log('[My Requests] Fetch completed successfully');
-        } catch (err: any) {
-            console.error('[My Requests] ❌ Error fetching requests:', err);
-            setError(err.message);
-        } finally {
-            console.log('[My Requests] Setting loading states to false');
-            setLoading(false);
-            setIsInternalLoading(false);
-        }
-    };
+    const requests = queryData?.requests || [];
+    const totalCount = queryData?.totalCount || 0;
+    const loading = isQueryLoading && !isPlaceholderData;
+    const isInternalLoading = isQueryLoading || isPlaceholderData;
+    const error = queryError ? (queryError as any).message : null;
 
 
 

@@ -2,7 +2,8 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useEffect, useState, useMemo } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { useWorkbookRows, WorkbookRow } from '@/hooks/useWorkbookRows';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,53 +34,44 @@ import { usePusherGlobalBriefUpdates } from '@/hooks/usePusherGlobalBriefUpdates
 import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 
-interface WorkbookRow {
-    id: string;
-    primary_keyword: string;
-    secondary_keyword: string | null;
-    page_type: string;
-    url: string | null;
-    status: string;
-    brief_url: string | null;
-    brief_data: any | null;
-    intent: string | null;
-    location: string | null;
-    longtail_keywords: string | null;
-    created_at: string;
-    updated_at: string;
-    client_id: string;
-    user_id: string | null;
-    clients: {
-        name: string;
-        workbook_url: string;
-    } | null;
-    profiles: {
-        full_name: string;
-        email: string;
-    } | null;
-    notes: string | null;
-}
 
 export default function ContentBriefActivityLog() {
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
-    const supabase = createClient();
-    const [rows, setRows] = useState<WorkbookRow[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
     const { userRole, isAdmin, loading: roleLoading } = useUserRole(user?.id);
 
-    // Pagination state
+    // UI State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [totalCount, setTotalCount] = useState(0);
-    const [isInternalLoading, setIsInternalLoading] = useState(false);
     const [selectedRow, setSelectedRow] = useState<WorkbookRow | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-    // Dynamic row data that updates in real-time if visible in the current list
+    // React Query
+    const queryClient = useQueryClient();
+    const {
+        data: queryData,
+        isLoading: isQueryLoading,
+        error: queryError,
+        isPlaceholderData
+    } = useWorkbookRows({
+        currentPage,
+        pageSize,
+        statusFilter,
+        userRole,
+        userId: user?.id,
+        enabled: !roleLoading
+    });
+
+    const rows = queryData?.rows || [];
+    const totalCount = queryData?.totalCount || 0;
+    const loading = isQueryLoading && !isPlaceholderData;
+    const isInternalLoading = isQueryLoading || isPlaceholderData;
+    const error = queryError ? (queryError as any).message : null;
+
+    // Dynamic row data that updates in real-time
     const activeRow = useMemo(() => {
         if (!selectedRow) return null;
         return rows.find(r => r.id === selectedRow.id) || selectedRow;
@@ -88,98 +80,34 @@ export default function ContentBriefActivityLog() {
     // Pusher real-time updates
     const updates = usePusherGlobalBriefUpdates();
 
-    useEffect(() => {
-        console.log('[Content Briefs] Effect triggered:', { user: !!user, userRole, roleLoading });
-        if (user && userRole && !roleLoading) {
-            console.log('[Content Briefs] Fetching rows...');
-            fetchRows();
-        } else {
-            console.log('[Content Briefs] Waiting for:', {
-                hasUser: !!user,
-                hasRole: !!userRole,
-                roleLoading
-            });
-        }
-    }, [user, userRole, roleLoading, currentPage, pageSize, statusFilter]);
-
-    // Handle real-time updates from Pusher
+    // Sync Pusher updates with React Query Cache
     useEffect(() => {
         if (updates.length === 0) return;
-
         const latestUpdate = updates[updates.length - 1];
 
-        setRows(prevRows => {
-            const index = prevRows.findIndex(r => r.id === latestUpdate.id);
-            if (index !== -1) {
-                // Update existing row
-                const updatedRows = [...prevRows];
-                updatedRows[index] = {
-                    ...updatedRows[index],
-                    status: latestUpdate.status,
-                    brief_url: latestUpdate.brief_url || updatedRows[index].brief_url,
-                    notes: latestUpdate.notes || updatedRows[index].notes,
-                    secondary_keyword: latestUpdate.secondary_keyword || updatedRows[index].secondary_keyword,
-                    longtail_keywords: latestUpdate.longtail_keywords || updatedRows[index].longtail_keywords,
-                    updated_at: new Date().toISOString()
-                };
+        // Update the cache for ALL current queries that might contain this row
+        // This is a powerful React Query pattern for real-time consistency
+        queryClient.setQueriesData<{ rows: WorkbookRow[], totalCount: number }>({ queryKey: ['workbook_rows'] }, (oldData) => {
+            if (!oldData || !oldData.rows) return oldData;
 
-                return updatedRows;
-            }
-            return prevRows;
+            const index = oldData.rows.findIndex((r: any) => r.id === latestUpdate.id);
+            if (index === -1) return oldData;
+
+            const newRows = [...oldData.rows];
+            newRows[index] = {
+                ...newRows[index],
+                status: latestUpdate.status,
+                brief_url: latestUpdate.brief_url || newRows[index].brief_url,
+                notes: latestUpdate.notes || newRows[index].notes,
+                secondary_keyword: latestUpdate.secondary_keyword || newRows[index].secondary_keyword,
+                longtail_keywords: latestUpdate.longtail_keywords || newRows[index].longtail_keywords,
+                updated_at: new Date().toISOString()
+            };
+
+            return { ...oldData, rows: newRows };
         });
-    }, [updates, toast]);
+    }, [updates, queryClient]);
 
-    const fetchRows = async () => {
-        setIsInternalLoading(true);
-        try {
-            const from = (currentPage - 1) * pageSize;
-            const to = from + pageSize - 1;
-
-            let query = supabase
-                .from('workbook_rows')
-                .select(`
-                    *,
-                    clients (
-                        name,
-                        workbook_url
-                    ),
-                    profiles:user_id (
-                        full_name,
-                        email
-                    )
-                `, { count: 'exact' });
-
-            if (statusFilter !== 'all') {
-                query = query.eq('status', statusFilter);
-            }
-
-            if (userRole !== 'admin') {
-                query = query.eq('user_id', user?.id);
-            }
-
-            const { data, error, count } = await query
-                .order('created_at', { ascending: false })
-                .range(from, to);
-
-            if (error) {
-                console.error('Supabase error fetching activity log:', error);
-                toast({
-                    title: "Fetch Error",
-                    description: `Status ${error.code}: ${error.message}. Check console for details.`,
-                    variant: "destructive"
-                });
-                throw error;
-            }
-
-            setRows(data as unknown as WorkbookRow[] || []);
-            setTotalCount(count || 0);
-        } catch (err: any) {
-            console.error('Error fetching activity log:', err);
-        } finally {
-            setLoading(false);
-            setIsInternalLoading(false);
-        }
-    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
