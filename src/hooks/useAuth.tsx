@@ -225,19 +225,7 @@ export function AuthProvider({
   const signOut = async () => {
     console.log('[Auth] 🚪 Starting signOut process...');
     try {
-      toast({
-        title: "Signed Out",
-        description: "You have been successfully signed out.",
-      });
-
-      // Clear local state immediately
-      console.log('[Auth] 🧹 Clearing local state...');
-      setSession(null);
-      setUser(null);
-      setProfile(null);
-      setIsProfileLoading(false);
-
-      // Sign out from Supabase
+      // Sign out from Supabase FIRST
       console.log('[Auth] 🔐 Calling Supabase signOut...');
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -245,7 +233,21 @@ export function AuthProvider({
         throw error;
       }
 
-      console.log('[Auth] ✅ Supabase signOut successful, redirecting to /login...');
+      console.log('[Auth] ✅ Supabase signOut successful');
+
+      // Clear local state AFTER Supabase signOut succeeds
+      console.log('[Auth] 🧹 Clearing local state...');
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setIsProfileLoading(false);
+
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+
+      console.log('[Auth] 🔄 Redirecting to /login...');
       // Use hard navigation for logout to clear memory contexts and ensure instant redirection
       window.location.href = '/login';
     } catch (error: any) {
