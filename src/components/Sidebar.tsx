@@ -36,15 +36,16 @@ interface SidebarProps {
 }
 
 export function Sidebar({ userRole, loading }: SidebarProps) {
-    const { signOut } = useAuth();
+    const { signOut, isInitialLoading } = useAuth();
     const pathname = usePathname();
 
     const isActive = (path: string) => {
         return pathname === path || (path === '/dashboard' && pathname === '/');
     };
 
-    // Show loading skeleton while role is being checked
-    if (loading) {
+    // Show loading skeleton ONLY during initial application boot
+    // If we have an initial load finished, we stay persistent even if 'loading' (background refresh) is true
+    if (isInitialLoading && loading && !userRole) {
         return (
             <div className="fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
                 {/* Header */}

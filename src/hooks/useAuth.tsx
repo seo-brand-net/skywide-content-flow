@@ -11,6 +11,7 @@ interface AuthContextType {
   profile: any | null;
   displayName: string | null;
   loading: boolean;
+  isInitialLoading: boolean;
   isProfileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
@@ -36,6 +37,7 @@ export function AuthProvider({
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(!initialSession);
   const [isProfileLoading, setIsProfileLoading] = useState(!!initialSession);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -54,6 +56,7 @@ export function AuthProvider({
         await fetchProfile(currentSession.user.id);
       }
       setLoading(false);
+      setIsInitialLoading(false);
     };
     checkInitialSession();
 
@@ -73,6 +76,7 @@ export function AuthProvider({
         }
 
         setLoading(false);
+        setIsInitialLoading(false);
 
         if (event === 'SIGNED_IN') {
           setIsPasswordReset(false);
@@ -80,7 +84,16 @@ export function AuthProvider({
           setIsPasswordReset(false);
           // Only redirect if we are on a protected route
           // This prevents infinite loops if login page itself triggers a mount event
-          const protectedPaths = ['/dashboard', '/research', '/content-briefs', '/analytics', '/settings'];
+          const protectedPaths = [
+            '/dashboard',
+            '/research',
+            '/content-briefs',
+            '/my-requests',
+            '/ai-rewriter',
+            '/features',
+            '/analytics',
+            '/settings'
+          ];
           const isProtected = protectedPaths.some(p => window.location.pathname.startsWith(p));
 
           if (isProtected) {
@@ -113,7 +126,8 @@ export function AuthProvider({
   }, [supabase, router]);
 
   const fetchProfile = async (userId: string) => {
-    setIsProfileLoading(true);
+    // Only show loading state if we don't have a profile yet to prevent focus-induced flickering
+    if (!profile) setIsProfileLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -213,8 +227,10 @@ export function AuthProvider({
       await supabase.auth.signOut();
       setSession(null);
       setUser(null);
-      router.push('/login');
-      router.refresh();
+      setProfile(null);
+
+      // Use hard navigation for logout to clear memory contexts and ensure instant redirection
+      window.location.href = '/login';
 
       toast({
         title: "Signed Out",
@@ -309,6 +325,7 @@ export function AuthProvider({
     displayName,
     loading,
     isProfileLoading,
+    isInitialLoading,
     signIn,
     signUp,
     signOut,
