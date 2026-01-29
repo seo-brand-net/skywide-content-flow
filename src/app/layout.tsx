@@ -33,12 +33,27 @@ export default async function RootLayout({
   // Get session separately if needed for initial state
   const { data: { session } } = await supabase.auth.getSession();
 
+  // Fetch initial profile on the server to prevent hydration flickers
+  let profile = null;
+  if (user) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    profile = data;
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers initialUser={user} initialSession={session}>
+        <Providers
+          initialUser={user}
+          initialSession={session}
+          initialProfile={profile}
+        >
           <ClientGlobalLayout>
             {children}
           </ClientGlobalLayout>

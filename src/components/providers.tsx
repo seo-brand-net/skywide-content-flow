@@ -13,11 +13,13 @@ import { User, Session } from "@supabase/supabase-js";
 export function Providers({
     children,
     initialUser = null,
-    initialSession = null
+    initialSession = null,
+    initialProfile = null
 }: {
     children: React.ReactNode,
     initialUser?: User | null,
-    initialSession?: Session | null
+    initialSession?: Session | null,
+    initialProfile?: any | null
 }) {
     const [queryClient] = useState(() => new QueryClient());
 
@@ -30,7 +32,11 @@ export function Providers({
                 disableTransitionOnChange
             >
                 <TooltipProvider>
-                    <AuthProvider initialUser={initialUser} initialSession={initialSession}>
+                    <AuthProvider
+                        initialUser={initialUser}
+                        initialSession={initialSession}
+                        initialProfile={initialProfile}
+                    >
                         {children}
                         <Toaster />
                         <Sonner />
