@@ -248,8 +248,8 @@ export function AuthProvider({
       });
 
       console.log('[Auth] 🔄 Redirecting to /login...');
-      // Use hard navigation for logout to clear memory contexts and ensure instant redirection
-      window.location.href = '/login';
+      router.push('/login');
+      router.refresh();
     } catch (error: any) {
       console.error('[Auth] ❌ SignOut error:', error);
       toast({
