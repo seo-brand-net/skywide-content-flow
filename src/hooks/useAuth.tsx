@@ -80,8 +80,14 @@ export function AuthProvider({
         setProfile(data);
         hasLoadedProfile.current = true;
       } else if (error) {
-        console.error('[Auth] ❌ Profile fetch error:', error.message);
-        setAuthError(`Profile resolution failed: ${error.message}`);
+        // Handle specific case where profile doesn't exist yet
+        if (error.code === 'PGRST116') {
+          console.warn('[Auth] ⚠️ Profile not found in database. Using user defaults.');
+          // Don't set authError here, useUserRole will handle the fallback
+        } else {
+          console.error('[Auth] ❌ Profile fetch error:', error.message);
+          setAuthError(`Profile resolution failed: ${error.message}`);
+        }
       }
     } catch (e) {
       console.error('[Auth] ❌ Unexpected profile error:', e);
@@ -91,7 +97,12 @@ export function AuthProvider({
     }
   };
 
+  const isInitialized = useRef(false);
+
   useEffect(() => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
     console.log('[Auth] 🔐 Initializing auth listener');
 
     // 1. Initial manual check to ensure sync
@@ -211,16 +222,23 @@ export function AuthProvider({
     window.addEventListener('focus', handleFocusSync);
     window.addEventListener('visibilitychange', handleFocusSync);
 
-    // 4. Safety threshold: If nothing has resolved in 6 seconds, force clear loading states
+    // 4. Safety threshold: If nothing has resolved in 12 seconds, force clear loading states
+    // Increased to 12s to account for slow production cold starts or RLS latency.
     const safetyTimer = setTimeout(() => {
       if (loading || isInitialLoading || isProfileLoading) {
         console.warn('[Auth] 🚨 Safety timeout: Forcing resolve due to inactivity');
-        setAuthError('Identity resolution timed out. Some features may be restricted.');
+        // Only set error if we don't have a user at all (critical failure)
+        // If we have a user but no profile, we can still function in 'user' mode.
+        if (!user && !sessionRef.current) {
+          setAuthError('Identity resolution timed out. Please check your connection.');
+        } else {
+          console.log('[Auth] 🛡️ Proceeding without full profile resolution due to timeout');
+        }
         setLoading(false);
         setIsInitialLoading(false);
         setIsProfileLoading(false);
       }
-    }, 6000);
+    }, 12000);
 
     return () => {
       subscription.unsubscribe();

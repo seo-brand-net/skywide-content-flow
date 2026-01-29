@@ -89,7 +89,7 @@ export default function ContentBriefsPage() {
             if (error) throw error;
             return data as Client[];
         },
-        enabled: !!user?.id && !authError,
+        enabled: !!user?.id,
         retry: 2
     });
 
@@ -112,7 +112,7 @@ export default function ContentBriefsPage() {
             if (error) throw error;
             return data as WorkbookRow[];
         },
-        enabled: !!selectedClient && !!user?.id && !authError,
+        enabled: !!selectedClient && !!user?.id,
         staleTime: 5000,
         retry: 2,
     });

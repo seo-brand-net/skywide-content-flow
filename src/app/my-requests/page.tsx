@@ -44,7 +44,7 @@ export default function MyRequests() {
         pageSize,
         userRole,
         userId: user?.id,
-        enabled: !!user?.id && !authError
+        enabled: !!user?.id
     });
 
     const requests = queryData?.requests || [];
