@@ -104,13 +104,16 @@ export function AuthProvider({
 
 
     // 2. Listen for auth changes
+    const isMounted = { current: true };
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
+        if (!isMounted.current) return;
+
         console.log(`[Auth] 🔄 Event received: ${event}`);
 
-        // Prevent clearing state if we already have it from a more reliable source
-        if (!currentSession && sessionRef.current && event === 'INITIAL_SESSION') {
-          console.log('[Auth] Intercepted spurious null INITIAL_SESSION');
+        // IGNORE null events on INITIAL_SESSION if we already have a session from the manual check
+        if (!currentSession && event === 'INITIAL_SESSION' && sessionRef.current) {
+          console.log('[Auth] 🛡️ Guard: Ignoring stale null initialization');
           return;
         }
 
@@ -120,20 +123,10 @@ export function AuthProvider({
 
         if (currentSession?.user) {
           await fetchProfile(currentSession.user.id);
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           setProfile(null);
           setIsProfileLoading(false);
-        }
 
-        setLoading(false);
-        setIsInitialLoading(false);
-
-        if (event === 'SIGNED_IN') {
-          setIsPasswordReset(false);
-        } else if (event === 'SIGNED_OUT') {
-          setIsPasswordReset(false);
-          // Only redirect if we are on a protected route
-          // This prevents infinite loops if login page itself triggers a mount event
           const protectedPaths = [
             '/dashboard',
             '/research',
@@ -147,16 +140,13 @@ export function AuthProvider({
           const isProtected = protectedPaths.some(p => window.location.pathname.startsWith(p));
 
           if (isProtected) {
-            console.log('[Auth] 🚪 User signed out, redirecting to login');
+            console.log('[Auth] 🚪 Redirecting to login...');
             router.push('/login');
           }
-        } else if (event === 'PASSWORD_RECOVERY') {
-          setIsPasswordReset(true);
-        } else if (event === 'TOKEN_REFRESHED') {
-          console.log('[Auth] ✨ Token refreshed successfully');
-        } else if (event === 'INITIAL_SESSION') {
-          console.log('[Auth] 🔑 Initial session established');
         }
+
+        setLoading(false);
+        setIsInitialLoading(false);
       }
     );
 
