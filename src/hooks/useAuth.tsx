@@ -1,9 +1,10 @@
 "use client";
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 
 interface AuthContextType {
   user: User | null;
@@ -41,7 +42,12 @@ export function AuthProvider({
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  const supabase = createClient();
+
+  // Memoize supabase client to prevent unnecessary useEffect re-runs
+  const supabase = useMemo(() => createClient(), []);
+
+  const hasLoadedProfile = useRef(false);
+  const sessionRef = useRef<Session | null>(initialSession);
 
   const fetchProfile = async (userId: string) => {
     if (!userId) {
@@ -80,13 +86,15 @@ export function AuthProvider({
       console.log('[Auth] 🔍 Checking initial session...');
       const { data: { session: currentSession }, error } = await supabase.auth.getSession();
 
+      setSession(currentSession);
+      sessionRef.current = currentSession;
+      setUser(currentSession?.user ?? null);
+
       if (currentSession) {
-        console.log('[Auth] Found existing session on mount');
-        setSession(currentSession);
-        setUser(currentSession.user);
+        console.log('[Auth] Initial session sync successful');
         await fetchProfile(currentSession.user.id);
       } else {
-        console.log('[Auth] No session found on mount');
+        console.log('[Auth] No session found during initial check');
         setIsProfileLoading(false);
       }
       setLoading(false);
@@ -94,12 +102,20 @@ export function AuthProvider({
     };
     checkInitialSession();
 
+
     // 2. Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log(`[Auth] 🔄 Event received: ${event}`);
 
+        // Prevent clearing state if we already have it from a more reliable source
+        if (!currentSession && sessionRef.current && event === 'INITIAL_SESSION') {
+          console.log('[Auth] Intercepted spurious null INITIAL_SESSION');
+          return;
+        }
+
         setSession(currentSession);
+        sessionRef.current = currentSession;
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
@@ -144,11 +160,14 @@ export function AuthProvider({
       }
     );
 
-    // 3. Keep-alive Heartbeat (proactively refresh session every 10 mins)
+    // 3. Keep-alive Heartbeat
     const heartbeat = setInterval(async () => {
-      if (session) {
+      if (sessionRef.current) {
         console.log('[Auth] 💓 Heartbeat: Checking session health...');
-        const { data, error } = await supabase.auth.getSession();
+        const { data: { session: freshSession }, error } = await supabase.auth.getSession();
+        if (freshSession) {
+          sessionRef.current = freshSession;
+        }
         if (error) console.error('[Auth] Heartbeat error:', error);
       }
     }, 10 * 60 * 1000); // 10 minutes
