@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
@@ -307,30 +308,44 @@ export function AuthProvider({
     }
   };
 
+  const queryClient = useQueryClient();
+
   const signOut = async () => {
-    console.log('[Auth] 🚪 Starting signOut process with safety timeout for:', user?.email);
+    console.log('[Auth] 🚪 Starting signOut process for:', user?.email);
 
     try {
-      // Clear local state first for immediate UI response
+      // 1. Immediate UI Feedback
+      toast({
+        title: "Signing out...",
+        description: "Clearing your session securely.",
+      });
+
+      // 2. Clear local state and cache first
+      queryClient.clear();
       setUser(null);
       setSession(null);
       setProfile(null);
       sessionRef.current = null;
+      setAuthError(null);
 
-      // Wrap Supabase signOut in a 3s timeout race
-      const signOutPromise = supabase.auth.signOut();
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Sign out timed out')), 3000)
+      // 3. Parallel sign out across layers with a shorter timeout
+      console.log('[Auth] 🌐 Performing multi-layer sign out...');
+      const apiPromise = fetch('/api/auth/sign-out', { method: 'POST' });
+      const localSignOutPromise = supabase.auth.signOut();
+
+      const timeoutPromise = new Promise((resolve) =>
+        setTimeout(() => resolve({ timeout: true }), 1200)
       );
 
-      try {
-        await Promise.race([signOutPromise, timeoutPromise]);
-        console.log('[Auth] ✅ Supabase signOut successful or timed out');
-      } catch (err: any) {
-        console.warn('[Auth] ⚠️ Sign out stalled or failed, proceeding with redirect anyway:', err.message);
-      }
+      // We wait for the first resolution or timeout
+      await Promise.race([
+        Promise.all([apiPromise, localSignOutPromise]),
+        timeoutPromise
+      ]);
 
-      // Perform hard navigation to destroy all memory context
+      console.log('[Auth] ✅ Sign out process finished (or timed out)');
+
+      // 4. Perform hard navigation to destroy all memory context
       window.location.replace('/login');
     } catch (error: any) {
       console.error('[Auth] ❌ Error in signOut process:', error.message);

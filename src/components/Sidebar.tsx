@@ -82,7 +82,7 @@ export function Sidebar({ userRole, loading }: SidebarProps) {
     const currentNavItems = userRole === 'admin' ? adminNavItems : navItems;
 
     return (
-        <div style={{ zIndex: 99 }} className="z-99 fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
+        <div style={{ zIndex: 100 }} className="z-[100] fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
             {/* Header */}
             <div className="p-6 border-b border-sidebar-border">
                 <Logo />
