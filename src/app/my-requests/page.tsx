@@ -24,7 +24,7 @@ import {
 
 export default function MyRequests() {
     const { user } = useAuth();
-    const { userRole, loading: roleLoading, authError } = useUserRole(user?.id);
+    const { userRole, loading: roleLoading, authError, isInitialLoading } = useUserRole(user?.id);
 
     // UI State
     const [searchTerm, setSearchTerm] = useState('');
@@ -44,12 +44,12 @@ export default function MyRequests() {
         pageSize,
         userRole,
         userId: user?.id,
-        enabled: !roleLoading
+        enabled: !!userRole && !roleLoading && !isInitialLoading
     });
 
     const requests = queryData?.requests || [];
     const totalCount = queryData?.totalCount || 0;
-    const loading = isQueryLoading && !isPlaceholderData;
+    const loading = roleLoading || isInitialLoading || (isQueryLoading && !isPlaceholderData);
     const isInternalLoading = isQueryLoading || isPlaceholderData;
     const error = queryError ? (queryError as any).message : null;
 
@@ -171,11 +171,17 @@ export default function MyRequests() {
     if (error) {
         return (
             <div className="min-h-screen bg-background p-8">
-                <div className="max-w-7xl mx-auto">
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-foreground mb-2">My Requests</h1>
-                        <p className="text-muted-foreground text-red-500">Error loading requests: {error}</p>
-                    </div>
+                <div className="max-w-7xl mx-auto space-y-6 py-20 text-center">
+                    <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+                    <h1 className="text-3xl font-bold text-foreground">Query Error</h1>
+                    <p className="text-red-500">{error?.message || String(error)}</p>
+                    <Button
+                        variant="outline"
+                        onClick={() => window.location.reload()}
+                        className="mt-6"
+                    >
+                        Force Refresh
+                    </Button>
                 </div>
             </div>
         );

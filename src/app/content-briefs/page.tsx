@@ -39,7 +39,7 @@ export default function ContentBriefActivityLog() {
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
-    const { userRole, isAdmin, loading: roleLoading, authError } = useUserRole(user?.id);
+    const { userRole, isAdmin, loading: roleLoading, authError, isInitialLoading } = useUserRole(user?.id);
 
     // UI State
     const [searchTerm, setSearchTerm] = useState('');
@@ -62,12 +62,12 @@ export default function ContentBriefActivityLog() {
         statusFilter,
         userRole,
         userId: user?.id,
-        enabled: !roleLoading
+        enabled: !!userRole && !roleLoading && !isInitialLoading
     });
 
     const rows = queryData?.rows || [];
     const totalCount = queryData?.totalCount || 0;
-    const loading = isQueryLoading && !isPlaceholderData;
+    const loading = roleLoading || isInitialLoading || (isQueryLoading && !isPlaceholderData);
     const isInternalLoading = isQueryLoading || isPlaceholderData;
     const error = queryError ? (queryError as any).message : null;
 
@@ -154,6 +154,25 @@ export default function ContentBriefActivityLog() {
                 <div className="max-w-7xl mx-auto space-y-8">
                     <Skeleton className="h-12 w-64" />
                     <Skeleton className="h-[500px] w-full" />
+                </div>
+            </div>
+        );
+    }
+
+    if (queryError) {
+        return (
+            <div className="min-h-screen bg-background p-8">
+                <div className="max-w-7xl mx-auto space-y-8 text-center py-20">
+                    <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+                    <h1 className="text-3xl font-bold text-foreground">Query Error</h1>
+                    <p className="text-red-500">{(queryError as any)?.message || String(queryError)}</p>
+                    <Button
+                        variant="outline"
+                        onClick={() => window.location.reload()}
+                        className="mt-6"
+                    >
+                        Force Refresh
+                    </Button>
                 </div>
             </div>
         );

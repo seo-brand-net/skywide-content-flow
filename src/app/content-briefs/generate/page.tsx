@@ -75,7 +75,7 @@ export default function ContentBriefsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
     const [localIsGenerating, setLocalIsGenerating] = useState(false);
-    const { userRole, isAdmin, loading: roleLoading } = useUserRole(user?.id);
+    const { userRole, isAdmin, loading: roleLoading, authError, isInitialLoading } = useUserRole(user?.id);
 
     // Queries
 
@@ -89,11 +89,13 @@ export default function ContentBriefsPage() {
                 .order('name');
             if (error) throw error;
             return data as Client[];
-        }
+        },
+        enabled: !roleLoading && !isInitialLoading && !authError,
+        retry: 2
     });
 
     const { data: workbookRows = [], isLoading: isLoadingRows, refetch: refetchRows } = useQuery({
-        queryKey: ['workbook_rows', selectedClient, userRole, roleLoading],
+        queryKey: ['workbook_rows', selectedClient, userRole],
         queryFn: async () => {
             if (!selectedClient) return [];
             let query = supabase
@@ -111,9 +113,12 @@ export default function ContentBriefsPage() {
             if (error) throw error;
             return data as WorkbookRow[];
         },
-        enabled: !!selectedClient && !!userRole && !roleLoading,
+        enabled: !!selectedClient && !!userRole && !roleLoading && !isInitialLoading && !authError,
         staleTime: 5000,
+        retry: 2,
     });
+
+    const isAppLoading = roleLoading || isInitialLoading;
 
     // Pusher real-time brief status updates with HIGH PERFORMANCE inline cache updates
     usePusherBriefUpdates(selectedClient, (update) => {
@@ -351,6 +356,12 @@ export default function ContentBriefsPage() {
                         <p className="seobrand-description max-w-2xl text-lg">
                             Select a client to manage their content briefs or add a new one.
                         </p>
+                        {authError && (
+                            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-500 text-sm animate-in slide-in-from-top duration-300">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                                <p><strong>Auth Warning:</strong> {authError}</p>
+                            </div>
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
@@ -489,17 +500,19 @@ export default function ContentBriefsPage() {
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-border/50">
-                                                {(isLoadingRows || syncMutation.isPending) && (
+                                                {(isAppLoading || (selectedClient && isLoadingRows) || syncMutation.isPending) && (
                                                     <tr>
                                                         <td colSpan={7} className="px-6 py-20 text-center text-muted-foreground">
                                                             <div className="flex flex-col items-center gap-3 animate-pulse">
                                                                 <RefreshCw className="w-8 h-8 animate-spin text-brand-blue-crayola/50" />
-                                                                <span className="font-medium">Streaming live data from Google Sheets...</span>
+                                                                <span className="font-medium">
+                                                                    {isAppLoading ? 'Resolving your identity...' : 'Streaming live data from Google Sheets...'}
+                                                                </span>
                                                             </div>
                                                         </td>
                                                     </tr>
                                                 )}
-                                                {!(isLoadingRows || syncMutation.isPending) && filteredRows.length === 0 && (
+                                                {!(isAppLoading || (selectedClient && isLoadingRows) || syncMutation.isPending) && filteredRows.length === 0 && (
                                                     <tr>
                                                         <td colSpan={7} className="px-6 py-20 text-center text-muted-foreground">
                                                             {searchQuery ? `No results matching "${searchQuery}"` : "No workbook history found for this client. Click 'Sync from Workbook' to pull data."}

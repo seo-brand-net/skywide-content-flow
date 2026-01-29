@@ -101,5 +101,6 @@ export function useWorkbookRows(options: {
             return previousData;
         },
         staleTime: 1000 * 30, // 30 seconds
+        retry: 2,
     });
 }
