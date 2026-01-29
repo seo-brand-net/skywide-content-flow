@@ -43,6 +43,26 @@ export function AuthProvider({
   const router = useRouter();
   const supabase = createClient();
 
+  const fetchProfile = async (userId: string) => {
+    // Only show loading state if we don't have a profile yet to prevent focus-induced flickering
+    if (!profile) setIsProfileLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (!error && data) {
+        setProfile(data);
+      }
+    } catch (e) {
+      console.error('Error fetching profile:', e);
+    } finally {
+      setIsProfileLoading(false);
+    }
+  };
+
   useEffect(() => {
     console.log('[Auth] 🔐 Initializing auth listener');
 
@@ -124,26 +144,6 @@ export function AuthProvider({
       clearInterval(heartbeat);
     };
   }, [supabase, router]);
-
-  const fetchProfile = async (userId: string) => {
-    // Only show loading state if we don't have a profile yet to prevent focus-induced flickering
-    if (!profile) setIsProfileLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (!error && data) {
-        setProfile(data);
-      }
-    } catch (e) {
-      console.error('Error fetching profile:', e);
-    } finally {
-      setIsProfileLoading(false);
-    }
-  };
 
   const displayName = user ? (
     profile?.display_name ||

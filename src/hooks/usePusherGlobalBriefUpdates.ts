@@ -10,7 +10,7 @@ interface BriefStatusUpdate {
     notes?: string;
     user_id?: string;
     secondary_keyword?: string;
-    longtail_keywords?: string;
+    longtail_keywords?: string
 }
 
 export function usePusherGlobalBriefUpdates() {
