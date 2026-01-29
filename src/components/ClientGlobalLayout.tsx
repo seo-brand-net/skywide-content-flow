@@ -25,7 +25,7 @@ export function ClientGlobalLayout({
 }) {
     const pathname = usePathname();
     const { user } = useAuth();
-    const { userRole, loading } = useUserRole(user?.id);
+    const { userRole, loading, isResolved } = useUserRole(user?.id);
 
     // Initialize universal notifications for content briefs
     usePusherUniversalNotifications();

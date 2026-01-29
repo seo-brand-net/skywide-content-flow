@@ -52,8 +52,8 @@ export function AuthProvider({
   const sessionRef = useRef<Session | null>(initialSession);
 
   const fetchProfile = async (userId: string) => {
-    if (!userId) {
-      setIsProfileLoading(false);
+    if (!userId || isProfileLoading || (profile?.id === userId && !hasLoadedProfile.current)) {
+      if (!userId) setIsProfileLoading(false);
       return;
     }
 
@@ -70,6 +70,7 @@ export function AuthProvider({
 
       if (!error && data) {
         setProfile(data);
+        hasLoadedProfile.current = true;
       } else if (error) {
         console.error('[Auth] ❌ Profile fetch error:', error);
       }

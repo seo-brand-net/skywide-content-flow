@@ -3,21 +3,20 @@ import { useAuth } from './useAuth';
 export function useUserRole(userId?: string) {
     const { profile, loading, isProfileLoading, isInitialLoading } = useAuth();
 
-    // If we have a profile, use its role, otherwise default to 'user'
-    // profile.role is expected to be 'admin', 'user', etc.
-    const userRole = profile?.role || 'user';
+    // If we are loading, we don't know the role yet.
+    // Defaulting to 'user' while loading can cause flickering/redirect loops for admins.
+    const userRole = (loading || isProfileLoading) ? null : (profile?.role || 'user');
     const isAdmin = userRole === 'admin';
-
-    const roleLoading = loading || isProfileLoading;
     const isResolved = !loading && !isProfileLoading && !!profile;
 
     return {
         userRole,
         isAdmin,
-        loading: roleLoading,
+        loading: loading || isProfileLoading,
         profileLoading: isProfileLoading,
         isInitialLoading,
         isResolved,
-        roleLoading
+        roleLoading: loading || isProfileLoading,
+        isRolePending: loading || isProfileLoading
     };
 }
