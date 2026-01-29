@@ -229,7 +229,7 @@ export function AuthProvider({
       window.removeEventListener('visibilitychange', handleFocusSync);
       clearTimeout(safetyTimer);
     };
-  }, [supabase, router, loading, isInitialLoading, isProfileLoading]);
+  }, [supabase, router]);
 
   const displayName = user ? (
     profile?.display_name ||

@@ -62,7 +62,7 @@ export default function ContentBriefActivityLog() {
         statusFilter,
         userRole,
         userId: user?.id,
-        enabled: !!userRole && !roleLoading && !isInitialLoading
+        enabled: !!user?.id && !authError
     });
 
     const rows = queryData?.rows || [];

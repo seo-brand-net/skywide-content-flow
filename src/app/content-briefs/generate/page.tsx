@@ -86,11 +86,10 @@ export default function ContentBriefsPage() {
             const { data, error } = await supabase
                 .from('clients')
                 .select('*')
-                .order('name');
             if (error) throw error;
             return data as Client[];
         },
-        enabled: !roleLoading && !isInitialLoading && !authError,
+        enabled: !!user?.id && !authError,
         retry: 2
     });
 
@@ -113,7 +112,7 @@ export default function ContentBriefsPage() {
             if (error) throw error;
             return data as WorkbookRow[];
         },
-        enabled: !!selectedClient && !!userRole && !roleLoading && !isInitialLoading && !authError,
+        enabled: !!selectedClient && !!user?.id && !authError,
         staleTime: 5000,
         retry: 2,
     });
