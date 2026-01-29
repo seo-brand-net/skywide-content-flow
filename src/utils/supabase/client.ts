@@ -1,15 +1,30 @@
 import { createBrowserClient } from '@supabase/ssr'
 
+let client: any = null;
+
 export function createClient() {
-    return createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-            auth: {
-                autoRefreshToken: true,
-                persistSession: true,
-                detectSessionInUrl: true
+    // Return a new client for server-side (required by Next.js SSR)
+    if (typeof window === 'undefined') {
+        return createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+    }
+
+    // Singleton pattern for the browser
+    if (!client) {
+        console.log('[Supabase] 🔌 Initializing singleton browser client');
+        client = createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                auth: {
+                    autoRefreshToken: true,
+                    persistSession: true,
+                    detectSessionInUrl: true
+                }
             }
-        }
-    )
+        )
+    }
+    return client;
 }

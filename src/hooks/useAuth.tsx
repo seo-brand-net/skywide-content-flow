@@ -133,36 +133,37 @@ export function AuthProvider({
         console.log(`[Auth] 🔄 Event received: ${event}`);
 
         // IGNORE null events on INITIAL_SESSION if we already have a session from the manual check
-        if (!currentSession && event === 'INITIAL_SESSION' && sessionRef.current) {
+        const isStaleInitialization = !currentSession && event === 'INITIAL_SESSION' && sessionRef.current;
+
+        if (isStaleInitialization) {
           console.log('[Auth] 🛡️ Guard: Ignoring stale null initialization');
-          return;
-        }
+        } else {
+          setSession(currentSession);
+          sessionRef.current = currentSession;
+          setUser(currentSession?.user ?? null);
 
-        setSession(currentSession);
-        sessionRef.current = currentSession;
-        setUser(currentSession?.user ?? null);
+          if (currentSession?.user) {
+            await fetchProfile(currentSession.user.id);
+          } else if (event === 'SIGNED_OUT') {
+            setProfile(null);
+            setIsProfileLoading(false);
 
-        if (currentSession?.user) {
-          await fetchProfile(currentSession.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          setProfile(null);
-          setIsProfileLoading(false);
+            const protectedPaths = [
+              '/dashboard',
+              '/research',
+              '/content-briefs',
+              '/my-requests',
+              '/ai-rewriter',
+              '/features',
+              '/analytics',
+              '/settings'
+            ];
+            const isProtected = protectedPaths.some(p => window.location.pathname.startsWith(p));
 
-          const protectedPaths = [
-            '/dashboard',
-            '/research',
-            '/content-briefs',
-            '/my-requests',
-            '/ai-rewriter',
-            '/features',
-            '/analytics',
-            '/settings'
-          ];
-          const isProtected = protectedPaths.some(p => window.location.pathname.startsWith(p));
-
-          if (isProtected) {
-            console.log('[Auth] 🚪 Redirecting to login...');
-            router.push('/login');
+            if (isProtected) {
+              console.log('[Auth] 🚪 Redirecting to login...');
+              router.push('/login');
+            }
           }
         }
 
@@ -267,7 +268,7 @@ export function AuthProvider({
   };
 
   const signOut = async () => {
-    console.log('[Auth] 🚪 Starting signOut process...');
+    console.log('[Auth] 🚪 Starting signOut process for:', user?.email);
     try {
       // Sign out from Supabase FIRST
       console.log('[Auth] 🔐 Calling Supabase signOut...');
