@@ -127,7 +127,7 @@ export function AuthProvider({
     // 2. Listen for auth changes
     const isMounted = { current: true };
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      async (event: any, currentSession: any) => {
         if (!isMounted.current) return;
 
         console.log(`[Auth] 🔄 Event received: ${event}`);

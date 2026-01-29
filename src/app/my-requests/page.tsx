@@ -112,7 +112,7 @@ export default function MyRequests() {
 
                 // If we have requests, fetch user profiles for them
                 if (data && data.length > 0) {
-                    const userIds = [...new Set(data.map(req => req.user_id))];
+                    const userIds = [...new Set(data.map((req: any) => req.user_id))];
                     console.log('[My Requests] Fetching profiles for', userIds.length, 'users');
 
                     const { data: profilesData, error: profilesError } = await supabase
@@ -125,12 +125,12 @@ export default function MyRequests() {
                         setRequests(data as ContentRequest[]);
                     } else if (profilesData) {
                         // Create a map for efficient lookup
-                        const profilesMap = new Map(
-                            profilesData.map(profile => [profile.id, profile])
+                        const profilesMap = new Map<string, any>(
+                            profilesData.map((profile: any) => [profile.id, profile])
                         );
 
                         // Merge profile data with requests
-                        const requestsWithProfiles: ContentRequest[] = data.map(request => ({
+                        const requestsWithProfiles: ContentRequest[] = data.map((request: any) => ({
                             ...request,
                             profiles: profilesMap.get(request.user_id) ? {
                                 full_name: profilesMap.get(request.user_id)!.full_name || '',

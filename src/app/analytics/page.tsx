@@ -61,25 +61,25 @@ export default function Analytics() {
                 const totalRequests = allRequests?.length || 0;
 
                 // Active users in last 30 days
-                const recentRequests = allRequests?.filter(req =>
+                const recentRequests = (allRequests || []).filter((req: any) =>
                     new Date(req.created_at) >= thirtyDaysAgo
-                ) || [];
-                const activeUsers = new Set(recentRequests.map(req => req.user_id)).size;
+                );
+                const activeUsers = new Set(recentRequests.map((req: any) => req.user_id)).size;
 
                 // Completion rate
-                const completedRequests = allRequests?.filter(req => req.status === 'completed').length || 0;
+                const completedRequests = (allRequests || []).filter((req: any) => req.status === 'completed').length;
                 const completionRate = totalRequests > 0 ? (completedRequests / totalRequests) * 100 : 0;
 
                 // System health (webhook success rate)
-                const webhookSentRequests = allRequests?.filter(req => req.webhook_sent === true).length || 0;
+                const webhookSentRequests = (allRequests || []).filter((req: any) => req.webhook_sent === true).length;
                 const systemHealth = totalRequests > 0 ? (webhookSentRequests / totalRequests) * 100 : 0;
 
                 // Status distribution
-                const statusCounts: Record<string, number> = allRequests?.reduce((acc, req) => {
+                const statusCounts: Record<string, number> = (allRequests || []).reduce((acc: Record<string, number>, req: any) => {
                     const status = req.status || 'pending';
                     acc[status] = (acc[status] || 0) + 1;
                     return acc;
-                }, {} as Record<string, number>) || {};
+                }, {} as Record<string, number>);
 
                 const statusDistribution = (Object.entries(statusCounts) as [string, number][]).map(([status, count]) => ({
                     status,
