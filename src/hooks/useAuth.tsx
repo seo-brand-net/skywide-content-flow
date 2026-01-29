@@ -11,6 +11,7 @@ interface AuthContextType {
   profile: any | null;
   displayName: string | null;
   loading: boolean;
+  isProfileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -34,6 +35,7 @@ export function AuthProvider({
   const [session, setSession] = useState<Session | null>(initialSession);
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(!initialSession);
+  const [isProfileLoading, setIsProfileLoading] = useState(!!initialSession);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -49,7 +51,7 @@ export function AuthProvider({
         console.log('[Auth] Found existing session on mount');
         setSession(currentSession);
         setUser(currentSession.user);
-        fetchProfile(currentSession.user.id);
+        await fetchProfile(currentSession.user.id);
       }
       setLoading(false);
     };
@@ -64,9 +66,10 @@ export function AuthProvider({
         setUser(currentSession?.user ?? null);
 
         if (currentSession?.user) {
-          fetchProfile(currentSession.user.id);
+          await fetchProfile(currentSession.user.id);
         } else {
           setProfile(null);
+          setIsProfileLoading(false);
         }
 
         setLoading(false);
@@ -110,6 +113,7 @@ export function AuthProvider({
   }, [supabase, router]);
 
   const fetchProfile = async (userId: string) => {
+    setIsProfileLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -122,6 +126,8 @@ export function AuthProvider({
       }
     } catch (e) {
       console.error('Error fetching profile:', e);
+    } finally {
+      setIsProfileLoading(false);
     }
   };
 
@@ -302,6 +308,7 @@ export function AuthProvider({
     profile,
     displayName,
     loading,
+    isProfileLoading,
     signIn,
     signUp,
     signOut,
