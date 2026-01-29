@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
@@ -44,9 +45,9 @@ interface ContentRequest {
 
 export default function MyRequests() {
     const { user } = useAuth();
+    const { userRole, loading: roleLoading } = useUserRole(user?.id);
     const [requests, setRequests] = useState<ContentRequest[]>([]);
     const [loading, setLoading] = useState(true);
-    const [userRole, setUserRole] = useState<string>('user');
     const [error, setError] = useState<string | null>(null);
     const [selectedRequest, setSelectedRequest] = useState<ContentRequest | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -59,16 +60,18 @@ export default function MyRequests() {
     const [isInternalLoading, setIsInternalLoading] = useState(false);
 
     useEffect(() => {
-        if (user) {
-            checkUserRole();
-        }
-    }, [user]);
-
-    useEffect(() => {
-        if (user && userRole) {
+        console.log('[My Requests] Effect triggered:', { user: !!user, userRole, roleLoading });
+        if (user && userRole && !roleLoading) {
+            console.log('[My Requests] Fetching requests...');
             fetchRequests();
+        } else {
+            console.log('[My Requests] Waiting for:', {
+                hasUser: !!user,
+                hasRole: !!userRole,
+                roleLoading
+            });
         }
-    }, [user, userRole, currentPage, pageSize]);
+    }, [user, userRole, roleLoading, currentPage, pageSize]);
 
     const fetchRequests = async () => {
         setIsInternalLoading(true);
@@ -174,21 +177,7 @@ export default function MyRequests() {
         }
     };
 
-    const checkUserRole = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('role, email')
-                .eq('id', user?.id)
-                .single();
 
-            if (data) {
-                setUserRole(data.role || 'user');
-            }
-        } catch (err) {
-            console.error('Error checking user role:', err);
-        }
-    };
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {

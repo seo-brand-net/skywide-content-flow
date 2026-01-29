@@ -40,7 +40,7 @@ export function AuthProvider({
   const [profile, setProfile] = useState<any | null>(initialProfile);
   const [loading, setLoading] = useState(!initialSession);
   const [isProfileLoading, setIsProfileLoading] = useState(!!initialSession && !initialProfile);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(!initialProfile);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const { toast } = useToast();
   const router = useRouter();

@@ -88,8 +88,16 @@ export default function ContentBriefActivityLog() {
     const updates = usePusherGlobalBriefUpdates();
 
     useEffect(() => {
+        console.log('[Content Briefs] Effect triggered:', { user: !!user, userRole, roleLoading });
         if (user && userRole && !roleLoading) {
+            console.log('[Content Briefs] Fetching rows...');
             fetchRows();
+        } else {
+            console.log('[Content Briefs] Waiting for:', {
+                hasUser: !!user,
+                hasRole: !!userRole,
+                roleLoading
+            });
         }
     }, [user, userRole, roleLoading, currentPage, pageSize, statusFilter]);
 
