@@ -224,18 +224,22 @@ export function AuthProvider({
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      setSession(null);
-      setUser(null);
-      setProfile(null);
-
-      // Use hard navigation for logout to clear memory contexts and ensure instant redirection
-      window.location.href = '/login';
-
       toast({
         title: "Signed Out",
         description: "You have been successfully signed out.",
       });
+
+      // Clear local state immediately
+      setSession(null);
+      setUser(null);
+      setProfile(null);
+      setIsProfileLoading(false);
+
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+
+      // Use hard navigation for logout to clear memory contexts and ensure instant redirection
+      window.location.href = '/login';
     } catch (error: any) {
       toast({
         title: "Sign Out Error",
