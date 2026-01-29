@@ -25,6 +25,10 @@ export function createClient() {
                 }
             }
         )
+        // Add global debug reference
+        if (typeof window !== 'undefined') {
+            (window as any).__SUPABASE_CLIENT__ = client;
+        }
     }
     return client;
 }

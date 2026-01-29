@@ -184,11 +184,22 @@ export function AuthProvider({
       }
     }, 10 * 60 * 1000); // 10 minutes
 
+    // 4. Safety threshold: If nothing has resolved in 6 seconds, force clear loading states
+    const safetyTimer = setTimeout(() => {
+      if (loading || isInitialLoading || isProfileLoading) {
+        console.warn('[Auth] 🚨 Safety timeout: Forcing resolve due to inactivity');
+        setLoading(false);
+        setIsInitialLoading(false);
+        setIsProfileLoading(false);
+      }
+    }, 6000);
+
     return () => {
       subscription.unsubscribe();
       clearInterval(heartbeat);
+      clearTimeout(safetyTimer);
     };
-  }, [supabase, router]);
+  }, [supabase, router, loading, isInitialLoading, isProfileLoading]);
 
   const displayName = user ? (
     profile?.display_name ||
@@ -268,40 +279,33 @@ export function AuthProvider({
   };
 
   const signOut = async () => {
-    console.log('[Auth] 🚪 Starting signOut process for:', user?.email);
+    console.log('[Auth] 🚪 Starting signOut process with safety timeout for:', user?.email);
+
     try {
-      // Sign out from Supabase FIRST
-      console.log('[Auth] 🔐 Calling Supabase signOut...');
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('[Auth] ❌ Supabase signOut error:', error);
-        throw error;
+      // Clear local state first for immediate UI response
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      sessionRef.current = null;
+
+      // Wrap Supabase signOut in a 3s timeout race
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Sign out timed out')), 3000)
+      );
+
+      try {
+        await Promise.race([signOutPromise, timeoutPromise]);
+        console.log('[Auth] ✅ Supabase signOut successful or timed out');
+      } catch (err: any) {
+        console.warn('[Auth] ⚠️ Sign out stalled or failed, proceeding with redirect anyway:', err.message);
       }
 
-      console.log('[Auth] ✅ Supabase signOut successful');
-
-      // Clear local state AFTER Supabase signOut succeeds
-      console.log('[Auth] 🧹 Clearing local state...');
-      setSession(null);
-      setUser(null);
-      setProfile(null);
-      setIsProfileLoading(false);
-
-      toast({
-        title: "Signed Out",
-        description: "You have been successfully signed out.",
-      });
-
-      console.log('[Auth] 🔄 Redirecting to /login...');
-      // Force a hard navigation to destroy all memory context
+      // Perform hard navigation to destroy all memory context
       window.location.replace('/login');
     } catch (error: any) {
-      console.error('[Auth] ❌ SignOut error:', error);
-      toast({
-        title: "Sign Out Error",
-        description: error?.message || "An error occurred during sign out.",
-        variant: "destructive",
-      });
+      console.error('[Auth] ❌ Error in signOut process:', error.message);
+      window.location.replace('/login');
     }
   };
 
