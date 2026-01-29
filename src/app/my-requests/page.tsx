@@ -74,12 +74,15 @@ export default function MyRequests() {
     }, [user, userRole, roleLoading, currentPage, pageSize]);
 
     const fetchRequests = async () => {
+        console.log('[My Requests] fetchRequests started');
         setIsInternalLoading(true);
         try {
             const from = (currentPage - 1) * pageSize;
             const to = from + pageSize - 1;
+            console.log('[My Requests] Fetching for role:', userRole, 'range:', from, '-', to);
 
             if (userRole === 'admin') {
+                console.log('[My Requests] Admin path - fetching all requests');
                 // For admin users, fetch content requests with user profiles in a single query
                 const { data, error, count } = await supabase
                     .from('content_requests')
@@ -102,12 +105,14 @@ export default function MyRequests() {
                     .order('created_at', { ascending: false })
                     .range(from, to);
 
+                console.log('[My Requests] Query result:', { dataCount: data?.length, error, totalCount: count });
                 if (error) throw error;
                 setTotalCount(count || 0);
 
                 // If we have requests, fetch user profiles for them
                 if (data && data.length > 0) {
                     const userIds = [...new Set(data.map(req => req.user_id))];
+                    console.log('[My Requests] Fetching profiles for', userIds.length, 'users');
 
                     const { data: profilesData, error: profilesError } = await supabase
                         .from('profiles')
@@ -133,14 +138,17 @@ export default function MyRequests() {
                             } : undefined
                         }));
 
+                        console.log('[My Requests] Setting', requestsWithProfiles.length, 'requests with profiles');
                         setRequests(requestsWithProfiles);
                     } else {
                         setRequests(data as ContentRequest[]);
                     }
                 } else {
+                    console.log('[My Requests] No data returned, setting empty array');
                     setRequests([]);
                 }
             } else {
+                console.log('[My Requests] User path - fetching own requests for user:', user?.id);
                 // For regular users, only fetch their own requests
                 const { data: requestsData, error: requestsError, count } = await supabase
                     .from('content_requests')
@@ -164,14 +172,17 @@ export default function MyRequests() {
                     .order('created_at', { ascending: false })
                     .range(from, to);
 
+                console.log('[My Requests] User query result:', { dataCount: requestsData?.length, error: requestsError, totalCount: count });
                 if (requestsError) throw requestsError;
                 setRequests(requestsData || []);
                 setTotalCount(count || 0);
             }
+            console.log('[My Requests] Fetch completed successfully');
         } catch (err: any) {
-            console.error('Error fetching requests:', err);
+            console.error('[My Requests] ❌ Error fetching requests:', err);
             setError(err.message);
         } finally {
+            console.log('[My Requests] Setting loading states to false');
             setLoading(false);
             setIsInternalLoading(false);
         }
