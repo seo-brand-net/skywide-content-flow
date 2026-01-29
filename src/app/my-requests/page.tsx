@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useEffect, useState, useMemo } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +46,7 @@ interface ContentRequest {
 export default function MyRequests() {
     const { user } = useAuth();
     const { userRole, loading: roleLoading } = useUserRole(user?.id);
+    const supabase = createClient();
     const [requests, setRequests] = useState<ContentRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
