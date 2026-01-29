@@ -223,6 +223,7 @@ export function AuthProvider({
   };
 
   const signOut = async () => {
+    console.log('[Auth] 🚪 Starting signOut process...');
     try {
       toast({
         title: "Signed Out",
@@ -230,20 +231,28 @@ export function AuthProvider({
       });
 
       // Clear local state immediately
+      console.log('[Auth] 🧹 Clearing local state...');
       setSession(null);
       setUser(null);
       setProfile(null);
       setIsProfileLoading(false);
 
       // Sign out from Supabase
-      await supabase.auth.signOut();
+      console.log('[Auth] 🔐 Calling Supabase signOut...');
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('[Auth] ❌ Supabase signOut error:', error);
+        throw error;
+      }
 
+      console.log('[Auth] ✅ Supabase signOut successful, redirecting to /login...');
       // Use hard navigation for logout to clear memory contexts and ensure instant redirection
       window.location.href = '/login';
     } catch (error: any) {
+      console.error('[Auth] ❌ SignOut error:', error);
       toast({
         title: "Sign Out Error",
-        description: "An error occurred during sign out.",
+        description: error?.message || "An error occurred during sign out.",
         variant: "destructive",
       });
     }
