@@ -34,7 +34,6 @@ export function useContentRequests(options: {
     enabled: boolean;
 }) {
     const { currentPage, pageSize, userRole, userId, enabled } = options;
-    const { authError } = useAuth();
     const supabase = createClient();
 
     const queryKey = ['content_requests', { currentPage, pageSize, userRole, userId }];
@@ -106,7 +105,7 @@ export function useContentRequests(options: {
         enabled: isActuallyEnabled,
         placeholderData: (previousData) => {
             if (!isActuallyEnabled && previousData) {
-                console.log('[useContentRequests] ⏸️ Query disabled/blocked, providing cached placeholderData', { authError });
+                console.log('[useContentRequests] ⏸️ Query disabled, providing cached placeholderData');
             }
             return previousData;
         },

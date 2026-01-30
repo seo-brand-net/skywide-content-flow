@@ -199,7 +199,7 @@ export function AuthProvider({
       isMounted.current = false;
       subscription.unsubscribe();
     };
-  }, [supabase, router]);
+  }, [supabase]); // Removed router - only used for side effects, not reactive data
 
   const displayName = user ? (
     profile?.display_name ||
