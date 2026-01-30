@@ -4,18 +4,18 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useInvitations } from '@/hooks/useInvitations';
-import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Users } from 'lucide-react';
 import { InvitationFormData, Invitation } from '@/types/invitation';
 import { sendInvitationEmail } from '@/services/invitationEmailService';
+import { withTimeout } from '@/utils/timeout';
 import { InvitationStats } from '@/components/invitation/InvitationStats';
 import { InvitationForm } from '@/components/invitation/InvitationForm';
 import { InvitationTable } from '@/components/invitation/InvitationTable';
 
 
 export default function InviteUsers() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, supabase } = useAuth();
     const { userRole, isAdmin, loading: roleLoading } = useUserRole(user?.id);
     const { invitations, loading, fetchInvitations } = useInvitations(user?.id);
     const { toast } = useToast();
@@ -71,14 +71,18 @@ export default function InviteUsers() {
             // Use Supabase client to sync if needed, or just refresh the list
             // Assuming the server handled the profile creation, we might want to manually insert into user_invitations for UI tracking
             try {
-                await supabase.from('user_invitations').upsert([{
-                    invited_by: user!.id,
-                    email: formData.email,
-                    full_name: formData.fullName,
-                    role: formData.role,
-                    status: 'pending',
-                    token: 'native_invite' // Indicating it's a native invite
-                }], { onConflict: 'email' });
+                await withTimeout(
+                    supabase.from('user_invitations').upsert([{
+                        invited_by: user!.id,
+                        email: formData.email,
+                        full_name: formData.fullName,
+                        role: formData.role,
+                        status: 'pending',
+                        token: 'native_invite'
+                    }], { onConflict: 'email' }),
+                    10000,
+                    'Local invitation status sync timed out'
+                );
             } catch (syncError) {
                 console.warn('Sync to user_invitations failed:', syncError);
             }

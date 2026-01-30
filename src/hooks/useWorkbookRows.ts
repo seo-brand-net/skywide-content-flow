@@ -40,7 +40,7 @@ export function useWorkbookRows(options: {
     enabled: boolean;
 }) {
     const { currentPage, pageSize, statusFilter, userRole, userId, enabled } = options;
-    const supabase = createClient();
+    const { supabase } = useAuth();
 
     const queryKey = ['workbook_rows', { currentPage, pageSize, statusFilter, userRole, userId }];
 

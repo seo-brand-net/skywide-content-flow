@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Invitation } from '@/types/invitation';
 
 export function useInvitations(userId?: string) {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
+  const { supabase } = useAuth();
   const { toast } = useToast();
 
   const fetchInvitations = async () => {

@@ -22,6 +22,7 @@ interface AuthContextType {
   updatePassword: (password: string) => Promise<{ error: any }>;
   isPasswordReset: boolean;
   authError: string | null;
+  supabase: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,19 +53,15 @@ export function AuthProvider({
   const supabase = useMemo(() => createClient(), []);
 
   const hasLoadedProfile = useRef(false);
+  const isFetchingProfile = useRef(false);
   const sessionRef = useRef<Session | null>(initialSession);
 
   const fetchProfile = async (userId: string, force = false) => {
-    if (!userId) {
-      setIsProfileLoading(false);
+    if (!userId || isFetchingProfile.current) {
       return;
     }
 
-    // Skip if already loading and not forced
-    if (isProfileLoading && !force) return;
-
-    // Only show loading state if we don't have a profile yet or it's forced
-    if (!profile || force) setIsProfileLoading(true);
+    isFetchingProfile.current = true;
     setAuthError(null);
 
     try {
@@ -92,6 +89,7 @@ export function AuthProvider({
     } catch (e) {
       console.error('[Auth] ❌ Unexpected profile error:', e);
     } finally {
+      isFetchingProfile.current = false;
       setIsProfileLoading(false);
       setIsInitialLoading(false);
     }
@@ -102,46 +100,43 @@ export function AuthProvider({
     const isMounted = { current: true };
     console.log('[Auth] 🔐 Initializing auth listener');
 
-    // 1. Initial manual check to ensure sync
-    const checkInitialSession = async () => {
+    const initializeAuth = async () => {
       try {
         if (!isMounted.current) return;
+
+        // Use withTimeout for safety even on initial session check
         console.log('[Auth] 🔍 Checking initial session...');
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
 
         if (error) {
           console.error('[Auth] ❌ Session check error:', error);
-          if (error.message?.includes('refresh_token_not_found')) {
-            localStorage.clear();
-          }
         }
 
-        const activeSession = currentSession || session;
-        const activeUser = activeSession?.user || user;
+        const activeSession = currentSession || sessionRef.current;
+        const activeUser = activeSession?.user;
 
-        setSession(activeSession);
-        sessionRef.current = activeSession;
-        setUser(activeUser);
+        if (activeUser) {
+          setSession(activeSession);
+          sessionRef.current = activeSession;
+          setUser(activeUser);
 
-        // If we don't have a profile yet but we have a user, fetch it
-        if (activeUser && !profile) {
-          console.log('[Auth] Fetching profile on mount (missing initial profile)');
+          // Atomic profile fetch
           await fetchProfile(activeUser.id);
-        } else if (activeUser && profile) {
-          console.log('[Auth] Using hydrated profile from server');
-          setIsProfileLoading(false);
         } else {
           console.log('[Auth] No session found during initial check');
-          setIsProfileLoading(false);
         }
       } catch (e) {
         console.error('[Auth] Critical initialization error:', e);
       } finally {
-        setLoading(false);
-        setIsInitialLoading(false);
+        if (isMounted.current) {
+          setLoading(false);
+          setIsInitialLoading(false);
+          setIsProfileLoading(false);
+        }
       }
     };
-    checkInitialSession();
+
+    initializeAuth();
 
 
     // 2. Listen for auth changes
@@ -413,6 +408,7 @@ export function AuthProvider({
     updatePassword,
     isPasswordReset,
     authError,
+    supabase,
   };
 
   return (

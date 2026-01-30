@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { withTimeout } from '@/utils/timeout';
 
 
 interface FormData {
@@ -29,7 +29,7 @@ interface FormData {
 }
 
 export default function Dashboard() {
-    const { user, displayName } = useAuth();
+    const { user, displayName, supabase } = useAuth();
     const { isAdmin } = useUserRole(user?.id);
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -89,26 +89,30 @@ export default function Dashboard() {
         setIsSubmitting(true);
 
         try {
-            // 1. Save to Supabase database FIRST
-            const { data: dbData, error: dbError } = await supabase
-                .from('content_requests')
-                .insert([{
-                    user_id: user?.id,
-                    article_title: formData.articleTitle,
-                    title_audience: formData.titleAudience,
-                    seo_keywords: "", // Legacy field, keeping empty or could map primary here too? keeping empty as requested
-                    primary_keywords: formData.primaryKeyword ? [formData.primaryKeyword] : [], // Assuming single string input from form, wrapped in array
-                    secondary_keywords: formData.secondaryKeyword ? [formData.secondaryKeyword] : [],
-                    semantic_themes: formData.semanticTheme ? [formData.semanticTheme] : [],
-                    tone: formData.tone,
-                    word_count: parseInt(formData.wordCount) || 0,
-                    article_type: formData.articleType,
-                    client_name: formData.clientName,
-                    creative_brief: formData.creativeBrief,
-                    page_intent: formData.pageIntent,
-                    status: 'pending'
-                }])
-                .select();
+            // 1. Save to Supabase database FIRST with timeout
+            const { data: dbData, error: dbError } = await withTimeout(
+                supabase
+                    .from('content_requests')
+                    .insert([{
+                        user_id: user?.id,
+                        article_title: formData.articleTitle,
+                        title_audience: formData.titleAudience,
+                        seo_keywords: "",
+                        primary_keywords: formData.primaryKeyword ? [formData.primaryKeyword] : [],
+                        secondary_keywords: formData.secondaryKeyword ? [formData.secondaryKeyword] : [],
+                        semantic_themes: formData.semanticTheme ? [formData.semanticTheme] : [],
+                        tone: formData.tone,
+                        word_count: parseInt(formData.wordCount) || 0,
+                        article_type: formData.articleType,
+                        client_name: formData.clientName,
+                        creative_brief: formData.creativeBrief,
+                        page_intent: formData.pageIntent,
+                        status: 'pending'
+                    }])
+                    .select(),
+                30000,
+                'Database submission timed out'
+            ) as any;
 
             if (dbError) {
                 throw new Error(`Database error: ${dbError.message}`);
@@ -171,11 +175,15 @@ export default function Dashboard() {
                     updatePayload.status = 'complete';
                 }
 
-                const { data: updateData, error: updateError } = await supabase
-                    .from('content_requests')
-                    .update(updatePayload)
-                    .eq('id', dbData[0].id)
-                    .select();
+                const { data: updateData, error: updateError } = await withTimeout(
+                    supabase
+                        .from('content_requests')
+                        .update(updatePayload)
+                        .eq('id', dbData[0].id)
+                        .select(),
+                    10000,
+                    'Status update timed out'
+                ) as any;
 
                 if (updateError) {
                     console.error('Error updating webhook status:', updateError);
