@@ -227,11 +227,37 @@ export function AuthProvider({
         } else {
           // If we had a session but now we don't, and there's no transient error
           // it means the session or refresh token has likely expired.
-          console.warn('[Auth] ⚠️ Session lost during health check. Clearing state.');
+          console.warn('[Auth] ⚠️ Session lost during health check. Redirecting to login.');
+
+          // Clear all local state
           setSession(null);
           sessionRef.current = null;
           setUser(null);
           setProfile(null);
+
+          // Check if we're on a protected route
+          const protectedPaths = [
+            '/dashboard',
+            '/research',
+            '/content-briefs',
+            '/my-requests',
+            '/ai-rewriter',
+            '/features',
+            '/analytics',
+            '/settings'
+          ];
+          const isProtected = protectedPaths.some(p => window.location.pathname.startsWith(p));
+
+          if (isProtected) {
+            toast({
+              title: "Session Expired",
+              description: "Your session has expired. Please sign in again.",
+              variant: "destructive",
+            });
+
+            // Use router.push for Next.js navigation
+            router.push('/login');
+          }
         }
 
         if (error) console.error('[Auth] Health check error:', error);
