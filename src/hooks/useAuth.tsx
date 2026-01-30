@@ -264,42 +264,12 @@ export function AuthProvider({
       }
     };
 
-    const heartbeat = setInterval(checkSession, 2 * 60 * 1000); // 2 minutes (proactive)
-
-    const handleFocusSync = () => {
-      if (document.visibilityState === 'visible') {
-        console.log('[Auth] 👁️ Tab visible/focused, checking session stability');
-        checkSession();
-      }
-    };
-    window.addEventListener('focus', handleFocusSync);
-    window.addEventListener('visibilitychange', handleFocusSync);
-
-    // 4. Safety threshold: If nothing has resolved in 12 seconds, force clear loading states
-    // Increased to 12s to account for slow production cold starts or RLS latency.
-    const safetyTimer = setTimeout(() => {
-      if (loading || isInitialLoading || isProfileLoading) {
-        console.warn('[Auth] 🚨 Safety timeout: Forcing resolve due to inactivity');
-        // Only set error if we don't have a user at all (critical failure)
-        // If we have a user but no profile, we can still function in 'user' mode.
-        if (!user && !sessionRef.current) {
-          setAuthError('Identity resolution timed out. Please check your connection.');
-        } else {
-          console.log('[Auth] 🛡️ Proceeding without full profile resolution due to timeout');
-        }
-        setLoading(false);
-        setIsInitialLoading(false);
-        setIsProfileLoading(false);
-      }
-    }, 12000);
+    const heartbeat = setInterval(checkSession, 2 * 60 * 1000); // 2 minutes
 
     return () => {
       isMounted.current = false;
       subscription.unsubscribe();
       clearInterval(heartbeat);
-      window.removeEventListener('focus', handleFocusSync);
-      window.removeEventListener('visibilitychange', handleFocusSync);
-      clearTimeout(safetyTimer);
     };
   }, [supabase, router]);
 
