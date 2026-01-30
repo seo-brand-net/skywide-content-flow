@@ -193,83 +193,11 @@ export function AuthProvider({
         setLoading(false);
         setIsInitialLoading(false);
       }
-    );
-
-    // 3. Keep-alive Heartbeat & Focus Sync
-    const checkSession = async () => {
-      if (sessionRef.current) {
-        console.log('[Auth] 💓 Heartbeat/Focus: Checking session health...');
-
-        // Proactive Refresh: If session expires in < 10 mins, force refresh
-        const expiresAt = sessionRef.current.expires_at;
-        const now = Math.floor(Date.now() / 1000);
-        const buffer = 10 * 60; // 10 minutes
-
-        if (expiresAt && (expiresAt - now) < buffer) {
-          console.log('[Auth] 🕒 Session near expiry, forcing refresh...');
-          const { data: { session: refreshed }, error: refreshError } = await supabase.auth.refreshSession();
-          if (refreshed) {
-            setSession(refreshed);
-            sessionRef.current = refreshed;
-            return;
-          }
-        }
-
-        const { data: { session: freshSession }, error } = await supabase.auth.getSession();
-
-        if (freshSession) {
-          if (freshSession.access_token !== sessionRef.current?.access_token) {
-            console.log('[Auth] 🔄 Session refreshed via background check');
-            setSession(freshSession);
-            sessionRef.current = freshSession;
-            setUser(freshSession.user);
-          }
-        } else {
-          // If we had a session but now we don't, and there's no transient error
-          // it means the session or refresh token has likely expired.
-          console.warn('[Auth] ⚠️ Session lost during health check. Redirecting to login.');
-
-          // Clear all local state
-          setSession(null);
-          sessionRef.current = null;
-          setUser(null);
-          setProfile(null);
-
-          // Check if we're on a protected route
-          const protectedPaths = [
-            '/dashboard',
-            '/research',
-            '/content-briefs',
-            '/my-requests',
-            '/ai-rewriter',
-            '/features',
-            '/analytics',
-            '/settings'
-          ];
-          const isProtected = protectedPaths.some(p => window.location.pathname.startsWith(p));
-
-          if (isProtected) {
-            toast({
-              title: "Session Expired",
-              description: "Your session has expired. Please sign in again.",
-              variant: "destructive",
-            });
-
-            // Use router.push for Next.js navigation
-            router.push('/login');
-          }
-        }
-
-        if (error) console.error('[Auth] Health check error:', error);
-      }
-    };
-
-    const heartbeat = setInterval(checkSession, 2 * 60 * 1000); // 2 minutes
+    )
 
     return () => {
       isMounted.current = false;
       subscription.unsubscribe();
-      clearInterval(heartbeat);
     };
   }, [supabase, router]);
 
