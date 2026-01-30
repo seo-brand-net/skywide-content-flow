@@ -214,15 +214,19 @@ export default function Dashboard() {
                 tone: '',
                 pageIntent: ''
             });
+            setIsSubmitting(false);
+        } catch (err: any) {
+            console.error('Submission error:', err);
 
-        } catch (error: any) {
-            console.error('Submission error:', error);
+            const isTimeout = err.message?.includes('timed out');
+
             toast({
-                title: "Submission Failed",
-                description: `Error: ${error.message || "Please try again."}`,
+                title: isTimeout ? "Connection Timeout" : "Submission Failed",
+                description: isTimeout
+                    ? "The database is taking too long to respond. Please refresh the page and try again."
+                    : (err.message || "An unexpected error occurred."),
                 variant: "destructive",
             });
-        } finally {
             setIsSubmitting(false);
         }
     };

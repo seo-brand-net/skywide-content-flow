@@ -1,11 +1,11 @@
 "use client";
-import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useRef, useMemo } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { withTimeout } from '@/utils/timeout';
 
 interface AuthContextType {
   user: User | null;
@@ -23,6 +23,7 @@ interface AuthContextType {
   isPasswordReset: boolean;
   authError: string | null;
   supabase: any;
+  isHealthy: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,6 +47,7 @@ export function AuthProvider({
   const [isInitialLoading, setIsInitialLoading] = useState(!initialProfile);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isHealthy, setIsHealthy] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -66,11 +68,17 @@ export function AuthProvider({
 
     try {
       console.log(`[Auth] 📋 Fetching profile for ${userId} (force: ${force})...`);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      setIsProfileLoading(true); // Ensure loading state is active
+
+      const { data, error } = await withTimeout(
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single(),
+        15000,
+        'Profile fetch timed out'
+      ) as any;
 
       if (!error && data) {
         console.log('[Auth] ✅ Profile resolved:', data.email, data.role);
@@ -106,7 +114,11 @@ export function AuthProvider({
 
         // Use withTimeout for safety even on initial session check
         console.log('[Auth] 🔍 Checking initial session...');
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        const { data: { session: currentSession }, error } = await withTimeout(
+          supabase.auth.getSession(),
+          10000,
+          'Initial session check timed out'
+        ) as any;
 
         if (error) {
           console.error('[Auth] ❌ Session check error:', error);
@@ -127,6 +139,7 @@ export function AuthProvider({
         }
       } catch (e) {
         console.error('[Auth] Critical initialization error:', e);
+        setAuthError('Authentication initialization timed out. Please refresh.');
       } finally {
         if (isMounted.current) {
           setLoading(false);
@@ -137,6 +150,32 @@ export function AuthProvider({
     };
 
     initializeAuth();
+
+    // 2. Connectivity Heartbeat (The Doctor)
+    const runHealthCheck = async () => {
+      if (!isMounted.current || !sessionRef.current) return;
+
+      try {
+        console.log('[Auth Watchdog] 💓 Pinging database...');
+        const { error } = await withTimeout(
+          supabase.from('profiles').select('id').limit(1),
+          10000,
+          'Database connectivity ping timed out'
+        ) as any;
+
+        if (error) throw error;
+        setIsHealthy(true);
+        console.log('[Auth Watchdog] ✅ Connection healthy');
+      } catch (e) {
+        console.error('[Auth Watchdog] ❌ Connectivity issue:', e);
+        setIsHealthy(false);
+        // Don't show toast for background pings to avoid user spam, 
+        // but we track the status globally.
+      }
+    };
+
+    const watchdog = setInterval(runHealthCheck, 2 * 60 * 1000); // 2 minutes
+    runHealthCheck(); // Initial check
 
 
     // 2. Listen for auth changes
@@ -192,6 +231,7 @@ export function AuthProvider({
 
     return () => {
       isMounted.current = false;
+      clearInterval(watchdog);
       subscription.unsubscribe();
     };
   }, [supabase]); // Removed router - only used for side effects, not reactive data
@@ -409,6 +449,7 @@ export function AuthProvider({
     isPasswordReset,
     authError,
     supabase,
+    isHealthy,
   };
 
   return (
