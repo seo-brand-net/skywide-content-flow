@@ -163,8 +163,8 @@ export function AuthProvider({
 
           if (currentSession?.user) {
             if (event === 'TOKEN_REFRESHED') {
-              console.log('[Auth] 🔑 Token refreshed. Refreshing data...');
-              queryClient.invalidateQueries();
+              console.log('[Auth] 🔑 Token refreshed silently. Data preserved.');
+              // Don't invalidate queries - React Query automatically retries with new token
             }
             await fetchProfile(currentSession.user.id);
           } else if (event === 'SIGNED_OUT') {

@@ -21,7 +21,17 @@ export function Providers({
     initialSession?: Session | null,
     initialProfile?: any | null
 }) {
-    const [queryClient] = useState(() => new QueryClient());
+    const [queryClient] = useState(() => new QueryClient({
+        defaultOptions: {
+            queries: {
+                retry: 3,
+                retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+                staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh longer
+                refetchOnWindowFocus: false, // Prevent refetch storms
+                refetchOnReconnect: true, // Do refetch on network reconnect
+            },
+        },
+    }));
 
     return (
         <QueryClientProvider client={queryClient}>
