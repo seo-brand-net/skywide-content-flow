@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
@@ -8,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle, PlayCircle, FileSearch, History } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, PlayCircle, History, Eye, X, Copy, Check } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import ReactMarkdown from 'react-markdown';
 
 const EXPORT_PATHS = [
     { id: 'openai_qa_loop', name: 'OpenAI QA Loop' },
@@ -30,16 +32,20 @@ interface TestResult {
     error?: string;
     data?: any;
     timestamp?: string;
+    content_markdown?: string;
 }
 
 export default function TestExportPage() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const router = useRouter();
     const [selectedPath, setSelectedPath] = useState<string>('all');
     const [isTesting, setIsTesting] = useState(false);
     const [results, setResults] = useState<TestResult[]>([]);
     const [overallProgress, setOverallProgress] = useState(0);
     const [history, setHistory] = useState<any[]>([]);
+    const [viewingContent, setViewingContent] = useState<{ title: string; markdown: string } | null>(null);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         if (user) fetchHistory();
@@ -137,6 +143,7 @@ export default function TestExportPage() {
                                 alignment: pollData.data?.alignment_summary || 'Analysis complete',
                                 improvements: pollData.data?.suggestions || [],
                                 data: pollData.data,
+                                content_markdown: pollData.content_markdown,
                                 timestamp: new Date().toLocaleTimeString()
                             });
                         } else if (attempts >= maxAttempts) {
@@ -196,15 +203,40 @@ export default function TestExportPage() {
         fetchHistory();
     };
 
+    const handleCopyMarkdown = (markdown: string) => {
+        navigator.clipboard.writeText(markdown);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast({ title: "Copied", description: "Markdown content copied to clipboard." });
+    };
+
+    const handleViewHistoryContent = async (requestId: string, title: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('test_results')
+                .select('content_markdown')
+                .eq('request_id', requestId)
+                .single();
+
+            if (error || !data?.content_markdown) {
+                toast({ title: "No Content", description: "No markdown content available for this result.", variant: "destructive" });
+                return;
+            }
+            setViewingContent({ title: title || 'Test Result', markdown: data.content_markdown });
+        } catch {
+            toast({ title: "Error", description: "Failed to load content.", variant: "destructive" });
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="max-w-5xl mx-auto space-y-8">
                 <div>
                     <h1 className="text-3xl font-bold seobrand-title seobrand-title-accent mb-2">
-                        Export Infrastructure Testing (Async)
+                        Content Testing Framework
                     </h1>
                     <p className="text-muted-foreground">
-                        Triggering tests via <code>/api/proxy-n8n-test</code> with asynchronous callback polling.
+                        Test content generation without Google Drive exports. Results display as Markdown directly in Skywide.
                     </p>
                 </div>
 
@@ -252,6 +284,7 @@ export default function TestExportPage() {
                     </CardContent>
                 </Card>
 
+                {/* Result Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {results.map((result) => (
                         <Card key={result.pathId} className={`bg-card/30 border-border ${result.status === 'running' ? 'border-brand-blue-crayola/50 shadow-[0_0_15px_rgba(37,99,235,0.1)]' : ''}`}>
@@ -272,7 +305,7 @@ export default function TestExportPage() {
                                             <span className="text-2xl font-black text-brand-blue-crayola">{result.score}%</span>
                                         </div>
                                         <p className="text-xs text-foreground/80 leading-relaxed bg-muted/30 p-3 rounded-lg border border-border/20 italic">
-                                            "{result.alignment}"
+                                            &ldquo;{result.alignment}&rdquo;
                                         </p>
                                         {result.improvements && result.improvements.length > 0 && (
                                             <div className="space-y-2">
@@ -289,9 +322,31 @@ export default function TestExportPage() {
                                         )}
                                         <div className="flex justify-between items-center pt-2 border-t border-border/10">
                                             <span className="text-[10px] font-mono text-muted-foreground">{result.timestamp}</span>
-                                            <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 hover:bg-brand-blue-crayola/10 text-brand-blue-crayola">
-                                                Full Report
-                                            </Button>
+                                            <div className="flex gap-1">
+                                                {result.content_markdown && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 text-[10px] px-2 hover:bg-emerald-500/10 text-emerald-500"
+                                                        onClick={() => setViewingContent({
+                                                            title: result.pathName,
+                                                            markdown: result.content_markdown!
+                                                        })}
+                                                    >
+                                                        <Eye className="mr-1 h-3 w-3" /> View Article
+                                                    </Button>
+                                                )}
+                                                {result.data?.request_id && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 text-[10px] px-2 hover:bg-brand-blue-crayola/10 text-brand-blue-crayola"
+                                                        onClick={() => router.push(`/dashboard/test-export/${result.data.request_id}`)}
+                                                    >
+                                                        Full Report
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -338,25 +393,30 @@ export default function TestExportPage() {
                                         <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Status</th>
                                         <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Score</th>
                                         <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Date</th>
+                                        <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Content</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/30">
                                     {history.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground italic">
+                                            <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground italic">
                                                 No previous diagnostics found.
                                             </td>
                                         </tr>
                                     ) : (
                                         history.map((run) => (
-                                            <tr key={run.id} className="hover:bg-muted/20 transition-colors">
+                                            <tr
+                                                key={run.id}
+                                                className="hover:bg-muted/20 transition-colors cursor-pointer"
+                                                onClick={() => router.push(`/dashboard/test-export/${run.request_id}`)}
+                                            >
                                                 <td className="px-6 py-4 font-medium">
                                                     {EXPORT_PATHS.find(p => p.id === run.path_id)?.name || run.path_id}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${run.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                            run.status === 'pending' ? 'bg-brand-blue-crayola/10 text-brand-blue-crayola' :
-                                                                'bg-rose-500/10 text-rose-500'
+                                                        run.status === 'pending' ? 'bg-brand-blue-crayola/10 text-brand-blue-crayola' :
+                                                            'bg-rose-500/10 text-rose-500'
                                                         }`}>
                                                         {run.status}
                                                     </span>
@@ -367,6 +427,16 @@ export default function TestExportPage() {
                                                 <td className="px-6 py-4 text-muted-foreground text-xs">
                                                     {new Date(run.created_at).toLocaleString()}
                                                 </td>
+                                                <td className="px-6 py-4">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 text-[10px] px-2 hover:bg-brand-blue-crayola/10 text-brand-blue-crayola"
+                                                        onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/test-export/${run.request_id}`); }}
+                                                    >
+                                                        <Eye className="mr-1 h-3 w-3" /> View Report
+                                                    </Button>
+                                                </td>
                                             </tr>
                                         ))
                                     )}
@@ -376,6 +446,50 @@ export default function TestExportPage() {
                     </Card>
                 </div>
             </div>
+
+            {/* Markdown Content Viewer Modal */}
+            {viewingContent && (
+                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+                            <div>
+                                <h3 className="text-lg font-bold text-foreground">{viewingContent.title}</h3>
+                                <p className="text-xs text-muted-foreground">Generated article content (Markdown)</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="h-8 text-xs"
+                                    onClick={() => handleCopyMarkdown(viewingContent.markdown)}
+                                >
+                                    {copied ? (
+                                        <><Check className="mr-1 h-3 w-3" /> Copied</>
+                                    ) : (
+                                        <><Copy className="mr-1 h-3 w-3" /> Copy Markdown</>
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => setViewingContent(null)}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Modal Body — Rendered Markdown */}
+                        <div className="overflow-y-auto px-8 py-6 flex-1">
+                            <article className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-li:text-foreground/90 prose-a:text-brand-blue-crayola">
+                                <ReactMarkdown>{viewingContent.markdown}</ReactMarkdown>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

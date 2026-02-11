@@ -243,7 +243,7 @@
 const CONFIG = {
   CLAUDE_MODEL: "claude-sonnet-4-20250514",
   CLAUDE_MAX_TOKENS: 24000,
-  MAX_ROWS_PER_RUN: 1,
+  MAX_ROWS_PER_RUN: 5,
   // SHEET_NAME is now dynamic or uses this as default
   DEFAULT_SHEET_NAME: "Content Brief Automation",
   DOCS_FOLDER_ID: "1nk3KsqlCv5-ndsayI-K1EC8aJXqvoAVQ",

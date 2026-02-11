@@ -9,7 +9,7 @@ export async function POST(request: Request) {
         console.log('--- TEST CALLBACK RECEIVED ---');
         console.log('Body:', JSON.stringify(body, null, 2));
 
-        const { request_id, audit_data, status: explicitStatus } = body;
+        const { request_id, audit_data, status: explicitStatus, content_markdown } = body;
 
         if (!request_id) {
             console.error('Callback error: Missing request_id');
@@ -38,26 +38,47 @@ export async function POST(request: Request) {
             .update({
                 audit_data: processedAudit,
                 score: score,
-                status: explicitStatus || 'completed'
+                status: explicitStatus || 'completed',
+                ...(content_markdown && { content_markdown })
             })
             .eq('request_id', request_id)
             .select();
 
         if (error) {
             console.error('Database update error in callback:', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
+            console.error('Attempted update with payload:', {
+                request_id,
+                score,
+                status: explicitStatus || 'completed',
+                has_content: !!content_markdown,
+                content_length: content_markdown?.length
+            });
+            return NextResponse.json({
+                error: error.message,
+                details: error,
+                hint: 'Check if all columns exist and types match.'
+            }, { status: 500 });
         }
 
         if (!data || data.length === 0) {
             console.warn(`No row found in test_results for request_id: ${request_id}`);
+            return NextResponse.json({
+                success: false,
+                error: 'No matching record found',
+                request_id
+            });
         } else {
             console.log(`Successfully updated test_results for ${request_id}`);
         }
 
         return NextResponse.json({ success: true, updated: data?.length || 0 });
-    } catch (error) {
-        console.error('Callback Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    } catch (error: any) {
+        console.error('Callback Error (Exception):', error);
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            message: error.message,
+            stack: error.stack
+        }, { status: 500 });
     }
 }
 
@@ -73,7 +94,7 @@ export async function GET(request: Request) {
     try {
         const { data, error } = await supabase
             .from('test_results')
-            .select('audit_data, status, score')
+            .select('audit_data, status, score, content_markdown')
             .eq('request_id', requestId)
             .single();
 
@@ -84,7 +105,8 @@ export async function GET(request: Request) {
         return NextResponse.json({
             status: data.status,
             data: data.audit_data,
-            score: data.score
+            score: data.score,
+            content_markdown: data.content_markdown
         });
     } catch (error) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

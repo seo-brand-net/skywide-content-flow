@@ -24,8 +24,8 @@ You only need to add **ONE HTTP Request node** at the very beginning of your wor
 
 ### Node Configuration:
 
-**Node Name:** `Initialize Run Tracking`  
-**Type:** HTTP Request  
+**Node Name:** `Initialize Run Tracking`
+**Type:** HTTP Request
 **Position:** Right after `Webhook1`
 
 **Configuration:**
@@ -79,15 +79,14 @@ You only need to add **ONE HTTP Request node** at the very beginning of your wor
 ## Step 4: Testing
 
 1. **Start the application:**
+
    ```bash
    npm run dev
    ```
-
 2. **Submit a content request** from `/dashboard`
-
 3. **Navigate to** `/my-requests` and click the in-progress request
-
 4. **Watch real-time updates** as the workflow executes:
+
    - Stages change from pending → running → completed
    - Progress bar advances
    - Outputs appear instantly
@@ -99,27 +98,27 @@ You only need to add **ONE HTTP Request node** at the very beginning of your wor
 
 The system automatically maps these n8n node names to stages:
 
-| Node Name | Stage Order | Display Name |
-|-----------|-------------|--------------|
-| `Webhook1` | 1 | Webhook Received |
-| `Create folder1` | 2 | Google Drive Folder Created |
-| `OpenAI Draft (GPT-4O)1` | 3 | OpenAI Draft Generated |
-| `Claude Draft (Claude Opus 3)1` | 4 | Claude Draft Generated |
-| `Data Check & Research Gaps1` | 5 | Data Check & Research Gaps |
-| `OpenAI Keyword Check + Semantic Gap1` | 6 | OpenAI Keyword Analysis |
-| `Claude Keyword Check + Semantic Gap1` | 7 | Claude Keyword Analysis |
-| `Claude Apply Recommendations1` | 8 | Recommendations Applied |
-| `OpenAI EEAT Injection1` | 9 | OpenAI EEAT Enhancement |
-| `Claude EEAT Injection1` | 10 | Claude EEAT Enhancement |
-| `Merge6` | 11 | EEAT Versions Merged |
-| `OpenAI SEO Optimization1` | 12 | SEO Optimization |
-| `OpenAI NLP & PR Optimization` | 13 | OpenAI NLP Optimization |
-| `Claude NLP & PR Optimization` | 14 | Claude NLP Optimization |
-| `Claude Final SEO Snippet Optimization` | 15 | Final SEO Snippet |
-| `OpenAI Humanised Readability Rewrite` | 16 | Humanized Readability |
-| `Document Export Sanitization` | 17 | Document Sanitization |
-| `1st Scoring Agent2` | 18 | Quality Scoring |
-| `Google Drive Notification1` | 19 | Final Document Created |
+| Node Name                                 | Stage Order | Display Name                |
+| ----------------------------------------- | ----------- | --------------------------- |
+| `Webhook1`                              | 1           | Webhook Received            |
+| `Create folder1`                        | 2           | Google Drive Folder Created |
+| `OpenAI Draft (GPT-4O)1`                | 3           | OpenAI Draft Generated      |
+| `Claude Draft (Claude Opus 3)1`         | 4           | Claude Draft Generated      |
+| `Data Check & Research Gaps1`           | 5           | Data Check & Research Gaps  |
+| `OpenAI Keyword Check + Semantic Gap1`  | 6           | OpenAI Keyword Analysis     |
+| `Claude Keyword Check + Semantic Gap1`  | 7           | Claude Keyword Analysis     |
+| `Claude Apply Recommendations1`         | 8           | Recommendations Applied     |
+| `OpenAI EEAT Injection1`                | 9           | OpenAI EEAT Enhancement     |
+| `Claude EEAT Injection1`                | 10          | Claude EEAT Enhancement     |
+| `Merge6`                                | 11          | EEAT Versions Merged        |
+| `OpenAI SEO Optimization1`              | 12          | SEO Optimization            |
+| `OpenAI NLP & PR Optimization`          | 13          | OpenAI NLP Optimization     |
+| `Claude NLP & PR Optimization`          | 14          | Claude NLP Optimization     |
+| `Claude Final SEO Snippet Optimization` | 15          | Final SEO Snippet           |
+| `OpenAI Humanised Readability Rewrite`  | 16          | Humanized Readability       |
+| `Document Export Sanitization`          | 17          | Document Sanitization       |
+| `1st Scoring Agent2`                    | 18          | Quality Scoring             |
+| `Google Drive Notification1`            | 19          | Final Document Created      |
 
 **Note:** If your node names are different, update the `STAGE_MAP` in `src/services/n8n-poller.ts`
 
@@ -130,6 +129,7 @@ The system automatically maps these n8n node names to stages:
 ### Issue: No updates appearing
 
 **Check:**
+
 1. Pusher credentials are correct in `.env`
 2. n8n API key has permissions for `/executions` endpoint
 3. Execution ID is being passed correctly from workflow
@@ -147,14 +147,14 @@ The system automatically maps these n8n node names to stages:
 
 ## Benefits Over Manual Tracking
 
-| Manual (19 nodes) | Automatic (1 node) |
-|-------------------|-------------------|
-| 19 HTTP request nodes | 1 HTTP request node |
-| Cluttered workflow | Clean workflow |
-| Hard to maintain | Easy to maintain |
-| Manual output capture | Automatic capture |
-| Polling from browser | Real-time WebSockets |
-| Higher latency | Instant updates |
+| Manual (19 nodes)     | Automatic (1 node)   |
+| --------------------- | -------------------- |
+| 19 HTTP request nodes | 1 HTTP request node  |
+| Cluttered workflow    | Clean workflow       |
+| Hard to maintain      | Easy to maintain     |
+| Manual output capture | Automatic capture    |
+| Polling from browser  | Real-time WebSockets |
+| Higher latency        | Instant updates      |
 
 ---
 
