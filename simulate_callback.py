@@ -2,17 +2,17 @@ import urllib.request
 import urllib.error
 import json
 
-# Production test URL
-url = "https://skywide-content-flow.vercel.app/api/test-callback"
+# Local test URL
+url = "http://localhost:3000/api/test-callback"
 request_id = "c4864b4a-91fb-41bd-b32f-ae4ec0a6e31c"
 
 payload = {
     "request_id": request_id,
     "status": "completed",
     "audit_data": {
-        "overallScore": 85,
-        "seoOptimization": 80,
-        "humanAuthenticity": 90,
+        "overallScore": 85.7,
+        "seoOptimization": 80.2,
+        "humanAuthenticity": 90.5,
         "readabilityStructure": 85,
         "engagementClarity": 88,
         "trustAuthority": 82,

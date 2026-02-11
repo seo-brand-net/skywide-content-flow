@@ -6,11 +6,14 @@ import json
 url = "https://obswcosfipqjvklqlnrj.supabase.co"
 key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ic3djb3NmaXBxanZrbHFsbnJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDg2NjI1OSwiZXhwIjoyMDgwNDQyMjU5fQ.3mRimqfkuFrcBZoFaY9xHHEaIBo7IH_nyP1mqfNMtPQ"
 
-def check_column():
-    print(f"Checking Supabase at {url}...")
+def check_schema():
+    print(f"Inspecting schema for 'test_results' at {url}...")
     
-    # PostgREST API endpoint
-    endpoint = f"{url}/rest/v1/test_results?select=content_markdown&limit=1"
+    # RPC to get table info (or just query columns from information_schema if enabled, 
+    # but standard PostgREST doesn't show schema directly easily without custom RPC)
+    # However, we can use the OpenAPI spec (Swagger) that PostgREST provides!
+    
+    endpoint = f"{url}/rest/v1/"
     
     req = urllib.request.Request(endpoint)
     req.add_header("apikey", key)
@@ -18,20 +21,17 @@ def check_column():
     
     try:
         with urllib.request.urlopen(req) as response:
-            if response.status == 200:
-                print("✅ SUCCESS: 'content_markdown' column exists!")
+            spec = json.loads(response.read().decode())
+            table = spec.get('definitions', {}).get('test_results')
+            if table:
+                print("\nColumn Definitions:")
+                properties = table.get('properties', {})
+                for col, details in properties.items():
+                    print(f"- {col}: {details.get('type')} ({details.get('format', 'no format')})")
             else:
-                print(f"❓ UNKNOWN: Received status code {response.status}")
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode()
-        if e.code == 400:
-            print("❌ FAILED: 'content_markdown' column likely MISSING.")
-            print(f"Error details: {error_body}")
-        else:
-            print(f"❌ HTTP Error {e.code}: {e.reason}")
-            print(f"Body: {error_body}")
+                print("❌ Could not find 'test_results' in OpenAPI spec.")
     except Exception as e:
         print(f"❌ Error: {str(e)}")
 
 if __name__ == "__main__":
-    check_column()
+    check_schema()

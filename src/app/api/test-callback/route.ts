@@ -28,9 +28,10 @@ export async function POST(request: Request) {
             }
         }
 
-        // Extract score if possible
-        const score = processedAudit?.alignment_score || processedAudit?.score || 0;
-        console.log(`Calculated score: ${score}`);
+        // Extract score if possible and ensure it's an integer for the DB
+        const rawScore = processedAudit?.alignment_score || processedAudit?.score || 0;
+        const score = Math.round(Number(rawScore));
+        console.log(`Calculated rounded score: ${score} (raw: ${rawScore})`);
 
         // Update the database with the audit results using Admin client to bypass RLS
         const { data, error } = await supabaseAdmin
