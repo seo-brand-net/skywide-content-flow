@@ -31,7 +31,9 @@ export default async function RootLayout({
   const { data: { user } } = await supabase.auth.getUser();
 
   // Get session separately if needed for initial state
-  const { data: { session } } = await supabase.auth.getSession();
+  // We avoid getSession() on the server to prevent "insecure" warnings.
+  // The client-side AuthProvider will handle session refresh if needed.
+  const session = null;
 
   // Fetch initial profile on the server to prevent hydration flickers
   let profile = null;

@@ -3,15 +3,19 @@
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle2, XCircle, PlayCircle, History, Eye, X, Copy, Check } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, PlayCircle, History, Eye, X, Download, FileText } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import ReactMarkdown from 'react-markdown';
+import { generatePDFFromMarkdown, downloadPDFBlob } from '@/services/pdfGeneratorService';
+import { ABTestModal } from '@/components/ab-test-modal';
+
+// Lazy load the PDF viewer
+const PDFViewer = lazy(() => import('@/components/pdf/PDFViewer'));
 
 const EXPORT_PATHS = [
     { id: 'openai_qa_loop', name: 'OpenAI QA Loop' },
@@ -33,6 +37,7 @@ interface TestResult {
     data?: any;
     timestamp?: string;
     content_markdown?: string;
+    pdf_url?: string;
 }
 
 export default function TestExportPage() {
@@ -44,8 +49,8 @@ export default function TestExportPage() {
     const [results, setResults] = useState<TestResult[]>([]);
     const [overallProgress, setOverallProgress] = useState(0);
     const [history, setHistory] = useState<any[]>([]);
-    const [viewingContent, setViewingContent] = useState<{ title: string; markdown: string } | null>(null);
-    const [copied, setCopied] = useState(false);
+    const [viewingPDF, setViewingPDF] = useState<{ title: string; url: string } | null>(null);
+    const [generatingPDF, setGeneratingPDF] = useState<string | null>(null);
 
     useEffect(() => {
         if (user) fetchHistory();
@@ -144,6 +149,7 @@ export default function TestExportPage() {
                                 improvements: pollData.data?.suggestions || [],
                                 data: pollData.data,
                                 content_markdown: pollData.content_markdown,
+                                pdf_url: pollData.pdf_url,
                                 timestamp: new Date().toLocaleTimeString()
                             });
                         } else if (attempts >= maxAttempts) {
@@ -203,26 +209,86 @@ export default function TestExportPage() {
         fetchHistory();
     };
 
-    const handleCopyMarkdown = (markdown: string) => {
-        navigator.clipboard.writeText(markdown);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        toast({ title: "Copied", description: "Markdown content copied to clipboard." });
+    const handleGeneratePDF = async (result: TestResult) => {
+        if (!result.content_markdown || !user?.id || !result.data?.request_id) {
+            toast({ title: "Error", description: "Missing data for PDF generation.", variant: "destructive" });
+            return;
+        }
+
+        setGeneratingPDF(result.pathId);
+
+        try {
+            const pdfResult = await generatePDFFromMarkdown(
+                result.content_markdown,
+                result.pathName,
+                result.data.request_id,
+                user.id
+            );
+
+            if (pdfResult.error) {
+                toast({ title: "PDF Error", description: pdfResult.error, variant: "destructive" });
+                return;
+            }
+
+            if (pdfResult.url) {
+                // Update the result with the PDF URL
+                setResults(prev => prev.map(r =>
+                    r.pathId === result.pathId ? { ...r, pdf_url: pdfResult.url! } : r
+                ));
+
+                // Open the PDF viewer
+                setViewingPDF({ title: result.pathName, url: pdfResult.url });
+
+                toast({ title: "PDF Generated", description: "Your PDF is ready to view and share." });
+            }
+        } catch (error: any) {
+            toast({ title: "Error", description: error.message, variant: "destructive" });
+        } finally {
+            setGeneratingPDF(null);
+        }
     };
 
-    const handleViewHistoryContent = async (requestId: string, title: string) => {
+    const handleViewHistoryPDF = async (requestId: string, title: string) => {
         try {
             const { data, error } = await supabase
                 .from('test_results')
-                .select('content_markdown')
+                .select('pdf_url, content_markdown')
                 .eq('request_id', requestId)
                 .single();
 
-            if (error || !data?.content_markdown) {
-                toast({ title: "No Content", description: "No markdown content available for this result.", variant: "destructive" });
+            if (error) {
+                toast({ title: "Error", description: "Failed to load PDF data.", variant: "destructive" });
                 return;
             }
-            setViewingContent({ title: title || 'Test Result', markdown: data.content_markdown });
+
+            // If PDF exists, show it
+            if (data?.pdf_url) {
+                setViewingPDF({ title: title || 'Test Result', url: data.pdf_url });
+                return;
+            }
+
+            // If no PDF but has markdown, generate it
+            if (data?.content_markdown && user?.id) {
+                setGeneratingPDF(requestId);
+                const pdfResult = await generatePDFFromMarkdown(
+                    data.content_markdown,
+                    title || 'Test Result',
+                    requestId,
+                    user.id
+                );
+
+                if (pdfResult.url) {
+                    setViewingPDF({ title: title || 'Test Result', url: pdfResult.url });
+                    fetchHistory(); // Refresh to show PDF URL
+                    toast({ title: "PDF Generated", description: "Your PDF has been created." });
+                } else {
+                    toast({ title: "Error", description: pdfResult.error || "Failed to generate PDF.", variant: "destructive" });
+                }
+                setGeneratingPDF(null);
+                return;
+            }
+
+            toast({ title: "No Content", description: "No content available for PDF generation.", variant: "destructive" });
         } catch {
             toast({ title: "Error", description: "Failed to load content.", variant: "destructive" });
         }
@@ -236,53 +302,48 @@ export default function TestExportPage() {
                         Content Testing Framework
                     </h1>
                     <p className="text-muted-foreground">
-                        Test content generation without Google Drive exports. Results display as Markdown directly in Skywide.
+                        Test content generation and export results as PDF documents. Results are stored in Skywide for easy sharing.
                     </p>
                 </div>
 
-                <Card className="border-border hover-glow">
-                    <CardContent className="pt-6">
-                        <div className="flex flex-col md:flex-row gap-6 items-end">
-                            <div className="flex-1 space-y-2">
-                                <Label htmlFor="path-select">Target Export Path</Label>
-                                <Select value={selectedPath} onValueChange={setSelectedPath}>
-                                    <SelectTrigger id="path-select">
-                                        <SelectValue placeholder="Select path" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Paths (Simultaneous)</SelectItem>
-                                        {EXPORT_PATHS.map(path => (
-                                            <SelectItem key={path.id} value={path.id}>
-                                                {path.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <Button
-                                onClick={handleRunTest}
-                                disabled={isTesting}
-                                className="w-full md:w-48 bg-brand-blue-crayola hover:bg-brand-blue-crayola/90"
-                            >
-                                {isTesting ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Diagnostic In Progress...</>
-                                ) : (
-                                    <><PlayCircle className="mr-2 h-4 w-4" /> Start Evaluation</>
-                                )}
-                            </Button>
-                        </div>
+                <div className="grid gap-6 md:grid-cols-2">
+                    <Card className="border-border hover-glow">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <PlayCircle className="h-5 w-5 text-brand-purple-mimosa" />
+                                Start New Test
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                                Launch a new content generation test using the A/B testing framework. Compare different prompts or models.
+                            </p>
+                            <ABTestModal />
+                        </CardContent>
+                    </Card>
 
-                        {isTesting && (
-                            <div className="mt-8 space-y-2">
-                                <div className="flex justify-between text-sm mb-1 text-muted-foreground">
-                                    <span>Cumulative Progress</span>
-                                    <span>{Math.round(overallProgress)}%</span>
-                                </div>
-                                <Progress value={overallProgress} className="h-1 bg-muted/20" />
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+                    <Card className="border-border hover-glow">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-blue-400" />
+                                Quick Links
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                                Access the most recent test result directly for debugging or review.
+                            </p>
+                            <Button
+                                variant="outline"
+                                className="w-full justify-start gap-2"
+                                onClick={() => router.push('/dashboard/test-export/latest')}
+                            >
+                                <Eye className="h-4 w-4" />
+                                View Latest Test Result
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Result Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -323,17 +384,32 @@ export default function TestExportPage() {
                                         <div className="flex justify-between items-center pt-2 border-t border-border/10">
                                             <span className="text-[10px] font-mono text-muted-foreground">{result.timestamp}</span>
                                             <div className="flex gap-1">
-                                                {result.content_markdown && (
+                                                {/* PDF Button - Generate or View */}
+                                                {result.pdf_url ? (
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
                                                         className="h-6 text-[10px] px-2 hover:bg-emerald-500/10 text-emerald-500"
-                                                        onClick={() => setViewingContent({
+                                                        onClick={() => setViewingPDF({
                                                             title: result.pathName,
-                                                            markdown: result.content_markdown!
+                                                            url: result.pdf_url!
                                                         })}
                                                     >
-                                                        <Eye className="mr-1 h-3 w-3" /> View Article
+                                                        <FileText className="mr-1 h-3 w-3" /> View PDF
+                                                    </Button>
+                                                ) : result.content_markdown && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-6 text-[10px] px-2 hover:bg-emerald-500/10 text-emerald-500"
+                                                        onClick={() => handleGeneratePDF(result)}
+                                                        disabled={generatingPDF === result.pathId}
+                                                    >
+                                                        {generatingPDF === result.pathId ? (
+                                                            <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Generating...</>
+                                                        ) : (
+                                                            <><FileText className="mr-1 h-3 w-3" /> Generate PDF</>
+                                                        )}
                                                     </Button>
                                                 )}
                                                 {result.data?.request_id && (
@@ -393,7 +469,7 @@ export default function TestExportPage() {
                                         <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Status</th>
                                         <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Score</th>
                                         <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Date</th>
-                                        <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Content</th>
+                                        <th className="px-6 py-4 font-bold text-xs uppercase tracking-widest text-muted-foreground">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/30">
@@ -428,14 +504,46 @@ export default function TestExportPage() {
                                                     {new Date(run.created_at).toLocaleString()}
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-6 text-[10px] px-2 hover:bg-brand-blue-crayola/10 text-brand-blue-crayola"
-                                                        onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/test-export/${run.request_id}`); }}
-                                                    >
-                                                        <Eye className="mr-1 h-3 w-3" /> View Report
-                                                    </Button>
+                                                    <div className="flex gap-1">
+                                                        {run.pdf_url ? (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-6 text-[10px] px-2 hover:bg-emerald-500/10 text-emerald-500"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setViewingPDF({ title: run.article_title || 'Test Result', url: run.pdf_url });
+                                                                }}
+                                                            >
+                                                                <FileText className="mr-1 h-3 w-3" /> View PDF
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-6 text-[10px] px-2 hover:bg-brand-blue-crayola/10 text-brand-blue-crayola"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleViewHistoryPDF(run.request_id, run.article_title);
+                                                                }}
+                                                                disabled={generatingPDF === run.request_id}
+                                                            >
+                                                                {generatingPDF === run.request_id ? (
+                                                                    <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Generating...</>
+                                                                ) : (
+                                                                    <><FileText className="mr-1 h-3 w-3" /> Generate PDF</>
+                                                                )}
+                                                            </Button>
+                                                        )}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-6 text-[10px] px-2 hover:bg-brand-blue-crayola/10 text-brand-blue-crayola"
+                                                            onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/test-export/${run.request_id}`); }}
+                                                        >
+                                                            <Eye className="mr-1 h-3 w-3" /> Full Report
+                                                        </Button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))
@@ -447,45 +555,48 @@ export default function TestExportPage() {
                 </div>
             </div>
 
-            {/* Markdown Content Viewer Modal */}
-            {viewingContent && (
-                <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            {/* PDF Viewer Modal */}
+            {viewingPDF && (
+                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 shrink-0">
                             <div>
-                                <h3 className="text-lg font-bold text-foreground">{viewingContent.title}</h3>
-                                <p className="text-xs text-muted-foreground">Generated article content (Markdown)</p>
+                                <h3 className="text-lg font-bold text-white">{viewingPDF.title}</h3>
+                                <p className="text-xs text-zinc-400">PDF Document</p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="h-8 text-xs"
-                                    onClick={() => handleCopyMarkdown(viewingContent.markdown)}
+                                    className="h-8 text-xs border-zinc-700 bg-zinc-800 hover:bg-zinc-700"
+                                    onClick={() => window.open(viewingPDF.url, '_blank')}
                                 >
-                                    {copied ? (
-                                        <><Check className="mr-1 h-3 w-3" /> Copied</>
-                                    ) : (
-                                        <><Copy className="mr-1 h-3 w-3" /> Copy Markdown</>
-                                    )}
+                                    <Download className="mr-1 h-3 w-3" /> Download PDF
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => setViewingContent(null)}
+                                    className="h-8 w-8 p-0 text-zinc-400 hover:text-white"
+                                    onClick={() => setViewingPDF(null)}
                                 >
                                     <X className="h-4 w-4" />
                                 </Button>
                             </div>
                         </div>
 
-                        {/* Modal Body — Rendered Markdown */}
-                        <div className="overflow-y-auto px-8 py-6 flex-1">
-                            <article className="prose prose-sm dark:prose-invert max-w-none prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground prose-li:text-foreground/90 prose-a:text-brand-blue-crayola">
-                                <ReactMarkdown>{viewingContent.markdown}</ReactMarkdown>
-                            </article>
+                        {/* Modal Body — PDF Viewer */}
+                        <div className="flex-1 overflow-hidden">
+                            <Suspense fallback={
+                                <div className="flex items-center justify-center h-full">
+                                    <div className="text-center space-y-3">
+                                        <Loader2 className="h-8 w-8 animate-spin text-brand-blue-crayola mx-auto" />
+                                        <p className="text-sm text-zinc-400">Loading PDF viewer...</p>
+                                    </div>
+                                </div>
+                            }>
+                                <PDFViewer url={viewingPDF.url} className="h-full" />
+                            </Suspense>
                         </div>
                     </div>
                 </div>

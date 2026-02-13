@@ -52,3 +52,6 @@ excel_structure.json
 # Run tracking feature (removed)
 /src/app/api/run-tracking
 /src/app/runs
+
+# Windows reserved names
+nul

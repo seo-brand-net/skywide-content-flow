@@ -58,9 +58,9 @@ export async function GET(request: Request) {
     )
 
     // 0. Check for existing session (Handles cases where Supabase already verified the user)
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    if (session && !sessionError) {
-        console.log('✅ [AUTH CALLBACK] Existing session found, proceeding to:', next)
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (user && !userError) {
+        console.log('✅ [AUTH CALLBACK] Existing user found, proceeding to:', next)
         return redirectToNext(request, origin, next, response)
     }
 

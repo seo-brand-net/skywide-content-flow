@@ -114,18 +114,46 @@ export function AuthProvider({
 
         // Use withTimeout for safety even on initial session check
         console.log('[Auth] 🔍 Checking initial session...');
-        const { data: { session: currentSession }, error } = await withTimeout(
-          supabase.auth.getSession(),
+
+        // 1. Try to get the user first (Most secure, verifies with server)
+        const { data: { user: secureUser }, error: userError } = await withTimeout(
+          supabase.auth.getUser(),
           10000,
-          'Initial session check timed out'
+          'Initial user check timed out'
         ) as any;
 
-        if (error) {
-          console.error('[Auth] ❌ Session check error:', error);
+        // 2. Get the session (needed for tokens)
+        const { data: { session: currentSession }, error: sessionError } = await withTimeout(
+          supabase.auth.getSession(),
+          5000,
+          'Session check timed out'
+        ) as any;
+
+        if (userError || sessionError) {
+          const err = userError || sessionError;
+
+          // Suppress expected "AuthSessionMissingError" when no session exists
+          if (err?.name === 'AuthSessionMissingError' || err?.message?.includes('Auth session missing')) {
+            // Expected behavior for unauthenticated users with getUser()
+            console.log('[Auth] User session not found (clean state).');
+          }
+          // Handle "Failed to fetch" (Network/CORS) specifically
+          else if (err?.message?.includes('Failed to fetch') || err?.message?.includes('NetworkError')) {
+            console.error('[Auth] ❌ Network Error detected:', err);
+            setAuthError('Unable to connect to authentication server. Please check your internet connection or if Supabase is reachable.');
+            toast({
+              title: "Connection Error",
+              description: "Could not connect to the authentication server. You may be offline.",
+              variant: "destructive"
+            });
+          } else {
+            console.error('[Auth] ❌ Session check error:', err);
+          }
         }
 
+        // Prefer the secure user from getUser(), fall back to session user if needed/missing
+        const activeUser = secureUser || currentSession?.user || sessionRef.current?.user;
         const activeSession = currentSession || sessionRef.current;
-        const activeUser = activeSession?.user;
 
         if (activeUser) {
           setSession(activeSession);
@@ -137,9 +165,20 @@ export function AuthProvider({
         } else {
           console.log('[Auth] No session found during initial check');
         }
-      } catch (e) {
+      } catch (e: any) {
+        // Suppress "AuthSessionMissingError" which can happen if Supabase client is confused
+        // This is safe because we default to logged out anyway.
+        if (e?.name === 'AuthSessionMissingError' || e?.message?.includes('Auth session missing')) {
+          console.warn('[Auth] Suppressed AuthSessionMissingError during init (User likely logged out)');
+          return;
+        }
+
         console.error('[Auth] Critical initialization error:', e);
-        setAuthError('Authentication initialization timed out. Please refresh.');
+        if (e?.message?.includes('Failed to fetch')) {
+          setAuthError('Network Error: Could not reach Supabase.');
+        } else {
+          setAuthError('Authentication initialization timed out. Please refresh.');
+        }
       } finally {
         if (isMounted.current) {
           setLoading(false);
@@ -245,17 +284,31 @@ export function AuthProvider({
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Use withTimeout to fail fast if network is down (522/504)
+      const { error } = await withTimeout(
+        supabase.auth.signInWithPassword({
+          email,
+          password,
+        }),
+        10000,
+        'Sign in request timed out. Check your connection.'
+      ) as any;
 
       if (error) {
-        toast({
-          title: "Sign In Failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        // Handle Network/Timeout errors specifically
+        if (error.message?.includes('Failed to fetch') || error.message?.includes('timed out')) {
+          toast({
+            title: "Connection Failed",
+            description: "Could not reach Supabase. You may be offline or the server is unreachable (Error 522).",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign In Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Welcome back!",
@@ -267,34 +320,55 @@ export function AuthProvider({
 
       return { error };
     } catch (error: any) {
-      toast({
-        title: "Sign In Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
-      });
+      // Catch explicit network crashes
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        toast({
+          title: "Connection Error",
+          description: "Unable to connect to the authentication server.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Sign In Error",
+          description: error.message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      }
       return { error };
     }
   };
 
   const signUp = async (email: string, password: string, displayName?: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: {
-            display_name: displayName || email.split('@')[0],
+      const { error } = await withTimeout(
+        supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: {
+              display_name: displayName || email.split('@')[0],
+            }
           }
-        }
-      });
+        }),
+        10000,
+        'Sign up request timed out. Check your connection.'
+      ) as any;
 
       if (error) {
-        toast({
-          title: "Sign Up Failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        if (error.message?.includes('Failed to fetch') || error.message?.includes('timed out')) {
+          toast({
+            title: "Connection Failed",
+            description: "Could not reach Supabase. You may be offline or the server is unreachable.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign Up Failed",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
       } else {
         toast({
           title: "Account Created!",
@@ -304,11 +378,19 @@ export function AuthProvider({
 
       return { error };
     } catch (error: any) {
-      toast({
-        title: "Sign Up Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
-      });
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        toast({
+          title: "Connection Error",
+          description: "Unable to connect to the authentication server.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Sign Up Error",
+          description: error.message || "An unexpected error occurred.",
+          variant: "destructive",
+        });
+      }
       return { error };
     }
   };

@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { withTimeout } from '@/utils/timeout';
+import { ABTestModal } from '@/components/ab-test-modal';
 
 
 interface FormData {
@@ -342,22 +343,8 @@ export default function Dashboard() {
                             Content Submission Form
                             {isAdmin && (
                                 <div className="flex gap-2">
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        onClick={clearTestData}
-                                        className="text-xs"
-                                    >
-                                        Clear Data
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={fillRandomData}
-                                        className="text-xs"
-                                    >
-                                        Fill Test Data
-                                    </Button>
+
+                                    <ABTestModal />
                                 </div>
                             )}
                         </CardTitle>
