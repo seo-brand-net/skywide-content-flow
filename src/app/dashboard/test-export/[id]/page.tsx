@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,7 +24,20 @@ import {
 import { generatePDFFromMarkdown } from "@/services/pdfGeneratorService";
 
 // Lazy load the PDF viewer
-const PDFViewer = lazy(() => import('@/components/pdf/PDFViewer'));
+import dynamic from 'next/dynamic';
+
+// Dynamically load PDF viewer with SSR disabled to prevent build errors
+const PDFViewer = dynamic(() => import('@/components/pdf/PDFViewer'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-[600px] w-full bg-zinc-900/50 rounded-lg">
+            <div className="text-center space-y-3">
+                <Loader2 className="h-8 w-8 animate-spin text-brand-blue-crayola mx-auto" />
+                <p className="text-sm text-muted-foreground">Loading PDF viewer...</p>
+            </div>
+        </div>
+    )
+});
 
 interface TestResultData {
     id: string;
@@ -278,16 +291,7 @@ export default function TestResultDetailPage() {
                                     <CardContent className="p-0">
                                         {result.pdf_url ? (
                                             <div className="h-[700px]">
-                                                <Suspense fallback={
-                                                    <div className="flex items-center justify-center h-full">
-                                                        <div className="text-center space-y-3">
-                                                            <Loader2 className="h-8 w-8 animate-spin text-brand-blue-crayola mx-auto" />
-                                                            <p className="text-sm text-muted-foreground">Loading PDF viewer...</p>
-                                                        </div>
-                                                    </div>
-                                                }>
-                                                    <PDFViewer url={result.pdf_url} className="h-full" />
-                                                </Suspense>
+                                                <PDFViewer url={result.pdf_url} className="h-full" />
                                             </div>
                                         ) : result.content_markdown ? (
                                             <div className="text-center py-24 space-y-6">

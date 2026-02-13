@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,20 @@ import { generatePDFFromMarkdown, downloadPDFBlob } from '@/services/pdfGenerato
 import { ABTestModal } from '@/components/ab-test-modal';
 
 // Lazy load the PDF viewer
-const PDFViewer = lazy(() => import('@/components/pdf/PDFViewer'));
+import dynamic from 'next/dynamic';
+
+// Dynamically load PDF viewer with SSR disabled to prevent build errors
+const PDFViewer = dynamic(() => import('@/components/pdf/PDFViewer'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-full">
+            <div className="text-center space-y-3">
+                <Loader2 className="h-8 w-8 animate-spin text-brand-blue-crayola mx-auto" />
+                <p className="text-sm text-zinc-400">Loading PDF viewer...</p>
+            </div>
+        </div>
+    )
+});
 
 const EXPORT_PATHS = [
     { id: 'openai_qa_loop', name: 'OpenAI QA Loop' },
@@ -587,16 +600,7 @@ export default function TestExportPage() {
 
                         {/* Modal Body — PDF Viewer */}
                         <div className="flex-1 overflow-hidden">
-                            <Suspense fallback={
-                                <div className="flex items-center justify-center h-full">
-                                    <div className="text-center space-y-3">
-                                        <Loader2 className="h-8 w-8 animate-spin text-brand-blue-crayola mx-auto" />
-                                        <p className="text-sm text-zinc-400">Loading PDF viewer...</p>
-                                    </div>
-                                </div>
-                            }>
-                                <PDFViewer url={viewingPDF.url} className="h-full" />
-                            </Suspense>
+                            <PDFViewer url={viewingPDF.url} className="h-full" />
                         </div>
                     </div>
                 </div>
