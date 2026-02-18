@@ -47,7 +47,7 @@ All colors MUST be HSL.
     --brand-davys-grey: 210 4% 30%;
     --brand-davys-grey-light: 210 4% 50%;
     --brand-davys-grey-lighter: 210 4% 70%;
-    
+
     /* SKYWIDE Brand Colors (Legacy) */
     --brand-cyan: 180 100% 70%;
     --brand-blue: 217 91% 60%;
@@ -70,6 +70,12 @@ All colors MUST be HSL.
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Terminal/CRT Design Tokens */
+    --terminal-green: 120 100% 60%;
+    --terminal-green-glow: 120 100% 75%;
+    --terminal-red: 0 100% 50%;
+    --crt-flicker: 0 0% 5%;
   }
 
   .dark {
@@ -115,6 +121,39 @@ All colors MUST be HSL.
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+
+  /* Terminal/CRT Theme — scoped override for auth & landing pages */
+  .terminal-theme {
+    --background: 0 0% 0%;
+    --foreground: 120 100% 60%;
+
+    --card: 0 0% 0%;
+    --card-foreground: 120 100% 60%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 120 100% 60%;
+
+    --primary: 120 100% 60%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 8%;
+    --muted-foreground: 120 60% 40%;
+
+    --accent: 120 100% 20%;
+    --accent-foreground: 120 100% 60%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 100% 30%;
+    --input: 120 100% 20%;
+    --ring: 120 100% 60%;
+
+    --radius: 0rem;
+  }
 }
 
 @layer base {
@@ -149,7 +188,7 @@ All colors MUST be HSL.
   .hover-glow {
     transition: all 0.3s ease;
   }
-  
+
   .hover-glow:hover {
     @apply shadow-lg;
     box-shadow: 0 10px 25px -5px hsl(var(--primary) / 0.3);
@@ -160,7 +199,7 @@ All colors MUST be HSL.
     @apply font-sans text-brand-davys-grey;
     position: relative;
   }
-  
+
   .seobrand-title-accent::after {
     content: '';
     position: absolute;
@@ -171,15 +210,47 @@ All colors MUST be HSL.
     background: hsl(var(--brand-blue-crayola));
     border-radius: 2px;
   }
-  
+
   .seobrand-subtitle {
     @apply font-secondary text-brand-blue-crayola font-medium;
   }
-  
+
   .seobrand-description {
     @apply font-secondary text-brand-davys-grey-light;
   }
+
+  /* Terminal/CRT Utility Classes */
+  .terminal-glow {
+    text-shadow: 0 0 10px hsl(var(--terminal-green)),
+      0 0 20px hsl(var(--terminal-green)),
+      0 0 30px hsl(var(--terminal-green));
+  }
+
+  .terminal-glow-red {
+    text-shadow: 0 0 10px hsl(var(--terminal-red)),
+      0 0 20px hsl(var(--terminal-red));
+  }
+
+  .scanlines {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scanlines::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 50%,
+        rgba(0, 255, 0, 0.03) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    z-index: 10;
+  }
 }
+
 
 /* ---break---
 */
@@ -188,6 +259,7 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

@@ -10,7 +10,7 @@ import { RegistrationForm } from '@/components/registration/RegistrationForm';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
-import { Logo } from '@/components/Logo';
+import { AuthLayout } from '@/components/auth/AuthLayout';
 
 interface RegistrationFormData {
     password: string;
@@ -28,8 +28,9 @@ function RegisterContent() {
     const token = searchParams.get('token');
     const { invitation: dbInvitation, loading, error } = useInvitationToken(token);
 
-    // Construct invitation from session if user is logged in
-    const invitation: any = user ? {
+    // Only construct a synthetic invitation if the user is logged in AND arrived via an invite token.
+    // Without a token, even authenticated users must not bypass the invitation gate.
+    const invitation: any = (user && token) ? {
         id: user.id,
         email: user.email || '',
         full_name: user.user_metadata?.full_name || '',
@@ -37,7 +38,7 @@ function RegisterContent() {
         status: 'accepted',
         created_at: new Date().toISOString(),
         expires_at: new Date().toISOString(),
-        token: 'native_invite'
+        token: token
     } : dbInvitation;
 
     const handleRegistration = async (formData: RegistrationFormData) => {
@@ -111,39 +112,45 @@ function RegisterContent() {
         }
     };
 
-    // If we have a session, we don't need to wait for token validation
+    // Guard: once auth has settled, a logged-in user with no token has no business on the register page
+    if (!loading && user && !token) {
+        router.replace('/dashboard');
+        return null;
+    }
+
+    // If we have a session with a token, we don't need to wait for token validation
     if (loading && !user) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center p-4">
-                <Card className="w-full max-w-md">
+            <div className="terminal-theme min-h-screen bg-black scanlines animate-crt-flicker flex items-center justify-center p-4">
+                <Card className="w-full max-w-md bg-black border-2 border-primary">
                     <CardContent className="p-8 text-center">
                         <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-muted-foreground">Validating invitation...</p>
+                        <p className="text-primary font-terminal tracking-wider">&gt; Validating invitation...</p>
                     </CardContent>
                 </Card>
             </div>
         );
     }
 
-    // CRITICAL: If we have a user, we ignore the token error because we're doing session-based set-password
-    if ((error && !user) || (!invitation && !user)) {
+    // Block access if there's no valid invitation (covers unauthenticated users with bad/missing tokens)
+    if (error || !invitation) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center p-4">
-                <Card className="w-full max-w-md">
+            <div className="terminal-theme min-h-screen bg-black scanlines animate-crt-flicker flex items-center justify-center p-4">
+                <Card className="w-full max-w-md bg-black border-2 border-secondary">
                     <CardContent className="p-8">
-                        <Alert variant="destructive">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>
-                                {error || 'Invalid invitation token'}
+                        <Alert variant="destructive" className="bg-black border-secondary">
+                            <AlertCircle className="h-4 w-4 text-secondary" />
+                            <AlertDescription className="font-terminal text-secondary tracking-wide">
+                                [!] ERROR: {error || 'Invalid invitation token'}
                             </AlertDescription>
                         </Alert>
 
-                        <div className="mt-6 text-center">
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Need help? Contact our support team.
+                        <div className="mt-6 text-center space-y-4">
+                            <p className="text-sm text-muted-foreground font-terminal tracking-wide">
+                                Need assistance? Contact support.
                             </p>
-                            <p className="text-sm text-muted-foreground">
-                                Email: <a href="mailto:support@skywide.co" className="text-primary hover:underline">
+                            <p className="text-sm text-muted-foreground font-terminal">
+                                Email: <a href="mailto:support@skywide.co" className="text-primary hover:underline terminal-glow">
                                     support@skywide.co
                                 </a>
                             </p>
@@ -155,14 +162,15 @@ function RegisterContent() {
     }
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                        <Logo size="large" />
-                    </div>
-                    <h2 className="text-xl text-foreground mb-2">Complete Your Registration</h2>
-                    <p className="text-muted-foreground">Welcome to SKYWIDE Content Dashboard</p>
+        <AuthLayout>
+            <div className="space-y-6">
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl md:text-3xl font-terminal terminal-glow text-primary tracking-[0.3em]">
+                        Complete Registration
+                    </h2>
+                    <p className="text-sm md:text-base text-muted-foreground font-terminal tracking-wider">
+                        Welcome to Skywide Content Management
+                    </p>
                 </div>
 
                 <RegistrationForm
@@ -171,29 +179,29 @@ function RegisterContent() {
                     isLoading={isSubmitting}
                 />
 
-                <div className="mt-6 text-center">
-                    <p className="text-sm text-muted-foreground">
+                <div className="text-center pt-2">
+                    <p className="text-sm text-muted-foreground font-terminal tracking-wide">
                         Already have an account?{' '}
                         <a
                             href="/login"
-                            className="text-primary hover:underline font-medium"
+                            className="text-primary hover:text-primary/80 terminal-glow transition-colors"
                             onClick={(e) => {
                                 e.preventDefault();
                                 router.push('/login');
                             }}
                         >
-                            Sign in
+                            Sign In
                         </a>
                     </p>
                 </div>
             </div>
-        </div>
+        </AuthLayout>
     );
 }
 
 export default function Register() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center"><span className="text-primary font-terminal terminal-glow">&gt; LOADING...</span></div>}>
             <RegisterContent />
         </Suspense>
     );

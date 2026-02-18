@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
-import { Eye, EyeOff, LogIn, Mail } from 'lucide-react';
-import { Logo } from '@/components/Logo';
+import { Eye, EyeOff } from 'lucide-react';
+import { AuthLayout } from '@/components/auth/AuthLayout';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -36,109 +35,107 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                        <Logo size="large" />
-                    </div>
-                    <p className="text-muted-foreground">Content Request Dashboard</p>
+        <AuthLayout>
+            {/* Login Form */}
+            <div className="space-y-6">
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl md:text-3xl font-terminal terminal-glow text-primary tracking-[0.3em]">
+                        SIGN IN
+                    </h2>
+                    <p className="text-sm md:text-base text-muted-foreground font-terminal tracking-wider">
+                        Enter your credentials to continue
+                    </p>
                 </div>
 
-                <Card className="hover-glow animate-fade-in">
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-2xl seobrand-title seobrand-title-accent">Welcome Back</CardTitle>
-                        <CardDescription className="seobrand-description">
-                            Sign in to your SKYWIDE account
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="h-11"
-                                />
-                            </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                        <Label
+                            htmlFor="email"
+                            className="font-terminal text-primary terminal-glow tracking-wider text-sm"
+                        >
+                            Email Address
+                        </Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="name@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="h-12 bg-black border-2 border-primary text-primary font-terminal placeholder:text-muted-foreground focus:ring-primary focus:ring-2 rounded-none"
+                        />
+                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        placeholder="Enter your password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="h-11 pr-10"
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? (
-                                            <EyeOff className="h-4 w-4 text-muted-foreground" />
-                                        ) : (
-                                            <Eye className="h-4 w-4 text-muted-foreground" />
-                                        )}
-                                    </Button>
-                                </div>
-                            </div>
-
+                    <div className="space-y-2">
+                        <Label
+                            htmlFor="password"
+                            className="font-terminal text-primary terminal-glow tracking-wider text-sm"
+                        >
+                            Password
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                className="h-12 bg-black border-2 border-primary text-primary font-terminal placeholder:text-muted-foreground focus:ring-primary focus:ring-2 rounded-none pr-12"
+                            />
                             <Button
-                                type="submit"
-                                className="w-full h-11 hover-glow"
-                                disabled={isLoading}
-                                role='button'
-                                aria-label='Sign In'
-                                data-testid="sign-in-button"
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 hover:bg-primary/10 text-primary rounded-none"
+                                onClick={() => setShowPassword(!showPassword)}
                             >
-                                {isLoading ? (
-                                    'Loading...'
+                                {showPassword ? (
+                                    <EyeOff className="h-4 w-4" />
                                 ) : (
-                                    <>
-                                        <LogIn className="mr-2 h-4 w-4" />
-                                        Sign In
-                                    </>
+                                    <Eye className="h-4 w-4" />
                                 )}
                             </Button>
-                        </form>
-
-                        <div className="mt-4 text-center">
-                            <button
-                                type="button"
-                                className="text-sm text-brand-blue-crayola hover:text-brand-blue-crayola/80 transition-colors"
-                                onClick={() => router.push('/reset-password')}
-                            >
-                                Forgot your password?
-                            </button>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
 
-                {/* Invitation Only Message */}
-                <Card className="mt-4 bg-muted/50 border-muted-foreground/20">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Mail className="w-4 h-4 text-brand-blue-crayola" />
-                            <span className="text-sm font-medium seobrand-subtitle">Invitation Only</span>
-                        </div>
-                        <p className="text-xs seobrand-description">
-                            Don't have an account? Contact your administrator to receive an invitation.
-                        </p>
-                    </CardContent>
-                </Card>
+                    <div className="relative group pt-2">
+                        <div className="absolute -inset-1 bg-primary/20 blur-xl animate-slow-pulse group-hover:bg-primary/40 transition-all duration-300"></div>
+                        <Button
+                            type="submit"
+                            className="relative w-full h-12 border-2 border-primary bg-black hover:bg-primary/10 text-primary terminal-glow font-terminal text-lg tracking-[0.3em] transition-all duration-300 hover:scale-105 animate-slow-pulse rounded-none"
+                            disabled={isLoading}
+                            role='button'
+                            aria-label='Sign In'
+                            data-testid="sign-in-button"
+                        >
+                            {isLoading ? 'Signing In...' : 'Sign In'}
+                        </Button>
+                    </div>
+                </form>
+
+                <div className="text-center pt-2">
+                    <button
+                        type="button"
+                        className="text-sm font-terminal text-primary hover:text-primary/80 transition-colors tracking-wider"
+                        onClick={() => router.push('/reset-password')}
+                    >
+                        Forgot Password?
+                    </button>
+                </div>
+
+                {/* Invitation Only Notice */}
+                <div className="mt-6 p-4 border border-secondary bg-black/50">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-terminal terminal-glow-red text-secondary tracking-wider">
+                            Notice
+                        </span>
+                    </div>
+                    <p className="text-xs font-terminal text-muted-foreground tracking-wide">
+                        This system is invitation-only. Contact your administrator for access.
+                    </p>
+                </div>
             </div>
-        </div>
+        </AuthLayout>
     );
 }

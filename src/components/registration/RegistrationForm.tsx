@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { Invitation } from '@/types/invitation';
@@ -36,7 +35,7 @@ interface RegistrationFormProps {
 
 export function RegistrationForm({ invitation, onSubmit, isLoading }: RegistrationFormProps) {
   const [password, setPassword] = useState('');
-  
+
   const form = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
@@ -51,130 +50,135 @@ export function RegistrationForm({ invitation, onSubmit, isLoading }: Registrati
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="text-center">
-        <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary">S</span>
-          </div>
-        </div>
-        <CardTitle className="text-2xl">Complete Registration</CardTitle>
-        <p className="text-muted-foreground">
-          You've been invited to join SKYWIDE Content Dashboard
-        </p>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
-        {/* Invitation Details */}
-        <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Full Name</Label>
-            <Input
-              value={invitation.full_name}
-              disabled
-              className="mt-1 bg-background"
-            />
-          </div>
-          
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Email Address</Label>
-            <Input
-              value={invitation.email}
-              disabled
-              className="mt-1 bg-background"
-            />
-          </div>
-          
-          <div>
-            <Label className="text-sm font-medium text-muted-foreground">Role</Label>
-            <div className="mt-1">
-              <Badge variant={invitation.role === 'admin' ? 'default' : 'secondary'} className="capitalize">
-                {invitation.role === 'admin' ? (
-                  <Shield className="h-3 w-3 mr-1" />
-                ) : (
-                  <User className="h-3 w-3 mr-1" />
-                )}
-                {invitation.role}
-              </Badge>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Invitation Details */}
+      <div className="space-y-4 p-4 border border-primary bg-black/50">
+        <div className="text-center mb-4">
+          <p className="text-sm font-terminal terminal-glow text-primary tracking-wider">
+            Invitation Details
+          </p>
         </div>
 
-        {/* Registration Form */}
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Enter your password"
-                      {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setPassword(e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <PasswordStrengthIndicator password={password} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div>
+          <Label className="text-xs font-terminal text-muted-foreground tracking-wider">Full Name</Label>
+          <Input
+            value={invitation.full_name}
+            disabled
+            className="mt-1 bg-black border-primary/50 text-primary font-terminal rounded-none"
+          />
+        </div>
 
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Confirm your password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+        <div>
+          <Label className="text-xs font-terminal text-muted-foreground tracking-wider">Email Address</Label>
+          <Input
+            value={invitation.email}
+            disabled
+            className="mt-1 bg-black border-primary/50 text-primary font-terminal rounded-none"
+          />
+        </div>
 
-            <FormField
-              control={form.control}
-              name="agreeToTerms"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <Label className="text-sm">
-                      I agree to the terms and conditions
-                    </Label>
-                  </div>
-                  <FormMessage />
-                </FormItem>
+        <div>
+          <Label className="text-xs font-terminal text-muted-foreground tracking-wider">Role</Label>
+          <div className="mt-1">
+            <Badge
+              variant={invitation.role === 'admin' ? 'default' : 'secondary'}
+              className="capitalize font-terminal bg-primary/20 text-primary border border-primary rounded-none"
+            >
+              {invitation.role === 'admin' ? (
+                <Shield className="h-3 w-3 mr-1" />
+              ) : (
+                <User className="h-3 w-3 mr-1" />
               )}
-            />
+              {invitation.role.toUpperCase()}
+            </Badge>
+          </div>
+        </div>
+      </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
+      {/* Registration Form */}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-terminal text-primary terminal-glow tracking-wider text-sm">
+                  Password
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Create a password"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      setPassword(e.target.value);
+                    }}
+                    className="h-12 bg-black border-2 border-primary text-primary font-terminal placeholder:text-muted-foreground focus:ring-primary focus:ring-2 rounded-none"
+                  />
+                </FormControl>
+                <PasswordStrengthIndicator password={password} />
+                <FormMessage className="font-terminal text-xs text-secondary" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-terminal text-primary terminal-glow tracking-wider text-sm">
+                  Confirm Password
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Confirm your password"
+                    {...field}
+                    className="h-12 bg-black border-2 border-primary text-primary font-terminal placeholder:text-muted-foreground focus:ring-primary focus:ring-2 rounded-none"
+                  />
+                </FormControl>
+                <FormMessage className="font-terminal text-xs text-secondary" />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="agreeToTerms"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border border-primary/50 bg-black/30">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-black"
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <Label className="text-xs font-terminal text-muted-foreground tracking-wide cursor-pointer">
+                    I agree to the terms and conditions
+                  </Label>
+                </div>
+                <FormMessage className="font-terminal text-xs text-secondary" />
+              </FormItem>
+            )}
+          />
+
+          <div className="relative group pt-2">
+            <div className="absolute -inset-1 bg-primary/20 blur-xl animate-slow-pulse group-hover:bg-primary/40 transition-all duration-300"></div>
+            <Button
+              type="submit"
+              className="relative w-full h-12 border-2 border-primary bg-black hover:bg-primary/10 text-primary terminal-glow font-terminal text-lg tracking-[0.3em] transition-all duration-300 hover:scale-105 animate-slow-pulse rounded-none"
               disabled={isLoading}
             >
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }

@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogIn, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 
 export default function Home() {
@@ -24,90 +23,71 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="terminal-theme min-h-screen bg-black scanlines animate-crt-flicker flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-primary font-terminal terminal-glow tracking-wider">&gt; INITIALIZING...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* SKYWIDE Brand Header */}
-          <div className="mb-12">
-            <h1 className="text-6xl md:text-8xl font-bold mb-4 animate-fade-in">
-              <span className="bg-gradient-to-r from-brand-cyan via-brand-blue to-brand-indigo bg-clip-text text-transparent">
-                SKYWIDE
-              </span>
-            </h1>
-            <p className="text-2xl md:text-3xl text-foreground font-semibold mb-2 animate-fade-in">
-              Content Request Dashboard
+    <div className="terminal-theme min-h-screen bg-black scanlines animate-crt-flicker flex items-start justify-center p-4 md:p-8 pt-12 md:pt-16 animate-fade-in">
+      <div className="w-full max-w-4xl">
+        <div className="flex flex-col items-center justify-center space-y-6 md:space-y-8">
+
+          {/* Logo */}
+          <div className="relative">
+            <Image
+              src="/skywide-logo.png"
+              alt="Skywide Logo"
+              width={550}
+              height={200}
+              className="w-80 md:w-[550px] h-auto drop-shadow-[0_0_20px_rgba(0,255,0,0.3)]"
+              priority
+            />
+          </div>
+
+          {/* System Info */}
+          <div className="space-y-2 text-center terminal-glow text-primary font-terminal">
+            <p className="text-lg md:text-2xl tracking-wider">
+              Skywide Content Dashboard
             </p>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in">
-              Streamline your content creation workflow with our comprehensive request management system
+            <p className="text-base md:text-lg text-muted-foreground tracking-wider">
+              Authorized Personnel Only
             </p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12 animate-scale-in">
-            <div className="bg-card border border-border rounded-lg p-6 hover-glow">
-              <div className="w-12 h-12 bg-brand-cyan/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <ArrowRight className="w-6 h-6 text-brand-cyan" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Submit Requests</h3>
-              <p className="text-muted-foreground text-sm">
-                Easily submit detailed content creation requests with all necessary information
-              </p>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6 hover-glow">
-              <div className="w-12 h-12 bg-brand-blue/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <ArrowRight className="w-6 h-6 text-brand-blue" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Track Progress</h3>
-              <p className="text-muted-foreground text-sm">
-                Monitor your requests and stay updated on their status in real-time
-              </p>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6 hover-glow">
-              <div className="w-12 h-12 bg-brand-indigo/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                <ArrowRight className="w-6 h-6 text-brand-indigo" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Collaborate</h3>
-              <p className="text-muted-foreground text-sm">
-                Work seamlessly with your team on content creation projects
-              </p>
-            </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
+          {/* Enter Button */}
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-primary/20 blur-xl animate-slow-pulse group-hover:bg-primary/40 transition-all duration-300"></div>
             <Button
+              variant="outline"
               size="lg"
-              className="bg-brand-blue-crayola hover:bg-brand-blue-crayola/90 text-white hover-glow text-lg px-8 py-6 transition-colors"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => router.push(user ? '/dashboard' : '/login')}
+              className="relative border-2 border-primary bg-black hover:bg-primary/10 text-primary terminal-glow font-terminal text-2xl md:text-3xl px-12 md:px-16 py-6 md:py-8 tracking-[0.3em] transition-all duration-300 hover:scale-105 animate-slow-pulse rounded-none"
             >
-              <LogIn className="mr-2 h-5 w-5" />
-              Access Dashboard
+              &gt; ENTER_
             </Button>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-border">
-            <div className="flex flex-col items-center gap-3">
-              <img
-                src="/lovable-uploads/abefa66b-a1f9-4c62-bc62-d9132351623e.png"
-                alt="SEOBRAND Logo"
-                className="h-12 opacity-90"
-              />
-              <p className="text-muted-foreground text-sm">
-                For SEO Brand Team Member Only • Secure Authentication Required
-              </p>
-            </div>
+          {/* Footer Credits */}
+          <div className="space-y-1 text-center">
+            <p className="text-sm md:text-base text-muted-foreground font-terminal tracking-wider">
+              ──────────────────────────────────
+            </p>
+            <p className="text-base md:text-xl terminal-glow-red text-secondary font-terminal tracking-wider">
+              POWERED BY <span className="font-bold">SEO BRAND</span>
+            </p>
+            <p className="text-sm md:text-base text-muted-foreground font-terminal tracking-wider">
+              ──────────────────────────────────
+            </p>
+          </div>
+
+          {/* Bottom System Message */}
+          <div className="terminal-glow text-primary text-base md:text-lg font-terminal tracking-wider opacity-70">
+            <span className="animate-cursor-blink">Awaiting user input...</span>
           </div>
         </div>
       </div>

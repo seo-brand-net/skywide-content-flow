@@ -2,14 +2,15 @@ interface LogoProps {
     size?: 'small' | 'default' | 'large';
     className?: string;
     showSubtitle?: boolean;
+    variant?: 'default' | 'terminal';
 }
 
-export function Logo({ size = 'default', className = '', showSubtitle = true }: LogoProps) {
+export function Logo({ size = 'default', className = '', showSubtitle = true, variant = 'default' }: LogoProps) {
     const sizes = {
         small: {
             icon: 'w-6 h-6',
             title: 'text-lg',
-            subtitle: 'text-xs',
+            subtitle: 'text-[10px]',
             gap: 'gap-2'
         },
         default: {
@@ -28,37 +29,49 @@ export function Logo({ size = 'default', className = '', showSubtitle = true }: 
 
     const NetworkIcon = () => (
         <svg
-            className={`${sizes[size].icon} text-brand-cyan`}
+            className={`${sizes[size].icon} ${variant === 'terminal' ? 'text-primary drop-shadow-[0_0_20px_rgba(0,255,0,0.3)]' : 'text-brand-cyan'}`}
             viewBox="0 0 32 32"
             fill="none"
             aria-hidden="true"
         >
+            <defs>
+                <linearGradient id="networkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: variant === 'terminal' ? 'hsl(120, 100%, 50%)' : 'hsl(180, 100%, 70%)', stopOpacity: 1 }} />
+                    <stop offset="100%" style={{ stopColor: variant === 'terminal' ? 'hsl(120, 100%, 35%)' : 'hsl(217, 91%, 60%)', stopOpacity: 1 }} />
+                </linearGradient>
+            </defs>
             {/* Central node */}
-            <circle cx="16" cy="16" r="3" fill="currentColor" />
-
-            {/* Primary surrounding nodes */}
-            <circle cx="16" cy="6" r="2.5" fill="currentColor" opacity="0.8" />
-            <circle cx="26" cy="16" r="2.5" fill="currentColor" opacity="0.8" />
-            <circle cx="16" cy="26" r="2.5" fill="currentColor" opacity="0.8" />
-            <circle cx="6" cy="16" r="2.5" fill="currentColor" opacity="0.8" />
-
-            {/* Secondary surrounding nodes */}
-            <circle cx="22" cy="9" r="2" fill="currentColor" opacity="0.6" />
-            <circle cx="22" cy="23" r="2" fill="currentColor" opacity="0.6" />
-            <circle cx="10" cy="23" r="2" fill="currentColor" opacity="0.6" />
-            <circle cx="10" cy="9" r="2" fill="currentColor" opacity="0.6" />
-
-            {/* Connection lines */}
-            <line x1="16" y1="13" x2="16" y2="9" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            <line x1="19" y1="16" x2="23" y2="16" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            <line x1="16" y1="19" x2="16" y2="23" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            <line x1="13" y1="16" x2="9" y2="16" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            <line x1="18" y1="14" x2="20" y2="11" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            <line x1="18" y1="18" x2="20" y2="21" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            <line x1="14" y1="18" x2="12" y2="21" stroke="currentColor" strokeWidth="1" opacity="0.4" />
-            <line x1="14" y1="14" x2="12" y2="11" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+            <circle cx="16" cy="16" r="3" fill="url(#networkGradient)" />
+            {/* Outer nodes */}
+            <circle cx="8" cy="8" r="2" fill="url(#networkGradient)" />
+            <circle cx="24" cy="8" r="2" fill="url(#networkGradient)" />
+            <circle cx="8" cy="24" r="2" fill="url(#networkGradient)" />
+            <circle cx="24" cy="24" r="2" fill="url(#networkGradient)" />
+            {/* Connecting lines */}
+            <line x1="16" y1="16" x2="8" y2="8" stroke="url(#networkGradient)" strokeWidth="1.5" />
+            <line x1="16" y1="16" x2="24" y2="8" stroke="url(#networkGradient)" strokeWidth="1.5" />
+            <line x1="16" y1="16" x2="8" y2="24" stroke="url(#networkGradient)" strokeWidth="1.5" />
+            <line x1="16" y1="16" x2="24" y2="24" stroke="url(#networkGradient)" strokeWidth="1.5" />
         </svg>
     );
+
+    if (variant === 'terminal') {
+        return (
+            <div className={`flex items-center ${sizes[size].gap} ${className}`}>
+                <NetworkIcon />
+                <div className="flex flex-col">
+                    <h1 className={`font-bold font-terminal terminal-glow text-primary ${sizes[size].title} tracking-[0.3em]`}>
+                        SKYWIDE
+                    </h1>
+                    {showSubtitle && (
+                        <p className={`terminal-glow-red text-secondary font-terminal ${sizes[size].subtitle} tracking-wider`}>
+                            POWERED BY SEOBRAND
+                        </p>
+                    )}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={`flex items-center ${sizes[size].gap} ${className}`}>
