@@ -2,8 +2,86 @@
  * ============================================================================
  * CLAUDE-POWERED SEO CONTENT BRIEF BUILDER
  * ============================================================================
- * Version: 1.6.0
- * Last Updated: 2025-01-27
+ * Version: 2.1.1
+ * Last Updated: 2026-02-19
+ *
+ * CHANGELOG v2.1.1:
+ * - Removed external link validation (validateExternalLinksServerSide) — saved ~6 min per run
+ * - External links now rely on search_suggestion for editorial verification (no server-side HTTP checks)
+ * - Re-enabled web_search for Phase 3 (external link discovery) — Phase 3 is small enough (~13K) to handle tool state
+ * - Tool isolation now Phase 2-only: Phase 1 gets all tools, Phase 3 gets web_search only, Phase 2 gets none
+ * - Fixed: Phase 3 and competitor retry now strip context_management from payload (requires beta header not present)
+ * - Updated quality scoring to evaluate search_suggestion presence instead of verified status
+ * - Updated Google Doc renderer to show search suggestions prominently for all links
+ *
+ * CHANGELOG v2.1.0:
+ * - Fixed cross-phase context overflow caused by server-managed tool state persistence
+ * - Phase 2 now uses server-side pre-fetched competitor content (no web_fetch needed)
+ * - Phase 3 uses web_search only for external link discovery (no web_fetch, prevents state bloat)
+ * - Only Phase 1 uses web_search/web_fetch, eliminating server state accumulation
+ * - Added CODE_VERSION runtime log for deployment verification
+ * - Added PRE_REQUEST_SIZE diagnostic logging
+ *
+ * CHANGELOG v2.0.0:
+ *
+ * AHREFS SERP API INTEGRATION:
+ * - ADDED: fetchAhrefsSerpData() — fetches real Google SERP data from Ahrefs API
+ *   * Endpoint: v3/serp-overview/serp-overview (top 20 positions)
+ *   * Filters to 8 organic competitors (excludes Reddit, YouTube, Wikipedia, social media, aggregators)
+ *   * Extracts People Also Ask (PAA) questions from SERP
+ *   * Returns competitor URLs with position, title, and Domain Rating
+ * - ADDED: CONFIG settings for AHREFS_SERP_COUNTRY, AHREFS_SERP_TOP_POSITIONS, AHREFS_MAX_COMPETITOR_URLS, AHREFS_SKIP_DOMAINS
+ * - CHANGED: Phase 2 now uses Ahrefs competitor URLs directly (no web_search for competitor discovery)
+ * - ADDED: Zero-width space stripping (U+200B, U+200C, U+200D, U+FEFF, U+00A0) before Ahrefs API call
+ * - ADDED: Position-priority instruction — Claude analyzes highest-ranked successful fetches
+ * - BENEFIT: Eliminates discovery overhead, ensures correct Google ranking data, zero web_search in Phase 2
+ *
+ * DETERMINISTIC FAQ LOGIC:
+ * - REMOVED: Subjective 3-criteria FAQ decision (competitors + PAA + featured snippet)
+ * - ADDED: Page-type-based deterministic FAQ rules:
+ *   * Blog page: Always include FAQ
+ *   * Homepage: Never include FAQ
+ *   * Service/Category page: Include if 2+ of 4 competitors have FAQs
+ *   * Product page: Include if 3+ of 4 competitors have FAQs
+ * - ADDED: reconcileFaqAnalysis() — server-side safety net ensures include_faq matches outline
+ * - CHANGED: faq_analysis schema simplified to include_faq, competitor_faq_count, rationale
+ * - REMOVED: competitors_have_faq, paa_boxes_present, featured_snippet_opportunity fields
+ * - BENEFIT: Consistent FAQ decisions across runs, no more coin-flip behavior
+ *
+ * SERVER-SIDE EXTERNAL LINK VALIDATION (PHASES 4-5 ELIMINATED):
+ * - REMOVED: Phase 4 (Validate External Links Batch 1) — was burning ~580K input tokens
+ * - REMOVED: Phase 5 (Validate External Links Batch 2) — was burning ~610K input tokens
+ * - REMOVED: validateExternalLinksServerSide() — UrlFetchApp timeouts wasted ~6 min per run (v2.1.1)
+ * - ADDED: search_suggestion field on external links — specific Google search query for each link
+ *   * Primary method for editorial team to find and verify links
+ *   * Shown prominently in Google Doc output for every link
+ * - CHANGED: Phase count reduced from 5 → 3 (Client Research, Competitor Research, Write Brief)
+ * - CHANGED: API calls per run reduced from 5-6 → 3
+ * - BENEFIT: ~1.1-1.2M input tokens saved per run (~45-55% total token reduction)
+ *
+ * CHANGELOG v1.7.0:
+ * 
+ * INTENT RANGE EXPANSION + NAVIGATIONAL HYBRIDS:
+ * - CHANGED: Widened all intent section count ranges for meaningful competitor influence:
+ *   * transactional: 5-6 → 4-8 (lean tool pages to robust service pages)
+ *   * informational: 7-10 → 5-11 (narrow definitions to comprehensive guides)
+ *   * commercial: 6-8 → 5-9 (simple A-vs-B to full buying guides)
+ *   * navigational: 5-6 → 3-6 (location/about pages to full homepages)
+ *   * transactional/informational: 8-10 → 6-10
+ *   * informational/commercial: 8-10 → 6-10
+ *   * transactional/commercial: 6-8 → 5-8
+ * - ADDED: 3 navigational hybrid intents (previously fell back to primary intent):
+ *   * transactional/navigational (4-7)
+ *   * informational/navigational (4-8)
+ *   * commercial/navigational (4-7)
+ * - REMOVED: 6 duplicate reverse-order hybrid entries (informational/transactional,
+ *   commercial/informational, commercial/transactional, navigational/transactional,
+ *   navigational/informational, navigational/commercial) — only 10 intents match dropdown
+ * - ADDED: HYBRID_NORMALIZE map in parseIntent() — normalizes any reverse-order input
+ *   to canonical key (e.g. "commercial/transactional" → "transactional/commercial")
+ * - BENEFIT: Competitor average calculation now meaningful across all intents
+ *   * Old tight ranges (width 2) made competitor analysis decorative
+ *   * New ranges let SERP data drive section count within intent guardrails
  *
  * CHANGELOG v1.6.0:
  * 
@@ -116,7 +194,7 @@
  * - IMPROVED: SERP validation now more forgiving for niche keywords:
  *   * 5+ pages = full pass (ideal)
  *   * 3-4 pages = pass with warning (acceptable for niche keywords)
- *   * 0-2 pages = hard fail (truly insufficient)
+ *   * 0-1 pages = hard fail (truly insufficient)
  * 
  * v1.5.0 Validation Retry System:
  * - ADDED: runAllValidations() function to collect pass/fail results for all validations
@@ -228,8 +306,8 @@
  * 
  * CHANGELOG v1.2.4:
  * - Added SERP analysis depth validation
- * - Validates minimum 5 competitor pages analyzed
- * - Validates word count variance (200-2000 word range)
+ * - Validates minimum 4 competitor pages analyzed
+ * - Word count range calculated server-side from competitor data with intent modifier
  * - Validates pattern specificity (not generic fluff)
  * - Validates competitive gaps are identified
  * - Validates SERP features are specific
@@ -243,7 +321,8 @@
 const CONFIG = {
   CLAUDE_MODEL: "claude-sonnet-4-20250514",
   CLAUDE_MAX_TOKENS: 24000,
-  MAX_ROWS_PER_RUN: 5,
+  CODE_VERSION: "2.1.0",
+  MAX_ROWS_PER_RUN: 3,
   // SHEET_NAME is now dynamic or uses this as default
   DEFAULT_SHEET_NAME: "Content Brief Automation",
   DOCS_FOLDER_ID: "1nk3KsqlCv5-ndsayI-K1EC8aJXqvoAVQ",
@@ -255,6 +334,17 @@ const CONFIG = {
   USE_WEB_SEARCH: true,
   VERIFY_EXTERNAL_LINKS: true,
   DEEP_SERP_ANALYSIS: true,
+  CONTEXT_EDITING_THRESHOLD: 60000,
+  WEB_FETCH_MAX_CONTENT_TOKENS: 80000,
+  AHREFS_SERP_COUNTRY: 'us',
+  AHREFS_SERP_TOP_POSITIONS: 20,
+  AHREFS_MAX_COMPETITOR_URLS: 10,
+  AHREFS_SKIP_DOMAINS: [
+    'reddit.com', 'quora.com', 'wikipedia.org', 'youtube.com',
+    'yelp.com', 'bbb.org', 'glassdoor.com', 'indeed.com',
+    'facebook.com', 'twitter.com', 'linkedin.com', 'instagram.com',
+    'pinterest.com', 'tiktok.com'
+  ],
   DEBUG: true
 };
 
@@ -325,7 +415,7 @@ const PAGE_TYPES = {
 const CONTENT_STRUCTURES = {
   'transactional': {
     afp_focus: 'value proposition with price signal',
-    section_count: '5-6 sections',
+    section_count: '4-8 sections',
     section_depth: 'shallow, persuasive',
     cta_frequency: 'every section',
     cta_type: 'strong action (Get Quote, Buy Now, Contact)',
@@ -335,7 +425,7 @@ const CONTENT_STRUCTURES = {
   },
   'informational': {
     afp_focus: 'direct answer to query',
-    section_count: '7-10 sections',
+    section_count: '5-11 sections',
     section_depth: 'very deep, educational',
     cta_frequency: 'end only',
     cta_type: 'soft (Learn More, Explore)',
@@ -345,7 +435,7 @@ const CONTENT_STRUCTURES = {
   },
   'commercial': {
     afp_focus: 'specs and price range',
-    section_count: '6-8 sections',
+    section_count: '5-9 sections',
     section_depth: 'moderate, comparison-focused',
     cta_frequency: 'every 2-3 sections',
     cta_type: 'medium (Compare, Get Quote, See Options)',
@@ -355,7 +445,7 @@ const CONTENT_STRUCTURES = {
   },
   'navigational': {
     afp_focus: 'who we are and what we do',
-    section_count: '5-6 sections',
+    section_count: '3-6 sections',
     section_depth: 'broad overview',
     cta_frequency: 'one main CTA',
     cta_type: 'contact, navigation',
@@ -366,7 +456,7 @@ const CONTENT_STRUCTURES = {
   // === HYBRID INTENTS ===
   'transactional/informational': {
     afp_focus: 'value proposition + immediate answer to capability question',
-    section_count: '8-10 sections',
+    section_count: '6-10 sections',
     section_depth: 'tiered: shallow product-focused first 3-4, then deep educational',
     cta_frequency: 'strong after product showcase, soft after education, strong at end',
     cta_type: 'mixed (Get Quote early, Learn More middle, Contact end)',
@@ -374,29 +464,9 @@ const CONTENT_STRUCTURES = {
     emphasis: 'product info/pricing first 40%, how-to middle 50%, conversion last 10%',
     tone: 'confident early, helpful middle, action-oriented end'
   },
-  'informational/transactional': {
-    afp_focus: 'direct answer to query + soft value proposition',
-    section_count: '8-10 sections',
-    section_depth: 'deep educational first, then conversion-focused',
-    cta_frequency: 'soft early, medium middle, strong late',
-    cta_type: 'Learn More → Compare → Get Quote',
-    word_count_modifier: 1.4,
-    emphasis: 'education first 60%, product info middle 30%, conversion last 10%',
-    tone: 'helpful early, confident middle, action-oriented end'
-  },
-  'commercial/informational': {
-    afp_focus: 'comparison overview + specs summary',
-    section_count: '8-10 sections',
-    section_depth: 'moderate comparison first, then deep educational',
-    cta_frequency: 'medium early, soft middle, medium end',
-    cta_type: 'Compare Options → Learn More → See Details',
-    word_count_modifier: 1.3,
-    emphasis: 'comparison first 40%, educational middle 50%, decision help last 10%',
-    tone: 'objective early, educational middle, helpful end'
-  },
   'informational/commercial': {
     afp_focus: 'educational answer + buying guidance',
-    section_count: '8-10 sections',
+    section_count: '6-10 sections',
     section_depth: 'deep educational first, then comparison-focused',
     cta_frequency: 'soft early, medium late',
     cta_type: 'Learn More → Compare → See Options',
@@ -406,7 +476,7 @@ const CONTENT_STRUCTURES = {
   },
   'transactional/commercial': {
     afp_focus: 'strong value proposition + competitive positioning',
-    section_count: '6-8 sections',
+    section_count: '5-8 sections',
     section_depth: 'shallow persuasive with comparison elements',
     cta_frequency: 'every section with comparison CTAs',
     cta_type: 'Get Quote, Compare, See Why We\'re Better',
@@ -414,35 +484,73 @@ const CONTENT_STRUCTURES = {
     emphasis: 'pricing and value first 50%, competitive comparison last 50%',
     tone: 'confident and competitive throughout'
   },
-  'commercial/transactional': {
-    afp_focus: 'comparison-driven with clear winner positioning',
-    section_count: '6-8 sections',
-    section_depth: 'comparison-heavy leading to conversion',
-    cta_frequency: 'comparison CTAs early, strong action late',
-    cta_type: 'Compare → See Why → Get Started',
+  // === NAVIGATIONAL HYBRIDS ===
+  'transactional/navigational': {
+    afp_focus: 'brand-specific action page with clear conversion path',
+    section_count: '4-7 sections',
+    section_depth: 'shallow, brand-focused with action elements',
+    cta_frequency: 'every section',
+    cta_type: 'strong action (Get Started, Contact Us, Sign Up)',
+    word_count_modifier: 0.8,
+    emphasis: 'brand identity first 30%, services/products 40%, conversion 30%',
+    tone: 'professional, confident, action-oriented'
+  },
+  'informational/navigational': {
+    afp_focus: 'educational answer with brand positioning',
+    section_count: '4-8 sections',
+    section_depth: 'educational with brand context',
+    cta_frequency: 'soft throughout',
+    cta_type: 'Learn More, Explore Our Resources',
     word_count_modifier: 1.0,
-    emphasis: 'objective comparison first 60%, conversion push last 40%',
-    tone: 'objective early, confident and action-oriented end'
-  }
+    emphasis: 'education first 60%, brand authority 30%, navigation 10%',
+    tone: 'educational, authoritative, welcoming'
+  },
+  'commercial/navigational': {
+    afp_focus: 'brand comparison page or branded product overview',
+    section_count: '4-7 sections',
+    section_depth: 'comparison elements with brand focus',
+    cta_frequency: 'medium throughout',
+    cta_type: 'Compare → See Our Options → Contact',
+    word_count_modifier: 0.9,
+    emphasis: 'brand positioning first 40%, comparisons 40%, navigation 20%',
+    tone: 'objective, brand-confident, professional'
+  },
 };
 
 /**
  * Parse intent string to detect hybrid intents
  * Supports formats like "transactional/informational", "transactional + informational", etc.
+ * Normalizes reverse orders to match CONTENT_STRUCTURES keys
  */
 function parseIntent(intentString) {
   const intentLower = intentString.toLowerCase().trim();
+
+  // Canonical hybrid key mapping - normalizes any order to match dropdown/CONTENT_STRUCTURES
+  const HYBRID_NORMALIZE = {
+    'transactional/informational': 'transactional/informational',
+    'informational/transactional': 'transactional/informational',
+    'transactional/commercial': 'transactional/commercial',
+    'commercial/transactional': 'transactional/commercial',
+    'transactional/navigational': 'transactional/navigational',
+    'navigational/transactional': 'transactional/navigational',
+    'informational/commercial': 'informational/commercial',
+    'commercial/informational': 'informational/commercial',
+    'informational/navigational': 'informational/navigational',
+    'navigational/informational': 'informational/navigational',
+    'commercial/navigational': 'commercial/navigational',
+    'navigational/commercial': 'commercial/navigational'
+  };
 
   // Support all hybrid intent combinations
   const hybridPatterns = [
     /transactional\s*[\/\+&]\s*informational/i,
     /informational\s*[\/\+&]\s*transactional/i,
-    /commercial\s*[\/\+&]\s*informational/i,
-    /informational\s*[\/\+&]\s*commercial/i,
     /transactional\s*[\/\+&]\s*commercial/i,
     /commercial\s*[\/\+&]\s*transactional/i,
     /transactional\s*[\/\+&]\s*navigational/i,
     /navigational\s*[\/\+&]\s*transactional/i,
+    /informational\s*[\/\+&]\s*commercial/i,
+    /commercial\s*[\/\+&]\s*informational/i,
     /informational\s*[\/\+&]\s*navigational/i,
     /navigational\s*[\/\+&]\s*informational/i,
     /commercial\s*[\/\+&]\s*navigational/i,
@@ -452,11 +560,14 @@ function parseIntent(intentString) {
   for (const pattern of hybridPatterns) {
     if (pattern.test(intentLower)) {
       const parts = intentLower.split(/[\/\+&]/).map(s => s.trim()).filter(s => s.length > 0);
+      const rawKey = `${parts[0]}/${parts[1] || parts[0]}`;
+      const normalizedKey = HYBRID_NORMALIZE[rawKey] || rawKey;
+      const normalizedParts = normalizedKey.split('/');
       return {
         isHybrid: true,
-        primary: parts[0],
-        secondary: parts[1] || null,
-        hybridKey: `${parts[0]}/${parts[1] || parts[0]}`
+        primary: normalizedParts[0],
+        secondary: normalizedParts[1] || null,
+        hybridKey: normalizedKey
       };
     }
   }
@@ -600,10 +711,15 @@ Before creating the brief, you MUST research the client's website thoroughly:
 1. DISCOVER CLIENT PAGES:
    - Use web_search with "site:CLIENT_DOMAIN" to find relevant pages
    - Focus on: homepage, about, services, products, features pages
-   - Identify the 5-6 most relevant pages based on the brief topic
+   - Identify the 3-4 most relevant pages based on the brief topic
 
 2. ANALYZE CLIENT PAGES WITH WEB_FETCH:
-   - Use web_fetch on 3-5 of the most relevant client pages to read their ACTUAL content
+   - ALWAYS fetch foundational pages first:
+     * Homepage (the root domain URL)
+     * About/About Us/Our Story page (search for it with site: if needed)
+     These provide essential brand context, company info, certifications, and trust signals for EEAT.
+   - Then fetch 0-1 additional pages most relevant to the brief topic
+   - Goal: 2-3 total client pages fetched (2 foundational + 0-1 keyword-relevant)
    - web_fetch gives you the full page content - use this for accurate information extraction
    - Extract factual information from the fetched content:
      * Products and services offered
@@ -645,6 +761,37 @@ ENTITY OPTIMIZATION (CRITICAL FOR LLM SEARCH):
 - Document certifications, standards, industry organizations mentioned
 - These entities are crucial for AI Overview inclusion
 
+PHASED RESEARCH WORKFLOW:
+This brief is generated in multiple phases. After each research phase, you MUST write comprehensive RESEARCH NOTES summarizing everything you learned. These notes are your ONLY record — the raw page data will be cleared between phases to free up context space. Your notes MUST capture ALL facts, metrics, and observations needed for later phases.
+
+PHASE 1 — CLIENT RESEARCH NOTES FORMAT:
+After fetching client pages, write a text block starting with "=== CLIENT RESEARCH NOTES ===" containing:
+- Business name, founding date, key personnel
+- Products/services offered (with specifics)
+- Certifications, awards, accreditations
+- Service areas and locations
+- Brand voice and messaging tone
+- Unique selling propositions
+- Trust signals (reviews, case results, testimonials)
+- Local trust signals (if location provided)
+- Geographic details (county, region, neighborhoods, landmarks)
+- Content gaps identified on client site
+- Key URLs fetched and what was on each page
+
+PHASE 2 — COMPETITOR RESEARCH NOTES FORMAT:
+After fetching competitor pages, write a text block starting with "=== COMPETITOR RESEARCH NOTES ===" containing:
+- Each competitor URL analyzed with domain name
+- Word count per competitor page (use server-provided word counts when shown in the competitor list)
+- ACTUAL H2/H3 section count per competitor page
+- Section count average + intent modifier calculation
+- Content format patterns (tables, lists, media)
+- FAQ presence/absence on each competitor page
+- PAA questions found
+- SERP features observed with specifics
+- Content patterns (with numbers: "6/6 use pricing tables")
+- Competitive gaps identified
+- Featured Snippet format observed
+
 CRITICAL OUTPUT REQUIREMENTS:
 1. ALL content must be in PLAIN TEXT with clear section headers
 2. Use markdown headers (##) for main sections
@@ -675,9 +822,12 @@ KEYWORD USAGE RULES:
   * REJECTION: Briefs missing ANY secondary keyword from AFP or H2 headings will be automatically rejected
 - Longtail/Semantic Keywords: MANDATORY 100% DISTRIBUTION
   * YOU WILL RECEIVE A KEYWORD_DISTRIBUTION_PLAN listing all terms to distribute
-  * ALL terms MUST appear in the outline - these keywords SHAPE your section structure
-  * Preferred: Use longtails in H2/H3 headings where they fit naturally
-  * Alternative: Place in keywords_to_include arrays or guidance text
+  * ALL terms MUST appear in the outline — place them in headings when section count allows, otherwise use keywords_to_include arrays or guidance text
+  * PRIORITY ORDER (non-negotiable):
+    1. Primary keyword → H1 (always)
+    2. Secondary keywords → dedicated H2 headings (always, one H2 per secondary keyword)
+    3. Longtail keywords → H2/H3 headings IF section count allows, otherwise consolidate into keywords_to_include arrays or guidance text within existing sections
+  * Never create extra sections just to house a longtail keyword — your section count from SERP analysis + intent is the ceiling
   * EVERY SINGLE longtail keyword must be accounted for (100% requirement)
   * VERIFICATION: Before returning JSON, verify ALL longtails are placed somewhere
   * REJECTION: Briefs missing ANY longtail keyword will be automatically rejected
@@ -690,19 +840,13 @@ CONTENT STRUCTURE BY PAGE TYPE:
 - Product Page: Product intro → Features → Specs → Benefits → Comparison → Reviews → [FAQ if beneficial]
 - Category Page: Category overview → Filter guidance → Featured products → Buying guide
 
-FAQ SECTION LOGIC (CRITICAL):
-- ONLY include FAQ section if ALL of the following are true:
-  1. Top 3-5 ranking competitor pages have FAQ sections
-  2. PAA (People Also Ask) boxes present in SERPs
-  3. Featured Snippet opportunities exist for question-based queries
-- If FAQ section is included:
-  - Place towards the END of content outline (usually last or second-to-last section)
-  - Can place just above final section if content flow benefits
-  - Service pages: 3-5 questions maximum
-  - Blog pages: 5-8 questions maximum
-  - Product pages: 3-5 questions maximum
-- If NO clear SEO/LLM benefit → DO NOT include FAQ section at all
-- Each FAQ must target actual user questions from PAA or competitor analysis
+FAQ SECTION LOGIC:
+The FAQ decision is made by the server based on page type and competitor data — you will receive a specific FAQ DECISION directive in Phase 3 telling you whether to include FAQ or not. Follow it exactly:
+- If the directive says INCLUDE: add an FAQ outline section with is_faq_section: true and faq_questions populated
+- If the directive says EXCLUDE: set include_faq: false and do NOT add an FAQ outline section
+- If the directive says CONDITIONAL: count competitor FAQs from your research notes and apply the threshold given
+- Place FAQ section towards the END of content outline (usually last or second-to-last section)
+- Each FAQ must target actual user questions from PAA data or competitor analysis
 
 ANSWER-FIRST PARAGRAPH (AFP) REQUIREMENTS:
 - DO NOT write the exact AFP text - only provide guidance on what it should cover
@@ -769,45 +913,31 @@ SOURCE PRIORITIES:
 - Prefer: Topic-relevant industry publications, research studies, trade organizations, .gov/.edu (when relevant)
 - Avoid: Direct competitors offering the same service as the client, spammy domains, low-authority sites
 
-MANDATORY URL VERIFICATION PROCESS (YOU MUST FOLLOW THIS):
-Step 1: Use web_search to find a specific article/page (NOT just the homepage)
-  - Search for specific content related to the topic, not just the source name
-  - Look for the EXACT URL in the search results
-  - Copy the FULL URL path from search results, not just the domain
+EXTERNAL LINK PROCESS:
+Step 1: Use web_search to find specific, authoritative pages relevant to the topic
+  - Search for specific content, not just the source name
+  - Copy the EXACT full URL path from search results, not just the domain
+  - Do NOT default to homepage URLs — find specific articles/pages
 
-Step 2: Use web_fetch on EVERY external link URL (MANDATORY)
-  - You MUST call web_fetch for each external link before including it
-  - Do NOT skip web_fetch - it is required for all external links
-  - Use the exact URL from search results, not the homepage
+Step 2: Set ALL external links to url_status: "suggested"
 
-Step 3: Based on web_fetch result:
-  - If web_fetch SUCCEEDS: Set url_status to "verified" - use the exact URL
-  - If web_fetch FAILS: Search for a different/correct URL, try web_fetch again
-  - If STILL fails after retry: Set url_status to "suggested" with verification_note
+Step 3: For EVERY external link, provide a search_suggestion
+  - This is a SHORT, SPECIFIC Google search query the editorial team will use to find and verify the exact page
+  - This is the PRIMARY way the content writer will locate each link — make it count
 
-VERIFICATION_NOTE FORMAT (CRITICAL):
-When url_status is "suggested", the verification_note must be a SHORT, SPECIFIC Google search query that the strategist can copy-paste directly into Google to find the exact page.
-
-GOOD verification_note examples (specific, searchable):
+GOOD search_suggestion examples (specific, directly searchable):
   - "ABA Model Rule 7.3 attorney advertising"
   - "Moz what is domain authority"
   - "Google Search Console performance report guide"
   - "CDC hand hygiene guidelines healthcare"
 
-BAD verification_note examples (too vague or conversational):
+BAD search_suggestion examples (too vague or conversational):
   - "Official ABA website for legal profession standards"
   - "Find the Google documentation about search"
   - "Moz SEO resources"
   - "Search for CDC guidelines"
 
-The verification_note should be specific enough to return the exact page as a top Google result.
-
-IMPORTANT: Do NOT default to homepage URLs. Search for SPECIFIC pages:
-  - BAD: Using a homepage URL with a note to "search for [specific topic]"
-  - GOOD: Using the exact article/page URL verified via web_fetch
-
-The goal is to have MOST external links verified (url_status: "verified"). 
-Only use "suggested" status as a last resort when web_fetch fails after multiple attempts.
+The search_suggestion should be specific enough to return the exact page as a top Google result.
 
 ANCHOR TEXT RULES (CRITICAL - FOLLOW EXACTLY):
 - Use SHORT, SIMPLE anchor text - maximum 3-4 words
@@ -830,22 +960,24 @@ MANDATORY SERP RESEARCH PROTOCOL:
 You MUST complete thorough SERP analysis before generating the brief. Briefs with insufficient research will be REJECTED.
 
 REQUIRED STEPS:
-1. Use web_search for the primary keyword to find the top ranking pages
-2. Use web_fetch on the top 5 competitor pages to read their ACTUAL content
-3. From the fetched content, COUNT the actual word count on each page
-4. From the fetched content, COUNT the actual H2/H3 sections on each page
-5. Calculate word count range using P25-P75 (25th to 75th percentile, rounded to nearest 50)
-6. Identify SPECIFIC content patterns from the actual page content (not guessed from snippets)
-7. Note competitive gaps based on what's actually missing from competitor pages
-8. Document SERP features with specific details
+1. Real Google SERP data may be provided in Phase 2 via Ahrefs API — if competitor URLs are listed, fetch those directly IN ORDER (do NOT use web_search to find competitors)
+2. If no Ahrefs data is provided, use web_search for the primary keyword to find the top ranking pages
+3. Use web_fetch on the top 4 competitor pages to read their ACTUAL content
+   IMPORTANT: Do NOT include the client's own domain as a competitor. The client's URL is provided in the spreadsheet - skip it when selecting competitor pages to analyze. Only analyze pages from OTHER domains.
+4. WORD COUNTS: When Ahrefs data is provided, word counts are pre-calculated by the server and shown next to each competitor URL. Use those values directly. Only estimate word counts yourself if the server shows "word count unavailable" for a competitor.
+5. From the fetched content, COUNT the actual H2/H3 sections on each page
+6. Report word counts per competitor (use server-provided counts when available)
+7. Identify SPECIFIC content patterns from the actual page content (not guessed from snippets)
+8. Note competitive gaps based on what's actually missing from competitor pages
+9. Document SERP features with specific details
 
 WHY WEB_FETCH IS REQUIRED FOR SERP ANALYSIS:
-- web_search only gives you snippets - you cannot accurately count words or sections from snippets
+- web_search only gives you snippets - you cannot accurately count sections from snippets
 - web_fetch gives you the full page content so you can actually count and analyze
-- Your word counts and section counts MUST be based on real data from web_fetch, not estimates
+- Your section counts MUST be based on real data from web_fetch, not estimates
 
 SECTION COUNT CALCULATION (CRITICAL):
-- Count the number of H2 and H3 headings on EACH of the top 5-7 competitor pages
+- Count the number of H2 and H3 headings on EACH of the top 3-4 competitor pages
 - Calculate the AVERAGE section count across all analyzed pages
 - Apply INTENT MODIFIER to the average:
   * Transactional intent: Use competitor average (conversion-focused, concise)
@@ -854,6 +986,12 @@ SECTION COUNT CALCULATION (CRITICAL):
   * Navigational intent: Subtract 1-2 sections from average (overview style)
   * Hybrid intents: Blend the modifiers appropriately
 - Your final section count = Competitor Average ± Intent Modifier
+- HARD BOUNDARY: Your final section count MUST fall within the INTENT STRUCTURE section count range above.
+  * If competitor average + modifier is BELOW the intent minimum, use the intent minimum.
+  * If competitor average + modifier is ABOVE the intent maximum, use the intent maximum.
+  * The intent range is your ceiling AND floor — do not exceed it or fall below it.
+  * Example: If competitors average 3 sections but transactional intent says 4-8, use 4.
+  * Example: If competitors average 12 sections but transactional intent says 4-8, use 8.
 - DOCUMENT this calculation in your serp_analysis.section_count_analysis field
 
 CONTENT FORMAT ANALYSIS (CRITICAL):
@@ -864,7 +1002,7 @@ When analyzing competitor pages, you MUST check for content formatting patterns:
    - Feature comparisons
    - Specifications
    - Data presentation
-   - Record: How many of the top 5-7 pages use tables? What type?
+   - Record: How many of the top 4 pages use tables? What type?
 
 2. LISTS (Numbered or Bulleted): Check if competitors use lists for:
    - Step-by-step processes
@@ -874,18 +1012,18 @@ When analyzing competitor pages, you MUST check for content formatting patterns:
    - Record: How many pages use lists? Are they numbered or bulleted?
 
 3. DECISION LOGIC:
-   - If 3+ of top 5 competitors use tables → RECOMMEND tables in your brief
-   - If 4+ of top 5 competitors use numbered lists → RECOMMEND numbered lists
+   - If 2+ of top 4 competitors use tables → RECOMMEND tables in your brief
+   - If 3+ of top 4 competitors use numbered lists → RECOMMEND numbered lists
    - If Featured Snippet is list-based → STRONGLY RECOMMEND matching format
    - If NO competitors use tables/lists → May not be necessary for this topic
 
 4. DOCUMENT your findings in serp_analysis.content_format_analysis field
 
 MINIMUM REQUIREMENTS (YOUR BRIEF WILL BE REJECTED IF YOU DON'T MEET THESE):
-- Analyze AT LEAST 5 competitor pages (7 is ideal)
-- Word count range MUST have at least 200-word variance (e.g., "1800-2000" is TOO NARROW)
-- Maximum variance is 2000 words (if wider, you didn't analyze enough pages)
-- Count H2/H3 sections on AT LEAST 5 competitor pages
+- Analyze AT LEAST 4 competitor pages
+- Word count range is calculated server-side from server-measured word counts — just use the word counts shown in the competitor list
+- If server word counts are unavailable, estimate MAIN BODY content only (exclude nav, sidebar, footer, comments)
+- Count H2/H3 sections on AT LEAST 4 competitor pages
 - Identify AT LEAST 3 specific content patterns
 - Identify AT LEAST 1 competitive gap
 
@@ -918,11 +1056,11 @@ SERP FEATURES - BE SPECIFIC:
 
 SELF-CHECK BEFORE GENERATING JSON:
 Before you output the JSON brief, verify:
-□ Did I analyze 5+ competitor pages using web_search?
-□ Did I extract actual word counts (not guess)?
-□ Is my word count variance between 200-2000 words?
+□ Did I analyze 4+ competitor pages using web_fetch?
+□ Did I use the server-provided word counts (shown next to each URL)?
 □ Did I COUNT H2/H3 sections on each competitor page?
 □ Did I calculate section count average and apply intent modifier?
+□ Is my final section count within the INTENT STRUCTURE section count range?
 □ Did I check for TABLES in competitor content and document findings?
 □ Did I check for LISTS (numbered/bulleted) and document findings?
 □ Are my patterns specific with numbers/examples (not generic adjectives)?
@@ -977,6 +1115,13 @@ Return ONLY a JSON object with this exact structure:
     }
   },
   "serp_analysis": {
+    "competitors_analyzed": [
+      {
+        "url": "string - full URL of the competitor page analyzed (NEVER include the client's own domain)",
+        "title": "string - page title",
+        "word_count": "number - use server-provided word count, or estimate if unavailable"
+      }
+    ],
     "top_ranking_patterns": ["array of strings"],
     "competitive_gaps": ["array of strings"],
     "serp_features": ["array of strings"],
@@ -989,13 +1134,13 @@ Return ONLY a JSON object with this exact structure:
     },
     "content_format_analysis": {
       "tables": {
-        "competitors_using_tables": "number - how many of top 5-7 use tables",
+        "competitors_using_tables": "number - how many of top 4 use tables",
         "table_types": ["array of strings - e.g. 'pricing comparison', 'feature specs'"],
         "recommend_tables": "boolean - true if 3+ competitors use tables",
         "table_recommendation": "string - specific table suggestion if recommended"
       },
       "lists": {
-        "competitors_using_lists": "number - how many of top 5-7 use lists",
+        "competitors_using_lists": "number - how many of top 4 use lists",
         "list_types": ["array of strings - e.g. 'numbered steps', 'bulleted benefits'"],
         "recommend_lists": "boolean - true if 4+ competitors use lists",
         "list_recommendation": "string - specific list suggestion if recommended"
@@ -1022,11 +1167,9 @@ Return ONLY a JSON object with this exact structure:
     }
   ],
   "faq_analysis": {
-    "include_faq": "boolean - true if FAQ section should be included",
-    "competitors_have_faq": "boolean",
-    "paa_boxes_present": "boolean",
-    "featured_snippet_opportunity": "boolean",
-    "rationale": "string - explanation of FAQ decision"
+    "include_faq": "boolean - true if FAQ section is included (follow the FAQ DECISION directive)",
+    "competitor_faq_count": "number - how many of the analyzed competitors have FAQ sections",
+    "rationale": "string - brief explanation referencing competitor count and page type rule"
   },
   "keyword_strategy": {
     "primary_usage": "string - where/how to use primary keyword",
@@ -1064,12 +1207,12 @@ Return ONLY a JSON object with this exact structure:
   "external_links": [
     {
       "anchor": "string - SIMPLE anchor text only (brand name, 'this study', 'read more') - NOT keyword-stuffed",
-      "url": "string - URL verified with web_fetch or best available URL",
-      "url_status": "string - 'verified' (web_fetch succeeded) or 'suggested' (needs manual verification)",
+      "url": "string - EXACT full URL from web_search results",
+      "url_status": "string - always 'suggested' (content writer will verify using the search_suggestion)",
       "placement": "string - where in content",
       "rationale": "string",
       "domain_authority": "string - high/medium/low",
-      "verification_note": "string or null - if 'suggested', provide a short specific Google search query to find the exact page"
+      "search_suggestion": "string - SHORT, SPECIFIC Google search query to find this exact page (e.g. 'ABA Model Rule 7.3 attorney advertising')"
     }
   ]
 }
@@ -1079,15 +1222,15 @@ RULES:
 2. NEVER invent facts about the client - use only researched information
 3. For INTERNAL links: If sitemap URLs are provided, select from that list and set url_status to "200" (pre-verified)
 4. For INTERNAL links: Only use web_search to verify if NO sitemap URLs are provided
-5. For EXTERNAL links: Use web_search to find sources, then web_fetch to verify URLs
-4. ALWAYS use web_search to analyze SERPs and find links
-5. ONLY return real, verified URLs - no placeholders or tool IDs
-6. Keep internal links between MIN and MAX (3-8)
-7. Verify all external links are accessible and credible
-8. Base word count ranges on actual SERP analysis
-9. Provide specific, actionable guidance for AI content generation
-10. Remember: this brief will be fed to an AI content machine, so be precise
-11. CRITICAL: After completing all research, IMMEDIATELY generate the complete JSON brief in a single response - do not pause or wait for confirmation
+5. For EXTERNAL links: Use web_search to find specific page URLs, set url_status to "suggested", and provide a search_suggestion for each
+6. Do NOT use web_fetch on external links — the content writer will verify them using the search_suggestion
+4. ALWAYS use web_search to analyze SERPs and find external links
+5. ONLY return real URLs - no placeholders or tool IDs
+6. Keep internal links between MIN and MAX (5-10)
+7. Base word count ranges on actual SERP analysis
+8. Provide specific, actionable guidance for AI content generation
+9. Remember: this brief will be fed to an AI content machine, so be precise
+10. CRITICAL: After completing all research, IMMEDIATELY generate the complete JSON brief in a single response - do not pause or wait for confirmation
 
 RESEARCH PROTOCOL:
 - When using tools, do NOT include ANY text, explanations, or "Searching..." markers. 
@@ -1210,6 +1353,100 @@ function getSanitizedFolderId() {
     return CONFIG.DOCS_FOLDER_ID.split('?')[0];
   } catch (e) {
     return '';
+  }
+}
+
+/**
+ * Fetches real Google SERP data from Ahrefs API for a given keyword.
+ * Returns filtered organic competitor URLs with position and domain rating.
+ * Falls back gracefully if API call fails — Phase 2 will use web_search instead.
+ */
+function fetchAhrefsSerpData(primaryKeyword, clientDomain) {
+  const ahrefsApiKey = PropertiesService.getScriptProperties().getProperty('AHREFS_API_KEY');
+  if (!ahrefsApiKey) {
+    debugLog('AHREFS_SKIP', 'No AHREFS_API_KEY found in Script Properties — falling back to web_search');
+    return null;
+  }
+
+  try {
+    const params = [
+      'select=position,url,title,domain_rating,type',
+      'country=' + encodeURIComponent(CONFIG.AHREFS_SERP_COUNTRY),
+      'keyword=' + encodeURIComponent(primaryKeyword.trim()),
+      'top_positions=' + CONFIG.AHREFS_SERP_TOP_POSITIONS,
+      'output=json'
+    ].join('&');
+
+    const url = 'https://api.ahrefs.com/v3/serp-overview/serp-overview?' + params;
+    debugLog('AHREFS_REQUEST', { url: url.replace(ahrefsApiKey, '***') });
+    const response = UrlFetchApp.fetch(url, {
+      method: 'get',
+      headers: { 'Authorization': 'Bearer ' + ahrefsApiKey.trim() },
+      muteHttpExceptions: true
+    });
+
+    const statusCode = response.getResponseCode();
+    const responseBody = response.getContentText();
+    if (statusCode !== 200) {
+      debugLog('AHREFS_API_ERROR', { statusCode: statusCode, body: responseBody.substring(0, 1000) });
+      return null;
+    }
+
+    const data = JSON.parse(response.getContentText());
+    const positions = data.positions || [];
+
+    // Clean client domain for matching (already stripped of protocol/www by extractDomain)
+    const cleanClient = (clientDomain || '').toLowerCase().trim();
+
+    // Extract PAA questions
+    const paaQuestions = positions
+      .filter(p => p.type && p.type.includes('question') && p.title)
+      .map(p => p.title);
+
+    // Filter to organic results only, remove client domain, skip domains, deduplicate
+    const seenDomains = new Set();
+    const competitors = positions.filter(p => {
+      if (!p.url || !p.type || !p.type.includes('organic')) return false;
+      
+      // Extract domain from URL using regex (Apps Script doesn't have URL constructor)
+      const domainMatch = p.url.match(/^https?:\/\/([^\/]+)/i);
+      if (!domainMatch || !domainMatch[1]) return false;
+      const domain = domainMatch[1].replace(/^www\./, '').replace(/:\d+$/, '').toLowerCase();
+
+      // Skip client domain (exact match or subdomain match with dot boundary)
+      if (cleanClient && (domain === cleanClient || domain.endsWith('.' + cleanClient))) return false;
+
+      // Skip excluded domains (exact match or subdomain match)
+      if (CONFIG.AHREFS_SKIP_DOMAINS.some(skip => domain === skip || domain.endsWith('.' + skip))) return false;
+
+      // Deduplicate by domain (keep first/highest position)
+      if (seenDomains.has(domain)) return false;
+      seenDomains.add(domain);
+
+      return true;
+    }).slice(0, CONFIG.AHREFS_MAX_COMPETITOR_URLS).map(p => ({
+      position: p.position,
+      url: p.url,
+      title: p.title || '',
+      domain_rating: p.domain_rating || 0
+    }));
+
+    debugLog('AHREFS_SERP_DATA', {
+      keyword: primaryKeyword,
+      total_positions: positions.length,
+      organic_filtered: competitors.length,
+      paa_questions: paaQuestions.length,
+      competitors: competitors.map(c => ({ pos: c.position, url: c.url, dr: c.domain_rating }))
+    });
+
+    return {
+      competitors: competitors,
+      paa_questions: paaQuestions
+    };
+
+  } catch (e) {
+    debugLog('AHREFS_FETCH_ERROR', e.message);
+    return null;
   }
 }
 
@@ -1342,6 +1579,7 @@ function getSheetFromUrl(ss, url) {
 }
 
 function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, overrideUserId) {
+  debugLog('CODE_VERSION', CONFIG.CODE_VERSION + ' | server-side competitor prefetch | tools Phase 1 only');
   const ss = openWorkbook(workbookUrl);
   let sheet = null;
   
@@ -1383,25 +1621,32 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
   }
   targets.forEach(r => {
     const idCol = headers['id']?.index;
-    const rowIdString = Utilities.getUuid();
-    if (idCol !== undefined) {
-      sheet.getRange(r + 1, idCol + 1).setValue(rowIdString);
+    let rowIdString = (idCol !== undefined) ? String(data[r][idCol] || '') : '';
+    
+    if (!rowIdString) {
+      rowIdString = Utilities.getUuid();
+      if (idCol !== undefined) {
+        sheet.getRange(r + 1, idCol + 1).setValue(rowIdString);
+        data[r][idCol] = rowIdString; // Save back to memory so loop 2 sees it
+      }
     }
+    
     sheet.getRange(r + 1, statusCol + 1).setValue('IN_PROGRESS');
+    data[r][statusCol] = 'IN_PROGRESS';
+    
     sheet.getRange(r + 1, runIdCol + 1).setValue(runId);
+    data[r][runIdCol] = runId;
+    
     const rowObj = rowToObject(data[r], headers);
-    rowObj.id = rowIdString;
     rowObj.client_id = rowObj.client_id || fallbackClientId;
     rowObj.user_id = overrideUserId || rowObj.user_id || '';
-    notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
+    
+    notifyDashboardStatus(rowObj, null);
   });
+  
   targets.forEach(r => {
     try {
       const rowObj = rowToObject(data[r], headers);
-      if (!rowObj.id) {
-        const idCol = headers['id']?.index;
-        rowObj.id = (idCol !== undefined) ? sheet.getRange(r + 1, idCol + 1).getValue() : '';
-      }
       rowObj.user_id = overrideUserId || rowObj.user_id || '';
       
       const strategy = buildStrategy(rowObj);
@@ -1452,14 +1697,12 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue(
         String(e.message || e).substring(0, 1000)
       );
+      
+      // Since we updated data[r] in the first loop, rowObj is now fully accurate!
       const rowObj = rowToObject(data[r], headers);
       if (!rowObj.client_id && fallbackClientId) rowObj.client_id = fallbackClientId;
       rowObj.user_id = overrideUserId || rowObj.user_id || '';
-      const idCol = headers['id']?.index;
-      if (!rowObj.id && idCol !== undefined) {
-        const freshId = sheet.getRange(r + 1, idCol + 1).getValue();
-        rowObj.id = freshId;
-      }
+      
       notifyDashboardStatus({ ...rowObj, status: 'ERROR', notes: e.toString() }, null);
     }
     if (targets.indexOf(r) < targets.length - 1) {
@@ -1651,11 +1894,11 @@ function getSitemapUrlsFromRobots(baseUrl) {
     if (sitemapMatches && sitemapMatches.length > 0) {
       sitemapMatches.forEach(match => {
         const url = match.replace(/^sitemap:\s*/i, '').trim();
-        if (url && url.startsWith('http')) {
+        if (url && url.startsWith('http') && sitemapUrls.indexOf(url) === -1) {
           sitemapUrls.push(url);
         }
       });
-      debugLog('ROBOTS_SITEMAPS', `Found ${sitemapUrls.length} sitemap(s) in robots.txt: ${sitemapUrls.join(', ')}`);
+      debugLog('ROBOTS_SITEMAPS', `Found ${sitemapUrls.length} unique sitemap(s) in robots.txt (${sitemapMatches.length} total directives): ${sitemapUrls.join(', ')}`);
     } else {
       debugLog('ROBOTS_SITEMAPS', 'No Sitemap directives found in robots.txt');
     }
@@ -1898,6 +2141,34 @@ function fetchAndFilterSitemap(domain, productPagePath, intent) {
     });
 
     debugLog('SITEMAP_FILTER', `${filteredUrls.length} URLs after junk filtering (removed ${allUrls.length - filteredUrls.length} junk URLs)`);
+
+    // Dedup URLs (same sitemap processed multiple times, or overlapping child sitemaps)
+    const beforeDedup = filteredUrls.length;
+    const seen = {};
+    filteredUrls = filteredUrls.filter(url => {
+      if (seen[url]) return false;
+      seen[url] = true;
+      return true;
+    });
+    if (beforeDedup !== filteredUrls.length) {
+      debugLog('SITEMAP_DEDUP', `Removed ${beforeDedup - filteredUrls.length} duplicate URLs (${beforeDedup} -> ${filteredUrls.length})`);
+    }
+
+    // Filter locale/language duplicate URLs (e.g., /en-gb/pages/faq, /en-ca/pages/faq)
+    // Only removes a locale URL if the equivalent base path URL already exists in the list
+    const localePattern = /^(https?:\/\/[^\/]+)\/(en-gb|en-ca|en-au|en-eu|en-us|fr|de|es|it|ja|zh|ko|pt|nl|sv|da|no|fi|pl|cs|ru)\/(.*)/i;
+    const baseUrls = {};
+    filteredUrls.forEach(function(url) { baseUrls[url] = true; });
+    const beforeLocale = filteredUrls.length;
+    filteredUrls = filteredUrls.filter(function(url) {
+      var match = url.match(localePattern);
+      if (!match) return true; // not a locale URL, keep it
+      var basePath = match[1] + '/' + match[3]; // reconstruct without locale prefix
+      return !baseUrls[basePath]; // only remove if base version exists
+    });
+    if (beforeLocale !== filteredUrls.length) {
+      debugLog('SITEMAP_LOCALE_FILTER', `Removed ${beforeLocale - filteredUrls.length} locale duplicate URLs (${beforeLocale} -> ${filteredUrls.length})`);
+    }
 
     // Filter out product page URLs if product_page_path is provided
     if (productPagePath && productPagePath.trim() !== '') {
@@ -2254,126 +2525,277 @@ ${JSON.stringify(strategyForDisplay, null, 2)}
     });
     userMessage += `\n🔴 MANDATORY DISTRIBUTION RULES (BRIEF WILL BE REJECTED IF NOT FOLLOWED):\n`;
     userMessage += `- ALL ${parsed.terms.length} keywords MUST appear in the outline (100% REQUIRED)\n`;
-    userMessage += `- These keywords should INFORM and SHAPE your section structure - create sections that naturally target these terms\n`;
-    userMessage += `- Preferred placement: Use longtails in H2/H3 headings where they fit naturally\n`;
-    userMessage += `  Example: If given "bedsore lawsuit settlements" → Create section "Understanding Bedsore Lawsuit Settlements"\n`;
-    userMessage += `- Secondary placement: In a section's keywords_to_include array\n`;
-    userMessage += `- Tertiary placement: In the guidance text for a section\n`;
+    userMessage += `- Place longtails in H2/H3 headings when your section count allows it\n`;
+    userMessage += `  Example: If given "bedsore lawsuit settlements" and section count allows → Create section "Understanding Bedsore Lawsuit Settlements"\n`;
+    userMessage += `- If your section count is already at the intent maximum, consolidate longtails into existing sections' keywords_to_include arrays or guidance text instead\n`;
+    userMessage += `  Example: If section count is capped at 6 and all sections are filled → Add "bedsore lawsuit settlements" to the most relevant section's keywords_to_include\n`;
+    userMessage += `- PRIORITY: Primary keyword (H1) → Secondary keywords (dedicated H2s) → Longtails (H2s if room, otherwise keywords_to_include)\n`;
     userMessage += `- DO NOT skip ANY keywords - each one represents user intent and must be addressed\n`;
     userMessage += `- VERIFICATION STEP: Before returning the JSON, count your longtails and where you placed them. ALL ${parsed.terms.length} MUST be accounted for.\n\n`;
   }
 
-  // Add AVAILABLE INTERNAL LINKS section with pre-fetched sitemap URLs
-  userMessage += `\n════════════════════════════════════════════════════════════\n`;
-  userMessage += `🔗 AVAILABLE INTERNAL LINKS (PRE-VERIFIED FROM SITEMAP) 🔗\n`;
-  userMessage += `════════════════════════════════════════════════════════════\n\n`;
+  // Build INTERNAL LINKS section separately — only needed for Phase 3 (internal link selection).
+  // Keeping this OUT of userMessage (Phase 1) saves ~8K chars of tokens during Phases 1-2,
+  // preventing context overflow since web_search/web_fetch tool definitions consume ~195K tokens.
+  let sitemapBlock = '';
+  sitemapBlock += `\n════════════════════════════════════════════════════════════\n`;
+  sitemapBlock += `🔗 AVAILABLE INTERNAL LINKS (PRE-VERIFIED FROM SITEMAP) 🔗\n`;
+  sitemapBlock += `════════════════════════════════════════════════════════════\n\n`;
   
   if (strategy.sitemap_data && strategy.sitemap_data.all_filtered_urls.length > 0) {
-    userMessage += `We have pre-fetched ${strategy.sitemap_data.all_filtered_urls.length} verified URLs from the client sitemap.\n`;
+    sitemapBlock += `We have pre-fetched ${strategy.sitemap_data.all_filtered_urls.length} verified URLs from the client sitemap.\n`;
     
     // Note if intent filtering was applied
     if (shouldExcludeBlogContent(strategy.intent)) {
-      userMessage += `📋 NOTE: This is a ${strategy.intent} intent page - informational content has been filtered out:\n`;
-      userMessage += `   - Blog/post sitemaps were skipped entirely\n`;
-      userMessage += `   - About, FAQ, team, and other informational pages were excluded\n`;
-      userMessage += `   (We keep users at the bottom of the funnel for conversion-focused pages.)\n`;
+      sitemapBlock += `📋 NOTE: This is a ${strategy.intent} intent page - informational content has been filtered out:\n`;
+      sitemapBlock += `   - Blog/post sitemaps were skipped entirely\n`;
+      sitemapBlock += `   - About, FAQ, team, and other informational pages were excluded\n`;
+      sitemapBlock += `   (We keep users at the bottom of the funnel for conversion-focused pages.)\n`;
     }
     
     // Note if product pages were filtered out
     if (strategy.sitemap_data.product_urls_removed > 0) {
-      userMessage += `📋 NOTE: ${strategy.sitemap_data.product_urls_removed} product page URLs were filtered out.\n`;
-      userMessage += `   If a specific product link would be valuable for this content, describe the type of product and why in your suggestions (without a specific URL).\n`;
+      sitemapBlock += `📋 NOTE: ${strategy.sitemap_data.product_urls_removed} product page URLs were filtered out.\n`;
+      sitemapBlock += `   If a specific product link would be valuable for this content, describe the type of product and why in your suggestions (without a specific URL).\n`;
     }
     
-    userMessage += `\n⚠️ CRITICAL: You MUST ONLY select internal links from this list. DO NOT invent or guess URLs.\n`;
-    userMessage += `If a URL is not in this list, it does not exist. Do not make up URLs under any circumstances.\n\n`;
+    sitemapBlock += `\n⚠️ CRITICAL: You MUST ONLY select internal links from this list. DO NOT invent or guess URLs.\n`;
+    sitemapBlock += `If a URL is not in this list, it does not exist. Do not make up URLs under any circumstances.\n\n`;
     
     // Show all filtered URLs as a simple flat list
-    userMessage += `AVAILABLE PAGES (${strategy.sitemap_data.all_filtered_urls.length} total):\n`;
+    sitemapBlock += `AVAILABLE PAGES (${strategy.sitemap_data.all_filtered_urls.length} total):\n`;
     strategy.sitemap_data.all_filtered_urls.forEach(url => {
-      userMessage += `  • ${url}\n`;
+      sitemapBlock += `  • ${url}\n`;
     });
-    userMessage += `\n`;
+    sitemapBlock += `\n`;
     
-    userMessage += `INTERNAL LINK SELECTION RULES:\n`;
-    userMessage += `1. Select ${CONFIG.TARGET_INTERNAL_LINKS} internal links from the list above (minimum ${CONFIG.MIN_INTERNAL_LINKS})\n`;
-    userMessage += `2. Choose links that are CONTEXTUALLY and SEMANTICALLY relevant to "${strategy.primary_keyword}"\n`;
-    userMessage += `   - This includes directly related topics AND semantically related topics\n`;
-    userMessage += `   - Example: For "truck accident lawyer", relevant links include truck accidents, commercial vehicle injuries, wrongful death, FMCSA regulations, etc.\n`;
-    userMessage += `   - Don't just match keywords - think about what topics a user interested in "${strategy.primary_keyword}" would also want to explore\n`;
-    userMessage += `3. All URLs above are PRE-VERIFIED - set url_status to "200" for all selected links\n`;
-    userMessage += `4. NEVER invent URLs - if a page isn't in the list above, do not include it\n`;
-    userMessage += `5. DO NOT use web_search to find or verify internal links - only use the list provided\n`;
+    sitemapBlock += `INTERNAL LINK SELECTION RULES:\n`;
+    sitemapBlock += `1. Select ${CONFIG.TARGET_INTERNAL_LINKS} internal links from the list above (minimum ${CONFIG.MIN_INTERNAL_LINKS})\n`;
+    sitemapBlock += `2. Choose links that are CONTEXTUALLY and SEMANTICALLY relevant to "${strategy.primary_keyword}"\n`;
+    sitemapBlock += `   - This includes directly related topics AND semantically related topics\n`;
+    sitemapBlock += `   - Example: For "truck accident lawyer", relevant links include truck accidents, commercial vehicle injuries, wrongful death, FMCSA regulations, etc.\n`;
+    sitemapBlock += `   - Don't just match keywords - think about what topics a user interested in "${strategy.primary_keyword}" would also want to explore\n`;
+    sitemapBlock += `3. All URLs above are PRE-VERIFIED - set url_status to "200" for all selected links\n`;
+    sitemapBlock += `4. NEVER invent URLs - if a page isn't in the list above, do not include it\n`;
+    sitemapBlock += `5. DO NOT use web_search to find or verify internal links - only use the list provided\n`;
     if (strategy.sitemap_data.product_urls_removed > 0) {
-      userMessage += `6. If a specific product page link would add value, note this in your recommendations with the product type and reasoning (no URL needed)\n`;
+      sitemapBlock += `6. If a specific product page link would add value, note this in your recommendations with the product type and reasoning (no URL needed)\n`;
     }
-    userMessage += `\n`;
+    sitemapBlock += `\n`;
   } else {
-    userMessage += `⚠️ No sitemap found for ${strategy.client_domain}.\n`;
-    userMessage += `You will need to use site:${strategy.client_domain} search to discover internal link candidates.\n`;
-    userMessage += `Verify each discovered URL with web_search before including.\n`;
-    userMessage += `Target: ${CONFIG.TARGET_INTERNAL_LINKS} internal links (minimum ${CONFIG.MIN_INTERNAL_LINKS})\n\n`;
+    sitemapBlock += `⚠️ No sitemap found for ${strategy.client_domain}.\n`;
+    sitemapBlock += `You will need to use site:${strategy.client_domain} search to discover internal link candidates.\n`;
+    sitemapBlock += `Verify each discovered URL with web_search before including.\n`;
+    sitemapBlock += `Target: ${CONFIG.TARGET_INTERNAL_LINKS} internal links (minimum ${CONFIG.MIN_INTERNAL_LINKS})\n\n`;
   }
-  userMessage += `════════════════════════════════════════════════════════════\n\n`;
+  sitemapBlock += `════════════════════════════════════════════════════════════\n\n`;
 
-  userMessage += `CRITICAL WORKFLOW:
-1. FIRST: Research client website (${strategy.client_domain})
-   - Use web_search with site: to find relevant pages
-   - Use web_fetch on 3-5 of the most relevant pages to read actual content
-   - Extract factual information from the fetched pages
-   
-2. THEN: Analyze SERPs for "${strategy.primary_keyword}"
-   - Use web_search to find top ranking pages
-   - Use web_fetch on top 5 competitor pages to read their actual content
-   - Count actual word counts and section counts from fetched content
-   - Identify content patterns and gaps from what you actually read
-   
-3. THEN: Select internal links from PRE-VERIFIED list above
-   - Choose ${CONFIG.TARGET_INTERNAL_LINKS} relevant URLs from the sitemap list provided (minimum ${CONFIG.MIN_INTERNAL_LINKS})
-   - Select pages that are contextually AND semantically relevant to the topic
-   - DO NOT use site: search for internal links - they are already provided
-   - All URLs in the list are verified and live
-   
-4. THEN: Find external link suggestions
-   - Search for 10 authoritative sources RELEVANT TO THE PRIMARY KEYWORD TOPIC
-   - Search for SPECIFIC articles/pages, not just homepages
-   - Copy the EXACT full URL from search results
-   - MANDATORY: Use web_fetch on EVERY external link URL to verify it exists
-   - If web_fetch succeeds: set url_status to "verified"
-   - If web_fetch fails: search for correct URL, retry web_fetch
-   - Only use "suggested" status with verification_note as LAST RESORT after web_fetch fails
-   - Goal: MOST external links should be "verified", not "suggested"
-   - Use SIMPLE anchor text (brand names, "read more", "this study") - NOT keyword-stuffed anchors
-   - AVOID linking to competitors offering the same service as the client
-   
-5. FINALLY: Create the complete JSON brief in this response
-   - Do NOT pause or wait after research
-   - Generate the full JSON brief immediately
+  userMessage += `════════════════════════════════════════════════════════════
+📌 PHASE 1 — CLIENT RESEARCH
+════════════════════════════════════════════════════════════
 
+Your task is split into multiple phases. In THIS phase, research the client website ONLY.
+
+INSTRUCTIONS:
+1. Use web_search with "site:${strategy.client_domain}" to find relevant pages
+2. ALWAYS fetch foundational pages first: homepage and about/about-us/our-story page
+   (These provide brand context, company info, certifications, and trust signals for EEAT)
+3. Then fetch 0-1 additional pages most relevant to "${strategy.primary_keyword}"
+4. Goal: 2-3 total client pages fetched (2 foundational + 0-1 keyword-relevant)
+5. Extract factual information from the fetched pages
+
+AFTER FETCHING ALL CLIENT PAGES:
+Write comprehensive "=== CLIENT RESEARCH NOTES ===" summarizing EVERYTHING you found.
+These notes are your ONLY record — raw page data will be cleared before the next phase.
+Include: business name, services, certifications, awards, trust signals, brand voice, 
+service areas, key facts, content gaps, and what was on each URL you fetched.
+
+DO NOT research competitors yet. DO NOT write the brief yet. ONLY research the client.
+End with your CLIENT RESEARCH NOTES text block.`;
+
+  // Fetch real Google SERP data from Ahrefs API
+  // Strip zero-width spaces (U+200B, U+FEFF, etc.) that can come from spreadsheet copy/paste
+  const cleanedKeyword = strategy.primary_keyword.replace(/[\u200B\u200C\u200D\uFEFF\u00A0]/g, '').trim();
+  const ahrefsSerpData = fetchAhrefsSerpData(cleanedKeyword, strategy.client_domain);
+
+  // Fetch competitor page word counts server-side (deterministic, matches Ahrefs UI)
+  if (ahrefsSerpData && ahrefsSerpData.competitors.length >= 3) {
+    fetchCompetitorWordCounts(ahrefsSerpData.competitors);
+    // Store server word counts on strategy for recalculateWordCountRange
+    strategy.server_word_counts = ahrefsSerpData.competitors
+      .filter(c => c.word_count > 0)
+      .map(c => ({ url: c.url, position: c.position, word_count: c.word_count }));
+  }
+
+  // Build Phase 2-5 messages (used later in the phased turn loop)
+  let phase2Message;
+  
+  if (ahrefsSerpData && ahrefsSerpData.competitors.length >= 3) {
+    // Build competitor content blocks from server-side pre-fetched content
+    var competitorsWithContent = ahrefsSerpData.competitors.filter(function(c) { 
+      return c.extracted_content && c.extracted_content.length > 100; 
+    });
+    var competitorsWithoutContent = ahrefsSerpData.competitors.filter(function(c) { 
+      return !c.extracted_content || c.extracted_content.length <= 100; 
+    });
+    
+    debugLog('PHASE2_CONTENT_PREP', {
+      total_competitors: ahrefsSerpData.competitors.length,
+      with_content: competitorsWithContent.length,
+      without_content: competitorsWithoutContent.length,
+      skipped_urls: competitorsWithoutContent.map(function(c) { return c.url; })
+    });
+    
+    // Build content blocks for each competitor that has pre-fetched content
+    var contentBlocks = competitorsWithContent.map(function(c, i) {
+      var wcLabel = c.word_count > 0 ? '~' + c.word_count + ' words' : 'word count unavailable';
+      return '────────────────────────────────────────\n' +
+        'COMPETITOR ' + (i + 1) + ': [Position #' + c.position + ', DR ' + c.domain_rating + ', ' + wcLabel + ']\n' +
+        'URL: ' + c.url + '\n' +
+        '────────────────────────────────────────\n' +
+        c.extracted_content;
+    }).join('\n\n');
+    
+    // List any competitors that couldn't be fetched
+    var failedList = competitorsWithoutContent.length > 0
+      ? '\nNOTE: The following competitors could not be fetched server-side (blocked/error):\n' +
+        competitorsWithoutContent.map(function(c) { 
+          return '   - [Position #' + c.position + '] ' + c.url + ' (fetch status: ' + c.word_count_source + ')'; 
+        }).join('\n') + '\n'
+      : '';
+    
+    const paaSection = ahrefsSerpData.paa_questions.length > 0
+      ? '\nPEOPLE ALSO ASK questions found in SERPs:\n' + ahrefsSerpData.paa_questions.map(q => '   - ' + q).join('\n') + '\nUse these to identify content gaps and as source material for FAQ questions if FAQ is included.\n'
+      : '';
+
+    phase2Message = `════════════════════════════════════════════════════════════
+📌 PHASE 2 — COMPETITOR RESEARCH  
+════════════════════════════════════════════════════════════
+
+Analyze the top competitors for "${strategy.primary_keyword}".
+
+The server has already fetched the competitor page content from the real Google SERPs (via Ahrefs).
+Their extracted text content is provided below. You do NOT need to use web_search or web_fetch.
+
+${competitorsWithContent.length} COMPETITOR PAGES (pre-fetched, analyzed by Google position order):
+
+${contentBlocks}
+${failedList}${paaSection}
+INSTRUCTIONS:
+1. Analyze ALL ${competitorsWithContent.length} competitor pages provided above by GOOGLE POSITION ORDER
+   - These pages are ranked by Google — analyze them in position order, not by DR or perceived quality
+2. WORD COUNTS — Pre-calculated by the server (shown above as "~X words"):
+   - Use the server-provided word counts in your research notes. Do NOT re-count words yourself.
+   - If a competitor shows "word count unavailable", estimate from the provided content (main body only).
+   - The server will use these word counts to calculate the target word count range.
+3. From the provided content, COUNT:
+   - Actual H2/H3 section count per page (look for heading patterns in the text)
+4. Calculate section count average + apply intent modifier
+5. Check for content format patterns (tables, lists, media references)
+6. For EACH competitor, note whether the page has a FAQ section (yes/no). Report the total count: "X of Y competitors have FAQ sections"
+7. Identify competitive gaps
+
+AFTER ANALYZING ALL COMPETITOR PAGES:
+Write comprehensive "=== COMPETITOR RESEARCH NOTES ===" summarizing EVERYTHING you found.
+These notes are your ONLY record — the competitor content will be cleared before the next phase.
+Include: each competitor URL + domain, word counts, section counts, calculations, patterns, gaps.
+
+DO NOT write the brief yet. ONLY research competitors.
+End with your COMPETITOR RESEARCH NOTES text block.`;
+
+  } else {
+    // Fallback — no Ahrefs data OR insufficient competitor content
+    // v2.1.0: Phase 2 no longer has access to web_search/web_fetch (to prevent server state overflow)
+    // Without pre-fetched content, competitor research cannot proceed
+    var fallbackReason = !ahrefsSerpData ? 'Ahrefs API returned no data' : 
+      'Ahrefs returned fewer than 3 competitors (' + (ahrefsSerpData ? ahrefsSerpData.competitors.length : 0) + ')';
+    debugLog('AHREFS_FALLBACK_ERROR', {
+      reason: fallbackReason,
+      competitors_returned: ahrefsSerpData ? ahrefsSerpData.competitors.length : 0
+    });
+    throw new Error('Insufficient competitor data for Phase 2. ' + fallbackReason + '. ' +
+      'v2.1.0 requires pre-fetched competitor content (no web_fetch in Phase 2). ' +
+      'Check Ahrefs API key and keyword validity.');
+  }
+
+  // Build deterministic FAQ directive based on page type
+  // Blog: always include | Service/Category: 2+ of 4 competitors | Product: 3+ of 4 | Homepage: never
+  let faqDirective;
+  let faqThreshold;
+  const faqQuestionRange = strategy.page_type === 'blog page' ? '5-8' : '3-5';
+  
+  switch (strategy.page_type) {
+    case 'blog page':
+      faqDirective = `FAQ DECISION: INCLUDE FAQ SECTION.
+Blog pages always include FAQ for long-tail keyword coverage and LLM/GEO citation value.
+- Add ${faqQuestionRange} questions targeting real user queries from PAA data and competitor analysis
+- Set include_faq: true and add an outline section with is_faq_section: true and faq_questions populated`;
+      faqThreshold = 0;
+      break;
+    case 'homepage':
+      faqDirective = `FAQ DECISION: DO NOT INCLUDE FAQ SECTION.
+Homepages never include FAQ sections.
+- Set include_faq: false with rationale "Homepage — FAQ not applicable"
+- Do NOT add any outline section with is_faq_section: true`;
+      faqThreshold = 5; // impossible threshold
+      break;
+    case 'product page':
+      faqDirective = `FAQ DECISION: CONDITIONAL — Check your COMPETITOR RESEARCH NOTES.
+Count how many of the competitors you analyzed have FAQ sections.
+- If 3 or more competitors have FAQs → INCLUDE FAQ: Set include_faq: true, add ${faqQuestionRange} questions in an outline section with is_faq_section: true
+- If fewer than 3 have FAQs → EXCLUDE FAQ: Set include_faq: false with rationale stating the competitor FAQ count
+- This is a strict count-based rule. Do NOT use judgment — just count and apply.`;
+      faqThreshold = 3;
+      break;
+    default: // service page, category page
+      faqDirective = `FAQ DECISION: CONDITIONAL — Check your COMPETITOR RESEARCH NOTES.
+Count how many of the competitors you analyzed have FAQ sections.
+- If 2 or more competitors have FAQs → INCLUDE FAQ: Set include_faq: true, add ${faqQuestionRange} questions in an outline section with is_faq_section: true
+- If fewer than 2 have FAQs → EXCLUDE FAQ: Set include_faq: false with rationale stating the competitor FAQ count
+- This is a strict count-based rule. Do NOT use judgment — just count and apply.`;
+      faqThreshold = 2;
+      break;
+  }
+  
+  // Store threshold for server-side reconciliation
+  strategy.faq_threshold = faqThreshold;
+  
+  debugLog('FAQ_RULES', {
+    page_type: strategy.page_type,
+    threshold: faqThreshold,
+    question_range: faqQuestionRange
+  });
+
+  const phase3Message = `════════════════════════════════════════════════════════════
+📌 PHASE 3 — WRITE CONTENT BRIEF
+════════════════════════════════════════════════════════════
+
+Using your CLIENT RESEARCH NOTES and COMPETITOR RESEARCH NOTES, write the complete JSON content brief.
+
+${sitemapBlock}
 REQUIREMENTS:
-1. Use web_fetch on 3-5 client pages to extract real facts
-2. Use web_fetch on top 5 competitor pages for accurate SERP analysis
-3. Use only REAL facts found via web_fetch - never hallucinate
-4. Select ${CONFIG.TARGET_INTERNAL_LINKS} internal links FROM THE PRE-VERIFIED LIST ABOVE (minimum ${CONFIG.MIN_INTERNAL_LINKS})
-5. Find ${CONFIG.MAX_EXTERNAL_LINKS} external links - MUST use web_fetch on each URL
-6. Use simple, natural anchor text for external links (brand names, "this study", etc.)
-7. Base word count on actual competitor pages you fetched
-8. Provide specific, actionable guidance for AI content machines
+1. Use ONLY facts from your research notes — never hallucinate
+2. Select ${CONFIG.TARGET_INTERNAL_LINKS} internal links FROM THE PRE-VERIFIED SITEMAP LIST above (minimum ${CONFIG.MIN_INTERNAL_LINKS})
+3. Find ${CONFIG.MAX_EXTERNAL_LINKS} external link suggestions:
+   - Use web_search to find specific, authoritative pages relevant to "${strategy.primary_keyword}"
+   - Copy the EXACT full URL from search results (NOT homepage URLs)
+   - Set ALL external links to url_status: "suggested"
+   - Do NOT use web_fetch on external links — it wastes tokens
+   - For EACH link, include a search_suggestion: a SHORT, SPECIFIC Google search query the content writer can use to find and verify the exact page
+   - Use SIMPLE anchor text (brand names, "this study", etc.) — NOT keyword-stuffed anchors
+   - AVOID linking to competitors offering the same service as the client
+4. Base word count on actual competitor pages from your COMPETITOR RESEARCH NOTES
+5. Provide specific, actionable guidance for AI content machines
 
 CONTENT OUTLINE STRUCTURE:
 - First item: H1 (level: 1)
-- Second item: AFP Guidance (level: 0, is_afp_guidance: true) - DO NOT write exact AFP text, only provide guidance on what it should cover (${strategy.page_config.answerFirstLength})
+- Second item: AFP Guidance (level: 0, is_afp_guidance: true) — DO NOT write exact AFP text, only provide guidance on what it should cover (${strategy.page_config.answerFirstLength})
 - Remaining items: H2/H3 sections with detailed guidance
-- FAQ section (if beneficial): towards end of outline
+- FAQ section (if applicable — see FAQ DECISION below): towards end of outline
 
-FAQ ANALYSIS (CRITICAL):
-- Check if top 3-5 ranking pages have FAQ sections
-- Look for PAA (People Also Ask) boxes in SERPs
-- Identify Featured Snippet opportunities for questions
-- ONLY include FAQ section in outline if ALL THREE conditions are met
-- If FAQ is included: ${strategy.page_type === 'blog page' ? '5-8 questions' : '3-5 questions'} maximum
-- Place FAQ towards end of outline (last or second-to-last section)
-- If no clear benefit → Set include_faq: false and explain in rationale
+${faqDirective}
+${ahrefsSerpData && ahrefsSerpData.paa_questions.length > 0 ? `\nPAA QUESTIONS FROM GOOGLE (use for FAQ content if FAQ is included):\n${ahrefsSerpData.paa_questions.map(q => '  - ' + q).join('\n')}\n` : ''}
+⚠️ CONSISTENCY: include_faq and outline MUST agree. If include_faq is true, outline must have is_faq_section. If false, outline must NOT have is_faq_section.
 
 CRITICAL OUTPUT REQUIREMENT:
 Return ONLY the JSON object. Do NOT include:
@@ -2389,7 +2811,16 @@ Your response must start with { and end with }. Nothing else.`;
     model: CONFIG.CLAUDE_MODEL,
     max_tokens: CONFIG.CLAUDE_MAX_TOKENS,
     system: systemPrompt,
-    messages: []
+    messages: [],
+    context_management: {
+      edits: [
+        {
+          type: 'clear_tool_uses_20250919',
+          trigger: { type: 'input_tokens', value: CONFIG.CONTEXT_EDITING_THRESHOLD },
+          keep: { type: 'tool_uses', value: 3 }
+        }
+      ]
+    }
   };
   if (CONFIG.USE_WEB_SEARCH) {
     requestBody.tools = [
@@ -2399,11 +2830,20 @@ Your response must start with { and end with }. Nothing else.`;
       },
       {
         type: 'web_fetch_20250910',
-        name: 'web_fetch'
+        name: 'web_fetch',
+        max_content_tokens: CONFIG.WEB_FETCH_MAX_CONTENT_TOKENS
       }
     ];
   }
-  debugLog('CLAUDE REQUEST', { model: CONFIG.CLAUDE_MODEL, has_tools: !!requestBody.tools, retry: retryCount });
+  debugLog('CLAUDE REQUEST', { 
+    model: CONFIG.CLAUDE_MODEL, 
+    has_tools: !!requestBody.tools, 
+    retry: retryCount,
+    context_editing_threshold: CONFIG.CONTEXT_EDITING_THRESHOLD,
+    web_fetch_max_content_tokens: CONFIG.WEB_FETCH_MAX_CONTENT_TOKENS,
+    tool_isolation: 'Phase 1 only (v2.1.0 — prevents server state overflow)',
+    prefetched_competitors: ahrefsSerpData ? ahrefsSerpData.competitors.filter(function(c) { return c.extracted_content && c.extracted_content.length > 100; }).length : 0
+  });
   if (retryCount === 0) {
     const optimalDelay = calculateOptimalDelay();
     debugLog('RATE_LIMIT_DELAY', `Waiting ${(optimalDelay / 1000).toFixed(1)}s before API call`);
@@ -2414,174 +2854,689 @@ Your response must start with { and end with }. Nothing else.`;
     Utilities.sleep(retryDelay);
   }
   try {
-    let conversationMessages = [
-      {
-        role: 'user',
-        content: userMessage
-      }
+    // ═══════════════════════════════════════════════════════════════════
+    // PHASE-BASED TURN LOOP — FRESH CONTEXT PER PHASE
+    // ═══════════════════════════════════════════════════════════════════
+    // Phase 1: Client research → CLIENT RESEARCH NOTES
+    // Phase 2: Competitor research → COMPETITOR RESEARCH NOTES  
+    // Phase 3: Write brief JSON (external links as "suggested" with search_suggestions for editorial verification)
+    //
+    // CRITICAL: Each phase starts with a FRESH conversation (no history).
+    // Server-managed tools (web_search, web_fetch) persist tool results
+    // server-side. Even if stripped from the conversation, the server
+    // re-injects ~44K tokens of tool results, causing context overflow
+    // (tool definitions alone consume ~163K of the 200K limit).
+    //
+    // Solution: Research notes from completed phases are extracted as plain
+    // text and injected directly into the next phase's user message.
+    // This keeps each phase under ~166K tokens total.
+    //
+    // Context editing (clear_tool_uses) fires WITHIN a phase when multiple
+    // tool turns cause input_tokens > CONTEXT_EDITING_THRESHOLD.
+    //
+    // External link validation is handled server-side using UrlFetchApp
+    // after the brief JSON is parsed — no additional API calls needed.
+    // ═══════════════════════════════════════════════════════════════════
+
+    const phases = [
+      { name: 'CLIENT_RESEARCH', message: userMessage, maxToolTurns: 6, expectJSON: false },
+      { name: 'COMPETITOR_RESEARCH', message: phase2Message, maxToolTurns: 8, expectJSON: false },
+      { name: 'WRITE_BRIEF', message: phase3Message, maxToolTurns: 6, expectJSON: true }
     ];
+
+    let conversationMessages = [];
     let briefText = '';
-    let maxTurns = 12;
-    let currentTurn = 0;
-    while (currentTurn < maxTurns) {
-      currentTurn++;
-      debugLog('CONVERSATION_TURN', `Turn ${currentTurn}/${maxTurns}`);
-      requestBody.messages = conversationMessages;
-      logToDebugSheet(`TURN_${currentTurn}_REQ`, requestBody);
-      const auditLog = conversationMessages.map((m, idx) => {
-        const types = Array.isArray(m.content) ? m.content.map(b => b.type).join(',') : 'string';
-        return `[${idx}] ${m.role}: ${types}`;
-      }).join(' | ');
-      debugLog('CONVERSATION_AUDIT', auditLog);
-      const response = robustFetch('https://api.anthropic.com/v1/messages', {
-        method: 'post',
-        contentType: 'application/json',
-        muteHttpExceptions: true,
-        headers: {
-          'x-api-key': apiKey.trim(),
-          'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'web-search-2025-03-05,web-fetch-2025-09-10'
-        },
-        payload: JSON.stringify(requestBody)
+    let totalApiCalls = 0;
+    
+    // Accumulate research notes between phases. Each phase starts with a FRESH
+    // conversation (no history) to avoid server-side tool result re-injection.
+    // Server-managed tools (web_search, web_fetch) persist their tool results
+    // server-side — even if stripped from the conversation, the server re-injects
+    // ~44K tokens of tool results, causing context overflow. By resetting the
+    // conversation and injecting only the research notes text, each phase stays
+    // within the ~5K token budget left after tool definitions (~163K) + system prompt (~8K).
+    let previousPhaseNotes = [];
+    
+    // Debug: Log sizes of key components
+    var userMsgChars = userMessage.length;
+    var systemPromptChars = JSON.stringify(requestBody.system || '').length;
+    var estimatedTokens = Math.round((userMsgChars + systemPromptChars) / 3);
+    debugLog('MESSAGE_SIZES', {
+      user_message_chars: userMsgChars,
+      system_prompt_chars: systemPromptChars,
+      combined_chars: userMsgChars + systemPromptChars,
+      estimated_tokens: estimatedTokens,
+      sitemap_urls_count: strategy.sitemap_data?.total_after_filter || 0,
+      context_limit: 200000,
+      context_editing_threshold: CONFIG.CONTEXT_EDITING_THRESHOLD,
+      total_phases: phases.length
+    });
+
+    // ─── PHASE LOOP ─────────────────────────────────────────────────
+    for (var phaseIndex = 0; phaseIndex < phases.length; phaseIndex++) {
+      var phase = phases[phaseIndex];
+      debugLog('PHASE_START', { 
+        phase: phase.name, 
+        index: phaseIndex + 1,
+        totalPhases: phases.length,
+        conversationLength: conversationMessages.length,
+        expectJSON: phase.expectJSON
       });
-      const statusCode = response.getResponseCode();
-      const responseText = response.getContentText();
-      debugLog('CLAUDE RESPONSE CODE', statusCode);
-      if (statusCode === 429 || statusCode === 529) {
-        if (retryCount < MAX_RETRIES) {
-          const waitTime = Math.pow(2, retryCount) * 30;
-          const errorType = statusCode === 429 ? 'RATE LIMIT' : 'SERVER OVERLOAD';
-          debugLog(`${errorType} HIT`, `Waiting ${waitTime} seconds before retry ${retryCount + 1}/${MAX_RETRIES}`);
-          Logger.log(`${errorType} error. Waiting ${waitTime} seconds before retry...`);
-          Utilities.sleep(waitTime * 1000);
-          return generateBriefWithClaude(strategy, retryCount + 1);
-        } else {
-          const errorMsg = statusCode === 429 
-            ? `Rate limit exceeded after ${MAX_RETRIES} retries. Please wait a few minutes or upgrade your API tier.`
-            : `Anthropic servers are overloaded (529) after ${MAX_RETRIES} retries. Please try again in 5-10 minutes.`;
-          throw new Error(errorMsg);
-        }
+
+      // ─── FRESH CONTEXT PER PHASE ───────────────────────────────────
+      // Reset conversation to avoid server-side tool result re-injection.
+      // Inject previous phase notes directly into the user message.
+      conversationMessages = [];
+      var phaseMessageContent = phase.message;
+      
+      if (previousPhaseNotes.length > 0) {
+        var notesPrefix = '════════════════════════════════════════════════════════════\n' +
+          '📋 RESEARCH FROM PREVIOUS PHASES (for reference)\n' +
+          '════════════════════════════════════════════════════════════\n\n' +
+          previousPhaseNotes.join('\n\n') + '\n\n';
+        phaseMessageContent = notesPrefix + phaseMessageContent;
+        debugLog('NOTES_INJECTED', {
+          phase: phase.name,
+          notes_count: previousPhaseNotes.length,
+          notes_chars: notesPrefix.length,
+          total_message_chars: phaseMessageContent.length
+        });
       }
-      if (statusCode !== 200) {
-        logToDebugSheet(`ERROR_${statusCode}`, requestBody, responseText);
-        debugLog('CLAUDE_ERROR_BODY', responseText);
-        if (statusCode === 400 && responseText.includes('invalid_request_error') && retryCount < MAX_RETRIES) {
-          debugLog('STABILIZATION_RETRY', 'Caught 400 protocol error. Retrying with fresh state...');
-          Utilities.sleep(5000); 
-          return generateBriefWithClaude(strategy, retryCount + 1);
-        }
-        throw new Error(`Claude API error ${statusCode}: ${responseText}`);
-      }
-      if (currentTurn === 1) logToDebugSheet('TURN_1_SUCCESS', requestBody, 'Check next log for response');
-      const responseData = JSON.parse(responseText);
-      debugLog('RESPONSE_STOP_REASON', responseData.stop_reason);
-      debugLog('RESPONSE_CONTENT_TYPES', responseData.content?.map(b => b.type).join(', '));
-      let assistantContent = responseData.content;
-      const hasWebTools = assistantContent.some(block => 
-        (block.type === 'tool_use' && (block.name === 'web_search' || block.name === 'web_fetch')) || 
-        (block.type === 'server_tool_use')
-      );
-      if (hasWebTools) {
-        const lastBlock = assistantContent[assistantContent.length - 1];
-        if (responseData.stop_reason === 'pause_turn' && lastBlock && lastBlock.type === 'server_tool_use') {
-          debugLog('PROTOCOL_FIX', `Dropping orphaned server_tool_use ID: ${lastBlock.id}`);
-          assistantContent.pop();
-        }
-        // Filter to keep tool-related blocks and ALL text blocks (parser handles JSON extraction)
-        assistantContent = assistantContent.filter(block => 
-          block.type === 'tool_use' || 
-          block.type === 'server_tool_use' || 
-          block.type === 'web_search_tool_result' ||
-          block.type === 'web_fetch_tool_result' ||
-          block.type === 'text'
-        );
-      }
+      
       conversationMessages.push({
-        role: 'assistant',
-        content: assistantContent
+        role: 'user',
+        content: phaseMessageContent
       });
-      const toolUses = assistantContent.filter(block => block.type === 'tool_use');
-      if (toolUses.length > 0) {
-        debugLog('TOOL_USE_DETECTED', `Claude requested ${toolUses.length} tools`);
-        const toolResults = toolUses.map(toolUse => {
-          if (toolUse.name === 'web_search') {
-            return {
-              type: 'tool_result',
-              tool_use_id: toolUse.id,
-              content: [{ type: 'web_search_tool_result' }]
-            };
+
+      // Log conversation size entering this phase
+      var convJson = JSON.stringify(conversationMessages);
+      var convChars = convJson.length;
+      var convEstTokens = Math.round(convChars / 3);
+      debugLog('PHASE_CONTEXT_SIZE', {
+        phase: phase.name,
+        conversation_chars: convChars,
+        estimated_tokens: convEstTokens,
+        message_count: conversationMessages.length,
+        will_context_edit: convEstTokens > CONFIG.CONTEXT_EDITING_THRESHOLD
+      });
+
+      logToDebugSheet('PHASE_' + (phaseIndex + 1) + '_START_' + phase.name, {
+        estimated_input_tokens: convEstTokens,
+        message_count: conversationMessages.length,
+        context_editing_threshold: CONFIG.CONTEXT_EDITING_THRESHOLD
+      });
+
+      var phaseComplete = false;
+      var phaseToolTurns = 0;
+      var phaseText = '';
+
+      // ─── INNER TOOL-CONTINUATION LOOP (per phase) ──────────────────
+      var phaseRetries = 0;
+      var MAX_PHASE_RETRIES = 3;
+      
+      while (!phaseComplete && phaseToolTurns < phase.maxToolTurns) {
+        phaseToolTurns++;
+        totalApiCalls++;
+        debugLog('PHASE_TURN', phase.name + ' tool turn ' + phaseToolTurns + '/' + phase.maxToolTurns + ' (API call #' + totalApiCalls + ')');
+
+        requestBody.messages = conversationMessages;
+        
+        // ── TOOL ISOLATION: Strip tools from Phase 2 only ─────────────
+        // Server-managed tools (web_search, web_fetch) maintain implicit server-side
+        // state between API calls. Phase 1's tool results (~88K tokens) get re-injected
+        // into subsequent phases even with fresh conversations, causing 208K+ overflow.
+        // Solution: Phase 2 uses pre-fetched competitor content (no tools needed).
+        // Phase 3 (~13K tokens) re-enables web_search for external link discovery —
+        // even with Phase 1 state re-injected (~88K), total is ~130K, well under 200K limit.
+        var toolsBackup = null;
+        var contextMgmtBackup = null;
+        var betaHeader = 'web-search-2025-03-05,web-fetch-2025-09-10,context-management-2025-06-27';
+        if (phase.name === 'COMPETITOR_RESEARCH') {
+          // Phase 2 only: Remove ALL tools and context_management to prevent server state re-injection
+          if (requestBody.tools) {
+            toolsBackup = requestBody.tools;
+            delete requestBody.tools;
           }
-          if (toolUse.name === 'web_fetch') {
-            return {
-              type: 'tool_result',
-              tool_use_id: toolUse.id,
-              content: [{ type: 'web_fetch_tool_result' }]
-            };
+          if (requestBody.context_management) {
+            contextMgmtBackup = requestBody.context_management;
+            delete requestBody.context_management;
           }
-          return {
-            type: 'tool_result',
-            tool_use_id: toolUse.id,
-            content: "Success"
+          // Strip server-tool betas from header entirely
+          betaHeader = '';
+          debugLog('TOOLS_STRIPPED', { phase: phase.name, turn: phaseToolTurns, reason: 'prevent server state re-injection' });
+        } else if (phase.name === 'WRITE_BRIEF') {
+          // Phase 3: Only web_search for external link discovery (no web_fetch, no context_management)
+          if (requestBody.tools) {
+            toolsBackup = requestBody.tools;
+            requestBody.tools = requestBody.tools.filter(function(t) {
+              return t.type === 'web_search_20250305' || t.name === 'web_search';
+            });
+            if (requestBody.tools.length === 0) delete requestBody.tools;
+          }
+          if (requestBody.context_management) {
+            contextMgmtBackup = requestBody.context_management;
+            delete requestBody.context_management;
+          }
+          betaHeader = 'web-search-2025-03-05';
+          debugLog('TOOLS_FILTERED', { phase: phase.name, turn: phaseToolTurns, tools_kept: 'web_search only', reason: 'external link discovery' });
+        }
+        
+        // Log request for first turn of each phase
+        if (phaseToolTurns === 1) {
+          logToDebugSheet('PHASE_' + (phaseIndex + 1) + '_REQ', requestBody);
+        }
+
+        var fetchHeaders = {
+            'x-api-key': apiKey.trim(),
+            'anthropic-version': '2023-06-01'
           };
+        if (betaHeader) {
+          fetchHeaders['anthropic-beta'] = betaHeader;
+        }
+        
+        // PRE_REQUEST_SIZE diagnostic
+        var payloadStr = JSON.stringify(requestBody);
+        debugLog('PRE_REQUEST_SIZE', {
+          phase: phase.name,
+          turn: phaseToolTurns,
+          payload_chars: payloadStr.length,
+          payload_est_tokens: Math.round(payloadStr.length / 3),
+          has_tools: !!requestBody.tools,
+          has_beta: !!betaHeader,
+          beta_header: betaHeader || 'none',
+          message_count: requestBody.messages ? requestBody.messages.length : 0,
+          message_roles: requestBody.messages ? requestBody.messages.map(function(m) { return m.role; }).join(',') : 'none'
         });
 
-        // Force generation after sufficient research (prevent infinite tool use loop)
-        if (currentTurn >= 3) {
-          debugLog('FORCING_GENERATION', `After ${currentTurn} turns, forcing brief generation`);
-          toolResults.push({
-            type: 'text',
-            text: 'You have completed sufficient research. Now generate the complete JSON brief immediately. Return ONLY the JSON object starting with { and ending with }. Do NOT use any more tools.'
+        var response = robustFetch('https://api.anthropic.com/v1/messages', {
+          method: 'post',
+          contentType: 'application/json',
+          muteHttpExceptions: true,
+          headers: fetchHeaders,
+          payload: payloadStr
+        });
+
+        var statusCode = response.getResponseCode();
+        var responseText = response.getContentText();
+        debugLog('PHASE_RESPONSE', { phase: phase.name, turn: phaseToolTurns, statusCode: statusCode });
+
+        // Restore tools and context_management if they were removed for this phase
+        if (toolsBackup) {
+          requestBody.tools = toolsBackup;
+          toolsBackup = null;
+        }
+        if (contextMgmtBackup) {
+          requestBody.context_management = contextMgmtBackup;
+          contextMgmtBackup = null;
+        }
+
+        // ── Error handling: retry in-place to preserve conversation history ──
+        if (statusCode === 429 || statusCode === 500 || statusCode === 529) {
+          if (phaseRetries < MAX_PHASE_RETRIES) {
+            phaseRetries++;
+            var waitTime = Math.pow(2, phaseRetries) * 30;
+            var errorType = statusCode === 429 ? 'RATE LIMIT' : 'SERVER ERROR';
+            debugLog(errorType + '_PHASE_RETRY', {
+              phase: phase.name,
+              attempt: phaseRetries + '/' + MAX_PHASE_RETRIES,
+              statusCode: statusCode,
+              waitSeconds: waitTime,
+              conversationPreserved: true,
+              messagesInHistory: conversationMessages.length
+            });
+            Utilities.sleep(waitTime * 1000);
+            // Undo the turn/call counters since we're retrying the same call
+            phaseToolTurns--;
+            totalApiCalls--;
+            continue;  // Retry the same API call with conversation intact
+          } else {
+            var errorMsg = statusCode === 429 
+              ? 'Rate limit exceeded after ' + MAX_PHASE_RETRIES + ' in-place retries in phase ' + phase.name
+              : 'Anthropic server error (' + statusCode + ') after ' + MAX_PHASE_RETRIES + ' in-place retries in phase ' + phase.name;
+            throw new Error(errorMsg);
+          }
+        }
+        
+        if (statusCode !== 200) {
+          logToDebugSheet('ERROR_' + statusCode + '_PHASE_' + phase.name, requestBody, responseText);
+          debugLog('CLAUDE_ERROR_BODY', responseText.substring(0, 1000));
+          
+          // Handle context limit / prompt too long errors (deterministic — retrying won't help)
+          if (statusCode === 400 && (responseText.includes('context limit') || responseText.includes('prompt is too long') || responseText.includes('too many tokens'))) {
+            debugLog('CONTEXT_LIMIT_HIT', 'Phase ' + phase.name + ': Input too large for context window (' + responseText.substring(0, 200) + ')');
+            
+            // Log detailed context analysis
+            var msgAnalysis = conversationMessages.map(function(m, idx) {
+              var blockTypes = Array.isArray(m.content) ? m.content.map(function(b) { return b.type; }).join(',') : 'string';
+              var msgChars = JSON.stringify(m.content).length;
+              return { idx: idx, role: m.role, types: blockTypes, chars: msgChars, est_tokens: Math.round(msgChars / 3) };
+            });
+            debugLog('CONTEXT_LIMIT_ANALYSIS', JSON.stringify(msgAnalysis));
+            
+            throw new Error(
+              'Context limit exceeded in phase ' + phase.name + ' (turn ' + phaseToolTurns + '). ' +
+              'Total API calls so far: ' + totalApiCalls + '. ' +
+              'Check CONTEXT_LIMIT_ANALYSIS log for message breakdown.'
+            );
+          }
+          
+          if (statusCode === 400 && responseText.includes('invalid_request_error') && phaseRetries < MAX_PHASE_RETRIES) {
+            phaseRetries++;
+            debugLog('STABILIZATION_RETRY', {
+              phase: phase.name,
+              attempt: phaseRetries + '/' + MAX_PHASE_RETRIES,
+              conversationPreserved: true
+            });
+            Utilities.sleep(5000);
+            phaseToolTurns--;
+            totalApiCalls--;
+            continue;
+          }
+          throw new Error('Claude API error ' + statusCode + ' in phase ' + phase.name + ': ' + responseText.substring(0, 500));
+        }
+
+        // Reset phase retry counter on successful 200 response
+        phaseRetries = 0;
+
+        // ── Parse response ──
+        var responseData = JSON.parse(responseText);
+        debugLog('PHASE_STOP_REASON', { phase: phase.name, stop_reason: responseData.stop_reason });
+
+        // Log usage data if available (shows actual input tokens after context editing)
+        if (responseData.usage) {
+          debugLog('PHASE_USAGE', {
+            phase: phase.name,
+            turn: phaseToolTurns,
+            input_tokens: responseData.usage.input_tokens,
+            output_tokens: responseData.usage.output_tokens,
+            cache_creation_input_tokens: responseData.usage.cache_creation_input_tokens || 0,
+            cache_read_input_tokens: responseData.usage.cache_read_input_tokens || 0
+          });
+          
+          // Log on first turn of each phase to show context editing impact
+          if (phaseToolTurns === 1) {
+            logToDebugSheet('PHASE_' + (phaseIndex + 1) + '_USAGE', {
+              phase: phase.name,
+              input_tokens: responseData.usage.input_tokens,
+              output_tokens: responseData.usage.output_tokens,
+              estimated_pre_edit_tokens: convEstTokens,
+              tokens_cleared: Math.max(0, convEstTokens - responseData.usage.input_tokens)
+            });
+          }
+        }
+
+        var assistantContent = responseData.content;
+        
+        // Log content block analysis
+        if (assistantContent) {
+          var blockSummary = assistantContent.map(function(block, idx) {
+            return { idx: idx, type: block.type, name: block.name || '', chars: JSON.stringify(block).length };
+          });
+          debugLog('PHASE_BLOCKS', { phase: phase.name, turn: phaseToolTurns, blocks: JSON.stringify(blockSummary) });
+          
+          // Log details of any small/failed fetch or search results for diagnostics
+          assistantContent.forEach(function(block, idx) {
+            if ((block.type === 'web_fetch_tool_result' || block.type === 'web_search_tool_result') 
+                && JSON.stringify(block).length < 500) {
+              var errorDetail = '';
+              try {
+                if (block.content) {
+                  errorDetail = typeof block.content === 'string' ? block.content : JSON.stringify(block.content);
+                }
+              } catch(e) {
+                errorDetail = 'Unable to extract content';
+              }
+              // Find the preceding server_tool_use to get the URL that was fetched
+              var fetchUrl = '';
+              if (idx > 0) {
+                var prevBlock = assistantContent[idx - 1];
+                if (prevBlock.type === 'server_tool_use' && prevBlock.input) {
+                  fetchUrl = prevBlock.input.url || prevBlock.input.query || '';
+                }
+              }
+              debugLog('FETCH_ERROR_DETAIL', { 
+                phase: phase.name, 
+                block_idx: idx, 
+                type: block.type, 
+                chars: JSON.stringify(block).length,
+                url: fetchUrl,
+                error_content: errorDetail.substring(0, 300)
+              });
+            }
           });
         }
 
+        // Clean up orphaned server_tool_use at end of response
+        var hasWebTools = assistantContent.some(function(block) {
+          return (block.type === 'tool_use' && (block.name === 'web_search' || block.name === 'web_fetch')) || 
+                 (block.type === 'server_tool_use');
+        });
+        if (hasWebTools) {
+          var lastBlock = assistantContent[assistantContent.length - 1];
+          if (responseData.stop_reason === 'pause_turn' && lastBlock && lastBlock.type === 'server_tool_use') {
+            debugLog('PROTOCOL_FIX', 'Phase ' + phase.name + ': Dropping orphaned server_tool_use ID: ' + lastBlock.id);
+            assistantContent.pop();
+          }
+          assistantContent = assistantContent.filter(function(block) {
+            return block.type === 'tool_use' || 
+                   block.type === 'server_tool_use' || 
+                   block.type === 'web_search_tool_result' ||
+                   block.type === 'web_fetch_tool_result' ||
+                   block.type === 'text';
+          });
+        }
+
+        // Add assistant response to conversation
         conversationMessages.push({
-          role: 'user',
-          content: toolResults
+          role: 'assistant',
+          content: assistantContent
         });
 
-        debugLog('STABILIZATION', 'Turn complete. Pacing 2s before next turn...');
-        Utilities.sleep(2000);
-        continue;
-      }
-      const textBlocks = assistantContent.filter(block => block.type === 'text');
-      if (textBlocks.length > 0) {
-        briefText = textBlocks.map(block => block.text).join('\n');
-        debugLog('TEXT_CONTENT_FOUND', `Found ${briefText.length} chars of text`);
+        // Check for tool use blocks (need continuation)
+        var toolUses = assistantContent.filter(function(block) { return block.type === 'tool_use'; });
+        if (toolUses.length > 0) {
+          debugLog('PHASE_TOOL_USE', phase.name + ': Claude requested ' + toolUses.length + ' tools');
+          var toolResults = toolUses.map(function(toolUse) {
+            if (toolUse.name === 'web_search') {
+              return {
+                type: 'tool_result',
+                tool_use_id: toolUse.id,
+                content: [{ type: 'web_search_tool_result' }]
+              };
+            }
+            if (toolUse.name === 'web_fetch') {
+              return {
+                type: 'tool_result',
+                tool_use_id: toolUse.id,
+                content: [{ type: 'web_fetch_tool_result' }]
+              };
+            }
+            return {
+              type: 'tool_result',
+              tool_use_id: toolUse.id,
+              content: "Success"
+            };
+          });
+
+          conversationMessages.push({
+            role: 'user',
+            content: toolResults
+          });
+
+          debugLog('PHASE_CONTINUE', phase.name + ': Tool turn complete. Pacing 2s...');
+          Utilities.sleep(2000);
+          continue;
+        }
+
+        // No tool use — check for text content (phase complete)
+        var textBlocks = assistantContent.filter(function(block) { return block.type === 'text'; });
+        if (textBlocks.length > 0) {
+          phaseText = textBlocks.map(function(block) { return block.text; }).join('\n');
+          debugLog('PHASE_TEXT_FOUND', { 
+            phase: phase.name, 
+            chars: phaseText.length,
+            hasResearchNotes: phaseText.indexOf('=== CLIENT RESEARCH NOTES ===') > -1 || phaseText.indexOf('=== COMPETITOR RESEARCH NOTES ===') > -1,
+            startsWithBrace: phaseText.trim().charAt(0) === '{',
+            preview: phaseText.substring(0, 200)
+          });
+          
+          logToDebugSheet('PHASE_' + (phaseIndex + 1) + '_COMPLETE', {
+            phase: phase.name,
+            text_length: phaseText.length,
+            tool_turns: phaseToolTurns,
+            total_api_calls: totalApiCalls
+          });
+
+          // If this phase expects JSON output, capture it as the briefText
+          if (phase.expectJSON) {
+            briefText = phaseText;
+            debugLog('BRIEF_TEXT_CAPTURED', { phase: phase.name, length: briefText.length });
+          }
+
+          phaseComplete = true;
+          break;
+        }
+
+        // Handle pause_turn without text or tool use (Claude needs a nudge)
+        if (responseData.stop_reason === 'pause_turn') {
+          debugLog('PHASE_PAUSE_NUDGE', phase.name + ': pause_turn with no tools/text, nudging...');
+          conversationMessages.push({
+            role: 'user',
+            content: 'Please continue with ' + phase.name + '.'
+          });
+          continue;
+        }
+
+        if (responseData.stop_reason === 'end_turn') {
+          debugLog('PHASE_END_NO_TEXT', phase.name + ': end_turn but no text content');
+          phaseComplete = true;
+          break;
+        }
+
+        if (responseData.stop_reason === 'max_tokens') {
+          throw new Error(
+            'Response cut off in phase ' + phase.name + ' (max_tokens). ' +
+            'Try increasing CLAUDE_MAX_TOKENS in CONFIG.'
+          );
+        }
+
+        debugLog('PHASE_UNEXPECTED_STOP', { phase: phase.name, stop_reason: responseData.stop_reason });
         break;
       }
-      if (responseData.stop_reason === 'pause_turn') {
-        debugLog('PAUSE_TURN_DETECTED', 'Continuing conversation...');
-        conversationMessages.push({
-          role: 'user',
-          content: 'Please continue and provide the complete JSON brief now.'
+
+      // Check if phase completed
+      if (!phaseComplete) {
+        debugLog('PHASE_TIMEOUT', phase.name + ': Did not complete within ' + phase.maxToolTurns + ' tool turns');
+        
+        // For non-JSON phases, this is a warning — we can still continue
+        if (!phase.expectJSON) {
+          debugLog('PHASE_TIMEOUT_CONTINUE', phase.name + ': Continuing to next phase despite timeout');
+        } else {
+          throw new Error(
+            'Phase ' + phase.name + ' did not complete within ' + phase.maxToolTurns + ' tool turns. ' +
+            'Total API calls: ' + totalApiCalls
+          );
+        }
+      }
+
+      debugLog('PHASE_COMPLETE', { 
+        phase: phase.name, 
+        toolTurns: phaseToolTurns, 
+        totalApiCalls: totalApiCalls,
+        textLength: phaseText.length,
+        conversationMessages: conversationMessages.length
+      });
+
+      // ─── COMPETITOR COUNT ENFORCEMENT (Phase 2 only) ────────────────
+      // After COMPETITOR_RESEARCH completes, verify Claude analyzed 4+ competitors.
+      // If fewer than 4, send it back with the next Ahrefs URLs in SERP order.
+      if (phase.name === 'COMPETITOR_RESEARCH' && ahrefsSerpData && ahrefsSerpData.competitors.length > 0) {
+        // Count SUCCESSFULLY analyzed competitors — must have word count data, not just a mention.
+        // Claude often writes "coalitiontechnologies.com — failed to fetch" which is NOT an analysis.
+        const notesLower = (phaseText || '').toLowerCase();
+        const analyzedUrls = ahrefsSerpData.competitors.filter(c => {
+          const urlLower = c.url.toLowerCase();
+          const domainMatch = urlLower.match(/^https?:\/\/([^\/]+)/i);
+          const domain = domainMatch ? domainMatch[1].replace(/^www\./, '') : '';
+          
+          // Must appear in notes AND have word count data nearby (within ~200 chars)
+          const domainIdx = domain ? notesLower.indexOf(domain) : -1;
+          const urlIdx = notesLower.indexOf(urlLower);
+          const foundIdx = urlIdx > -1 ? urlIdx : domainIdx;
+          
+          if (foundIdx === -1) return false;
+          
+          // Check for word count pattern near the mention (indicates successful analysis)
+          const nearby = notesLower.substring(foundIdx, foundIdx + 300);
+          const hasWordCount = /\d+\s*words/.test(nearby) || /word\s*count[:\s]+\d/.test(nearby);
+          
+          // Also exclude if "failed" or "not accessible" or "blocked" appears before word count
+          const hasFailure = /fail|not accessible|blocked|error|unavailable|could not/.test(nearby);
+          
+          return hasWordCount && !hasFailure;
         });
-        continue;
+        
+        const analyzedCount = analyzedUrls.length;
+        debugLog('COMPETITOR_COUNT_CHECK', { 
+          analyzed: analyzedCount, 
+          required: 4,
+          found_urls: analyzedUrls.map(c => c.url)
+        });
+        
+        if (analyzedCount < 4) {
+          // Find URLs not successfully analyzed — remaining list stays in SERP position order
+          const analyzedSet = new Set(analyzedUrls.map(c => c.url.toLowerCase()));
+          const remainingUrls = ahrefsSerpData.competitors.filter(c => 
+            !analyzedSet.has(c.url.toLowerCase())
+          );
+          
+          if (remainingUrls.length > 0) {
+            const needed = 4 - analyzedCount;
+            
+            // Check if remaining URLs have pre-fetched content available
+            var remainingWithContent = remainingUrls.filter(function(c) { 
+              return c.extracted_content && c.extracted_content.length > 100; 
+            });
+            
+            if (remainingWithContent.length > 0) {
+              // Build content blocks for remaining competitors
+              var retryContentBlocks = remainingWithContent.slice(0, needed + 2).map(function(c, i) {
+                var wcLabel = c.word_count > 0 ? '~' + c.word_count + ' words' : 'word count unavailable';
+                return '────────────────────────────────────────\n' +
+                  'COMPETITOR [Position #' + c.position + ', DR ' + c.domain_rating + ', ' + wcLabel + ']\n' +
+                  'URL: ' + c.url + '\n' +
+                  '────────────────────────────────────────\n' +
+                  c.extracted_content;
+              }).join('\n\n');
+              
+              const retryMessage = `You only successfully analyzed ${analyzedCount} competitor pages — the minimum is 4.
+
+Here are ${remainingWithContent.length} additional competitor pages (pre-fetched content provided). Analyze them now:
+
+${retryContentBlocks}
+
+APPEND to your existing research notes with the same format (word count, H2/H3 count, patterns, FAQ presence). Do NOT rewrite your existing notes — just add the new competitors.`;
+
+              debugLog('COMPETITOR_RETRY', { 
+                analyzed: analyzedCount, 
+                needed: needed, 
+                remaining_with_content: remainingWithContent.map(c => c.url) 
+              });
+            
+              // Push retry message and make one API call (no tools needed)
+              conversationMessages.push({ role: 'user', content: retryMessage });
+            
+              Utilities.sleep(CONFIG.RATE_LIMIT_DELAY_MS || 35000);
+              totalApiCalls++;
+              debugLog('PHASE_TURN', 'COMPETITOR_RETRY (API call #' + totalApiCalls + ')');
+            
+              requestBody.messages = conversationMessages;
+              // No tools, no beta header needed — just plain text analysis
+              // Temporarily strip context_management (requires beta header not present here)
+              var retryCtxBackup = requestBody.context_management || null;
+              if (retryCtxBackup) delete requestBody.context_management;
+              var retryToolsBackup = requestBody.tools || null;
+              if (retryToolsBackup) delete requestBody.tools;
+              var retryResponse = robustFetch('https://api.anthropic.com/v1/messages', {
+                method: 'post',
+                contentType: 'application/json',
+                muteHttpExceptions: true,
+                headers: {
+                  'x-api-key': apiKey.trim(),
+                  'anthropic-version': '2023-06-01'
+                },
+                payload: JSON.stringify(requestBody)
+              });
+              // Restore after retry call
+              if (retryCtxBackup) requestBody.context_management = retryCtxBackup;
+              if (retryToolsBackup) requestBody.tools = retryToolsBackup;
+            
+            var retryStatus = retryResponse.getResponseCode();
+            if (retryStatus === 200) {
+              var retryData = JSON.parse(retryResponse.getContentText());
+              debugLog('PHASE_USAGE', {
+                phase: 'COMPETITOR_RETRY',
+                turn: 1,
+                input_tokens: retryData.usage?.input_tokens || 0,
+                output_tokens: retryData.usage?.output_tokens || 0
+              });
+              
+              var retryContent = retryData.content || [];
+              conversationMessages.push({ role: 'assistant', content: retryContent });
+              
+              // Extract text and append to phase notes
+              var retryTextBlocks = retryContent.filter(function(b) { return b.type === 'text'; });
+              if (retryTextBlocks.length > 0) {
+                var retryText = retryTextBlocks.map(function(b) { return b.text; }).join('\n');
+                phaseText = phaseText + '\n\n' + retryText;
+                debugLog('COMPETITOR_RETRY_COMPLETE', { 
+                  added_chars: retryText.length,
+                  total_notes_chars: phaseText.length
+                });
+              } else {
+                debugLog('COMPETITOR_RETRY_NO_TEXT', { 
+                  stop_reason: retryData.stop_reason,
+                  block_types: retryContent.map(function(b) { return b.type; })
+                });
+              }
+            } else {
+              debugLog('COMPETITOR_RETRY_FAILED', { statusCode: retryStatus });
+              // Non-fatal — proceed with fewer competitors
+            }
+            } else {
+              // No remaining URLs have pre-fetched content — can't retry without tools
+              debugLog('COMPETITOR_RETRY_SKIPPED', { 
+                reason: 'no pre-fetched content available for remaining URLs',
+                remaining_urls: remainingUrls.map(function(c) { return c.url; })
+              });
+            }
+          }
+        }
       }
-      if (responseData.stop_reason === 'end_turn') {
-        debugLog('END_TURN_NO_TEXT', 'Claude ended turn but provided no text content');
-        break;
+      // ─── END COMPETITOR COUNT ENFORCEMENT ────────────────────────────
+
+      // ─── SAVE RESEARCH NOTES FOR NEXT PHASE ──────────────────────
+      // Each phase produces research notes that subsequent phases need.
+      // Instead of carrying conversation history (which triggers server-side
+      // tool result re-injection of ~44K tokens), we save just the text and
+      // inject it into the next phase's user message.
+      // NOTE: This runs AFTER competitor retry so phaseText includes any appended retry notes.
+      if (phaseIndex < phases.length - 1 && phaseText.length > 0) {
+        previousPhaseNotes.push(phaseText);
+        debugLog('NOTES_SAVED', {
+          phase_completed: phase.name,
+          notes_chars: phaseText.length,
+          total_accumulated_notes: previousPhaseNotes.reduce(function(sum, n) { return sum + n.length; }, 0),
+          notes_count: previousPhaseNotes.length
+        });
       }
-      if (responseData.stop_reason === 'max_tokens') {
-        throw new Error(
-          'Claude response was cut off due to max_tokens limit. ' +
-          'Try increasing CLAUDE_MAX_TOKENS in CONFIG or simplifying the request.'
-        );
+
+      // Pace between phases
+      if (phaseIndex < phases.length - 1) {
+        debugLog('PHASE_TRANSITION', 'Waiting 2s before phase ' + (phaseIndex + 2) + '...');
+        Utilities.sleep(2000);
       }
-      debugLog('UNEXPECTED_STOP_REASON', responseData.stop_reason);
-      break;
     }
+    // ─── END PHASE LOOP ───────────────────────────────────────────────
+
+    debugLog('ALL_PHASES_COMPLETE', {
+      totalApiCalls: totalApiCalls,
+      briefTextLength: briefText.length,
+      conversationMessages: conversationMessages.length
+    });
+
     if (!briefText) {
-      const lastResponse = conversationMessages[conversationMessages.length - 1];
-      const contentTypes = lastResponse.content?.map(b => b.type) || [];
-      debugLog('NO_TEXT_AFTER_TURNS', {
-        totalTurns: currentTurn,
+      var lastResponse = conversationMessages[conversationMessages.length - 1];
+      var contentTypes = lastResponse.content ? lastResponse.content.map(function(b) { return b.type; }) : [];
+      debugLog('NO_BRIEF_AFTER_PHASES', {
+        totalApiCalls: totalApiCalls,
         lastContentTypes: contentTypes,
         conversationLength: conversationMessages.length
       });
       throw new Error(
-        `No text content after ${currentTurn} conversation turns. ` +
+        'No JSON brief produced after ' + totalApiCalls + ' API calls across ' + phases.length + ' phases. ' +
         'Last content types: ' + contentTypes.join(', ') + '. ' +
-        'This may indicate Claude is stuck in tool use or the brief generation failed.'
+        'Check PHASE_*_COMPLETE logs for details.'
       );
     }
     debugLog('BRIEF TEXT LENGTH', briefText.length);
@@ -2593,6 +3548,13 @@ Your response must start with { and end with }. Nothing else.`;
       debugLog('LINK_VERIFICATION', `Verified ${brief.internal_links.length} internal links`);
     }
 
+    // Recalculate word count range server-side from competitor data
+    // Claude estimates word counts but can't do reliable P25-P75 math — let the code handle it
+    recalculateWordCountRange(brief, strategy);
+    
+    // Reconcile FAQ: ensure faq_analysis.include_faq matches what's actually in the outline
+    reconcileFaqAnalysis(brief);
+    
     // Run all validations with retry support
     let validationResults = runAllValidations(brief, strategy);
     
@@ -2606,19 +3568,23 @@ Your response must start with { and end with }. Nothing else.`;
       // Construct retry message and ask Claude to fix
       const retryMessage = constructValidationRetryMessage(validationResults, brief);
       
-      conversationMessages.push({
-        role: 'assistant',
-        content: [{ type: 'text', text: briefText }]
-      });
-      conversationMessages.push({
-        role: 'user', 
-        content: retryMessage
-      });
-      
       debugLog('VALIDATION_RETRY', 'Asking Claude to fix validation errors...');
       
-      // Make one more API call to get the fixed brief
-      requestBody.messages = conversationMessages;
+      // Build a CLEAN minimal request - no research history needed
+      // Claude already generated the brief; retry just needs the JSON + fix instructions
+      const retryRequestBody = {
+        model: requestBody.model,
+        max_tokens: requestBody.max_tokens,
+        system: requestBody.system,
+        messages: [
+          {
+            role: 'user',
+            content: `Here is the JSON content brief you previously generated:\n\n${briefText}\n\n${retryMessage}`
+          }
+        ]
+      };
+      
+      debugLog('VALIDATION_RETRY_PAYLOAD_SIZE', JSON.stringify(retryRequestBody).length);
       
       const retryResponse = robustFetch('https://api.anthropic.com/v1/messages', {
         method: 'post',
@@ -2626,17 +3592,16 @@ Your response must start with { and end with }. Nothing else.`;
         muteHttpExceptions: true,
         headers: {
           'x-api-key': apiKey.trim(),
-          'anthropic-version': '2023-06-01',
-          'anthropic-beta': 'web-search-2025-03-05'
+          'anthropic-version': '2023-06-01'
         },
-        payload: JSON.stringify(requestBody)
+        payload: JSON.stringify(retryRequestBody)
       });
       
       const retryStatusCode = retryResponse.getResponseCode();
       const retryResponseText = retryResponse.getContentText();
       
       if (retryStatusCode !== 200) {
-        debugLog('VALIDATION_RETRY_API_ERROR', retryStatusCode);
+        debugLog('VALIDATION_RETRY_API_ERROR', `Status ${retryStatusCode}: ${retryResponseText.substring(0, 500)}`);
         // Fall through to throw original validation errors
       } else {
         const retryData = JSON.parse(retryResponseText);
@@ -2653,6 +3618,12 @@ Your response must start with { and end with }. Nothing else.`;
             if (retryBrief.internal_links && retryBrief.internal_links.length > 0) {
               retryBrief.internal_links = verifyInternalLinks(retryBrief.internal_links, strategy.sitemap_data);
             }
+            
+            // Recalculate word count range server-side
+            recalculateWordCountRange(retryBrief, strategy);
+            
+            // Reconcile FAQ analysis
+            reconcileFaqAnalysis(retryBrief);
             
             // Run ALL validations again on the retry brief
             validationResults = runAllValidations(retryBrief, strategy);
@@ -2688,8 +3659,13 @@ Your response must start with { and end with }. Nothing else.`;
   } catch (error) {
     if (error.message && error.message.includes('rate_limit') && retryCount < MAX_RETRIES) {
       const waitTime = Math.pow(2, retryCount) * 30;
-      debugLog('RATE LIMIT ERROR', `Waiting ${waitTime} seconds before retry ${retryCount + 1}/${MAX_RETRIES}`);
-      Logger.log(`Rate limit error. Waiting ${waitTime} seconds before retry...`);
+      debugLog('RATE_LIMIT_FULL_RESTART', {
+        reason: 'Rate limit error caught outside phase loop — full restart required',
+        attempt: retryCount + 1 + '/' + MAX_RETRIES,
+        waitSeconds: waitTime,
+        note: 'Previous phase work will be lost'
+      });
+      Logger.log(`Rate limit error (fallback). Waiting ${waitTime} seconds before full restart...`);
       Utilities.sleep(waitTime * 1000);
       return generateBriefWithClaude(strategy, retryCount + 1);
     }
@@ -2779,6 +3755,325 @@ function parseClaudeResponse(text) {
 }
 
 /**
+ * Checks if a URL is a homepage (root domain with no meaningful path).
+ * Examples: https://lawrank.com/, https://www.example.com, http://site.org/
+ */
+function isHomepageUrl(url) {
+  if (!url) return false;
+  // Strip protocol and www, then check if path is empty or just "/"
+  const pathMatch = url.match(/^https?:\/\/[^\/]+(\/.*)?$/i);
+  if (!pathMatch) return false;
+  const path = (pathMatch[1] || '').replace(/\/+$/, '');  // strip trailing slashes
+  return path === '' || path === '/';
+}
+
+/**
+ * Recalculates word_count_range server-side from competitor data
+ * Uses P25-P75 interpolation on word count values
+ * 
+ * APPROACH: Claude picks competitors (editorial judgment), server measures them (accuracy).
+ * For each URL in competitors_analyzed, look up the server word count for that URL.
+ * Falls back to Claude's estimate only if no server count exists for that URL.
+ * 
+ * HOMEPAGE FILTERING: Unless the brief's page_type is "homepage", exclude homepage URLs
+ * from word count calculation. Homepages rank on domain authority, not content depth —
+ * benchmarking a service/blog page against a homepage produces an artificially low floor.
+ * If filtering leaves < 2 data points, supplement from remaining Ahrefs URLs (non-homepage).
+ * 
+ * No intent modifier — competitors ARE the benchmark.
+ */
+function recalculateWordCountRange(brief, strategy) {
+  const competitors = brief.serp_analysis?.competitors_analyzed || [];
+  const briefPageType = (strategy.page_type || '').toLowerCase().trim();
+  const excludeHomepages = briefPageType !== 'homepage';
+  
+  // Build URL → word_count lookup from ALL server measurements (all 8 Ahrefs URLs)
+  const serverLookup = {};
+  if (strategy.server_word_counts) {
+    strategy.server_word_counts.forEach(c => {
+      const key = c.url.replace(/\/+$/, '').toLowerCase();
+      serverLookup[key] = { word_count: c.word_count, url: c.url };
+    });
+  }
+  
+  // For each competitor Claude analyzed, prefer server word count over Claude's estimate
+  const matched = [];
+  const excluded = [];
+  
+  competitors.forEach(c => {
+    const key = (c.url || '').replace(/\/+$/, '').toLowerCase();
+    const isHomepage = isHomepageUrl(c.url);
+    const serverEntry = serverLookup[key];
+    const wc = (serverEntry && serverEntry.word_count > 0) 
+      ? serverEntry.word_count 
+      : (typeof c.word_count === 'number' && c.word_count > 0 ? c.word_count : 0);
+    const source = (serverEntry && serverEntry.word_count > 0) ? 'server' : 'claude';
+    
+    if (wc <= 0) return;
+    
+    if (excludeHomepages && isHomepage) {
+      excluded.push({ url: c.url, source: source, word_count: wc, reason: 'homepage' });
+    } else {
+      matched.push({ url: c.url, source: source, word_count: wc });
+    }
+  });
+  
+  // If homepage filtering left us with < 2 data points, supplement from remaining Ahrefs URLs
+  if (matched.length < 2 && strategy.server_word_counts) {
+    const matchedUrls = new Set(matched.map(m => m.url.replace(/\/+$/, '').toLowerCase()));
+    const excludedUrls = new Set(excluded.map(e => e.url.replace(/\/+$/, '').toLowerCase()));
+    
+    // Check Ahrefs URLs that Claude didn't analyze (and weren't already excluded)
+    strategy.server_word_counts.forEach(c => {
+      if (matched.length >= 4) return;  // Cap at 4 data points
+      const key = c.url.replace(/\/+$/, '').toLowerCase();
+      if (matchedUrls.has(key) || excludedUrls.has(key)) return;
+      if (excludeHomepages && isHomepageUrl(c.url)) return;
+      if (c.word_count <= 0) return;
+      
+      matched.push({ url: c.url, source: 'server_supplement', word_count: c.word_count });
+      matchedUrls.add(key);
+    });
+    
+    if (matched.length > excluded.length) {
+      debugLog('WORD_COUNT_HOMEPAGE_SUPPLEMENT', {
+        after_filtering: matched.length - (matched.filter(m => m.source === 'server_supplement').length),
+        supplemented_from_ahrefs: matched.filter(m => m.source === 'server_supplement').length,
+        total_after_supplement: matched.length,
+        excluded_homepages: excluded
+      });
+    }
+  }
+  
+  if (excluded.length > 0) {
+    debugLog('WORD_COUNT_HOMEPAGE_EXCLUDED', {
+      page_type: briefPageType,
+      excluded: excluded
+    });
+  }
+  
+  const wordCounts = matched
+    .map(m => m.word_count)
+    .sort((a, b) => a - b);
+  
+  if (wordCounts.length < 2) {
+    debugLog('WORD_COUNT_RECALC_SKIP', {
+      reason: 'Insufficient word count data after homepage filtering (' + wordCounts.length + ' valid counts)',
+      matched: matched,
+      excluded: excluded
+    });
+    return;
+  }
+  
+  // Calculate P25 and P75 using linear interpolation
+  const n = wordCounts.length;
+  const p25Idx = 0.25 * (n - 1);
+  const p75Idx = 0.75 * (n - 1);
+  
+  const p25Floor = Math.floor(p25Idx);
+  const p25Frac = p25Idx - p25Floor;
+  const p25 = wordCounts[p25Floor] + p25Frac * (wordCounts[Math.min(p25Floor + 1, n - 1)] - wordCounts[p25Floor]);
+  
+  const p75Floor = Math.floor(p75Idx);
+  const p75Frac = p75Idx - p75Floor;
+  const p75 = wordCounts[p75Floor] + p75Frac * (wordCounts[Math.min(p75Floor + 1, n - 1)] - wordCounts[p75Floor]);
+  
+  // Round to nearest 50
+  let adjustedMin = Math.round(p25 / 50) * 50;
+  let adjustedMax = Math.round(p75 / 50) * 50;
+  
+  // Defensive swap if min > max
+  if (adjustedMin > adjustedMax) {
+    const temp = adjustedMin;
+    adjustedMin = adjustedMax;
+    adjustedMax = temp;
+  }
+  
+  // If range is 0 (all competitors identical after rounding), add ±100 buffer
+  if (adjustedMin === adjustedMax) {
+    adjustedMin = adjustedMin - 100;
+    adjustedMax = adjustedMax + 100;
+  }
+  
+  const originalRange = brief.word_count_range;
+  brief.word_count_range = adjustedMin + '-' + adjustedMax + ' words';
+  
+  debugLog('WORD_COUNT_RECALC', {
+    matched: matched,
+    competitor_word_counts: wordCounts,
+    sample_size: n,
+    homepages_excluded: excluded.length,
+    server_matched: matched.filter(m => m.source === 'server').length,
+    server_supplement: matched.filter(m => m.source === 'server_supplement').length,
+    claude_fallback: matched.filter(m => m.source === 'claude').length,
+    p25_raw: Math.round(p25),
+    p75_raw: Math.round(p75),
+    p25_rounded: adjustedMin,
+    p75_rounded: adjustedMax,
+    spread: adjustedMax - adjustedMin,
+    claude_original: originalRange,
+    server_calculated: brief.word_count_range
+  });
+}
+
+/**
+ * Reconciles faq_analysis.include_faq with what's actually in the outline.
+ * The outline is the source of truth — if Claude wrote an FAQ section, include_faq should be true.
+ * If Claude said include_faq: true but didn't write one, force it to false.
+ * This prevents the doc, score, and field from disagreeing.
+ */
+function reconcileFaqAnalysis(brief) {
+  const faqSection = brief.outline?.find(s => s.is_faq_section);
+  const hasFaqSection = !!faqSection;
+  const claimedInclude = brief.faq_analysis?.include_faq;
+  
+  if (claimedInclude && !hasFaqSection) {
+    // Claude said include but didn't write one — force false
+    brief.faq_analysis.include_faq = false;
+    if (!brief.faq_analysis.rationale || brief.faq_analysis.rationale.length < 10) {
+      brief.faq_analysis.rationale = 'FAQ was marked for inclusion but no FAQ section was added to the outline.';
+    }
+    debugLog('FAQ_RECONCILE', {
+      action: 'forced_false',
+      reason: 'include_faq was true but no outline section has is_faq_section: true'
+    });
+  } else if (!claimedInclude && hasFaqSection) {
+    // Claude wrote an FAQ section but said don't include — trust the outline
+    brief.faq_analysis.include_faq = true;
+    debugLog('FAQ_RECONCILE', {
+      action: 'forced_true',
+      reason: 'include_faq was false but outline contains an FAQ section',
+      questions: faqSection.faq_questions?.length || 0
+    });
+  } else {
+    debugLog('FAQ_RECONCILE', {
+      action: 'no_change',
+      include_faq: claimedInclude,
+      has_faq_section: hasFaqSection
+    });
+  }
+}
+
+/**
+ * Fetches competitor pages server-side and counts words from HTML content.
+ * Runs BEFORE Phase 2 so word counts are deterministic ground truth,
+ * not Claude's variable estimates. Matches what Ahrefs measures in their UI.
+ * 
+ * @param {Array} competitors - Array of {position, url, title, domain_rating} from Ahrefs
+ * @returns {Array} Same array with word_count added to each entry (0 if fetch failed)
+ */
+function fetchCompetitorWordCounts(competitors) {
+  if (!competitors || competitors.length === 0) return competitors;
+  
+  const results = [];
+  
+  // Build parallel request array
+  const requests = competitors.map(comp => ({
+    url: comp.url,
+    muteHttpExceptions: true,
+    followRedirects: true,
+    validateHttpsCertificates: false,
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5'
+    }
+  }));
+  
+  // Fire all requests simultaneously
+  let responses;
+  try {
+    responses = UrlFetchApp.fetchAll(requests);
+  } catch (e) {
+    // If fetchAll itself fails, mark all as failed
+    debugLog('SERVER_WORD_COUNTS_FETCHALL_ERROR', e.message.substring(0, 200));
+    competitors.forEach(comp => {
+      comp.word_count = 0;
+      comp.word_count_source = 'error';
+      comp.extracted_content = '';
+      results.push({ pos: comp.position, url: comp.url, words: 0, status: 'fetchAll_error' });
+    });
+    debugLog('SERVER_WORD_COUNTS', {
+      total: competitors.length,
+      successful: 0,
+      counts: results
+    });
+    return competitors;
+  }
+  
+  // Process responses (same order as requests)
+  responses.forEach((response, idx) => {
+    const comp = competitors[idx];
+    try {
+      const statusCode = response.getResponseCode();
+      
+      if (statusCode >= 200 && statusCode < 400) {
+        const html = response.getContentText();
+        
+        // Strip HTML tags, scripts, styles, and count words
+        const textContent = html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ')   // Remove script blocks
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')     // Remove style blocks
+          .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, ' ') // Remove noscript blocks
+          .replace(/<!--[\s\S]*?-->/g, ' ')                      // Remove HTML comments
+          .replace(/<[^>]+>/g, ' ')                               // Remove remaining HTML tags
+          .replace(/&[a-zA-Z]+;/g, ' ')                           // Remove HTML entities (&amp; etc.)
+          .replace(/&#\d+;/g, ' ')                                // Remove numeric HTML entities
+          .replace(/\s+/g, ' ')                                   // Collapse whitespace
+          .trim();
+        
+        // Count words (split on whitespace, filter empty strings)
+        const wordCount = textContent.split(/\s+/).filter(w => w.length > 0).length;
+        
+        comp.word_count = wordCount;
+        comp.word_count_source = 'server';
+        
+        // Save extracted text content for Phase 2 injection (cap at 5000 words
+        // to keep context manageable — ~6700 tokens per page × 5 pages = ~33K tokens)
+        var maxContentWords = 5000;
+        var contentWords = textContent.split(/\s+/).filter(function(w) { return w.length > 0; });
+        if (contentWords.length > maxContentWords) {
+          comp.extracted_content = contentWords.slice(0, maxContentWords).join(' ') + ' [TRUNCATED]';
+        } else {
+          comp.extracted_content = textContent;
+        }
+        
+        results.push({ pos: comp.position, url: comp.url, words: wordCount, status: 'ok' });
+      } else {
+        comp.word_count = 0;
+        comp.word_count_source = 'failed';
+        comp.extracted_content = '';
+        results.push({ pos: comp.position, url: comp.url, words: 0, status: 'http_' + statusCode });
+      }
+    } catch (e) {
+      comp.word_count = 0;
+      comp.word_count_source = 'error';
+      comp.extracted_content = '';
+      results.push({ pos: comp.position, url: comp.url, words: 0, status: 'error', error: e.message.substring(0, 80) });
+    }
+  });
+  
+  debugLog('SERVER_WORD_COUNTS', {
+    total: competitors.length,
+    successful: results.filter(r => r.words > 0).length,
+    counts: results
+  });
+  
+  // Log pre-fetched content stats for Phase 2 injection
+  var contentStats = competitors.map(function(c) {
+    return { url: c.url.substring(0, 60), content_chars: (c.extracted_content || '').length, words: c.word_count };
+  });
+  debugLog('PREFETCHED_CONTENT', {
+    total_pages: competitors.length,
+    pages_with_content: competitors.filter(function(c) { return c.extracted_content && c.extracted_content.length > 0; }).length,
+    total_content_chars: competitors.reduce(function(sum, c) { return sum + (c.extracted_content || '').length; }, 0),
+    stats: contentStats
+  });
+  
+  return competitors;
+}
+
+/**
  * Runs all validations and returns results object instead of throwing
  * Used for validation retry system - allows collecting pass/fail status for each validation
  */
@@ -2841,9 +4136,7 @@ function constructValidationRetryMessage(validationResults, brief) {
   message += `YOUR BRIEF HAD THE FOLLOWING ISSUES:\n`;
   validationResults.errors.forEach((error, idx) => {
     message += `\n${idx + 1}. ${error.type.toUpperCase()}:\n`;
-    // Include just the key part of the error, not the full message
-    const shortError = error.message.split('\n').slice(0, 5).join('\n');
-    message += `${shortError}\n`;
+    message += `${error.message}\n`;
   });
   
   message += `\n✅ THESE PARTS WERE CORRECT (DO NOT CHANGE):\n`;
@@ -3089,22 +4382,23 @@ function validateLongtailDistribution(brief, strategy) {
 function validateSerpAnalysis(brief, strategy) {
   const serp = brief.serp_analysis;
   const clientResearch = brief.client_research;
-  const pagesAnalyzed = clientResearch.pages_analyzed?.length || 0;
+  const competitorsAnalyzed = serp.competitors_analyzed?.length || 0;
   
-  // Hard fail only if truly insufficient (0-2 pages)
-  // 3-4 pages = warning but acceptable for niche keywords
-  // 5+ pages = ideal
-  if (pagesAnalyzed < 3) {
+  // Hard fail only if truly insufficient (0-1 pages)
+  // 2-4 pages = warning but acceptable for niche keywords
+  // 4 pages = ideal
+  if (competitorsAnalyzed < 2) {
     throw new Error(
-      `Insufficient SERP research: Only ${pagesAnalyzed} pages analyzed. ` +
-      'Minimum 3 competitor pages required. Ideally analyze 5+ for comprehensive coverage.'
+      `Insufficient SERP research: Only ${competitorsAnalyzed} competitor pages analyzed. ` +
+      'Minimum 2 competitor pages required. Ideally analyze 4+ for comprehensive coverage.'
     );
   }
-  if (pagesAnalyzed < 5) {
-    Logger.log(
-      `WARNING: Only ${pagesAnalyzed} competitor pages analyzed. ` +
-      'This may be acceptable for niche keywords, but 5+ is recommended for quality analysis.'
-    );
+  if (competitorsAnalyzed < 4) {
+    debugLog('COMPETITOR_COUNT_WARNING', {
+      analyzed: competitorsAnalyzed,
+      recommended: 4,
+      note: 'May be acceptable for niche keywords but 4 is recommended'
+    });
   }
   const wordCountPattern = /(\d+)-(\d+)/;
   const match = brief.word_count_range.match(wordCountPattern);
@@ -3116,10 +4410,18 @@ function validateSerpAnalysis(brief, strategy) {
   const min = parseInt(match[1]);
   const max = parseInt(match[2]);
   const variance = max - min;
-  if (variance < 200) {
+  // Word count range is now calculated server-side by recalculateWordCountRange()
+  // Hard fail only for impossible values (negative = bug in recalc)
+  if (variance < 0) {
     throw new Error(
-      `Word count range too narrow (${variance} words). ` +
-      'Suggests insufficient competitor analysis. Expected variance of at least 200-400 words.'
+      `Word count range inverted (${variance} words). ` +
+      'Min is greater than max — this indicates a calculation error.'
+    );
+  }
+  if (variance < 150) {
+    Logger.log(
+      `WARNING: Narrow word count range (${variance} words). ` +
+      'Competitors may have very similar content lengths for this keyword.'
     );
   }
   if (variance > 2000) {
@@ -3186,7 +4488,7 @@ function validateSerpAnalysis(brief, strategy) {
     if (competitorCounts.length < 3) {
       Logger.log(
         `WARNING: Only ${competitorCounts.length} competitor section counts recorded. ` +
-        'Expected counts from at least 5 competitor pages.'
+        'Expected counts from at least 4 competitor pages.'
       );
     }
     
@@ -3246,7 +4548,7 @@ function validateSerpAnalysis(brief, strategy) {
   }
   
   debugLog('SERP ANALYSIS VALIDATED', {
-    pages_analyzed: pagesAnalyzed,
+    competitors_analyzed: competitorsAnalyzed,
     word_count_variance: variance,
     pattern_count: patterns.length,
     specific_patterns: specificPatternCount,
@@ -3261,14 +4563,14 @@ function calculateQualityScore(brief, strategy) {
   let score = 0;
   
   // Point distribution: 100 points total
-  // Keyword Strategy: 20, Content Outline: 15, SERP Analysis: 15, EEAT: 15, 
-  // Intent Alignment: 10, Link Quality: 10, Content Format: 10, FAQ: 5
+  // Keyword Strategy: 20, Content Outline: 15, SERP Analysis: 15, EEAT: 20, 
+  // Intent Alignment: 5, Link Quality: 10, Content Format: 10, FAQ: 5
   let breakdown = {
     keyword_strategy: { score: 0, max: 20, details: [] },
     content_outline: { score: 0, max: 15, details: [] },
     serp_analysis: { score: 0, max: 15, details: [] },
-    eeat_signals: { score: 0, max: 15, details: [] },
-    intent_alignment: { score: 0, max: 10, details: [] },
+    eeat_signals: { score: 0, max: 20, details: [] },
+    intent_alignment: { score: 0, max: 5, details: [] },
     link_quality: { score: 0, max: 10, details: [] },
     content_format: { score: 0, max: 10, details: [] },
     faq_analysis: { score: 0, max: 5, details: [] }
@@ -3452,37 +4754,37 @@ function calculateQualityScore(brief, strategy) {
   // ============================================================
   // SERP ANALYSIS (15 points)
   // ============================================================
-  const pagesAnalyzed = brief.client_research.pages_analyzed?.length || 0;
+  const competitorsAnalyzed = brief.serp_analysis?.competitors_analyzed?.length || 0;
   const patterns = brief.serp_analysis.top_ranking_patterns || [];
   const gaps = brief.serp_analysis.competitive_gaps || [];
   
   // Pages analyzed (5 points)
-  // 5+ = full points, 3-4 = acceptable for niche keywords, 0-2 = insufficient
-  if (pagesAnalyzed >= 5) {
+  // 4+ = full points, 3 = acceptable for niche keywords, 0-2 = insufficient
+  if (competitorsAnalyzed >= 4) {
     breakdown.serp_analysis.score += 5;
-    breakdown.serp_analysis.details.push(`✓ Analyzed ${pagesAnalyzed} competitor pages (5pts)`);
-  } else if (pagesAnalyzed >= 3) {
+    breakdown.serp_analysis.details.push(`✓ Analyzed ${competitorsAnalyzed} competitor pages (5pts)`);
+  } else if (competitorsAnalyzed >= 3) {
     breakdown.serp_analysis.score += 3;
-    breakdown.serp_analysis.details.push(`○ Analyzed ${pagesAnalyzed} competitor pages - acceptable for niche keywords (3pts)`);
+    breakdown.serp_analysis.details.push(`○ Analyzed ${competitorsAnalyzed} competitor pages - acceptable for niche keywords (3pts)`);
   } else {
     breakdown.serp_analysis.score += 1;
-    breakdown.serp_analysis.details.push(`✗ Only ${pagesAnalyzed} pages analyzed (1pt)`);
+    breakdown.serp_analysis.details.push(`✗ Only ${competitorsAnalyzed} competitor pages analyzed (1pt)`);
   }
 
-  // Word count variance (5 points)
+  // Word count variance (5 points) — range is now server-calculated from competitor data
   const wordCountPattern = /(\d+)-(\d+)/;
   const match = brief.word_count_range.match(wordCountPattern);
   const variance = match ? (parseInt(match[2]) - parseInt(match[1])) : 0;
   
-  if (variance >= 400 && variance <= 800) {
+  if (variance >= 200) {
     breakdown.serp_analysis.score += 5;
-    breakdown.serp_analysis.details.push(`✓ Optimal word count variance: ${variance} words (5pts)`);
-  } else if (variance >= 200 && variance <= 1200) {
+    breakdown.serp_analysis.details.push(`✓ Good word count variance: ${variance} words (5pts)`);
+  } else if (variance >= 100) {
     breakdown.serp_analysis.score += 3;
-    breakdown.serp_analysis.details.push(`○ Acceptable word count variance: ${variance} words (3pts)`);
+    breakdown.serp_analysis.details.push(`○ Narrow word count variance: ${variance} words — competitors may be very similar (3pts)`);
   } else {
     breakdown.serp_analysis.score += 1;
-    breakdown.serp_analysis.details.push(`✗ Poor word count variance: ${variance} words (1pt)`);
+    breakdown.serp_analysis.details.push(`✗ Very narrow word count variance: ${variance} words (1pt)`);
   }
 
   // Specific patterns identified (5 points)
@@ -3504,7 +4806,7 @@ function calculateQualityScore(brief, strategy) {
   }
 
   // ============================================================
-  // EEAT SIGNALS (15 points) - NEW
+  // EEAT SIGNALS (20 points)
   // ============================================================
   const clientResearch = brief.client_research || {};
   const outlineText = JSON.stringify(brief.outline).toLowerCase();
@@ -3513,60 +4815,70 @@ function calculateQualityScore(brief, strategy) {
   const competitiveAdvantages = clientResearch.competitive_advantages || [];
   const externalLinks = brief.external_links || [];
   
-  // Expertise signals (5 points) - technical specs, specific data, industry knowledge
+  // Expertise signals (7 points) - technical specs, specific data, industry knowledge
   let expertiseScore = 0;
   const hasSpecificFacts = keyFacts.length >= 5;
   const hasTechnicalTerms = outlineText.includes('specification') || outlineText.includes('technical') || 
     outlineText.includes('engineering') || outlineText.includes('warranty') || outlineText.includes('certification');
   const hasDataPoints = keyFacts.some(f => /\d+/.test(f)); // Facts contain numbers
+  const hasIndustryDepth = keyFacts.length >= 8; // Deep research yields more facts
   
   if (hasSpecificFacts) expertiseScore += 2;
   if (hasTechnicalTerms) expertiseScore += 2;
   if (hasDataPoints) expertiseScore += 1;
+  if (hasIndustryDepth) expertiseScore += 2;
   
   breakdown.eeat_signals.score += expertiseScore;
-  breakdown.eeat_signals.details.push(`${expertiseScore >= 4 ? '✓' : '○'} Expertise: ${keyFacts.length} facts, technical depth=${hasTechnicalTerms ? '✓' : '✗'} (${expertiseScore}/5pts)`);
+  breakdown.eeat_signals.details.push(`${expertiseScore >= 5 ? '✓' : '○'} Expertise: ${keyFacts.length} facts, technical depth=${hasTechnicalTerms ? '✓' : '✗'}, deep research=${hasIndustryDepth ? '✓' : '✗'} (${expertiseScore}/7pts)`);
 
-  // Experience signals (4 points) - real-world applications, testimonials, case studies
+  // Experience signals (5 points) - real-world applications, testimonials, case studies
   let experienceScore = 0;
   const hasApplications = outlineText.includes('application') || outlineText.includes('use case') || 
     outlineText.includes('example') || outlineText.includes('testimonial') || outlineText.includes('customer');
   const hasCompetitiveAdvantages = competitiveAdvantages.length >= 3;
+  const hasCaseStudies = outlineText.includes('case stud') || outlineText.includes('result') || outlineText.includes('success');
   
   if (hasApplications) experienceScore += 2;
   if (hasCompetitiveAdvantages) experienceScore += 2;
+  if (hasCaseStudies) experienceScore += 1;
   
   breakdown.eeat_signals.score += experienceScore;
-  breakdown.eeat_signals.details.push(`${experienceScore >= 3 ? '✓' : '○'} Experience: real-world examples=${hasApplications ? '✓' : '✗'}, advantages documented=${hasCompetitiveAdvantages ? '✓' : '✗'} (${experienceScore}/4pts)`);
+  breakdown.eeat_signals.details.push(`${experienceScore >= 4 ? '✓' : '○'} Experience: real-world examples=${hasApplications ? '✓' : '✗'}, advantages documented=${hasCompetitiveAdvantages ? '✓' : '✗'}, case studies=${hasCaseStudies ? '✓' : '✗'} (${experienceScore}/5pts)`);
 
-  // Authoritativeness signals (3 points) - certifications, high-authority external links
+  // Authoritativeness signals (4 points) - certifications, high-authority external links
   let authorityScore = 0;
   const hasCertifications = certifications.length >= 1;
-  const hasHighAuthLinks = externalLinks.filter(l => l.domain_authority === 'high').length >= 1;
+  const highAuthCount = externalLinks.filter(l => l.domain_authority === 'high').length;
+  const hasHighAuthLinks = highAuthCount >= 1;
+  const hasMultipleHighAuth = highAuthCount >= 3;
   const hasGovEduLinks = externalLinks.some(l => /\.(gov|edu|org)/.test(l.url || ''));
   
   if (hasCertifications) authorityScore += 1;
   if (hasHighAuthLinks) authorityScore += 1;
+  if (hasMultipleHighAuth) authorityScore += 1;
   if (hasGovEduLinks) authorityScore += 1;
   
   breakdown.eeat_signals.score += authorityScore;
-  breakdown.eeat_signals.details.push(`${authorityScore >= 2 ? '✓' : '○'} Authority: certs=${hasCertifications ? '✓' : '✗'}, high-auth links=${hasHighAuthLinks ? '✓' : '✗'}, .gov/.edu=${hasGovEduLinks ? '✓' : '✗'} (${authorityScore}/3pts)`);
+  breakdown.eeat_signals.details.push(`${authorityScore >= 3 ? '✓' : '○'} Authority: certs=${hasCertifications ? '✓' : '✗'}, high-auth links=${hasHighAuthLinks ? '✓' : '✗'}(${highAuthCount}), .gov/.edu=${hasGovEduLinks ? '✓' : '✗'} (${authorityScore}/4pts)`);
 
-  // Trustworthiness signals (3 points) - warranty, pricing transparency, verifiable claims
+  // Trustworthiness signals (4 points) - warranty, pricing transparency, verifiable claims, social proof
   let trustScore = 0;
   const hasWarranty = outlineText.includes('warranty') || keyFacts.some(f => f.toLowerCase().includes('warranty'));
   const hasPricing = outlineText.includes('pricing') || outlineText.includes('cost') || outlineText.includes('price');
   const hasVerifiableClaims = keyFacts.some(f => /\d+/.test(f) && f.length > 20); // Specific factual claims
+  const hasSocialProof = outlineText.includes('review') || outlineText.includes('rating') || outlineText.includes('testimonial') ||
+    keyFacts.some(f => f.toLowerCase().includes('star') || f.toLowerCase().includes('rating') || f.toLowerCase().includes('review'));
   
   if (hasWarranty) trustScore += 1;
   if (hasPricing) trustScore += 1;
   if (hasVerifiableClaims) trustScore += 1;
+  if (hasSocialProof) trustScore += 1;
   
   breakdown.eeat_signals.score += trustScore;
-  breakdown.eeat_signals.details.push(`${trustScore >= 2 ? '✓' : '○'} Trust: warranty=${hasWarranty ? '✓' : '✗'}, pricing=${hasPricing ? '✓' : '✗'}, verifiable claims=${hasVerifiableClaims ? '✓' : '✗'} (${trustScore}/3pts)`);
+  breakdown.eeat_signals.details.push(`${trustScore >= 3 ? '✓' : '○'} Trust: warranty=${hasWarranty ? '✓' : '✗'}, pricing=${hasPricing ? '✓' : '✗'}, verifiable claims=${hasVerifiableClaims ? '✓' : '✗'}, social proof=${hasSocialProof ? '✓' : '✗'} (${trustScore}/4pts)`);
 
   // ============================================================
-  // INTENT ALIGNMENT (10 points) - NEW
+  // INTENT ALIGNMENT (5 points) — section count within intent range only
   // ============================================================
   const intentData = parseIntent(strategy.intent);
   const intentKey = intentData.hybridKey;
@@ -3592,54 +4904,6 @@ function calculateQualityScore(brief, strategy) {
     breakdown.intent_alignment.details.push(`✗ Section count (${outlineSections}) outside ${strategy.intent} range (${intentSectionMin}-${intentSectionMax}) (1pt)`);
   }
 
-  // Intent-appropriate content sections (5 points)
-  let intentContentScore = 0;
-  const headingsText = brief.outline.map(s => (s.heading || '').toLowerCase()).join(' ');
-  
-  if (intentData.primary === 'transactional' || intentData.secondary === 'transactional') {
-    // Transactional should have pricing/cost/quote sections
-    if (headingsText.includes('price') || headingsText.includes('cost') || headingsText.includes('quote') || headingsText.includes('order')) {
-      intentContentScore += 3;
-    }
-    if (headingsText.includes('feature') || headingsText.includes('benefit') || headingsText.includes('why choose')) {
-      intentContentScore += 2;
-    }
-  }
-  
-  if (intentData.primary === 'informational' || intentData.secondary === 'informational') {
-    // Informational should have how-to/guide/process sections
-    if (headingsText.includes('how') || headingsText.includes('guide') || headingsText.includes('step') || headingsText.includes('process')) {
-      intentContentScore += 3;
-    }
-    if (headingsText.includes('what') || headingsText.includes('why') || headingsText.includes('understand')) {
-      intentContentScore += 2;
-    }
-  }
-  
-  if (intentData.primary === 'commercial' || intentData.secondary === 'commercial') {
-    // Commercial should have comparison/review/alternative sections
-    if (headingsText.includes('compar') || headingsText.includes('vs') || headingsText.includes('review') || headingsText.includes('best')) {
-      intentContentScore += 3;
-    }
-    if (headingsText.includes('alternative') || headingsText.includes('option') || headingsText.includes('pros') || headingsText.includes('cons')) {
-      intentContentScore += 2;
-    }
-  }
-  
-  if (intentData.primary === 'navigational') {
-    // Navigational should have overview/services/contact sections
-    if (headingsText.includes('service') || headingsText.includes('about') || headingsText.includes('contact')) {
-      intentContentScore += 3;
-    }
-    if (headingsText.includes('overview') || headingsText.includes('location')) {
-      intentContentScore += 2;
-    }
-  }
-  
-  intentContentScore = Math.min(intentContentScore, 5);
-  breakdown.intent_alignment.score += intentContentScore;
-  breakdown.intent_alignment.details.push(`${intentContentScore >= 4 ? '✓' : '○'} Intent-appropriate sections for ${strategy.intent} (${intentContentScore}/5pts)`);
-
   // ============================================================
   // LINK QUALITY (10 points)
   // ============================================================
@@ -3659,21 +4923,20 @@ function calculateQualityScore(brief, strategy) {
     breakdown.link_quality.details.push(`✗ ${internalVerified}/${internalTotal} internal links verified (1pt)`);
   }
 
-  // External links (5 points) - verified via web_fetch preferred, suggested acceptable
-  const externalVerified = externalLinks.filter(l => l.url_status === 'verified').length;
-  const externalValid = externalLinks.filter(l => l.url_status === 'verified' || l.url_status === 'suggested').length;
-  const externalHighAuth = externalLinks.filter(l => (l.url_status === 'verified' || l.url_status === 'suggested') && l.domain_authority === 'high').length;
+  // External links (5 points) - scored on count, authority, and search_suggestion presence
+  const externalWithSearchSuggestion = externalLinks.filter(l => l.search_suggestion && l.search_suggestion.length > 5).length;
+  const externalHighAuth = externalLinks.filter(l => l.domain_authority === 'high').length;
   const externalTotal = externalLinks.length;
   
-  if (externalTotal >= 2 && externalVerified >= externalTotal * 0.5 && externalHighAuth >= 1) {
+  if (externalTotal >= 2 && externalWithSearchSuggestion >= externalTotal * 0.8 && externalHighAuth >= 1) {
     breakdown.link_quality.score += 5;
-    breakdown.link_quality.details.push(`✓ ${externalVerified}/${externalTotal} verified, ${externalHighAuth} high authority (5pts)`);
-  } else if (externalTotal >= 1 && externalValid >= externalTotal * 0.75) {
+    breakdown.link_quality.details.push(`✓ ${externalTotal} external links, ${externalWithSearchSuggestion} with search suggestions, ${externalHighAuth} high authority (5pts)`);
+  } else if (externalTotal >= 1 && externalWithSearchSuggestion >= externalTotal * 0.5) {
     breakdown.link_quality.score += 3;
-    breakdown.link_quality.details.push(`○ ${externalVerified} verified, ${externalValid - externalVerified} suggested of ${externalTotal} (3pts)`);
+    breakdown.link_quality.details.push(`○ ${externalTotal} external links, ${externalWithSearchSuggestion} with search suggestions (3pts)`);
   } else {
     breakdown.link_quality.score += 1;
-    breakdown.link_quality.details.push(`✗ ${externalValid}/${externalTotal} external links valid (1pt)`);
+    breakdown.link_quality.details.push(`✗ ${externalTotal} external links, ${externalWithSearchSuggestion} with search suggestions (1pt)`);
   }
 
   // ============================================================
@@ -3917,10 +5180,14 @@ function validateBrief(brief, strategy) {
     h1_length: brief.h1.length,
     has_afp_guidance: !!afpSection,
     client_pages_analyzed: brief.client_research.pages_analyzed.length,
+    competitors_analyzed: brief.serp_analysis.competitors_analyzed?.length || 0,
     outline_sections: brief.outline.length,
     internal_links: internalCount,
     external_links: brief.external_links.length,
+    external_with_search_suggestions: brief.external_links.filter(l => l.search_suggestion && l.search_suggestion.length > 5).length,
     faq_included: brief.faq_analysis.include_faq,
+    faq_competitor_count: brief.faq_analysis.competitor_faq_count || 0,
+    faq_threshold: strategy.faq_threshold,
     faq_questions: faqSection?.faq_questions?.length || 0,
     quality_score: qualityScore.total_score,
     intent: strategy.intent
@@ -4089,7 +5356,7 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   body.appendParagraph(`Intent: ${strategy.intent}`).setItalic(true);
   body.appendParagraph('');
   if (brief.faq_analysis.include_faq) {
-    body.appendParagraph('Note: FAQ section is included in this outline based on competitor analysis and SERP features.')
+    body.appendParagraph(`Note: FAQ section included — ${brief.faq_analysis.competitor_faq_count || 0} of 4 competitors have FAQ sections (threshold: ${strategy.faq_threshold}).`)
       .setItalic(true)
       .setFontSize(10)
       .setForegroundColor('#666666');
@@ -4199,7 +5466,7 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
           .setForegroundColor('#0066cc')
           .setIndentStart(18);
       });
-      body.appendParagraph('');
+      body.appendParagraph('').setForegroundColor('#000000').setFontFamily('Arial').setFontSize(11);
     }
     if (brief.client_research.key_entities) {
       body.appendParagraph('Key Entities (for LLM optimization):').setBold(true);
@@ -4279,6 +5546,18 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   }
   if (brief.serp_analysis) {
     addHeading(body, 'SERP Analysis', DocumentApp.ParagraphHeading.HEADING2);
+    if (brief.serp_analysis.competitors_analyzed?.length > 0) {
+      body.appendParagraph('Competitors Analyzed:').setBold(true).setFontSize(11);
+      brief.serp_analysis.competitors_analyzed.forEach(comp => {
+        body.appendParagraph(comp.url)
+          .setFontFamily('Courier New')
+          .setFontSize(9)
+          .setBold(false)
+          .setForegroundColor('#0066cc')
+          .setIndentStart(18);
+      });
+      body.appendParagraph('').setForegroundColor('#000000').setFontFamily('Arial').setFontSize(11);
+    }
     if (brief.serp_analysis.top_ranking_patterns?.length > 0) {
       body.appendParagraph('Top Ranking Content Patterns:').setBold(true).setFontSize(11);
       brief.serp_analysis.top_ranking_patterns.forEach(pattern => {
@@ -4313,9 +5592,9 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
   if (!brief.faq_analysis.include_faq) {
     addHeading(body, 'FAQ Analysis (Not Included)', DocumentApp.ParagraphHeading.HEADING2);
     const faqItems = [
-      `Competitors have FAQ: ${brief.faq_analysis.competitors_have_faq ? 'Yes' : 'No'}`,
-      `PAA boxes present: ${brief.faq_analysis.paa_boxes_present ? 'Yes' : 'No'}`,
-      `Featured snippet opportunity: ${brief.faq_analysis.featured_snippet_opportunity ? 'Yes' : 'No'}`
+      `Competitors with FAQ: ${brief.faq_analysis.competitor_faq_count || 0} of 4 analyzed`,
+      `Page type: ${strategy.page_type}`,
+      `Threshold: ${strategy.faq_threshold || 'N/A'} competitors needed`
     ];
     faqItems.forEach(item => {
       body.appendListItem(item)
@@ -4378,14 +5657,17 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
     body.appendParagraph(`${idx + 1}. Anchor Text: "${link.anchor}"`)
       .setBold(true)
       .setFontSize(11);
-    const isVerified = link.url_status === 'verified';
-    const statusIndicator = isVerified ? ' (VERIFIED)' : ' (SUGGESTED - VERIFY BEFORE USE)';
-    const urlColor = isVerified ? '#006600' : '#0066cc'; // Green for verified, blue for suggested
-    body.appendParagraph(`   URL: ${link.url}${statusIndicator}`)
+    body.appendParagraph(`   URL: ${link.url}`)
       .setFontFamily('Courier New')
       .setFontSize(9)
       .setBold(false)
-      .setForegroundColor(urlColor);
+      .setForegroundColor('#0066cc');
+    if (link.search_suggestion) {
+      body.appendParagraph(`   Google Search: ${link.search_suggestion}`)
+        .setFontSize(10)
+        .setBold(true)
+        .setForegroundColor('#1a73e8');
+    }
     body.appendParagraph(`   Placement: ${link.placement}`)
       .setFontSize(10)
       .setBold(false)
@@ -4396,12 +5678,6 @@ function renderBriefToGoogleDoc(brief, strategy, overrideFolderId) {
     body.appendParagraph(`   Rationale: ${link.rationale}`)
       .setFontSize(10)
       .setBold(false);
-    if (link.verification_note) {
-      body.appendParagraph(`   ⚠️ SEARCH: ${link.verification_note}`)
-        .setItalic(true)
-        .setFontSize(9)
-        .setForegroundColor('#cc6600');
-    }
     body.appendParagraph('')
       .setForegroundColor('#000000')
       .setItalic(false)
@@ -4580,6 +5856,76 @@ function setAnthropicKey(apiKey) {
   Logger.log('Anthropic API key saved');
 }
 
+function resetRowStatus(rowId, runId, keyword, workbookUrl) {
+  const ss = openWorkbook(workbookUrl);
+  let sheet = null;
+  
+  if (workbookUrl) {
+    sheet = getSheetFromUrl(ss, workbookUrl);
+  }
+  
+  if (!sheet) {
+    try {
+      sheet = discoverDataSheet(ss);
+    } catch (e) {
+      throw new Error("Could not find data sheet for reset.");
+    }
+  }
+  
+  const headers = getHeaderMap(sheet);
+  const data = sheet.getDataRange().getValues();
+  
+  const idCol = headers['id']?.index;
+  const runIdCol = headers['run_id']?.index;
+  const keywordCol = headers['primary_keyword']?.index;
+  const statusCol = headers['status']?.index;
+  const urlCol = headers['document_url']?.index || headers['brief_url']?.index;
+  const errorNotesCol = headers['error_notes']?.index || headers['notes']?.index;
+  
+  if (statusCol === undefined) throw new Error("Status column missing");
+  
+  let targetRowIndex = -1;
+  
+  // Stage 1: ID
+  if (idCol !== undefined && rowId) {
+    for (let r = 1; r < data.length; r++) {
+      if (String(data[r][idCol]) === String(rowId)) {
+        targetRowIndex = r; break;
+      }
+    }
+  }
+  
+  // Stage 2: run_id
+  if (targetRowIndex === -1 && runIdCol !== undefined && runId) {
+    for (let r = 1; r < data.length; r++) {
+      if (String(data[r][runIdCol]) === String(runId)) {
+        targetRowIndex = r; break;
+      }
+    }
+  }
+  
+  // Stage 3: primary_keyword
+  if (targetRowIndex === -1 && keywordCol !== undefined && keyword) {
+    const cleanKw = String(keyword).trim().toLowerCase();
+    for (let r = 1; r < data.length; r++) {
+      if (String(data[r][keywordCol]).trim().toLowerCase() === cleanKw) {
+        targetRowIndex = r; break;
+      }
+    }
+  }
+  
+  if (targetRowIndex === -1) {
+    throw new Error("Row not found for restart. Tried matching by ID, run_id, and primary_keyword.");
+  }
+  
+  // Update the sheet
+  sheet.getRange(targetRowIndex + 1, statusCol + 1).setValue('NEW');
+  if (urlCol !== undefined) sheet.getRange(targetRowIndex + 1, urlCol + 1).clearContent();
+  if (errorNotesCol !== undefined) sheet.getRange(targetRowIndex + 1, errorNotesCol + 1).clearContent();
+  
+  return { status: 'success', message: 'Row reset successfully.' };
+}
+
 function doPost(e) {
   try {
     const params = JSON.parse(e.postData.contents);
@@ -4590,6 +5936,21 @@ function doPost(e) {
       result = getWorkbookData(workbookUrl);
     } else if (command === 'appendToClient') {
       result = appendToWorkbook(workbookUrl, params.formData);
+    } else if (command === 'resetRowStatus') {
+      const resetResult = resetRowStatus(params.rowId, params.runId, params.keyword, workbookUrl);
+      
+      const userProps = PropertiesService.getUserProperties();
+      userProps.setProperty('PENDING_FOLDER_ID', params.folderId || '');
+      userProps.setProperty('PENDING_WORKBOOK_URL', workbookUrl || '');
+      userProps.setProperty('PENDING_CLIENT_ID', params.clientId || '');
+      userProps.setProperty('PENDING_USER_ID', params.userId || params.user_id || '');
+      
+      ScriptApp.newTrigger('asyncRunBriefGeneration')
+        .timeBased()
+        .after(1000)
+        .create();
+        
+      result = resetResult;
     } else {
       const userProps = PropertiesService.getUserProperties();
       userProps.setProperty('PENDING_FOLDER_ID', params.folderId || '');

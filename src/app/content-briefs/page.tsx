@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Eye, Clock, ExternalLink, Search, Loader2, Sparkles, Filter, CheckCircle2, AlertCircle, TableIcon } from 'lucide-react';
+import { Eye, Clock, ExternalLink, Search, Loader2, Sparkles, Filter, CheckCircle2, AlertCircle, TableIcon, RotateCcw } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -48,6 +48,7 @@ export default function ContentBriefActivityLog() {
     const [pageSize, setPageSize] = useState(10);
     const [selectedRow, setSelectedRow] = useState<WorkbookRow | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [restartingRowId, setRestartingRowId] = useState<string | null>(null);
 
     // React Query
     const queryClient = useQueryClient();
@@ -110,6 +111,60 @@ export default function ContentBriefActivityLog() {
             return { ...oldData, rows: newRows };
         });
     }, [updates, queryClient]);
+
+
+    const handleRestartRow = async (row: WorkbookRow) => {
+        if (!row.clients?.workbook_url || !row.clients?.id || !row.clients?.folder_id) {
+            toast({
+                title: "Missing Data",
+                description: "Cannot restart: Missing client workbook or folder information.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setRestartingRowId(row.id);
+
+        try {
+            const response = await fetch('/api/proxy-apps-script', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    command: 'resetRowStatus',
+                    workbookUrl: row.clients.workbook_url,
+                    rowId: row.id,
+                    userId: user?.id,
+                    clientId: row.clients.id,
+                    folderId: row.clients.folder_id,
+                    runId: (row as any).run_id || '',
+                    keyword: row.primary_keyword
+                }),
+            });
+
+            const result = await response.json();
+
+            // Check nested result status for workbook-level errors
+            if (!response.ok || result.status === 'error' || (result.result && result.result.status === 'error')) {
+                throw new Error(result.message || (result.result && result.result.message) || 'Restart failed');
+            }
+
+            toast({
+                title: "Restart Initiated",
+                description: `Successfully reset "${row.primary_keyword}". The engine should pick this up momentarily.`,
+            });
+
+            queryClient.invalidateQueries({ queryKey: ['workbook_rows'] });
+
+        } catch (error: any) {
+            toast({
+                title: "Restart Failed",
+                description: error.message || "An error occurred while trying to restart this brief.",
+                variant: "destructive"
+            });
+        } finally {
+            setRestartingRowId(null);
+        }
+    };
 
 
     const formatDate = (dateString: string) => {
@@ -336,18 +391,35 @@ export default function ContentBriefActivityLog() {
                                                 )}
                                             </TableCell>
                                             <TableCell className="py-5 px-6 text-right">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-8 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={() => {
-                                                        setSelectedRow(row);
-                                                        setIsDetailModalOpen(true);
-                                                    }}
-                                                >
-                                                    <Eye className="w-3.5 h-3.5 mr-1.5" />
-                                                    View Details
-                                                </Button>
+                                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {row.status === 'ERROR' && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleRestartRow(row);
+                                                            }}
+                                                            disabled={restartingRowId === row.id}
+                                                        >
+                                                            <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${restartingRowId === row.id ? 'animate-spin' : ''}`} />
+                                                            {restartingRowId === row.id ? 'Restarting...' : 'Restart'}
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8 text-xs font-bold"
+                                                        onClick={() => {
+                                                            setSelectedRow(row);
+                                                            setIsDetailModalOpen(true);
+                                                        }}
+                                                    >
+                                                        <Eye className="w-3.5 h-3.5 mr-1.5" />
+                                                        View Details
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}

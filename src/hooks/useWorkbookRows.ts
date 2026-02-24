@@ -21,8 +21,10 @@ export interface WorkbookRow {
     client_id: string;
     user_id: string | null;
     clients: {
+        id: string;
         name: string;
         workbook_url: string;
+        folder_id: string;
     } | null;
     profiles: {
         full_name: string;
@@ -65,8 +67,10 @@ export function useWorkbookRows(options: {
                 .select(`
                     *,
                     clients (
+                        id,
                         name,
-                        workbook_url
+                        workbook_url,
+                        folder_id
                     ),
                     profiles:user_id (
                         full_name,

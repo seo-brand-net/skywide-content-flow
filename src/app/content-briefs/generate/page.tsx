@@ -75,6 +75,7 @@ export default function ContentBriefsPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [generationStartTime, setGenerationStartTime] = useState<number | null>(null);
     const [localIsGenerating, setLocalIsGenerating] = useState(false);
+    const [restartingRowId, setRestartingRowId] = useState<string | null>(null);
     const { userRole, isAdmin, loading: roleLoading, authError, isInitialLoading } = useUserRole(user?.id);
 
     // Queries
@@ -179,8 +180,8 @@ export default function ContentBriefsPage() {
     const isGenerating = useMemo(() => {
         // We are generating if:
         // 1. Local state says we just started (overrides DB lag)
-        // 2. OR any row in the DB is currently NEW or IN_PROGRESS
-        const hasActiveRows = workbookRows.some(row => row.status === 'NEW' || row.status === 'IN_PROGRESS');
+        // 2. OR any row in the DB is currently IN_PROGRESS
+        const hasActiveRows = workbookRows.some(row => row.status === 'IN_PROGRESS');
 
         // Handover: Clear local override ONLY if we finally see active rows in the DB
         // or if the mutation itself failed/finished (handled by mutation state)
@@ -316,6 +317,59 @@ export default function ContentBriefsPage() {
             return;
         }
         automationMutation.mutate({ client: currentClient });
+    };
+
+    const handleRestartRow = async (row: WorkbookRow) => {
+        if (!currentClient?.workbook_url || !currentClient?.id || !currentClient?.folder_id) {
+            toast({
+                title: "Missing Data",
+                description: "Cannot restart: Missing client workbook or folder information.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setRestartingRowId(row.id);
+
+        try {
+            const response = await fetch('/api/proxy-apps-script', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    command: 'resetRowStatus',
+                    workbookUrl: currentClient.workbook_url,
+                    rowId: row.id,
+                    userId: user?.id,
+                    clientId: currentClient.id,
+                    folderId: currentClient.folder_id,
+                    runId: row.run_id || '',
+                    keyword: row.primary_keyword
+                }),
+            });
+
+            const result = await response.json();
+
+            // Check nested result status for workbook-level errors
+            if (!response.ok || result.status === 'error' || (result.result && result.result.status === 'error')) {
+                throw new Error(result.message || (result.result && result.result.message) || 'Restart failed');
+            }
+
+            toast({
+                title: "Restart Initiated",
+                description: `Successfully reset "${row.primary_keyword}". The engine should pick this up momentarily.`,
+            });
+
+            queryClient.invalidateQueries({ queryKey: ['workbook_rows', selectedClient] });
+
+        } catch (error: any) {
+            toast({
+                title: "Restart Failed",
+                description: error.message || "An error occurred while trying to restart this brief.",
+                variant: "destructive"
+            });
+        } finally {
+            setRestartingRowId(null);
+        }
     };
 
 
@@ -560,35 +614,53 @@ export default function ContentBriefsPage() {
                                                             <div className="text-[9px] text-muted-foreground mt-1 opacity-50 font-mono">{row.run_id?.substring(0, 8)}...</div>
                                                         </td>
                                                         <td className="px-4 py-3 text-center">
-                                                            <AlertDialog>
-                                                                <AlertDialogTrigger asChild>
+                                                            <div className="flex justify-center items-center gap-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                {row.status === 'ERROR' && (
                                                                     <Button
                                                                         variant="ghost"
                                                                         size="sm"
-                                                                        className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                        className="h-7 w-7 p-0 text-amber-600 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleRestartRow(row);
+                                                                        }}
+                                                                        disabled={restartingRowId === row.id}
+                                                                        title="Restart Brief Generation"
                                                                     >
-                                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                                        <RotateCcw className={`w-3.5 h-3.5 ${restartingRowId === row.id ? 'animate-spin' : ''}`} />
                                                                     </Button>
-                                                                </AlertDialogTrigger>
-                                                                <AlertDialogContent>
-                                                                    <AlertDialogHeader>
-                                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                                        <AlertDialogDescription>
-                                                                            This action cannot be undone. This will permanently delete this row
-                                                                            from your local workspace history.
-                                                                        </AlertDialogDescription>
-                                                                    </AlertDialogHeader>
-                                                                    <AlertDialogFooter>
-                                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                        <AlertDialogAction
-                                                                            onClick={() => deleteMutation.mutate(row.id)}
-                                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                )}
+                                                                <AlertDialog>
+                                                                    <AlertDialogTrigger asChild>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                                                                            title="Delete from local history"
                                                                         >
-                                                                            Delete
-                                                                        </AlertDialogAction>
-                                                                    </AlertDialogFooter>
-                                                                </AlertDialogContent>
-                                                            </AlertDialog>
+                                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                                        </Button>
+                                                                    </AlertDialogTrigger>
+                                                                    <AlertDialogContent>
+                                                                        <AlertDialogHeader>
+                                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                                            <AlertDialogDescription>
+                                                                                This action cannot be undone. This will permanently delete this row
+                                                                                from your local workspace history.
+                                                                            </AlertDialogDescription>
+                                                                        </AlertDialogHeader>
+                                                                        <AlertDialogFooter>
+                                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                            <AlertDialogAction
+                                                                                onClick={() => deleteMutation.mutate(row.id)}
+                                                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                            >
+                                                                                Delete
+                                                                            </AlertDialogAction>
+                                                                        </AlertDialogFooter>
+                                                                    </AlertDialogContent>
+                                                                </AlertDialog>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
