@@ -7,19 +7,18 @@ d.nodes.forEach(n => {
     if (n.name.includes('Claude Draft') || n.name.includes('OpenAI Draft')) {
         let p = n.parameters;
 
-        const fixContent = (content) => {
+        const injectPayloads = (content) => {
             if (typeof content !== 'string') return content;
             let newContent = content;
 
-            // Fix keyword_strategy.system_prompt_injection
-            newContent = newContent.replace(/keyword_strategy\\.system_prompt_injection/g, "system_prompt_injection");
+            // Ensure eeat_prompt_injection exists
+            if (!newContent.includes("eeat_prompt_injection")) {
+                newContent += "\\n\\n{{ $('Keyword Strategist').first().json.eeat_prompt_injection }}";
+            }
 
-            // Fix item.json reference to first().json 
-            newContent = newContent.replace(/\\$\\('Keyword Strategist'\\)\\.item\\.json/g, "$('Keyword Strategist').first().json");
-
-            // If it has system_prompt_injection but NOT structure_prompt_injection, append it.
-            if (newContent.includes("system_prompt_injection") && !newContent.includes("structure_prompt_injection")) {
-                newContent += "\\n\\n{{ $('Keyword Strategist').first().json.structure_prompt_injection }}";
+            // Ensure style_prompt_injection exists
+            if (!newContent.includes("style_prompt_injection")) {
+                newContent += "\\n\\n{{ $('Keyword Strategist').first().json.style_prompt_injection }}";
             }
 
             return newContent;
@@ -27,43 +26,43 @@ d.nodes.forEach(n => {
 
         // Deep replace in text properties
         if (p.text) {
-            let fresh = fixContent(p.text);
+            let fresh = injectPayloads(p.text);
             if (fresh !== p.text) {
                 p.text = fresh;
                 updated = true;
-                console.log("✅ Fixed parameters.text in " + n.name);
+                console.log("✅ Added EEAT/Style to parameters.text in " + n.name);
             }
         }
 
         // Replace in systemMessage
         if (p.systemMessage) {
-            let fresh = fixContent(p.systemMessage);
+            let fresh = injectPayloads(p.systemMessage);
             if (fresh !== p.systemMessage) {
                 p.systemMessage = fresh;
                 updated = true;
-                console.log("✅ Fixed parameters.systemMessage in " + n.name);
+                console.log("✅ Added EEAT/Style to parameters.systemMessage in " + n.name);
             }
         }
 
         // Replace in messages.values
         if (p.messages && p.messages.values && p.messages.values.length > 0) {
             let old = p.messages.values[0].content;
-            let fresh = fixContent(old);
+            let fresh = injectPayloads(old);
             if (fresh !== old) {
                 p.messages.values[0].content = fresh;
                 updated = true;
-                console.log("✅ Fixed parameters.messages.values in " + n.name);
+                console.log("✅ Added EEAT/Style to parameters.messages.values in " + n.name);
             }
         }
 
         // Replace in messages.messageValues
         if (p.messages && p.messages.messageValues && p.messages.messageValues.length > 0) {
             let old = p.messages.messageValues[0].message;
-            let fresh = fixContent(old);
+            let fresh = injectPayloads(old);
             if (fresh !== old) {
                 p.messages.messageValues[0].message = fresh;
                 updated = true;
-                console.log("✅ Fixed parameters.messages.messageValues in " + n.name);
+                console.log("✅ Added EEAT/Style to parameters.messages.messageValues in " + n.name);
             }
         }
     }

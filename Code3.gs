@@ -11,6 +11,9 @@
  * - Re-enabled web_search for Phase 3 (external link discovery) — Phase 3 is small enough (~13K) to handle tool state
  * - Tool isolation now Phase 2-only: Phase 1 gets all tools, Phase 3 gets web_search only, Phase 2 gets none
  * - Fixed: Phase 3 and competitor retry now strip context_management from payload (requires beta header not present)
+ * - Added: Ahrefs fallback — if Ahrefs API fails or returns <3 competitors, Phase 1 discovers competitors
+ *   via web_search, URLs are fetched server-side, and Phase 2 proceeds with pre-fetched content as normal.
+ *   Fallback briefs write "Ahrefs fallback: Competitors discovered via web_search" to the notes column.
  * - Updated quality scoring to evaluate search_suggestion presence instead of verified status
  * - Updated Google Doc renderer to show search suggestions prominently for all links
  *
@@ -321,8 +324,8 @@
 const CONFIG = {
   CLAUDE_MODEL: "claude-sonnet-4-20250514",
   CLAUDE_MAX_TOKENS: 24000,
-  CODE_VERSION: "2.1.0",
-  MAX_ROWS_PER_RUN: 3,
+  CODE_VERSION: "2.1.1",
+  MAX_ROWS_PER_RUN: 5,
   // SHEET_NAME is now dynamic or uses this as default
   DEFAULT_SHEET_NAME: "Content Brief Automation",
   DOCS_FOLDER_ID: "1nk3KsqlCv5-ndsayI-K1EC8aJXqvoAVQ",
@@ -1579,7 +1582,7 @@ function getSheetFromUrl(ss, url) {
 }
 
 function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, overrideUserId) {
-  debugLog('CODE_VERSION', CONFIG.CODE_VERSION + ' | server-side competitor prefetch | tools Phase 1 only');
+  debugLog('CODE_VERSION', CONFIG.CODE_VERSION + ' | server-side competitor prefetch | Phase 2 no tools, Phase 3 web_search only | Ahrefs fallback');
   const ss = openWorkbook(workbookUrl);
   let sheet = null;
   
@@ -1619,6 +1622,10 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
     safeAlert('No new rows to process', 'Batch Information');
     return;
   }
+  
+  const EXECUTION_START_TIME = Date.now();
+  const MAX_EXECUTION_TIME_MS = 5.5 * 60 * 1000; // 5.5 minutes
+
   targets.forEach(r => {
     const idCol = headers['id']?.index;
     let rowIdString = (idCol !== undefined) ? String(data[r][idCol] || '') : '';
@@ -1641,12 +1648,19 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
     rowObj.client_id = rowObj.client_id || fallbackClientId;
     rowObj.user_id = overrideUserId || rowObj.user_id || '';
     
-    notifyDashboardStatus(rowObj, null);
+    notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'IN_PROGRESS' }, null);
   });
-  
   targets.forEach(r => {
     try {
+      if (Date.now() - EXECUTION_START_TIME > MAX_EXECUTION_TIME_MS) {
+         throw new Error("Execution time limit reached (5.5m). Script gracefully paused to avoid a hard Google timeout. Please restart this row later.");
+      }
+      
       const rowObj = rowToObject(data[r], headers);
+      if (!rowObj.id) {
+        const idCol = headers['id']?.index;
+        rowObj.id = (idCol !== undefined) ? sheet.getRange(r + 1, idCol + 1).getValue() : '';
+      }
       rowObj.user_id = overrideUserId || rowObj.user_id || '';
       
       const strategy = buildStrategy(rowObj);
@@ -1667,7 +1681,9 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
       }
       
       sheet.getRange(r + 1, headers['status'].index + 1).setValue('DONE');
-      sheet.getRange(r + 1, headers['notes'].index + 1).setValue('');
+      sheet.getRange(r + 1, headers['notes'].index + 1).setValue(
+        strategy.ahrefsFallback ? 'Ahrefs fallback: Competitors discovered via web_search' : ''
+      );
       if (headers['quality_score']) {
         sheet.getRange(r + 1, headers['quality_score'].index + 1).setValue(brief.quality_score.total_score);
       }
@@ -1697,13 +1713,12 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue(
         String(e.message || e).substring(0, 1000)
       );
-      
       // Since we updated data[r] in the first loop, rowObj is now fully accurate!
       const rowObj = rowToObject(data[r], headers);
       if (!rowObj.client_id && fallbackClientId) rowObj.client_id = fallbackClientId;
       rowObj.user_id = overrideUserId || rowObj.user_id || '';
       
-      notifyDashboardStatus({ ...rowObj, status: 'ERROR', notes: e.toString() }, null);
+      notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'ERROR', notes: e.toString() }, null);
     }
     if (targets.indexOf(r) < targets.length - 1) {
       const delay = calculateOptimalDelay();
@@ -2618,6 +2633,41 @@ End with your CLIENT RESEARCH NOTES text block.`;
   const cleanedKeyword = strategy.primary_keyword.replace(/[\u200B\u200C\u200D\uFEFF\u00A0]/g, '').trim();
   const ahrefsSerpData = fetchAhrefsSerpData(cleanedKeyword, strategy.client_domain);
 
+  // Fallback flag: if Ahrefs fails, Phase 1 discovers competitors via web_search
+  var ahrefsFallback = false;
+  if (!ahrefsSerpData || ahrefsSerpData.competitors.length < 3) {
+    ahrefsFallback = true;
+    strategy.ahrefsFallback = true;  // Store on strategy for access in calling scope
+    var fallbackReason = !ahrefsSerpData ? 'Ahrefs API returned no data' : 
+      'Ahrefs returned only ' + ahrefsSerpData.competitors.length + ' competitors (need 3+)';
+    debugLog('AHREFS_FALLBACK', {
+      reason: fallbackReason,
+      competitors_returned: ahrefsSerpData ? ahrefsSerpData.competitors.length : 0,
+      action: 'Phase 1 will discover competitors via web_search'
+    });
+    
+    // Append competitor discovery task to Phase 1 message
+    userMessage += `
+
+════════════════════════════════════════════════════════════
+⚠️ ADDITIONAL TASK — COMPETITOR DISCOVERY (Ahrefs unavailable)
+════════════════════════════════════════════════════════════
+
+The SERP data API is unavailable for this keyword. You MUST also discover competitor pages.
+After completing your client research above, do ONE web_search for "${strategy.primary_keyword}" 
+and identify the top 6-8 organic result URLs (skip ads, PAA boxes, and the client domain ${strategy.client_domain}).
+
+List discovered competitor URLs at the END of your research notes in this EXACT format:
+
+=== DISCOVERED COMPETITOR URLS ===
+COMPETITOR_URL: https://example.com/full-page-path
+COMPETITOR_URL: https://example2.com/full-page-path
+(one per line, full URL including path, 6-8 URLs)
+
+These URLs will be fetched server-side for competitor analysis in Phase 2.
+Include your regular CLIENT RESEARCH NOTES first, then the DISCOVERED COMPETITOR URLS section last.`;
+  }
+
   // Fetch competitor page word counts server-side (deterministic, matches Ahrefs UI)
   if (ahrefsSerpData && ahrefsSerpData.competitors.length >= 3) {
     fetchCompetitorWordCounts(ahrefsSerpData.competitors);
@@ -2705,17 +2755,36 @@ End with your COMPETITOR RESEARCH NOTES text block.`;
 
   } else {
     // Fallback — no Ahrefs data OR insufficient competitor content
-    // v2.1.0: Phase 2 no longer has access to web_search/web_fetch (to prevent server state overflow)
-    // Without pre-fetched content, competitor research cannot proceed
-    var fallbackReason = !ahrefsSerpData ? 'Ahrefs API returned no data' : 
-      'Ahrefs returned fewer than 3 competitors (' + (ahrefsSerpData ? ahrefsSerpData.competitors.length : 0) + ')';
-    debugLog('AHREFS_FALLBACK_ERROR', {
-      reason: fallbackReason,
-      competitors_returned: ahrefsSerpData ? ahrefsSerpData.competitors.length : 0
+    // Phase 1 has been instructed to discover competitor URLs via web_search.
+    // After Phase 1 completes, those URLs will be fetched server-side and
+    // this placeholder message will be replaced with pre-fetched content.
+    debugLog('AHREFS_FALLBACK_PHASE2', {
+      reason: 'Phase 2 message will be rebuilt after Phase 1 discovers competitors',
+      ahrefsFallback: ahrefsFallback
     });
-    throw new Error('Insufficient competitor data for Phase 2. ' + fallbackReason + '. ' +
-      'v2.1.0 requires pre-fetched competitor content (no web_fetch in Phase 2). ' +
-      'Check Ahrefs API key and keyword validity.');
+    phase2Message = `════════════════════════════════════════════════════════════
+📌 PHASE 2 — COMPETITOR RESEARCH (FALLBACK MODE)
+════════════════════════════════════════════════════════════
+
+Analyze the competitor pages for "${strategy.primary_keyword}".
+
+NOTE: The Ahrefs SERP API was unavailable. Competitor content was discovered via web_search 
+and fetched server-side. If no competitor content appears above this message, use your 
+research notes from Phase 1 to provide the best competitor analysis you can.
+
+INSTRUCTIONS:
+1. Analyze ALL competitor pages provided above by position order
+2. Count H2/H3 sections, note content structure and patterns
+3. Identify content gaps and opportunities
+4. For EACH competitor, note whether the page has a FAQ section (yes/no)
+
+AFTER ANALYZING ALL COMPETITOR PAGES:
+Write comprehensive "=== COMPETITOR RESEARCH NOTES ===" summarizing EVERYTHING you found.
+These notes are your ONLY record — the competitor content will be cleared before the next phase.
+Include: each competitor URL + domain, word counts, section counts, calculations, patterns, gaps.
+
+DO NOT write the brief yet. ONLY research competitors.
+End with your COMPETITOR RESEARCH NOTES text block.`;
   }
 
   // Build deterministic FAQ directive based on page type
@@ -2841,7 +2910,7 @@ Your response must start with { and end with }. Nothing else.`;
     retry: retryCount,
     context_editing_threshold: CONFIG.CONTEXT_EDITING_THRESHOLD,
     web_fetch_max_content_tokens: CONFIG.WEB_FETCH_MAX_CONTENT_TOKENS,
-    tool_isolation: 'Phase 1 only (v2.1.0 — prevents server state overflow)',
+    tool_isolation: 'Phase 1: all tools | Phase 2: none | Phase 3: web_search only (v2.1.1)',
     prefetched_competitors: ahrefsSerpData ? ahrefsSerpData.competitors.filter(function(c) { return c.extracted_content && c.extracted_content.length > 100; }).length : 0
   });
   if (retryCount === 0) {
@@ -3510,6 +3579,131 @@ APPEND to your existing research notes with the same format (word count, H2/H3 c
           notes_count: previousPhaseNotes.length
         });
       }
+
+      // ─── AHREFS FALLBACK: Rebuild Phase 2 after Phase 1 discovers competitors ──
+      // When Ahrefs was unavailable, Phase 1 was instructed to discover competitor URLs
+      // via web_search. Parse those URLs, fetch content server-side, and rebuild Phase 2.
+      if (ahrefsFallback && phase.name === 'CLIENT_RESEARCH' && phaseText.length > 0) {
+        // Parse COMPETITOR_URL lines from Phase 1 notes
+        var urlMatches = phaseText.match(/COMPETITOR_URL:\s*(https?:\/\/[^\s]+)/g) || [];
+        var discoveredUrls = urlMatches.map(function(m) { return m.replace(/COMPETITOR_URL:\s*/, '').trim(); });
+        
+        // Deduplicate and filter out client domain
+        var seenFallbackDomains = {};
+        discoveredUrls = discoveredUrls.filter(function(url) {
+          var domainMatch = url.match(/^https?:\/\/([^\/]+)/i);
+          var domain = domainMatch ? domainMatch[1].replace(/^www\./, '').toLowerCase() : '';
+          if (!domain) return false;
+          if (domain === strategy.client_domain.toLowerCase()) return false;
+          if (seenFallbackDomains[domain]) return false;
+          seenFallbackDomains[domain] = true;
+          return true;
+        });
+        
+        debugLog('AHREFS_FALLBACK_URLS_PARSED', {
+          raw_matches: urlMatches.length,
+          after_dedup: discoveredUrls.length,
+          urls: discoveredUrls
+        });
+        
+        if (discoveredUrls.length >= 2) {
+          // Build competitor structure matching Ahrefs format
+          var fallbackCompetitors = discoveredUrls.slice(0, 10).map(function(url, i) {
+            return {
+              position: i + 1,
+              url: url,
+              title: '',
+              domain_rating: 0
+            };
+          });
+          
+          // Fetch content server-side (same function used for Ahrefs competitors)
+          fetchCompetitorWordCounts(fallbackCompetitors);
+          
+          // Store server word counts for recalculateWordCountRange
+          strategy.server_word_counts = fallbackCompetitors
+            .filter(function(c) { return c.word_count > 0; })
+            .map(function(c) { return { url: c.url, position: c.position, word_count: c.word_count }; });
+          
+          // Filter to those with successfully fetched content
+          var fallbackWithContent = fallbackCompetitors.filter(function(c) { 
+            return c.extracted_content && c.extracted_content.length > 100; 
+          });
+          var fallbackWithoutContent = fallbackCompetitors.filter(function(c) { 
+            return !c.extracted_content || c.extracted_content.length <= 100; 
+          });
+          
+          debugLog('AHREFS_FALLBACK_CONTENT', {
+            total: fallbackCompetitors.length,
+            with_content: fallbackWithContent.length,
+            without_content: fallbackWithoutContent.length,
+            skipped_urls: fallbackWithoutContent.map(function(c) { return c.url; })
+          });
+          
+          if (fallbackWithContent.length >= 2) {
+            // Build content blocks — same format as normal Phase 2
+            var fallbackContentBlocks = fallbackWithContent.map(function(c, i) {
+              var wcLabel = c.word_count > 0 ? '~' + c.word_count + ' words' : 'word count unavailable';
+              return '────────────────────────────────────────\n' +
+                'COMPETITOR ' + (i + 1) + ': [Position #' + c.position + ', DR ' + c.domain_rating + ', ' + wcLabel + ']\n' +
+                'URL: ' + c.url + '\n' +
+                '────────────────────────────────────────\n' +
+                c.extracted_content;
+            }).join('\n\n');
+            
+            var fallbackFailedList = fallbackWithoutContent.length > 0
+              ? '\nNOTE: The following competitors could not be fetched server-side (blocked/error):\n' +
+                fallbackWithoutContent.map(function(c) { 
+                  return '   - ' + c.url + ' (fetch status: ' + (c.word_count_source || 'unknown') + ')'; 
+                }).join('\n') + '\n'
+              : '';
+            
+            // Rebuild Phase 2 message with pre-fetched content
+            phases[1].message = '════════════════════════════════════════════════════════════\n' +
+              '📌 PHASE 2 — COMPETITOR RESEARCH (FALLBACK — competitors discovered via web_search)\n' +
+              '════════════════════════════════════════════════════════════\n\n' +
+              'Analyze the top competitors for "' + strategy.primary_keyword + '".\n\n' +
+              'NOTE: Ahrefs SERP API was unavailable. These competitors were discovered via web_search in Phase 1\n' +
+              'and their content was fetched server-side. Domain ratings may show as 0 (unavailable without Ahrefs).\n\n' +
+              fallbackWithContent.length + ' COMPETITOR PAGES (pre-fetched):\n\n' +
+              fallbackContentBlocks + '\n' +
+              fallbackFailedList + '\n' +
+              'INSTRUCTIONS:\n' +
+              '1. Analyze ALL ' + fallbackWithContent.length + ' competitor pages provided above\n' +
+              '2. WORD COUNTS — Pre-calculated by the server (shown above as "~X words"):\n' +
+              '   - Use the server-provided word counts in your research notes. Do NOT re-count words yourself.\n' +
+              '3. From the provided content, COUNT:\n' +
+              '   - Actual H2/H3 section count per page (look for heading patterns in the text)\n' +
+              '4. Calculate section count average + apply intent modifier\n' +
+              '5. Check for content format patterns (tables, lists, media references)\n' +
+              '6. For EACH competitor, note whether the page has a FAQ section (yes/no). Report the total count: "X of Y competitors have FAQ sections"\n' +
+              '7. Identify competitive gaps\n\n' +
+              'AFTER ANALYZING ALL COMPETITOR PAGES:\n' +
+              'Write comprehensive "=== COMPETITOR RESEARCH NOTES ===" summarizing EVERYTHING you found.\n' +
+              'These notes are your ONLY record — the competitor content will be cleared before the next phase.\n' +
+              'Include: each competitor URL + domain, word counts, section counts, calculations, patterns, gaps.\n\n' +
+              'DO NOT write the brief yet. ONLY research competitors.\n' +
+              'End with your COMPETITOR RESEARCH NOTES text block.';
+            
+            debugLog('AHREFS_FALLBACK_PHASE2_REBUILT', {
+              competitors_injected: fallbackWithContent.length,
+              message_chars: phases[1].message.length
+            });
+          } else {
+            debugLog('AHREFS_FALLBACK_INSUFFICIENT_CONTENT', {
+              fetched: fallbackWithContent.length,
+              needed: 2,
+              reason: 'Phase 2 will use placeholder message — Claude will work from Phase 1 notes only'
+            });
+          }
+        } else {
+          debugLog('AHREFS_FALLBACK_NO_URLS', {
+            parsed: discoveredUrls.length,
+            reason: 'Phase 1 did not discover enough competitor URLs — Phase 2 will use placeholder'
+          });
+        }
+      }
+      // ─── END AHREFS FALLBACK ──────────────────────────────────────────
 
       // Pace between phases
       if (phaseIndex < phases.length - 1) {
