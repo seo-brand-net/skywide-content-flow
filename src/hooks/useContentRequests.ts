@@ -19,6 +19,8 @@ export interface ContentRequest {
     webhook_response: string | null;
     user_id: string;
     current_run_id: string | null;
+    error_message: string | null;
+    improvement_notes: string | null;
     profiles?: {
         full_name: string;
         email: string;

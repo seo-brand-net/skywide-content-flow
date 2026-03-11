@@ -232,70 +232,281 @@ export default function Dashboard() {
         }
     };
 
-    const fillRandomData = () => {
-        const testScenarios = [
-            {
-                title: "The Future of AI in Content Creation",
-                brief: "Explore how generative AI models are reshaping the editorial landscape. Focus on the shift from manual writing to AI-assisted workflows, ethical considerations for accuracy, and how human editors remain the final layer of quality assurance. Avoid alarmist tones; focus on partnership between tech and talent.",
-                primary: "AI content creation",
-                secondary: "generative AI trends",
-                theme: "Technology & Innovation",
-                intent: "Informational"
-            },
-            {
-                title: "Top 10 SEO Strategies for 2024",
-                brief: "Provide a high-level guide on modern SEO beyond keywords. Cover the importance of E-E-A-T (Experience, Expertise, Authoritativeness, and Trustworthiness), optimizing for zero-click searches, and why mobile-first indexing is no longer optional but a baseline. Ensure all advice is actionable for small to mid-sized businesses.",
-                primary: "SEO strategies 2024",
-                secondary: "Google E-E-A-T",
-                theme: "Digital Marketing",
-                intent: "Commercial"
-            },
-            {
-                title: "Sustainable Living: A Practical Guide",
-                brief: "A roadmap for individuals looking to reduce their environmental impact without radical lifestyle changes. Include sections on zero-waste kitchen habits, ethical fashion choices, and the long-term benefits of circular economy participation. The tone should be encouraging and non-judgmental, acting as a 'mentor' to the reader.",
-                primary: "sustainable living tips",
-                secondary: "eco-friendly habits",
-                theme: "Lifestyle & Sustainability",
-                intent: "Informational"
-            },
-            {
-                title: "Crypto Market Trends: What to Watch",
-                brief: "An analysis of the current state of decentralized finance (DeFi) and institutional adoption of blockchain. Discuss the impact of Bitcoin ETFs, the rise of Layer 2 solutions for scalability, and what long-term investors should consider regarding portfolio diversification. Maintain a balanced, expert view without financial advice disclaimers (not needed for this test).",
-                primary: "crypto market trends",
-                secondary: "blockchain adoption",
-                theme: "Finance & Crypto",
-                intent: "Commercial"
-            },
-            {
-                title: "Remote Work Best Practices for Hybrid Teams",
-                brief: "A comprehensive look at maintaining company culture in a distributed environment. Address asynchronous communication tools, setting boundaries to prevent burnout, and how leadership can foster trust when face-to-face interaction is limited. Focus on practical solutions for HR managers and team leads.",
-                primary: "remote work best practices",
-                secondary: "hybrid team management",
-                theme: "Business & Management",
-                intent: "Lead Generation"
-            }
-        ];
-
-        const title_audiences = ["Tech Professionals", "Small Business Owners", "Eco-conscious Consumers", "Investors", "HR Managers"];
-        const clients = ["TechCorp", "GreenLife", "CryptoKing", "WorkSmart", "HealthPlus"];
-        const types = ["Website", "Blogs"];
-        const tones = ["Professional", "Casual", "Authoritative", "Friendly", "Technical"];
-
-        const random = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
-        const scenario = random(testScenarios);
-
+    const fillRealTestData = () => {
         setFormData({
-            articleTitle: scenario.title,
-            titleAudience: random(title_audiences),
-            clientName: random(clients),
-            creativeBrief: scenario.brief,
-            articleType: random(types),
-            wordCount: "1200",
-            primaryKeyword: scenario.primary,
-            secondaryKeyword: scenario.secondary,
-            semanticTheme: scenario.theme,
-            tone: random(tones),
-            pageIntent: scenario.intent
+            articleTitle: "Anxiety and School Pressure: Managing Stress Without Burning Out",
+            titleAudience: "Parents of teens dealing with school burn out",
+            clientName: "The Ridge RTC",
+            creativeBrief: `Do NOT deviate from this outline. 
+
+Blog Brief: Anxiety and School Pressure: Managing Stress Without Burning Out
+Reading Time: ~6 minutes
+Target Word Count: ~800 words
+Audience
+Parents and caregivers of teens and adolescents experiencing academic stress, overwhelm, or anxiety related to school performance — particularly middle and high school students.
+Tone
+Supportive, validating, educational, clinical yet accessible — reassuring without minimizing stress or over-pathologizing.
+Brand Positioning (The Ridge)
+Adolescent-focused, evidence-based, trauma-informed, skills-oriented — emphasizing emotional regulation, balance, and resilience rather than perfection or pressure.
+
+SEO Guidelines
+Focus Keyword
+Teen School Anxiety
+Must appear in:
+H1 (title)
+First paragraph
+At least two additional times naturally throughout the article
+Primary Keyword
+High School Anxiety
+Must appear in:
+At least one H2 heading
+At least two additional times naturally in the body
+Long-Tail Keywords
+Use each once organically:
+How to Deal With Anxiety at School Teenager
+How to Help Teenager With School Anxiety
+
+Table of Contents
+Introduction
+Understanding Teen School Anxiety
+High School Anxiety and Academic Pressure
+Signs School Stress Is Becoming a Problem
+Why Teens Burn Out
+How to Deal With Anxiety at School Teenager
+How to Help Teenager With School Anxiety
+When School Anxiety Needs Professional Support
+FAQs
+Conclusion
+Key Takeaways
+Cited Sources
+
+Internal Links:
+https://theridgertc.com/what-we-treat/teen-anxiety-treatment/
+https://theridgertc.com/what-we-treat/school-refusal-treatment-program/
+https://theridgertc.com/how-we-treat/residential-treatment-centers-for-youth/
+https://theridgertc.com/contact/
+https://paradigmtreatment.com/teen-anxiety-school-refusal/
+
+Content Outline & Writing Instructions
+1. Introduction (≈90–110 words)
+Purpose: Normalize school-related stress and frame burnout prevention.
+Acknowledge the pressure teens face from academics, extracurriculars, testing, and expectations.
+Introduce Teen School Anxiety as a common and understandable response to chronic stress.
+Emphasize that unmanaged school pressure can lead to burnout, emotional exhaustion, and anxiety.
+Use the focus keyword naturally in the first paragraph.
+
+2. Understanding Teen School Anxiety (≈90–100 words)
+Purpose: Define school-related anxiety in adolescents.
+Explain how school anxiety differs from normal stress or motivation.
+Discuss how performance pressure, comparison, and fear of failure contribute to anxiety.
+Reinforce that Teen School Anxiety affects emotional, physical, and cognitive functioning.
+
+3. High School Anxiety and Academic Pressure (≈90–100 words)
+Purpose: Address developmental and environmental factors.
+Use High School Anxiety in the H2 and body copy.
+Discuss increased workload, testing, college pressure, and social comparison.
+Explain how adolescent brain development makes stress regulation more challenging.
+Emphasize that anxiety is not a sign of weakness or lack of effort.
+
+4. Signs School Stress Is Becoming a Problem (≈80–90 words)
+Purpose: Help parents recognize red flags.
+Emotional signs: irritability, worry, perfectionism, emotional shutdown.
+Physical signs: headaches, stomachaches, fatigue, sleep disruption.
+Behavioral signs: avoidance, school refusal, declining grades, burnout symptoms.
+Emphasize patterns over isolated incidents.
+
+5. Why Teens Burn Out (≈80–90 words)
+Purpose: Explain burnout without blame.
+Describe chronic stress, lack of recovery time, and constant performance demands.
+Discuss internal pressure vs. external expectations.
+Reinforce that burnout is a nervous system response, not laziness.
+
+6. How to Deal With Anxiety at School Teenager (≈90–110 words)
+Purpose: Offer teen-centered coping strategies.
+Introduce How to Deal With Anxiety at School Teenager organically.
+Suggest skills such as pacing, grounding techniques, realistic goal-setting, and breaks.
+Emphasize learning stress-management skills rather than avoiding school entirely.
+Reinforce that support should be collaborative, not punitive.
+
+7. How to Help Teenager With School Anxiety (≈90–110 words)
+Purpose: Guide parents toward supportive responses.
+Introduce How to Help Teenager With School Anxiety naturally.
+Encourage open conversations about pressure and expectations.
+Suggest validating emotions while helping teens build coping tools.
+Emphasize flexibility, balance, and emotional safety over achievement.
+
+8. When School Anxiety Needs Professional Support (≈80–90 words)
+Purpose: Normalize seeking help.
+Explain when anxiety interferes with attendance, sleep, mood, or functioning.
+Emphasize that early intervention prevents long-term burnout.
+Position The Ridge's adolescent-focused, skills-based approach as supportive and developmentally appropriate.
+
+9. FAQs (≈100 words total)
+Q1: Is school anxiety normal for teens?
+A: Some stress is normal, but persistent anxiety is not something teens should handle alone.
+Q2: Can anxiety affect academic performance?
+A: Yes — anxiety can impair focus, memory, and motivation.
+Q3: Should parents reduce academic expectations?
+A: Balance and flexibility often support better long-term outcomes than pressure.
+Q4: Can teens learn to manage school stress effectively?
+A: Yes — with skills, support, and guidance, teens can build resilience.
+
+10. Conclusion (≈70–80 words)
+Reinforce that Teen School Anxiety is common but manageable.
+Emphasize that addressing High School Anxiety early helps prevent burnout.
+Encourage families to prioritize emotional well-being alongside academic success.
+Reinforce that support, skills, and balance make a meaningful difference.
+
+11. Key Takeaways
+Teen school anxiety is a common response to chronic academic pressure.
+High school anxiety can escalate without support.
+Burnout reflects nervous system overload, not lack of effort.
+Knowing how to deal with anxiety at school helps teens stay engaged.
+Knowing how to help a teenager with school anxiety starts with validation and balance.
+
+12. Cited Sources
+Include authoritative sources such as:
+CDC – Youth Stress & Mental Health
+American Academy of Pediatrics – School Stress in Adolescents
+National Institute of Mental Health (NIMH) – Anxiety Disorders in Teens
+Child Mind Institute – School Anxiety & Burnout`,
+            articleType: "Blogs",
+            wordCount: "800",
+            primaryKeyword: "Teen School Anxiety",
+            secondaryKeyword: "High School Anxiety",
+            semanticTheme: "How to Deal With Anxiety at School as a Teenager, How to Help Teenager With School Anxiety",
+            tone: "Professional, compassionate",
+            pageIntent: "Informational"
+        });
+    };
+
+    const fillParadigmTestData = () => {
+        setFormData({
+            articleTitle: "Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens",
+            titleAudience: "Parents and Caregivers",
+            clientName: "Paradigm Treatment",
+            creativeBrief: `Blog Brief: Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens
+Reading Time: ~6 minutes
+Target Word Count: 800 words
+Audience
+Parents and caregivers of teens and adolescents experiencing stress, anxiety, or chronic health conditions — especially those seeking to understand how physical health impacts emotional well-being.
+Tone
+Compassionate, educational, reassuring, clinical yet accessible — validating parental concern without fear-based messaging.
+Brand Positioning
+Trauma-informed, evidence-based, developmental, family-engaged — emphasizing whole-person care and the mind–body connection without blame.
+
+SEO Guidelines
+Primary Keyword
+Teen Stress and Anxiety
+Must appear in:
+H1 (title)
+First paragraph
+At least two additional times naturally throughout the article
+Secondary Keyword
+Exercise and Adolescent Mental Health
+Must appear in:
+At least one H2 heading
+At least two additional times naturally in the body
+Semantic Themes
+Use each once organically:
+How to Help a Teenager With Stress and Anxiety
+Exercise and Mental Health in Adolescents
+
+Internal Links:
+https://paradigmtreatment.com/mental-health-treatment-for-teens/
+https://paradigmtreatment.com/mental-health-treatment-for-teens/anxiety-treatment-for-teens/
+https://paradigmtreatment.com/treatment-approach/residential-treatment-centers-for-youth/
+https://paradigmtreatment.com/treatment-approach/young-adult-residential-treatment/
+https://paradigmtreatment.com/contact-paradigm-treatment/
+
+Table of Contents
+Introduction
+Understanding Teen Stress and Anxiety
+The Link Between Physical Health and Mental Wellness
+Exercise and Adolescent Mental Health
+Chronic Illness, Pain, and Anxiety in Teens
+How to Help a Teenager With Stress and Anxiety
+When Physical and Mental Health Need Integrated Care
+FAQs
+Conclusion
+Key Takeaways
+Cited Sources
+
+Content Outline & Writing Instructions
+1. Introduction
+Purpose: Frame the mind–body connection and normalize parental concern.
+Acknowledge how stress and anxiety often coexist with physical health challenges in teens.
+Introduce Teen Stress and Anxiety as common but meaningful concerns that deserve a holistic approach.
+Emphasize that physical health — including exercise, sleep, and chronic illness management — plays a critical role in emotional regulation and resilience.
+Use the focus keyword naturally in the first paragraph.
+
+2. Understanding Teen Stress and Anxiety
+Purpose: Define stress and anxiety in adolescence.
+Explain how teen stress differs from adult stress due to developmental and neurologic factors.
+Describe common stressors (school pressure, social expectations, health issues).
+Reinforce that persistent stress can contribute to anxiety symptoms when left unaddressed.
+
+3. The Link Between Physical Health and Mental Wellness
+Purpose: Establish the biological connection between body and mind.
+Explain how stress hormones, inflammation, sleep disruption, and physical discomfort impact emotional health.
+Highlight that physical health challenges can intensify Teen Stress and Anxiety.
+Emphasize that mental wellness is not separate from physical well-being.
+
+4. Exercise and Adolescent Mental Health
+Purpose: Highlight movement as a protective and supportive factor.
+Use Exercise and Adolescent Mental Health in the H2 and body copy.
+Explain how regular physical activity supports mood regulation, stress reduction, and nervous system balance.
+Introduce Exercise and Mental Health in Adolescents once organically.
+Emphasize that exercise does not need to be intense or performance-based to be beneficial.
+Reinforce that movement can be adapted for teens with anxiety or physical limitations.
+
+5. Chronic Illness, Pain, and Anxiety in Teens
+Purpose: Address the emotional impact of ongoing physical conditions.
+Discuss how chronic illness, pain, or medical conditions can heighten anxiety and stress.
+Acknowledge feelings of loss of control, isolation, or frustration common in teens managing health conditions.
+Emphasize the importance of coordinated medical and mental health support.
+
+6. How to Help a Teenager With Stress and Anxiety
+Purpose: Provide practical, compassionate parental guidance.
+Introduce How to Help a Teenager With Stress and Anxiety naturally.
+Encourage open conversations about physical symptoms, stress, and emotions.
+Suggest supporting healthy routines (movement, sleep, nutrition) without pressure.
+Reinforce observing patterns rather than isolated behaviors.
+
+7. When Physical and Mental Health Need Integrated Care
+Purpose: Normalize professional support and integrated treatment.
+Explain when stress and anxiety begin to interfere with daily functioning or physical health management.
+Highlight the benefits of integrated care that addresses both physical and mental health needs.
+Emphasize early intervention and whole-person treatment.
+
+8. FAQs
+Q1: Can physical health issues cause anxiety in teens?
+A: Yes — chronic illness, pain, and fatigue can increase stress and anxiety symptoms.
+Q2: Does exercise really help teen anxiety?
+A: Regular movement supports mood regulation and stress reduction.
+Q3: What if my teen can't exercise due to illness?
+A: Gentle, adaptive movement and other body-based supports can still help.
+Q4: Should mental and physical health be treated together?
+A: Yes — integrated care leads to better outcomes for teens.
+
+9. Conclusion
+Reinforce that understanding Teen Stress and Anxiety requires looking at the whole person.
+Emphasize the role of physical health, movement, and chronic illness management in emotional wellness.
+Encourage parents to seek integrated, compassionate support rather than addressing symptoms in isolation.
+
+10. Key Takeaways
+Teen stress and anxiety are closely linked to physical health.
+Exercise supports adolescent mental health in accessible ways.
+Chronic illness can intensify emotional stress in teens.
+Knowing how to help a teenager with stress and anxiety starts with whole-person care.
+Integrated treatment supports long-term resilience.`,
+            articleType: "Blogs",
+            wordCount: "800",
+            primaryKeyword: "Teen Stress and Anxiety",
+            secondaryKeyword: "Exercise and Adolescent Mental Health",
+            semanticTheme: "How to Help a Teenager With Stress and Anxiety, Exercise and Mental Health in Adolescents",
+            tone: "Compassionate, educational, reassuring, clinical yet accessible. Validates parental concern without fear-based messaging.",
+            pageIntent: "Informational"
         });
     };
 
@@ -343,7 +554,24 @@ export default function Dashboard() {
                             Content Submission Form
                             {isAdmin && (
                                 <div className="flex gap-2">
-
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={fillRealTestData}
+                                        className="text-xs"
+                                    >
+                                        🧪 Ridge RTC
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={fillParadigmTestData}
+                                        className="text-xs"
+                                    >
+                                        🧪 Paradigm
+                                    </Button>
                                     <ABTestModal />
                                 </div>
                             )}

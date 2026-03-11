@@ -1,0 +1,68 @@
+﻿diff --git a/Code.txt b/MikeCode.gs
+index 1af7ebc..21ecfcd 100644
+--- a/Code.txt
++++ b/MikeCode.gs
+@@ -14,6 +14,8 @@
+  * - Added: Ahrefs fallback ÔÇö if Ahrefs API fails or returns <3 competitors, Phase 1 discovers competitors
+  *   via web_search, URLs are fetched server-side, and Phase 2 proceeds with pre-fetched content as normal.
+  *   Fallback briefs write "Ahrefs fallback: Competitors discovered via web_search" to the notes column.
++ * - Fixed: fetchCompetitorWordCounts now falls back to individual fetches when fetchAll crashes
++ *   (one bad DNS no longer kills all competitor fetches ÔÇö e.g. sfbradsutter.com DNS failure)
+  * - Updated quality scoring to evaluate search_suggestion presence instead of verified status
+  * - Updated Google Doc renderer to show search suggestions prominently for all links
+  *
+@@ -4179,26 +4181,41 @@ function fetchCompetitorWordCounts(competitors) {
+   try {
+     responses = UrlFetchApp.fetchAll(requests);
+   } catch (e) {
+-    // If fetchAll itself fails, mark all as failed
++    // fetchAll crashed (e.g. one bad DNS poisons the batch) ÔÇö fall back to individual fetches
+     debugLog('SERVER_WORD_COUNTS_FETCHALL_ERROR', e.message.substring(0, 200));
+-    competitors.forEach(comp => {
+-      comp.word_count = 0;
+-      comp.word_count_source = 'error';
+-      comp.extracted_content = '';
+-      results.push({ pos: comp.position, url: comp.url, words: 0, status: 'fetchAll_error' });
+-    });
+-    debugLog('SERVER_WORD_COUNTS', {
+-      total: competitors.length,
+-      successful: 0,
+-      counts: results
+-    });
+-    return competitors;
++    debugLog('SERVER_WORD_COUNTS_FALLBACK', 'Retrying ' + competitors.length + ' URLs individually');
++    responses = [];
++    for (var i = 0; i < requests.length; i++) {
++      try {
++        responses.push(UrlFetchApp.fetch(requests[i].url, {
++          muteHttpExceptions: true,
++          followRedirects: true,
++          validateHttpsCertificates: false,
++          headers: requests[i].headers
++        }));
++      } catch (fetchErr) {
++        // This individual URL failed (DNS, timeout, etc.) ÔÇö push null placeholder
++        debugLog('SERVER_WORD_COUNTS_INDIVIDUAL_ERROR', { 
++          url: competitors[i].url, 
++          error: fetchErr.message.substring(0, 100) 
++        });
++        responses.push(null);
++      }
++    }
+   }
+   
+   // Process responses (same order as requests)
+   responses.forEach((response, idx) => {
+     const comp = competitors[idx];
+     try {
++      // null = individual fetch failed (DNS, timeout, etc.)
++      if (!response) {
++        comp.word_count = 0;
++        comp.word_count_source = 'error';
++        comp.extracted_content = '';
++        results.push({ pos: comp.position, url: comp.url, words: 0, status: 'fetch_failed' });
++        return;
++      }
+       const statusCode = response.getResponseCode();
+       
+       if (statusCode >= 200 && statusCode < 400) {

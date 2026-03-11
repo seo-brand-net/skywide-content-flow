@@ -1,0 +1,53 @@
+Handover Prompt: Content Brief Restart & Auto-Generation Enhancement
+Objective: Implement a stable, reliable "Restart" flow for content briefs that are stuck or failed. The restart must not only reset the status in Google Sheets but also automatically re-trigger the generation engine without manual intervention.
+
+Technical Architecture:
+
+Frontend: Next.js with Supabase and Pusher for real-time updates.
+Backend Bridge: A Proxy API route /api/proxy-apps-script that forwards commands to Google Apps Script.
+Engine: Google Apps Script (
+
+Code3.gs
+) managing Google Sheets and content generation (Claude API).
+Key Implementation Details:
+
+Robust Row Targeting (3-Stage Fallback): The Apps Script 
+
+resetRowStatus
+ function uses the following logic to find the correct row to reset in the Google Sheet:
+
+Stage 1: Search by 
+
+id
+ (Supabase UUID).
+Stage 2: Fallback to run_id (Generated at the start of every run).
+Stage 3: Fallback to primary_keyword (Trimmed and case-insensitive).
+Rationale: Ensures the system can find rows even if manual sheet edits have broken the UUID link or introduced whitespace.
+Automatic Re-triggering Logic: In Code3.gs:doPost, when a 
+
+resetRowStatus
+ command is successful:
+
+The script sets PENDING_FOLDER_ID, PENDING_WORKBOOK_URL, PENDING_CLIENT_ID, and PENDING_USER_ID in UserProperties.
+It creates a time-based trigger for 
+
+asyncRunBriefGeneration
+ to run "after(1000)" (immediately).
+Rationale: This bypasses the need for the user to manually click "Trigger Engine" again.
+Error Tracking Persistence: In Code3.gs:runBriefGeneration, the error handling catch-block has been updated to ensure the run_id is included in the 
+
+notifyDashboardStatus
+ call even if a row fails.
+
+Rationale: This prevents "orphaned" error rows that can't be found during a restart because they lack a run_id.
+Frontend Data Flow:
+
+Hook: 
+
+useWorkbookRows.ts
+ now fetches clientId and folderId from the Supabase clients relation.
+Pages: 
+
+handleRestartRow
+ in both the Activity Log and Generation pages passes the full payload: { command, workbookUrl, rowId, userId, clientId, folderId, runId, keyword }.
+Error Handling: The UI now checks the nested result.result.status from the Apps Script response to correctly report workbook-level errors (like "Row not found").

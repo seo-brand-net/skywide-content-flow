@@ -1,5 +1,5 @@
 {
-  "name": "DEV Skywide Content (TEST v23)",
+  "name": "DEV Skywide  Content",
   "nodes": [
     {
       "parameters": {
@@ -10,11 +10,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -416,
-        16
+        -12048,
+        -2528
       ],
       "typeVersion": 1,
-      "id": "ac5c6fa9-8f3a-43d5-9c43-d37050f5906c",
+      "id": "fc30d24e-daa5-42cd-87c6-f43267e723d9",
       "name": "Sticky Note"
     },
     {
@@ -23,11 +23,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        192,
-        464
+        -11440,
+        -2080
       ],
       "typeVersion": 1,
-      "id": "743e0f2e-da5e-4b79-9406-42ef6fb2967d",
+      "id": "815691c6-a6ef-4a82-bbe0-81f1cb9730ca",
       "name": "Sticky Note5"
     },
     {
@@ -101,25 +101,25 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        672,
-        1664
+        -11504,
+        -768
       ],
-      "id": "a3231089-542f-483e-bdf2-5feacf78a1f4",
+      "id": "bc4ddb34-ea41-4bc3-8c32-cf8ace329d8d",
       "name": "Clean1"
     },
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "content-test",
+        "path": "content-engine-dev",
         "options": {}
       },
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        0,
-        1760
+        -12624,
+        -672
       ],
-      "id": "37f193c4-e6d3-44ab-bf19-6b4a1abb02f3",
+      "id": "465de248-38cd-40a0-85d4-dcaf2b47427d",
       "name": "Webhook1",
       "webhookId": "c9d7ab2c-298f-4b57-be8e-235a1c25f1ef"
     },
@@ -144,10 +144,10 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        448,
-        1760
+        -11728,
+        -672
       ],
-      "id": "1fdca468-4162-41cb-b6d2-4a4fc7a2e4ab",
+      "id": "56379bfb-1914-4d81-9e1a-87459b77aa43",
       "name": "Create folder1",
       "notesInFlow": true,
       "credentials": {
@@ -164,7 +164,7 @@
         "messages": {
           "message": [
             {
-              "content": "=You are an expert content editor who synthesizes multiple AI drafts into one superior article. You fact-check claims, combine the best elements from each draft, and maintain the authentic, conversational tone. You research current data to enhance credibility while preserving the human-like voice. \n\nCRITICAL: The final merged article MUST be {{ $('Webhook1').item.json.body.word_count }} words (±10% acceptable: {{ $('Webhook1').item.json.body.word_count * 0.9 }}-{{ $('Webhook1').item.json.body.word_count * 1.1 }} words). Do not exceed or fall short of this range.\n\nCurrent date: {{ $now.toISO() }}\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\n{{ $('Keyword Strategist').first().json.keyword_strategy.system_prompt_injection }}",
+              "content": "=You are an expert content editor who synthesizes multiple AI drafts into one superior article. You fact-check claims, combine the best elements from each draft, and maintain the authentic, conversational tone. You research current data to enhance credibility while preserving the human-like voice. \n\nCRITICAL: The final merged article's main body (excluding FAQs) MUST be {{ $('Webhook1').item.json.body.word_count }} words (±10% acceptable: {{ $('Webhook1').item.json.body.word_count * 0.9 }}-{{ $('Webhook1').item.json.body.word_count * 1.1 }} words). Do not exceed or fall short of this range.\n\nCurrent date: {{ $now.toISO() }}\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\n{{ $('Keyword Strategist').first().json.system_prompt_injection }}",
               "role": "system"
             },
             {
@@ -180,10 +180,10 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        1472,
-        1664
+        -10704,
+        -768
       ],
-      "id": "7f6a8b4c-e3ef-4dd4-b9fa-d790bd9dfcca",
+      "id": "61474cc4-5db4-4301-9949-4d3eb3777271",
       "name": "Data Check & Research Gaps1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -203,10 +203,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        1248,
-        1664
+        -10928,
+        -768
       ],
-      "id": "cfb682a8-f2ec-43ef-bea1-1d5df4a4bc33",
+      "id": "25a31aa3-dc60-41cd-9e1e-79da79a228f1",
       "name": "Merge3"
     },
     {
@@ -220,7 +220,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are an SEO strategist who optimizes content for search while preserving authentic, conversational tone. \n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Any suggested changes must keep the article within this range.\n\nYour goal is to enhance discoverability without sacrificing the natural \"friend giving advice\" voice. Never suggest changes that make content sound corporate or AI-generated. \n\nCurrent date: {{ $now.toISO() }}\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
+              "content": "=You are an SEO strategist who optimizes content for search while preserving authentic, conversational tone. \n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Any suggested changes must keep the article within this range.\n\nYour goal is to enhance discoverability without sacrificing the natural \"friend giving advice\" voice. Never suggest changes that make content sound corporate or AI-generated. \n\nCurrent date: {{ $now.toISO() }}\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
               "role": "system"
             },
             {
@@ -229,17 +229,17 @@
           ]
         },
         "options": {
-          "temperature": 0.5,
-          "maxTokens": 4096
+          "maxTokens": 4096,
+          "temperature": 0.5
         }
       },
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        1696,
-        1504
+        -10480,
+        -912
       ],
-      "id": "07a676e3-1c39-45c1-acf8-57e6a8e8f951",
+      "id": "0c24cc61-49ae-4337-a55f-d516666ae22d",
       "name": "OpenAI Keyword Check + Semantic Gap1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -266,10 +266,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        1696,
-        1808
+        -10480,
+        -624
       ],
-      "id": "255d7fa1-8b5e-40df-854e-8a310f17c822",
+      "id": "f7b98317-2454-4a84-bd78-e396a3c9b61d",
       "name": "Claude Keyword Check + Semantic Gap1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -291,10 +291,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        1776,
-        2032
+        -10416,
+        -400
       ],
-      "id": "67960c3c-f528-45da-a308-e9a939804e18",
+      "id": "ec0d78a7-7ece-42cd-96dd-c2ee6f12d54c",
       "name": "Anthropic Chat Model5",
       "credentials": {
         "anthropicApi": {
@@ -312,10 +312,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        2048,
-        1664
+        -10128,
+        -768
       ],
-      "id": "f4b5136e-8313-4c6e-9663-79ddc5298218",
+      "id": "d7c88cee-4ec5-4ebd-ac91-a875eaad2809",
       "name": "Merge5"
     },
     {
@@ -325,7 +325,7 @@
         "messages": {
           "messageValues": [
             {
-              "message": "=You are an expert SEO content editor specializing in implementing optimization recommendations while preserving content authenticity and readability. \n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When applying recommendations, maintain this word count by replacing or condensing content, not just adding.\n\nYour role is to seamlessly integrate SEO improvements and factual updates into existing content without compromising the natural human voice or flow.\n\n# Critical Rules\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Do not write in the company's voice for {{ $('Webhook1').first().json.body.client_name }} (\"we,\" \"our,\" \"join us\"). Write in second person (\"you\") or neutral third person"
+              "message": "=You are an expert SEO content editor specializing in implementing optimization recommendations while preserving content authenticity and readability. \n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When applying recommendations, maintain this word count by replacing or condensing content, not just adding.\n\nYour role is to seamlessly integrate SEO improvements and factual updates into existing content without compromising the natural human voice or flow.\n\n# Critical Rules\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Do not write in the company's voice for {{ $('Webhook1').first().json.body.client_name }} (\"we,\" \"our,\" \"join us\"). Write in second person (\"you\") or neutral third person"
             }
           ]
         },
@@ -334,10 +334,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        2496,
-        1664
+        -9680,
+        -768
       ],
-      "id": "5218157e-38ba-4c9c-bc5a-41953b206165",
+      "id": "0ccddeab-fb45-4a52-9739-9a887b4a4ee8",
       "name": "Claude Apply Recommendations1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -358,10 +358,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        2576,
-        1888
+        -9616,
+        -544
       ],
-      "id": "4c6e86c1-3823-4c2f-9b74-603abf7660b3",
+      "id": "0efbfc11-d934-4636-9f99-70dbe8808286",
       "name": "Anthropic Chat Model6",
       "credentials": {
         "anthropicApi": {
@@ -381,7 +381,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are a senior SEO content strategist and copywriter with 10+ years of experience specializing in EEAT optimization for authoritative content.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When adding EEAT elements, condense or replace existing content to maintain length.\n\nYou understand how to authentically demonstrate Experience, Expertise, Authority, and Trust through subtle content enhancements that feel natural and valuable to readers while maintaining a neutral expert voice and satisfying Google's quality guidelines.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
+              "content": "=You are a senior SEO content strategist and copywriter with 10+ years of experience specializing in EEAT optimization for authoritative content.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When adding EEAT elements, condense or replace existing content to maintain length.\n\nYou understand how to authentically demonstrate Experience, Expertise, Authority, and Trust through subtle content enhancements that feel natural and valuable to readers while maintaining a neutral expert voice and satisfying Google's quality guidelines.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
               "role": "system"
             },
             {
@@ -396,10 +396,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        2848,
-        1504
+        -9328,
+        -912
       ],
-      "id": "101511d9-60c1-4cc3-94f7-56d45b977678",
+      "id": "83cb0c65-d504-4c4e-a322-6200feb94ff6",
       "name": "OpenAI EEAT Injection1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -417,7 +417,7 @@
         "messages": {
           "messageValues": [
             {
-              "message": "=You are a senior SEO content strategist and copywriter with 10+ years of experience specializing in EEAT optimization for authoritative content.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When adding EEAT elements, condense or replace existing content to maintain length.\n\nYou understand how to authentically demonstrate Experience, Expertise, Authority, and Trust through subtle content enhancements that feel natural and valuable to readers while maintaining a neutral expert voice and satisfying Google's quality guidelines."
+              "message": "=You are a senior SEO content strategist and copywriter with 10+ years of experience specializing in EEAT optimization for authoritative content.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When adding EEAT elements, condense or replace existing content to maintain length.\n\nYou understand how to authentically demonstrate Experience, Expertise, Authority, and Trust through subtle content enhancements that feel natural and valuable to readers while maintaining a neutral expert voice and satisfying Google's quality guidelines."
             }
           ]
         },
@@ -426,10 +426,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        2848,
-        1808
+        -9328,
+        -624
       ],
-      "id": "24142e62-2b60-458b-bd6b-605ba2738413",
+      "id": "76347540-eba7-4c29-8004-8b8fbabc5db3",
       "name": "Claude EEAT Injection1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -443,10 +443,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3200,
-        1664
+        -8976,
+        -768
       ],
-      "id": "340f6719-5e2f-4dea-bce7-0e1bab9517d9",
+      "id": "6c30ad7c-58c2-4c8f-a3e1-a587e68e53bf",
       "name": "Merge6"
     },
     {
@@ -465,10 +465,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        2928,
-        2032
+        -9264,
+        -400
       ],
-      "id": "0bfba8cf-d671-427d-9ca5-4fee8cdf8a2c",
+      "id": "e46bf16b-6fb5-4cd8-a10d-14b6564b3a87",
       "name": "Anthropic Chat Model7",
       "credentials": {
         "anthropicApi": {
@@ -488,7 +488,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are an expert SEO editor specializing in AI search optimization, featured snippets, and voice search queries.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When merging and optimizing, maintain this word count.\n\nYou understand how modern search algorithms evaluate content for featured snippets, People Also Ask boxes, and voice assistant responses. Your expertise includes optimizing content structure, formatting, and language patterns that perform well across all search result types while preserving authentic, conversational tone.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
+              "content": "=You are an expert SEO editor specializing in AI search optimization, featured snippets, and voice search queries.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When merging and optimizing, maintain this word count.\n\nYou understand how modern search algorithms evaluate content for featured snippets, People Also Ask boxes, and voice assistant responses. Your expertise includes optimizing content structure, formatting, and language patterns that perform well across all search result types while preserving authentic, conversational tone.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
               "role": "system"
             },
             {
@@ -503,10 +503,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        3648,
-        1664
+        -8528,
+        -768
       ],
-      "id": "e2e6ccbf-1be9-465f-9f64-98fdc2e6095b",
+      "id": "6c48808e-ef8a-4964-96e4-e3bf6adf4ca3",
       "name": "OpenAI SEO Optimization1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -528,7 +528,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are an advanced SEO and NLP optimization specialist who enhances content for Google's algorithms while preserving authentic, conversational tone.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Optimizations must maintain this word count.\n\nYour expertise is making subtle technical improvements that boost search performance without sacrificing the natural \"friend giving advice\" voice that makes content genuinely helpful.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\\n\\n{{ $('Keyword Strategist').first().json.eeat_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.style_prompt_injection }}",
+              "content": "=You are an advanced SEO and NLP optimization specialist who enhances content for Google's algorithms while preserving authentic, conversational tone.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Optimizations must maintain this word count.\n\nYour expertise is making subtle technical improvements that boost search performance without sacrificing the natural \"friend giving advice\" voice that makes content genuinely helpful.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\n{{ $('Keyword Strategist').item.json.system_prompt_injection }}\n\n{{ $('Keyword Strategist').item.json.structure_prompt_injection }}\n{{ $('Keyword Strategist').item.json.eeat_prompt_injection }}\n{{ $('Keyword Strategist').item.json.style_prompt_injection }}",
               "role": "system"
             },
             {
@@ -543,10 +543,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        4224,
-        1504
+        -7952,
+        -912
       ],
-      "id": "ad9e7743-2a7c-4467-99f8-b60ac82f084c",
+      "id": "865e10bd-0b7a-4bf8-bf2e-188ed9c6c3d1",
       "name": "OpenAI NLP & PR Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -560,11 +560,11 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nAll NLP optimizations must keep the article within this range.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\" (secondary used naturally)\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\\n\\n## KEYWORD PRESERVATION (MANDATORY — DO NOT OVERRIDE)\nWhile rewriting or improving, you MUST preserve these keyword placements exactly:\n1. The H1 title MUST still contain: \"{{ $('Webhook1').first().json.body.primary_keywords }}\"\n2. The primary keyword MUST still appear in the first 100 words\n3. At least one H2 MUST still contain the primary keyword or close variation\n4. The final paragraph MUST still reference the primary keyword\n5. Every secondary keyword listed below MUST still appear at least once in the body\n\nDO NOT paraphrase, rephrase, or reorder these keywords. You may improve the\nsentences AROUND them, but the keywords themselves must remain intact.\n\nKeywords to preserve:\n- Primary: {{ $('Webhook1').first().json.body.primary_keywords }}\n- Secondary: {{ $('Webhook1').first().json.body.secondary_keywords }}\n- Semantic: {{ $('Webhook1').first().json.body.semantic_theme }}\n# Critical Rules\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Write as a NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Primary Goal\nEnhance this article for Google's NLP systems (BERT, MUM, passage ranking) while maintaining the conversational, authentic tone and target word count.\n\n## Key Optimizations (Apply Gently & Naturally):\n\n### Entity & Semantic Strengthening (word-count-neutral)\n- Naturally reinforce important entities and industry terms through strategic repetition\n- Use semantic clustering to strengthen topic authority (related terms grouped logically)\n- Include relevant variations and synonyms where they feel conversational\n- Add co-occurring terms that Google expects for this topic\n- **Never force technical jargon that breaks conversational flow**\n\n### Passage-Level Clarity (improve existing content)\n- Ensure each paragraph delivers clear value as a standalone unit for passage ranking\n- Lead paragraphs with the most helpful information (front-load value)\n- Maintain natural question-answer patterns that work for voice search\n- Optimize for featured snippets without sounding robotic or formulaic\n- Make key information extractable out of context\n\n### Information Architecture (structural refinement)\n- Strengthen subheadings for better passage anchoring (more descriptive, question-based)\n- Enhance scannable formatting: bold key terms, use bullets/numbers appropriately\n- Maintain logical flow that serves readers first, algorithms second\n- Ensure clear semantic relationships between sections\n- Improve topic clustering and relevance signals\n\n### NLP-Friendly Patterns\n- Use complete, well-formed sentences that parse cleanly\n- Include natural question-answer pairs for Q&A boxes\n- Maintain clear entity references (avoid ambiguous pronouns)\n- Strengthen context around key claims and recommendations\n\n## Critical Requirements\n- **PRESERVE the \"friend giving advice\" conversational tone above all else**\n- Never sacrifice authenticity for technical optimization\n- Keep language natural and genuinely helpful\n- Maintain readability and human appeal\n- All changes should feel organic, not algorithmic\n- Word count must stay within {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}\n\n## Article to Optimize:\n{{ $json.message.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. Still sounds like helpful advice from a knowledgeable friend?\n3. {{ $('Webhook1').first().json.body.client_name }} mentioned naturally in first two sentences?\n4. No \"we/our\" from any company perspective?\n5. NLP optimizations feel completely natural, not forced?\n6. Would a human reader notice these are \"optimizations\" or just good writing?\n\n## Output Requirements\nProvide ONLY the enhanced article. Start with title, end with conclusion. No optimization summaries, meta-commentary, or word count in output.\n\nQuality priority: Authentic helpfulness > Technical perfection\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
+        "text": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nAll NLP optimizations must keep the article within this range.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\" (secondary used naturally)\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\\n\\n## KEYWORD PRESERVATION (MANDATORY — DO NOT OVERRIDE)\nWhile rewriting or improving, you MUST preserve these keyword placements exactly:\n1. The H1 title MUST still contain: \"{{ $('Webhook1').first().json.body.primary_keywords }}\"\n2. The primary keyword MUST still appear in the first 100 words\n3. At least one H2 MUST still contain the primary keyword or close variation\n4. The final paragraph MUST still reference the primary keyword\n5. Every secondary keyword listed below MUST still appear at least once in the body\n\nDO NOT paraphrase, rephrase, or reorder these keywords. You may improve the\nsentences AROUND them, but the keywords themselves must remain intact.\n\nKeywords to preserve:\n- Primary: {{ $('Webhook1').first().json.body.primary_keywords }}\n- Secondary: {{ $('Webhook1').first().json.body.secondary_keywords }}\n- Semantic: {{ $('Webhook1').first().json.body.semantic_theme }}\n# Critical Rules\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Write as a NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Primary Goal\nEnhance this article for Google's NLP systems (BERT, MUM, passage ranking) while maintaining the conversational, authentic tone and target word count.\n\n## Key Optimizations (Apply Gently & Naturally):\n\n### Entity & Semantic Strengthening (word-count-neutral)\n- Naturally reinforce important entities and industry terms through strategic repetition\n- Use semantic clustering to strengthen topic authority (related terms grouped logically)\n- Include relevant variations and synonyms where they feel conversational\n- Add co-occurring terms that Google expects for this topic\n- **Never force technical jargon that breaks conversational flow**\n\n### Passage-Level Clarity (improve existing content)\n- Ensure each paragraph delivers clear value as a standalone unit for passage ranking\n- Lead paragraphs with the most helpful information (front-load value)\n- Maintain natural question-answer patterns that work for voice search\n- Optimize for featured snippets without sounding robotic or formulaic\n- Make key information extractable out of context\n\n### Information Architecture (structural refinement)\n- Strengthen subheadings for better passage anchoring (more descriptive, question-based)\n- Enhance scannable formatting: bold key terms, use bullets/numbers appropriately\n- Maintain logical flow that serves readers first, algorithms second\n- Ensure clear semantic relationships between sections\n- Improve topic clustering and relevance signals\n\n### NLP-Friendly Patterns\n- Use complete, well-formed sentences that parse cleanly\n- Include natural question-answer pairs for Q&A boxes\n- Maintain clear entity references (avoid ambiguous pronouns)\n- Strengthen context around key claims and recommendations\n\n## Critical Requirements\n- **PRESERVE the \"friend giving advice\" conversational tone above all else**\n- Never sacrifice authenticity for technical optimization\n- Keep language natural and genuinely helpful\n- Maintain readability and human appeal\n- All changes should feel organic, not algorithmic\n- Word count must stay within {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}\n\n## Article to Optimize:\n{{ $json.message.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. Still sounds like helpful advice from a knowledgeable friend?\n3. {{ $('Webhook1').first().json.body.client_name }} mentioned naturally in first two sentences?\n4. No \"we/our\" from any company perspective?\n5. NLP optimizations feel completely natural, not forced?\n6. Would a human reader notice these are \"optimizations\" or just good writing?\n\n## Output Requirements\nProvide ONLY the enhanced article. Start with title, end with conclusion. No optimization summaries, meta-commentary, or word count in output.\n\nQuality priority: Authentic helpfulness > Technical perfection\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\n{{ $('Keyword Strategist').item.json.system_prompt_injection }}\n\n{{ $('Keyword Strategist').item.json.structure_prompt_injection }}\n{{ $('Keyword Strategist').item.json.eeat_prompt_injection }}\n{{ $('Keyword Strategist').item.json.style_prompt_injection }}",
         "messages": {
           "messageValues": [
             {
-              "message": "=You are an advanced SEO and NLP optimization specialist who enhances content for Google's algorithms while preserving authentic, conversational tone.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Optimizations must maintain this word count.\n\nYour expertise is making subtle technical improvements that boost search performance without sacrificing the natural \"friend giving advice\" voice that makes content genuinely helpful."
+              "message": "=You are an advanced SEO and NLP optimization specialist who enhances content for Google's algorithms while preserving authentic, conversational tone.\n\nCRITICAL: The final article MUST remain {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Optimizations must maintain this word count.\n\nYour expertise is making subtle technical improvements that boost search performance without sacrificing the natural \"friend giving advice\" voice that makes content genuinely helpful."
             }
           ]
         },
@@ -573,10 +573,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        4224,
-        1808
+        -7952,
+        -624
       ],
-      "id": "9345c87f-d4c8-4b18-a1a8-b9c254d55fcc",
+      "id": "23f463fa-02a0-4bbe-8134-6b199bfb4847",
       "name": "Claude NLP & PR Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -597,10 +597,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        4304,
-        2032
+        -7888,
+        -400
       ],
-      "id": "8d803167-948f-439f-a4e2-0823eebbec25",
+      "id": "b96e9c26-0e9c-4b15-9003-8057841154b3",
       "name": "Anthropic Chat Model11",
       "credentials": {
         "anthropicApi": {
@@ -618,10 +618,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        4576,
-        1664
+        -7600,
+        -768
       ],
-      "id": "94bff137-15c0-4406-97a1-1a990195cc8c",
+      "id": "a726f972-0613-417f-9935-accb1f4749cf",
       "name": "Merge7"
     },
     {
@@ -640,10 +640,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        5104,
-        2576
+        -7088,
+        -16
       ],
-      "id": "ac3e0d3f-0e82-4a2c-a616-fbd483cdf68f",
+      "id": "b6a63f34-98e3-4de6-938e-17c37c430f51",
       "name": "Anthropic Chat Model12",
       "credentials": {
         "anthropicApi": {
@@ -667,10 +667,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        5680,
-        2576
+        -6512,
+        -16
       ],
-      "id": "e54af37d-f0fb-446d-a6ff-255993767b18",
+      "id": "0ddd31b7-af77-46d4-9f50-b9e7e355b433",
       "name": "Anthropic Chat Model13",
       "credentials": {
         "anthropicApi": {
@@ -686,7 +686,7 @@
         "messages": {
           "messageValues": [
             {
-              "message": "=You are a senior SEO editor with expertise in Google's ranking algorithms and featured snippet optimization.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Technical optimizations must not change the word count."
+              "message": "=You are a senior SEO editor with expertise in Google's ranking algorithms and featured snippet optimization.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Technical optimizations must not change the word count."
             }
           ]
         },
@@ -695,10 +695,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        5600,
-        2352
+        -6576,
+        -240
       ],
-      "id": "219fa35a-1f79-48ce-a2e3-9d042b5606e2",
+      "id": "0374b8fc-60b7-4181-b599-55c40ebd1d60",
       "name": "Claude Final SEO Snippet Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -714,7 +714,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are an experienced editor who specializes in light content polish and synthesis.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When combining versions, maintain this word count.\n\nYour role is to combine multiple versions of content into one flowing article while preserving the authentic, conversational tone and all technical optimizations already completed.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\\n\\n{{ $('Keyword Strategist').first().json.eeat_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.style_prompt_injection }}",
+              "content": "=You are an experienced editor who specializes in light content polish and synthesis.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When combining versions, maintain this word count.\n\nYour role is to combine multiple versions of content into one flowing article while preserving the authentic, conversational tone and all technical optimizations already completed.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\n{{ $('Keyword Strategist').item.json.system_prompt_injection }}\n\n{{ $('Keyword Strategist').item.json.structure_prompt_injection }}\n{{ $('Keyword Strategist').item.json.eeat_prompt_injection }}\n{{ $('Keyword Strategist').item.json.style_prompt_injection }}",
               "role": "system"
             },
             {
@@ -729,10 +729,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        5024,
-        1024
+        -7152,
+        -1376
       ],
-      "id": "29f6c896-d478-4c13-9501-807817e28140",
+      "id": "7f34a0dc-e65c-4354-864e-eff2862edfea",
       "name": "OpenAI Humanised Readability Rewrite",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -754,7 +754,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are a technical content production assistant specializing in document formatting and export preparation.\n\nCRITICAL: The final sanitized article MUST remain {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Sanitization is formatting-only and must not change word count.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
+              "content": "=You are a technical content production assistant specializing in document formatting and export preparation.\n\nCRITICAL: The final sanitized article MUST remain {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Sanitization is formatting-only and must not change word count.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
               "role": "system"
             },
             {
@@ -769,10 +769,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        5952,
-        1024
+        -6224,
+        -1376
       ],
-      "id": "0a5816e1-96c6-48e2-9e2e-8fa063a8025f",
+      "id": "88fa08da-d534-4fb4-8e51-f9eaf98c5693",
       "name": "Document Export Sanitization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -788,10 +788,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        4800,
-        1024
+        -7376,
+        -1376
       ],
-      "id": "221ee0ef-39f6-4f0f-a91e-e0cbc74954cf",
+      "id": "ba9eee0a-ca2d-4854-99e5-3acb87e1cb61",
       "name": "Wait6",
       "webhookId": "7a372933-6525-4c44-92e4-7743d0a44c8b"
     },
@@ -800,10 +800,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        4800,
-        2352
+        -7376,
+        -240
       ],
-      "id": "193ace4b-bad4-4218-8b84-b8010689d577",
+      "id": "b1a09f0a-05a3-4d93-9073-d1321ea3462f",
       "name": "Wait7",
       "webhookId": "7a372933-6525-4c44-92e4-7743d0a44c8b"
     },
@@ -812,10 +812,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        5376,
-        1024
+        -6800,
+        -1376
       ],
-      "id": "8d5405d8-bb77-4c8f-9d81-3c03861c81c3",
+      "id": "2b237d12-66d9-4c21-95b0-d859cac9e7ee",
       "name": "Wait8",
       "webhookId": "a748588d-97b9-4b52-99b1-31c0affeeab3"
     },
@@ -824,10 +824,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        5376,
-        2352
+        -6800,
+        -240
       ],
-      "id": "547f0d9e-7f9f-4952-aaba-b83ffd39b47a",
+      "id": "cc637a2a-9d84-47aa-aac7-d9e8d8833c8d",
       "name": "Wait10",
       "webhookId": "49d694d9-d5d4-4509-867a-89cc50a2f04b"
     },
@@ -836,10 +836,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        3424,
-        1664
+        -8752,
+        -768
       ],
-      "id": "b4bff241-c572-4dbc-beb5-f61e10b465a9",
+      "id": "ab4137ae-0572-431c-abad-13820ff25ae2",
       "name": "Wait14",
       "webhookId": "2db62569-3f26-4159-85e0-9a8b47a13344"
     },
@@ -848,10 +848,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        4000,
-        1504
+        -8176,
+        -912
       ],
-      "id": "67c99672-74a2-4ea8-a5ba-7b868c2ce302",
+      "id": "871c016c-8d62-4aa8-8bea-29fbae89caba",
       "name": "Wait17",
       "webhookId": "e0466a06-d809-467b-b0d1-3171ddae30a6"
     },
@@ -860,17 +860,17 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        2272,
-        1664
+        -9904,
+        -768
       ],
-      "id": "468bf593-f665-493a-8e49-b401572e37a4",
+      "id": "8fe78c04-5974-447a-9fff-265693432e85",
       "name": "Wait18",
       "webhookId": "be177216-d87e-494c-b058-1d021b29a470"
     },
     {
       "parameters": {
         "method": "PATCH",
-        "url": "=https://obswcosfipqjvkqlfnrj.supabase.co/rest/v1/content_requests",
+        "url": "=https://obswcosfipqjvklqlnrj.supabase.co/rest/v1/content_requests",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -915,10 +915,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        672,
-        1856
+        -11504,
+        -576
       ],
-      "id": "4abdac55-41ab-4c35-a7e4-6e3758a81e4c",
+      "id": "37e3f269-065b-49f0-9aa3-5598810c2a95",
       "name": "Google Drive Notification1",
       "notesInFlow": true,
       "notes": "Add G-Drive Link to Skywide Dashboard"
@@ -939,10 +939,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        6880,
-        1264
+        -5296,
+        -1136
       ],
-      "id": "26e7ba3e-c8dc-4960-9852-eed7e6e8cacd",
+      "id": "e6db8515-8a4d-43e3-b7c1-8202ac9dda19",
       "name": "1st Improvement LLM2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -974,10 +974,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        7232,
-        1264
+        -4944,
+        -1136
       ],
-      "id": "cb1e71ae-1b4c-46a3-8da8-5e8221fefaa8",
+      "id": "117b70f3-a7c6-4a34-8a74-21f0e14700e4",
       "name": "2nd Scoring Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1003,10 +1003,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        6656,
-        1024
+        -5520,
+        -1376
       ],
-      "id": "93902845-c357-4135-8bab-7bdb43dd9761",
+      "id": "12ca0500-4c41-412b-b914-98711cd9ef51",
       "name": "80+ ?2",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1025,10 +1025,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        7648,
-        1264
+        -4528,
+        -1136
       ],
-      "id": "4c4b2317-7d00-41a4-bc1d-1ac7bcea7806",
+      "id": "a349f0ab-6e73-4abb-b449-fdd7d1b9ca09",
       "name": "80 +?4",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1069,10 +1069,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        8160,
-        1184
+        -4016,
+        -1168
       ],
-      "id": "a9f77935-e6cb-4069-9953-c96675c11cb9",
+      "id": "545fb573-2a8d-40df-bb60-03d8e3e37a32",
       "name": "Check Max Iterations2",
       "notesInFlow": true,
       "notes": "Prevent infinite loops by checking if we've tried too many times"
@@ -1094,10 +1094,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7936,
-        1360
+        -4240,
+        -1040
       ],
-      "id": "83969f5e-a70e-4a5d-8ce4-972c4be9b070",
+      "id": "e3df4a51-b8b4-4c09-a644-858b3fb4887d",
       "name": "Max Iterations2"
     },
     {
@@ -1116,10 +1116,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        8384,
-        1312
+        -3792,
+        -1168
       ],
-      "id": "9f59b7de-3bc5-46a5-b3f9-64758cbda1b0",
+      "id": "0b8d4ad1-f513-4fcc-aaef-db067df7a13f",
       "name": "Improvement LLM2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1140,10 +1140,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        8464,
-        1536
+        -3728,
+        -944
       ],
-      "id": "aaca15f9-064c-4a4e-ad88-a5f0e000fc17",
+      "id": "b63b1e54-836d-4c48-81ba-f8b673d792d5",
       "name": "Anthropic Chat Model18",
       "credentials": {
         "anthropicApi": {
@@ -1179,10 +1179,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8736,
-        1312
+        -3440,
+        -1168
       ],
-      "id": "7265dd2c-bfc4-4806-9e24-968f8f29ed1e",
+      "id": "d0e78918-ba50-45c8-8ca9-cfa39e0401fa",
       "name": "Scoring7",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1201,58 +1201,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        7936,
-        976
+        -1488,
+        -1264
       ],
-      "id": "b1176334-31f4-4221-a161-1135c605e8cf",
-      "name": "Create a document4",
-      "credentials": {
-        "googleDocsOAuth2Api": {
-          "id": "MtLhGZ2k5z3HZHk8",
-          "name": "Google Docs account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "update",
-        "documentURL": "={{ $json.id }}",
-        "actionsUi": {
-          "actionFields": [
-            {
-              "action": "insert",
-              "text": "=Overall Score: {{ $('Scoring7').item.json.message.content.overallScore }}/100\n\nPotential Issues: {{ $('Scoring7').item.json.message.content.issues }}\n\nPotential Fixes: {{ $('Scoring7').item.json.message.content.fixes }}\n\nPotential Impact: {{ $('Scoring7').item.json.message.content.impact }}\n\nCurrent Content:\n{{ $('Improvement LLM2').item.json.data[1].text }}\n"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.googleDocs",
-      "typeVersion": 2,
-      "position": [
-        11616,
-        1136
-      ],
-      "id": "2fa29f09-7b91-4656-bc78-3b730d0b90a0",
-      "name": "Update a document4",
-      "credentials": {
-        "googleDocsOAuth2Api": {
-          "id": "MtLhGZ2k5z3HZHk8",
-          "name": "Google Docs account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "folderId": "={{ $('Create folder1').item.json.id }}",
-        "title": "={{ $('Webhook1').first().json.body.title }} - OpenAI"
-      },
-      "type": "n8n-nodes-base.googleDocs",
-      "typeVersion": 2,
-      "position": [
-        9440,
-        432
-      ],
-      "id": "b5345c71-9bef-42cc-837f-aa89dadb6fd7",
+      "id": "f32b978b-d851-4ae2-bb1c-cd2b52860206",
       "name": "Create a document15",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1277,10 +1229,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        9664,
-        432
+        -1264,
+        -1264
       ],
-      "id": "72a548f2-5ca7-42f5-a8cd-b423f88f93ef",
+      "id": "fba78add-1c61-4da9-89eb-c85ecc25b400",
       "name": "Update a document15",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1305,10 +1257,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        6960,
-        1488
+        -5232,
+        -912
       ],
-      "id": "d7951e71-961f-4b0a-b22e-00378d065c6c",
+      "id": "81aac033-7e4e-4b18-9faa-082f37ee440c",
       "name": "Anthropic Chat Model19",
       "credentials": {
         "anthropicApi": {
@@ -1344,10 +1296,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        6304,
-        1024
+        -5872,
+        -1376
       ],
-      "id": "00f4f741-6484-40a5-be74-008397535d99",
+      "id": "ab504fc2-dafe-4837-b877-e34a6182604c",
       "name": "1st Scoring Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1359,34 +1311,6 @@
         }
       },
       "notes": "First scoring agent"
-    },
-    {
-      "parameters": {
-        "operation": "update",
-        "documentURL": "={{ $json.id }}",
-        "actionsUi": {
-          "actionFields": [
-            {
-              "action": "insert",
-              "text": "=Overall Score: {{ $('80 +?4').item.json.message.content.overallScore }}/100\n\nPotential Issues: {{ $('2nd Scoring Agent2').item.json.message.content.issues }}\n\nPotential Fixes: {{ $('2nd Scoring Agent2').item.json.message.content.fixes }}\n\nPotential Impact: {{ $('2nd Scoring Agent2').item.json.message.content.impact }}\n\nCurrent Content:\n{{ $('1st Improvement LLM2').item.json.data[1].text }}"
-            }
-          ]
-        }
-      },
-      "type": "n8n-nodes-base.googleDocs",
-      "typeVersion": 2,
-      "position": [
-        8160,
-        976
-      ],
-      "id": "3f8e8af6-d51c-4ac4-b5d7-d270c236562c",
-      "name": "Update a document5",
-      "credentials": {
-        "googleDocsOAuth2Api": {
-          "id": "MtLhGZ2k5z3HZHk8",
-          "name": "Google Docs account"
-        }
-      }
     },
     {
       "parameters": {
@@ -1403,32 +1327,12 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        9152,
-        1488
+        -3088,
+        -1040
       ],
-      "id": "57dbcf11-a579-4fef-a297-94ad85dcb732",
+      "id": "f3bb4646-d954-4d38-85d5-e70f07d45844",
       "name": "80 +?5",
       "notes": "Checks if content score meets the target threshold of 85"
-    },
-    {
-      "parameters": {
-        "folderId": "={{ $('Create folder1').first().json.id }}",
-        "title": "={{ $('Webhook1').first().json.body.title }} - OpenAI"
-      },
-      "type": "n8n-nodes-base.googleDocs",
-      "typeVersion": 2,
-      "position": [
-        11392,
-        1136
-      ],
-      "id": "cef48ba9-b438-4909-a09a-bc0179eb73ea",
-      "name": "Create a document5",
-      "credentials": {
-        "googleDocsOAuth2Api": {
-          "id": "MtLhGZ2k5z3HZHk8",
-          "name": "Google Docs account"
-        }
-      }
     },
     {
       "parameters": {
@@ -1446,10 +1350,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        6880,
-        2592
+        -5296,
+        16
       ],
-      "id": "60d47304-455f-465d-9712-be73f6d98343",
+      "id": "963481c1-3fd1-43c4-8b09-bbf5f108b75b",
       "name": "1st Improvement LLM3",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1481,10 +1385,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        7232,
-        2592
+        -4944,
+        16
       ],
-      "id": "c2ff978d-10d7-4311-be9d-b83a607f27b2",
+      "id": "a3cdb197-9d44-4dcd-82c1-5091a3a7e6f4",
       "name": "2nd Scoring Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1510,10 +1414,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        6656,
-        2352
+        -5520,
+        -240
       ],
-      "id": "177e0061-d1d0-43fb-9a03-adcb081c6b3a",
+      "id": "08c9c537-4719-49d2-9cc4-10fa26d433e0",
       "name": "80+ ?3",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1532,10 +1436,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        7648,
-        2592
+        -4528,
+        16
       ],
-      "id": "8baca045-362e-46c9-b1c2-5002a2d69cbe",
+      "id": "d4714ef8-2c1e-4480-a5ac-907fb5744332",
       "name": "80 +?6",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1576,10 +1480,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        8160,
-        2624
+        -4016,
+        -32
       ],
-      "id": "2d6bda7a-2d0e-424a-a753-9cf07808eece",
+      "id": "863ecc62-26bb-47ec-bd38-13aa763c45ac",
       "name": "Check Max Iterations3",
       "notesInFlow": true,
       "notes": "Prevent infinite loops by checking if we've tried too many times"
@@ -1601,10 +1505,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7936,
-        2688
+        -4240,
+        112
       ],
-      "id": "36163b72-52f9-41cb-a357-652cbc041762",
+      "id": "98c70803-5573-4736-83b6-d8dbe0f091f1",
       "name": "Max Iterations3"
     },
     {
@@ -1623,10 +1527,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        8384,
-        2496
+        -3792,
+        -32
       ],
-      "id": "6fe29346-7e33-4284-8232-e2a8fbbccfc8",
+      "id": "c3122b64-85ac-4ecf-85db-cdd6978bd5e6",
       "name": "Improvement LLM3",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1647,10 +1551,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        8464,
-        2720
+        -3728,
+        208
       ],
-      "id": "35fbb8f1-cae4-4a53-8c91-8139b9bedace",
+      "id": "dc1c7cbe-8543-4b4e-9f35-ad50ef85a46c",
       "name": "Anthropic Chat Model20",
       "credentials": {
         "anthropicApi": {
@@ -1686,10 +1590,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8736,
-        2496
+        -3440,
+        -32
       ],
-      "id": "9bf8a081-e072-4b0c-8078-42713b1cda21",
+      "id": "2b7b5be9-6865-4837-bdf0-c9bb2d06683e",
       "name": "Scoring1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1708,10 +1612,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        7936,
-        2352
+        -4240,
+        -224
       ],
-      "id": "7771ba85-88d8-490f-a24b-1be5741d902f",
+      "id": "f084a727-1969-4bc5-946c-3cb4c9b853ff",
       "name": "Create a document6",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1728,10 +1632,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        9440,
-        1824
+        -1488,
+        -416
       ],
-      "id": "378cf065-1d5a-4430-b475-a093c998fd6e",
+      "id": "56e65670-2a35-434b-ab05-a437cde90b15",
       "name": "Create a document16",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1756,10 +1660,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        9664,
-        1824
+        -1264,
+        -416
       ],
-      "id": "8332c172-5c45-4605-a32e-acc1c5432652",
+      "id": "68c64e8b-bd5a-4c67-87cf-7ce8dcf1ef0a",
       "name": "Update a document16",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1784,10 +1688,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        6960,
-        2816
+        -5232,
+        240
       ],
-      "id": "4b1e9fec-1e28-46d4-ae3b-b9ffe205edfd",
+      "id": "dc170d2c-9f70-4873-8ea3-d60f069e61f0",
       "name": "Anthropic Chat Model21",
       "credentials": {
         "anthropicApi": {
@@ -1823,10 +1727,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        6304,
-        2352
+        -5872,
+        -240
       ],
-      "id": "75461b61-01ae-4316-bd6a-aa8ecc2ac8e1",
+      "id": "67190e4f-6431-42d7-b941-a6eaef3db0ac",
       "name": "1st Scoring Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1855,10 +1759,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        8160,
-        2352
+        -4016,
+        -224
       ],
-      "id": "0b19e5be-e9d9-453e-b990-f2deeabdef32",
+      "id": "3184f13e-3a92-4069-975c-88e16e0e5bdc",
       "name": "Update a document7",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1882,10 +1786,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        9152,
-        2496
+        -3088,
+        112
       ],
-      "id": "89d00689-72fe-4ae2-b446-a3be9b7b0f53",
+      "id": "84780d21-aca8-4f3d-9225-680c815ee5eb",
       "name": "80 +?7",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1897,10 +1801,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        11392,
-        2624
+        -4240,
+        -1360
       ],
-      "id": "75b43b60-1c74-440c-8882-205e474a6217",
+      "id": "b076210c-de98-47c6-b797-80b560e1c589",
       "name": "Create a document7",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1920,7 +1824,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are a senior SEO editor with expertise in Google's ranking algorithms and featured snippet optimization.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Technical optimizations must not change the word count.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
+              "content": "=You are a senior SEO editor with expertise in Google's ranking algorithms and featured snippet optimization.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Technical optimizations must not change the word count.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
               "role": "system"
             },
             {
@@ -1935,10 +1839,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        5600,
-        1024
+        -6576,
+        -1376
       ],
-      "id": "4e05099c-72c6-43ff-a8ff-0dd0c9758ae1",
+      "id": "6ddba521-4f5b-46d0-a793-fd385ee02530",
       "name": "Final SEO Snippet Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1960,7 +1864,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are a technical content production assistant specializing in document formatting and export preparation.\n\nCRITICAL: The final sanitized article MUST remain {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Sanitization is formatting-only and must not change word count.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
+              "content": "=You are a technical content production assistant specializing in document formatting and export preparation.\n\nCRITICAL: The final sanitized article MUST remain {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). Sanitization is formatting-only and must not change word count.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.",
               "role": "system"
             },
             {
@@ -1975,10 +1879,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        5952,
-        2352
+        -6224,
+        -240
       ],
-      "id": "c7fb6268-1368-401a-b1d5-0ccb2494faf3",
+      "id": "e7f0ea7c-b1e1-44ea-9308-38cbe6d4156e",
       "name": "Document Export Sanitization5",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2000,26 +1904,26 @@
         "messages": {
           "values": [
             {
-              "content": "=You are an expert content writer who creates authentic, helpful articles that sound like genuine advice from a knowledgeable consultant. \n\nCRITICAL REQUIREMENT: Every article MUST be {{ $('Webhook1').first().json.body.word_count }} words. Acceptable range: {{ $json.word_count * 0.9 }} to {{ $json.word_count * 1.1 }} words. Count carefully and adjust before finalizing. Do not include the word count in your output.\n\nYour writing is natural and conversational but always professional, never corporate or robotic.\n\n# Global Rules\n1. Always mention the client's name ({{ $('Webhook1').first().json.body.client_name }}) naturally in the opening paragraph, within the first two sentences, unless explicitly instructed otherwise.\n2. Never write from the company's perspective (\"we,\" \"our,\" \"join us\"). Always write in second person (\"you\") or neutral third person, as an outside expert giving advice about {{ $('Webhook1').first().json.body.client_name }}.\n3. Never open with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattering phrases like \"dear readers,\" \"lovers of,\"  etc.\n4. Openings must start with an observation, problem, or question tied to {{ $('Webhook1').first().json.body.client_name }} — not a generic greeting or sales pitch.\n5. Use the following context:\n   - Client: {{ $('Webhook1').first().json.body.client_name }}\n   - Topic: {{ $json.brief_title }}\n   - Instructions: {{ $('Webhook1').first().json.body.creative_brief }}\n   - Current date: {{ $now.toISO() }}\n6. Tone should feel approachable and human — like trusted advice from someone with real experience. Avoid filler, clichés, or anything that feels AI-generated.\n7. Ensure every article begins with a clear, audience-focused hook that establishes why the content matters to the reader.\n\nYour goal: Write content that sounds like it comes from a knowledgeable expert who has lived and worked in the field, while showcasing the client clearly and appropriately from the start.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\nFAQ RULE: You must include an FAQ section at the end of the article. If the Creative Brief provides FAQs, you MUST use those exact questions. If the brief does NOT provide FAQs, formulate 3-5 of your own highly relevant FAQs based on the generated content.\n\n{{ $('Keyword Strategist').first().json.keyword_strategy.system_prompt_injection }}\n\n{{ $('Keyword Strategist').item.json.structure_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.eeat_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.style_prompt_injection }}",
+              "content": "=You are an expert content writer who creates authentic, helpful articles that sound like genuine advice from a knowledgeable consultant. \n\nCRITICAL REQUIREMENT: Every article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding the FAQ section). Acceptable range: {{ $json.word_count * 0.9 }} to {{ $json.word_count * 1.1 }} words. Count carefully and adjust before finalizing. Do not include the word count in your output.\n\nYour writing is natural and conversational but always professional, never corporate or robotic.\n\n# Global Rules\n1. Always mention the client's name ({{ $('Webhook1').first().json.body.client_name }}) naturally in the opening paragraph, within the first two sentences, unless explicitly instructed otherwise.\n2. Never write from the company's perspective (\"we,\" \"our,\" \"join us\"). Always write in second person (\"you\") or neutral third person, as an outside expert giving advice about {{ $('Webhook1').first().json.body.client_name }}.\n3. Never open with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattering phrases like \"dear readers,\" \"lovers of,\"  etc.\n4. Openings must start with an observation, problem, or question tied to {{ $('Webhook1').first().json.body.client_name }} — not a generic greeting or sales pitch.\n5. Use the following context:\n   - Client: {{ $('Webhook1').first().json.body.client_name }}\n   - Topic: {{ $json.brief_title }}\n   - Instructions: {{ $('Webhook1').first().json.body.creative_brief }}\n   - Current date: {{ $now.toISO() }}\n6. Tone should feel approachable and human — like trusted advice from someone with real experience. Avoid filler, clichés, or anything that feels AI-generated.\n7. Ensure every article begins with a clear, audience-focused hook that establishes why the content matters to the reader.\n\nYour goal: Write content that sounds like it comes from a knowledgeable expert who has lived and worked in the field, while showcasing the client clearly and appropriately from the start.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\nFAQ RULE: Only include an FAQ section at the end of the article IF the Creative Brief explicitly provides FAQs or requests them. If the brief provides FAQs, you MUST use those exact questions. Do NOT formulate your own FAQs if they are not in the brief.\nIMPORTANT: The FAQ section (if included) does NOT count towards your final article word count target.\n\n{{ $('Keyword Strategist').item.json.system_prompt_injection }}\n\n{{ $('Keyword Strategist').item.json.structure_prompt_injection }}\n{{ $('Keyword Strategist').item.json.eeat_prompt_injection }}\n{{ $('Keyword Strategist').item.json.style_prompt_injection }}",
               "role": "system"
             },
             {
-              "content": "=# ABSOLUTE REQUIREMENT - READ THIS FIRST\nYou MUST write exactly {{ $('Webhook1').first().json.body.word_count }} words (±10% acceptable).\nThis is NON-NEGOTIABLE. Before finishing, verify your word count and adjust.\nIf under range: add examples, expand explanations, include more insights.\nIf over range: tighten without losing substance.\n\nYou MUST hit this word count target. Do not include the word count in your final article output.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\"\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\n# Writing Voice & Style\nWrite like you're having coffee with someone who asked for your honest advice:\n- Use natural speech and contractions\n- Mix short and flowing sentences\n- Add observations, mild controversy, and rhetorical questions\n- Use parenthetical thoughts and casual transitions\n- Always write in second person (\"you\") or neutral third person, never in first person for {{ $('Webhook1').first().json.body.client_name }}\n\n# Content Approach\n- Share insights as if firsthand\n- Include \"what I've noticed\" style observations and real scenarios\n- Use everyday analogies, not jargon\n- Disagree with bad/common advice when better points exist\n- Admit limits when things don't always work\n\n# Critical: NEVER Use These AI Phrases\n\"You're Not Alone\" | \"You Are Not Alone\" | \"It's important to note\" | \"Additionally/Furthermore\" | \"In today's digital landscape\" | \"Streamline/leverage/optimize/enhance\" | \"In conclusion\" | Perfect bullet parallelism\n\n# Use These Natural Transitions Instead\n\"Also,\" \"Plus,\" \"Here's the deal,\" \"The thing is,\" \"So basically,\" \"Oh, and don't forget\"\n\n# Structure Requirements\n- Opening must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Opening must be a natural observation, problem, or question tied to {{ $('Webhook1').first().json.body.client_name }} — never a greeting, fluff, or sales pitch\n- Write in flowing conversational paragraphs, not stiff blog headings\n- Use subheads as casual questions or statements only if needed\n- Include mild frustrations or challenges around misconceptions\n- End with genuine advice, not a corporate wrap-up\n\n# Client Name Requirement\n- Always mention the client name ({{ $('Webhook1').first().json.body.client_name }}) naturally in the opening paragraph, within the first two sentences\n- Refer back to {{ $('Webhook1').first().json.body.client_name }} throughout the piece when contextually relevant (not just once at the start)\n- Never substitute vague phrases like \"this company\" or \"the brand\" when {{ $('Webhook1').first().json.body.client_name }} should be used\n\n# Your Content Assignment\nTitle: {{ $json.brief_title }}\nBrief: {{ $('Webhook1').first().json.body.creative_brief }}\nTarget Audience: {{ $('Webhook1').first().json.body.audience }}\nSEO Keywords: {{ $('Webhook1').first().json.body.primary_keywords }}\n\n# Output Requirements\n- Write the complete article within {{ $json.word_count * 0.9 }}-{{ $json.word_count * 1.1 }} words\n- Do NOT include \"Word Count: X\" or any meta-information in your output\n- End with the final sentence of your article, nothing else\n\n# Quality Check\n- Read aloud. If any sentence sounds stiff, corporate, or AI-like, rewrite it.\n- If the introduction starts with a greeting, audience-flattering phrase, or does not mention {{ $('Webhook1').first().json.body.client_name }}, rewrite it before continuing.\n- Do not write in the voice of {{ $('Webhook1').first().json.body.client_name }} (no \"we,\" \"our,\" or \"join us\").\n\n# FINAL VERIFICATION STEP\nBefore submitting:\n1. Count your total words\n2. Target range: {{ $json.word_count * 0.9 }}-{{ $json.word_count * 1.1 }} words\n3. If outside range, revise immediately by expanding thin sections or tightening verbose ones\n4. Submit ONLY when within range"
+              "content": "=# ABSOLUTE REQUIREMENT - READ THIS FIRST\nYou MUST write exactly {{ $('Webhook1').first().json.body.word_count }} words (±10% acceptable) for the main body of the article (excluding the FAQ section).\nThis is NON-NEGOTIABLE. Before finishing, verify your word count and adjust.\nIf under range: add examples, expand explanations, include more insights.\nIf over range: tighten without losing substance.\n\nYou MUST hit this word count target. Do not include the word count in your final article output.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\"\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\n# Writing Voice & Style\nWrite like you're having coffee with someone who asked for your honest advice:\n- Use natural speech and contractions\n- Mix short and flowing sentences\n- Add observations, mild controversy, and rhetorical questions\n- Use parenthetical thoughts and casual transitions\n- Always write in second person (\"you\") or neutral third person, never in first person for {{ $('Webhook1').first().json.body.client_name }}\n\n# Content Approach\n- Share insights as if firsthand\n- Include \"what I've noticed\" style observations and real scenarios\n- Use everyday analogies, not jargon\n- Disagree with bad/common advice when better points exist\n- Admit limits when things don't always work\n\n# Critical: NEVER Use These AI Phrases\n\"You're Not Alone\" | \"You Are Not Alone\" | \"It's important to note\" | \"Additionally/Furthermore\" | \"In today's digital landscape\" | \"Streamline/leverage/optimize/enhance\" | \"In conclusion\" | Perfect bullet parallelism\n\n# Use These Natural Transitions Instead\n\"Also,\" \"Plus,\" \"Here's the deal,\" \"The thing is,\" \"So basically,\" \"Oh, and don't forget\"\n\n# Structure Requirements\n- Opening must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Opening must be a natural observation, problem, or question tied to {{ $('Webhook1').first().json.body.client_name }} — never a greeting, fluff, or sales pitch\n- Write in flowing conversational paragraphs, not stiff blog headings\n- Use subheads as casual questions or statements only if needed\n- Include mild frustrations or challenges around misconceptions\n- End with genuine advice, not a corporate wrap-up\n\n# Client Name Requirement\n- Always mention the client name ({{ $('Webhook1').first().json.body.client_name }}) naturally in the opening paragraph, within the first two sentences\n- Refer back to {{ $('Webhook1').first().json.body.client_name }} throughout the piece when contextually relevant (not just once at the start)\n- Never substitute vague phrases like \"this company\" or \"the brand\" when {{ $('Webhook1').first().json.body.client_name }} should be used\n\n# Your Content Assignment\nTitle: {{ $json.brief_title }}\nBrief: {{ $('Webhook1').first().json.body.creative_brief }}\nTarget Audience: {{ $('Webhook1').first().json.body.audience }}\nSEO Keywords: {{ $('Webhook1').first().json.body.primary_keywords }}\n\n# Output Requirements\n- Write the complete article within {{ $json.word_count * 0.9 }}-{{ $json.word_count * 1.1 }} words\n- Do NOT include \"Word Count: X\" or any meta-information in your output\n- End with the final sentence of your article, nothing else\n\n# Quality Check\n- Read aloud. If any sentence sounds stiff, corporate, or AI-like, rewrite it.\n- If the introduction starts with a greeting, audience-flattering phrase, or does not mention {{ $('Webhook1').first().json.body.client_name }}, rewrite it before continuing.\n- Do not write in the voice of {{ $('Webhook1').first().json.body.client_name }} (no \"we,\" \"our,\" or \"join us\").\n\n# FINAL VERIFICATION STEP\nBefore submitting:\n1. Count your total words\n2. Target range: {{ $json.word_count * 0.9 }}-{{ $json.word_count * 1.1 }} words\n3. If outside range, revise immediately by expanding thin sections or tightening verbose ones\n4. Submit ONLY when within range"
             }
           ]
         },
         "options": {
-          "temperature": 0.5,
-          "maxTokens": 4096
+          "maxTokens": 16384,
+          "temperature": 0.5
         }
       },
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        896,
-        1504
+        -11280,
+        -912
       ],
-      "id": "8b22ad8d-c141-4151-849a-d804bc336bfc",
+      "id": "275f216c-9b99-4f34-8d50-6e718a8dea61",
       "name": "OpenAI Draft (GPT-4O)1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2033,11 +1937,11 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nWhen combining and polishing both versions, stay within this range.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\" (secondary used naturally)\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\\n\\n## KEYWORD PRESERVATION (CRITICAL — HIGHEST PRIORITY)\nYou are the final LLM in the pipeline. Previous nodes have carefully placed target keywords.\nYour job is to improve readability and tone WITHOUT removing any keyword placement.\n\nPROTECTED ELEMENTS (do not alter these):\n1. H1 title — keep the primary keyword in it, you may adjust surrounding words only\n2. First 100 words — the primary keyword must remain in this window\n3. H2 headings containing keywords — do not replace with generic headings\n4. Final paragraph — the primary keyword must still appear here\n5. Every secondary/semantic keyword below must still appear at least once\n\nYou CAN: improve sentence flow, adjust transitions, fix awkward phrasing around keywords\nYou CANNOT: remove, rephrase, or relocate any target keyword\n\nPrimary: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic: {{ $('Webhook1').first().json.body.semantic_theme }}\n# Critical Rules\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Write as a NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nCombine the best elements from both NLP-optimized versions into one smooth, readable article that maintains the conversational \"friend giving advice\" tone and target word count.\n\n## Simple Goals:\n- Take the strongest passages from each version\n- Smooth any awkward transitions or repetitive sections between versions\n- Improve flow and readability without over-editing\n- **Preserve the natural, helpful voice throughout**\n- Keep all SEO optimizations intact (keywords, entities, structure)\n- Maintain word count by selecting best content, not adding\n\n## What to Combine:\n- Choose the more natural-sounding phrasing when versions differ\n- Keep the clearest explanations and examples\n- Eliminate redundancy between the two versions\n- Maintain the best heading structures\n- Preserve all technical optimizations (entity strength, passage clarity, formatting)\n\n## Critical Requirements:\n- Don't rewrite extensively - just polish and combine thoughtfully\n- Maintain the conversational, authentic tone above all else\n- Keep all keyword integration and entity relationships\n- Preserve technical optimizations from previous stages\n- No corporate or overly polished language\n- Stay within {{ $('Webhook1').first().json.body.word_count }} words ±10%\n\n## Input Versions:\n\n### Claude NLP Version:\n{{ $json.text }}\n\n### OpenAI NLP Version:\n{{ $json.message.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. Still sounds like genuine, helpful advice from a knowledgeable friend?\n3. {{ $('Webhook1').first().json.body.client_name }} mentioned naturally in first two sentences?\n4. No \"we/our\" from any company perspective?\n5. Flow feels natural, not choppy or over-edited?\n6. All SEO optimizations preserved?\n\n## Output Requirements:\nProvide ONLY the final polished article. Start with title, end with conclusion. No explanatory text, editing notes, or word count in output.\n\nQuality check: Does this still sound like genuine, helpful advice from a knowledgeable friend?\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\nIMPORTANT: Do NOT generate a Frequently Asked Questions (FAQ) section. The FAQ section will be generated by a separate process. Focus only on the main article content.",
+        "text": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nWhen combining and polishing both versions, stay within this range.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\" (secondary used naturally)\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\\n\\n## KEYWORD PRESERVATION (CRITICAL — HIGHEST PRIORITY)\nYou are the final LLM in the pipeline. Previous nodes have carefully placed target keywords.\nYour job is to improve readability and tone WITHOUT removing any keyword placement.\n\nPROTECTED ELEMENTS (do not alter these):\n1. H1 title — keep the primary keyword in it, you may adjust surrounding words only\n2. First 100 words — the primary keyword must remain in this window\n3. H2 headings containing keywords — do not replace with generic headings\n4. Final paragraph — the primary keyword must still appear here\n5. Every secondary/semantic keyword below must still appear at least once\n\nYou CAN: improve sentence flow, adjust transitions, fix awkward phrasing around keywords\nYou CANNOT: remove, rephrase, or relocate any target keyword\n\nPrimary: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic: {{ $('Webhook1').first().json.body.semantic_theme }}\n# Critical Rules\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Write as a NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nCombine the best elements from both NLP-optimized versions into one smooth, readable article that maintains the conversational \"friend giving advice\" tone and target word count.\n\n## Simple Goals:\n- Take the strongest passages from each version\n- Smooth any awkward transitions or repetitive sections between versions\n- Improve flow and readability without over-editing\n- **Preserve the natural, helpful voice throughout**\n- Keep all SEO optimizations intact (keywords, entities, structure)\n- Maintain word count by selecting best content, not adding\n\n## What to Combine:\n- Choose the more natural-sounding phrasing when versions differ\n- Keep the clearest explanations and examples\n- Eliminate redundancy between the two versions\n- Maintain the best heading structures\n- Preserve all technical optimizations (entity strength, passage clarity, formatting)\n\n## Critical Requirements:\n- Don't rewrite extensively - just polish and combine thoughtfully\n- Maintain the conversational, authentic tone above all else\n- Keep all keyword integration and entity relationships\n- Preserve technical optimizations from previous stages\n- No corporate or overly polished language\n- Stay within {{ $('Webhook1').first().json.body.word_count }} words ±10%\n\n## Input Versions:\n\n### Claude NLP Version:\n{{ $json.text }}\n\n### OpenAI NLP Version:\n{{ $json.message.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. Still sounds like genuine, helpful advice from a knowledgeable friend?\n3. {{ $('Webhook1').first().json.body.client_name }} mentioned naturally in first two sentences?\n4. No \"we/our\" from any company perspective?\n5. Flow feels natural, not choppy or over-edited?\n6. All SEO optimizations preserved?\n\n## Output Requirements:\nProvide ONLY the final polished article. Start with title, end with conclusion. No explanatory text, editing notes, or word count in output.\n\nQuality check: Does this still sound like genuine, helpful advice from a knowledgeable friend?\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\n{{ $('Keyword Strategist').item.json.system_prompt_injection }}\n\n{{ $('Keyword Strategist').item.json.structure_prompt_injection }}\n{{ $('Keyword Strategist').item.json.eeat_prompt_injection }}\n{{ $('Keyword Strategist').item.json.style_prompt_injection }}",
         "messages": {
           "messageValues": [
             {
-              "message": "=You are an experienced editor who specializes in light content polish and synthesis.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When combining versions, maintain this word count.\n\nYour role is to combine multiple versions of content into one flowing article while preserving the authentic, conversational tone and all technical optimizations already completed."
+              "message": "=You are an experienced editor who specializes in light content polish and synthesis.\n\nCRITICAL: The final article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding any FAQs) (±10%: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words). When combining versions, maintain this word count.\n\nYour role is to combine multiple versions of content into one flowing article while preserving the authentic, conversational tone and all technical optimizations already completed."
             }
           ]
         },
@@ -2046,10 +1950,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        5024,
-        2352
+        -7152,
+        -240
       ],
-      "id": "52ad1d9a-e943-47cb-85bf-7d6511bb59af",
+      "id": "25093cae-63d8-4715-9d2c-c528a35828e8",
       "name": "Claude Humanised Readability Rewrite",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2072,10 +1976,10 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        400,
-        1760
+        -12176,
+        -672
       ],
-      "id": "406c2b8f-ded6-4f0f-b79d-6752bdd1674d",
+      "id": "6f441e39-851a-422c-a8c0-85d7d0e5c994",
       "name": "Execution Data1"
     },
     {
@@ -2094,10 +1998,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        11616,
-        2624
+        -4016,
+        -1360
       ],
-      "id": "dc805872-48c4-46e6-9f0c-756def6f3cde",
+      "id": "a29efff9-b5a1-4341-adb5-8c9fbf74aa0e",
       "name": "Update a document6",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -2126,10 +2030,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8384,
-        624
+        -3792,
+        -1696
       ],
-      "id": "9787e42e-9b72-4e95-9a07-836a7abdcf1c",
+      "id": "996203d8-7d3e-4a66-813a-6ed369b26984",
       "name": "QA Rewriter Agent",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2158,10 +2062,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        8800,
-        752
+        -3376,
+        -1568
       ],
-      "id": "4f88f92f-e8ec-46f9-b738-1bf5f7f8afa3"
+      "id": "e9898768-06d3-4569-930c-539133feecbb"
     },
     {
       "parameters": {
@@ -2178,7 +2082,7 @@
               "role": "system"
             },
             {
-              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize:\n{{ $('Append FAQ to Article').first().json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
+              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize\n\n{{ $('AI Agent').item.json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
             }
           ]
         },
@@ -2189,10 +2093,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        9088,
-        432
+        -3792,
+        -1888
       ],
-      "id": "474fc386-ff6b-4eac-b582-b62d2479b54a",
+      "id": "61262296-a501-4056-bc57-56b54d267a67",
       "name": "Document Export Sanitization3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2213,10 +2117,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        7584,
-        528
+        -4592,
+        -1792
       ],
-      "id": "0888563d-380a-4e1b-8b4a-572399a4963b",
+      "id": "75ee43f0-7686-4d97-8134-696eb9aa079a",
       "name": "AI Agent",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2228,10 +2132,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        7728,
-        752
+        -4464,
+        -1568
       ],
-      "id": "74432528-1bd9-4ff4-ba70-79c766b544cc",
+      "id": "bc0979dd-6b1b-4c0d-987c-d07e7fd4cfd4",
       "name": "Structured Output Parser"
     },
     {
@@ -2243,17 +2147,16 @@
           "cachedResultName": "GPT-5"
         },
         "options": {
-          "timeout": 300000,
-          "maxCompletionTokens": 4096
+          "timeout": 300000
         }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        7600,
-        752
+        -4592,
+        -1568
       ],
-      "id": "47b7dd98-f64b-4c7c-b1c2-80dd6654e952",
+      "id": "ac757286-d141-442f-ad29-cc9b6d45cae0",
       "name": "OpenAI Chat Model",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2281,10 +2184,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        6944,
-        656
+        -5232,
+        -1664
       ],
-      "id": "058452a4-6a3d-41e3-b503-5f65296121c7",
+      "id": "64d8e159-03cb-472c-bf35-e2b9f1e5e796",
       "name": "Edit Fields"
     },
     {
@@ -2304,10 +2207,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7296,
-        528
+        -4880,
+        -1792
       ],
-      "id": "ac110d36-91cb-405a-be7d-fc4eb367f983",
+      "id": "0fffb1df-427a-40d4-8653-a8a36ca28786",
       "name": "Edit Fields1"
     },
     {
@@ -2355,10 +2258,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        8160,
-        528
+        -4016,
+        -1792
       ],
-      "id": "f473cd8e-9e09-4453-a03a-cea35c1bc372",
+      "id": "4e5c620d-da52-4d66-af39-b3f1feff0d20",
       "name": "If"
     },
     {
@@ -2381,10 +2284,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8384,
-        2016
+        -3792,
+        -560
       ],
-      "id": "d03218db-dfcb-4798-94a3-3ebcd11484a1",
+      "id": "92443c14-4b85-4d55-964a-b433c2d0e2f4",
       "name": "QA Rewriter Agent1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2419,10 +2322,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        8800,
-        2128
+        -3376,
+        -432
       ],
-      "id": "42f41eec-533f-4b7f-b3ea-788ea11badd6"
+      "id": "29cbd03c-e5c0-4bd9-aa5f-32db2fb0da4a"
     },
     {
       "parameters": {
@@ -2439,7 +2342,7 @@
               "role": "system"
             },
             {
-              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize:\n{{ $('Append FAQ to Article1').first().json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
+              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize:\n{{ $('AI Agent1').item.json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
             }
           ]
         },
@@ -2450,10 +2353,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        9088,
-        1824
+        -3792,
+        -752
       ],
-      "id": "b47bd43c-3465-422d-84f4-98aeb7306f35",
+      "id": "5d9c27d5-a4ed-4c3d-ac26-9f9e9bace7dd",
       "name": "Document Export Sanitization4",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2474,10 +2377,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        7584,
-        1920
+        -4592,
+        -656
       ],
-      "id": "42eec454-2374-4a31-931d-c4ea45caf14c",
+      "id": "ab46c2b7-c910-44d5-9062-26a1dff5d906",
       "name": "AI Agent1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2489,10 +2392,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        7728,
-        2144
+        -4464,
+        -432
       ],
-      "id": "f15af8d4-1a24-4a98-bde5-92396dc0b7d7",
+      "id": "3c6f6ba6-6473-4fe0-882c-a833f5720cf6",
       "name": "Structured Output Parser1"
     },
     {
@@ -2504,17 +2407,16 @@
           "cachedResultName": "GPT-5"
         },
         "options": {
-          "timeout": 300000,
-          "maxCompletionTokens": 4096
+          "timeout": 300000
         }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        7600,
-        2144
+        -4592,
+        -432
       ],
-      "id": "796de2ca-7433-4f3a-b6c3-cebd8e06ecc7",
+      "id": "566e5d17-3fa8-4e32-b7c9-d3ad8560fc72",
       "name": "OpenAI Chat Model1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2542,10 +2444,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        6944,
-        2032
+        -5232,
+        -528
       ],
-      "id": "3d819603-c07a-45ea-8a52-fa7a047ddac3",
+      "id": "249af63c-c68d-4f23-bbf9-8b09219a0189",
       "name": "Edit Fields2"
     },
     {
@@ -2565,10 +2467,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7296,
-        1920
+        -4880,
+        -656
       ],
-      "id": "e8afb8f2-7d03-4d23-b4c0-2d663f0aed38",
+      "id": "cdee651b-70ca-4548-816d-c4224ac8fd1e",
       "name": "Edit Fields3"
     },
     {
@@ -2616,10 +2518,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        8160,
-        1920
+        -4016,
+        -656
       ],
-      "id": "e0a54f51-2328-4312-b2aa-17c34acd99ed",
+      "id": "49b5dac3-45ff-451b-b7c0-85374145e2be",
       "name": "If1"
     },
     {
@@ -2642,10 +2544,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        10464,
-        2352
+        -1840,
+        -224
       ],
-      "id": "b1b33b02-67d4-4ab9-8ea2-c25e995b9b7c",
+      "id": "2f5171a7-d150-42cc-9bd0-9131cccc460e",
       "name": "QA Rewriter Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2680,10 +2582,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        10816,
-        2592
+        -1488,
+        208
       ],
-      "id": "4497ded4-f34a-46d7-9a63-ee4fa5e5e8f7"
+      "id": "116a6da5-2314-4004-97a3-f248d83333ec"
     },
     {
       "parameters": {
@@ -2700,7 +2602,7 @@
               "role": "system"
             },
             {
-              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize:\n{{ $('Append FAQ to Article2').first().json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
+              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize:\n{{ $('AI Agent2').item.json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
             }
           ]
         },
@@ -2711,10 +2613,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        11040,
-        2160
+        -1840,
+        -416
       ],
-      "id": "43997559-7a69-4041-b394-0071060759e0",
+      "id": "c7d493a5-8ed0-4f90-ae18-92add3747482",
       "name": "Document Export Sanitization6",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2735,10 +2637,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        9888,
-        2256
+        -2416,
+        -320
       ],
-      "id": "9c3b5cec-e60a-4ede-8d12-1e3b1be47240",
+      "id": "a1c4e349-849b-4a92-bdad-ce7b7dd9124f",
       "name": "AI Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2750,10 +2652,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        10032,
-        2480
+        -2288,
+        -96
       ],
-      "id": "a5de68a7-d896-42ee-87a3-540a26702583",
+      "id": "c5720b00-b9d1-4061-ba99-724b9dd981fd",
       "name": "Structured Output Parser2"
     },
     {
@@ -2764,17 +2666,15 @@
           "mode": "list",
           "cachedResultName": "GPT-5"
         },
-        "options": {
-          "maxCompletionTokens": 4096
-        }
+        "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        9904,
-        2480
+        -2416,
+        -96
       ],
-      "id": "7beae088-c0dd-43f0-95d6-1e1113e4bf0a",
+      "id": "5670169a-ed5b-4252-b066-842fda983991",
       "name": "OpenAI Chat Model2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2802,10 +2702,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        9440,
-        2496
+        -2864,
+        112
       ],
-      "id": "2ab7addf-baa7-483d-ad22-e7c568f6d0a5",
+      "id": "83b4da78-7351-4d1b-bb92-4094ceb38110",
       "name": "Edit Fields4"
     },
     {
@@ -2825,10 +2725,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        9664,
-        2256
+        -2640,
+        -320
       ],
-      "id": "657517af-74a3-456a-82d8-d3931d697f49",
+      "id": "8ebaac3c-8ebe-4bba-907e-41d4e2631d7e",
       "name": "Edit Fields5"
     },
     {
@@ -2867,10 +2767,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        10240,
-        2256
+        -2064,
+        -320
       ],
-      "id": "09751b9f-70ae-470a-87cd-3c4a86d0307d",
+      "id": "347e9cc5-dd19-48ed-b6c4-1fb28428fb60",
       "name": "If2"
     },
     {
@@ -2893,10 +2793,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        10464,
-        1456
+        -1840,
+        -832
       ],
-      "id": "ed04f236-4dd9-478d-93d3-47d0f6526b5e",
+      "id": "ab0f19ec-3dd2-421f-a754-4152dfa3f07f",
       "name": "QA Rewriter Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2931,10 +2831,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        10816,
-        1584
+        -1488,
+        -704
       ],
-      "id": "836ded62-2b77-4a8e-9f69-41e02ed6888c"
+      "id": "aece5dd4-d418-49c3-942e-0ee20fda7aaa"
     },
     {
       "parameters": {
@@ -2951,7 +2851,7 @@
               "role": "system"
             },
             {
-              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize:\n{{ $('Append FAQ to Article3').first().json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
+              "content": "=# PRIMARY CONSTRAINT - Word Count\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }} words\n\nSanitization must not alter word count - this is formatting cleanup only.\n\n# SEO Keywords\n{{ $('Webhook1').first().json.body.primary_keywords }}\n(Keywords should already be properly integrated - do not modify content)\n\n# Critical Rules (Already Applied - Verify Only)\n- The opening paragraph must include {{ $('Webhook1').first().json.body.client_name }} within the first two sentences\n- Never replace {{ $('Webhook1').first().json.body.client_name }} with \"the company\" or \"the brand\"\n- Never start with greetings like \"Hello,\" \"Welcome,\" \"Hey,\" or audience-flattery (\"dear readers,\" \"lovers of...\")\n- Content written as NEUTRAL EXPERT about {{ $('Webhook1').first().json.body.client_name }} - never use \"we,\" \"our,\" \"us\" from any company perspective\n- Always use second person (\"you\") or neutral third person\n\n## Objective\nPrepare this article for clean DOCX export and client delivery through formatting sanitization only.\n\n## Required Sanitization (Formatting Changes Only):\n\n### Character Replacement\n- Replace smart quotes (\"\") with straight ASCII quotes (\"\")\n- Replace smart apostrophes (') with straight apostrophes (')\n- Replace em dashes (—) with double hyphens (--)\n- Replace en dashes (–) with single hyphens (-)\n- Remove any other non-ASCII characters or special symbols\n- Preserve all HTML entities if present\n\n### Spacing & Formatting Cleanup\n- Remove double spaces (replace with single space)\n- Eliminate rogue line breaks within paragraphs\n- Ensure consistent paragraph spacing (one blank line between paragraphs)\n- Remove trailing spaces at end of lines\n- Ensure consistent spacing after punctuation\n\n### Header Formatting\nKeep headers clearly marked using markdown:\n- H1: # Header Text\n- H2: ## Header Text  \n- H3: ### Header Text\n- H4: #### Header Text\n\n### List Formatting\n- Numbered lists: 1. Item text\n- Bullet lists: - Item text\n- Maintain consistent indentation\n\n## What NOT to Change:\n- Do not alter any wording or phrasing\n- Do not modify sentence structure\n- Do not change paragraph order or content\n- Do not add or remove any substantive text\n- Do not modify meta title or meta description\n- This is FORMATTING ONLY\n\n## Article to Sanitize:\n{{ $('AI Agent3').item.json.content }}\n\n## Before Submitting - MANDATORY CHECKS:\n1. Word count still between {{ $('Webhook1').first().json.body.word_count * 0.9 }}-{{ $('Webhook1').first().json.body.word_count * 1.1 }}?\n2. All smart quotes replaced with straight quotes?\n3. All special dashes replaced with ASCII hyphens?\n4. No double spaces or irregular line breaks?\n5. Content unchanged - only formatting cleaned?\n6. {{ $('Webhook1').first().json.body.client_name }} still in first two sentences?\n\n## Output Requirements:\nReturn ONLY the clean, sanitized article ready for Word document import. No explanatory text, meta-commentary, or word count in output.\n\nFormat: Start with Meta Title and Meta Description (if present), then the full article with clean markdown formatting."
             }
           ]
         },
@@ -2962,10 +2862,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        11040,
-        1264
+        -1840,
+        -1264
       ],
-      "id": "6932ca9b-d137-4f0e-aee2-0075fc6a295d",
+      "id": "3d69a7e0-3974-4ed6-9a07-fbe98d4fea69",
       "name": "Document Export Sanitization7",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2986,10 +2886,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        9888,
-        1360
+        -2416,
+        -1168
       ],
-      "id": "a5bca3f6-e51a-43cd-bfdb-c5ef3b8e6e76",
+      "id": "18e111e7-b684-4e84-bd85-993fe2a440d1",
       "name": "AI Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -3001,10 +2901,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        10032,
-        1584
+        -2288,
+        -944
       ],
-      "id": "8cc622a1-c833-48c1-8660-09b40697ab27",
+      "id": "6cef60b7-9e2f-4dc5-bd1e-02c99bc45218",
       "name": "Structured Output Parser3"
     },
     {
@@ -3015,17 +2915,15 @@
           "mode": "list",
           "cachedResultName": "GPT-5"
         },
-        "options": {
-          "maxCompletionTokens": 4096
-        }
+        "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        9904,
-        1584
+        -2416,
+        -944
       ],
-      "id": "cf40f887-be12-4da9-be16-459de4158436",
+      "id": "3461f3d0-ff70-41bd-8404-6228b4cb1dd4",
       "name": "OpenAI Chat Model3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -3059,10 +2957,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        9440,
-        1488
+        -2864,
+        -1040
       ],
-      "id": "83dc41e1-cf2f-4bb7-bcf9-159365f17d00",
+      "id": "769cc92c-29f9-4772-9cb1-00fa6d217d2e",
       "name": "Edit Fields6"
     },
     {
@@ -3082,10 +2980,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        9664,
-        1360
+        -2640,
+        -1168
       ],
-      "id": "52c3cd95-8492-437a-8e7b-234ca402c11c",
+      "id": "41cbce17-9dcb-4fd3-ace3-54b3e6644faa",
       "name": "Edit Fields7"
     },
     {
@@ -3124,20 +3022,20 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        10240,
-        1360
+        -2064,
+        -1168
       ],
-      "id": "f79b4fdb-c664-4793-908e-355d44c8ea7d",
+      "id": "eb2f07ba-e581-44f3-b580-ad8a89ce088d",
       "name": "If3"
     },
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# PRIMARY CONSTRAINT - Word Count (MANDATORY)\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $json.word_count * 0.9 }} to {{ $json.word_count * 1.1 }} words\n\nYou MUST hit this word count target. Do not include the word count in your final article output.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\" (secondary used naturally)\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\n# Global Rules\n1. Always mention the client's name ({{ $('Webhook1').first().json.body.client_name }}) naturally in the opening paragraph, within the first two sentences, unless explicitly instructed otherwise.\n2. Openings must be professional, relevant, and tied directly to the client's industry, audience, or problem space. Do not use jokes, unrelated stories, or casual metaphors unless requested in the brief.\n3. Tone should feel approachable and human — like trusted advice from someone with real experience. Avoid filler, clichés, or anything that feels AI-generated.\n4. Ensure every article begins with a clear, audience-focused hook that establishes why the content matters to the reader.\n5. Never substitute vague phrases like \"this company\" or \"the brand\" when {{ $('Webhook1').first().json.body.client_name }} should be used.\n\n# Writing Voice & Style\nWrite like you're having coffee with someone who asked for your honest advice:\n- Use natural speech: \"I think,\" \"Here's what works,\" \"Honestly,\" \"Look\"\n- Mix short punchy sentences with flowing ones\n- Include personal observations and mild controversy when relevant\n- Add parenthetical thoughts (we all do this) and natural rhetorical questions\n- Use contractions and start sentences with \"And,\" \"But,\" \"So\"\n\n# Content Approach\n- Share insights like you've experienced this firsthand\n- Include \"what I've noticed\" observations and real scenarios\n- Use everyday analogies, not business jargon\n- Disagree with common advice when you have better points\n- Admit limitations and when things don't always work\n\n# Critical: NEVER Use These AI Phrases\n\"You're Not Alone\" | \"You Are Not Alone\" | \"It's important to note\" | \"Additionally/Furthermore\" | \"In today's digital landscape\" | \"Streamline/leverage/optimize/enhance\" | \"In conclusion\" | Perfect bullet parallelism\n\n# Use These Natural Transitions Instead\n\"Also,\" \"Plus,\" \"Here's the deal,\" \"The thing is,\" \"So basically,\" \"Oh, and don't forget\"\n\n# Structure Requirements\n- Hook with natural conversation starter\n- Subheadings as questions or statements (not formal headings)\n- Include mild frustrations about misconceptions\n- End with genuine advice, not corporate wrap-up\n\n# Your Content Assignment\nTitle: {{ $json.brief_title }}\nBrief: {{ $('Webhook1').first().json.body.creative_brief }}\nTarget Audience: {{ $('Webhook1').first().json.body.audience }}\nSEO Keywords: {{ $('Webhook1').first().json.body.primary_keywords }}\n\n# Output Requirements\n- Write the complete article within {{ $json.word_count * 0.9 }}-{{ $json.word_count * 1.1 }} words\n- Do NOT include \"Word Count: X\" or any meta-information in your output\n- End with the final sentence of your article, nothing else\n\nAuthentic helpfulness is the goal, but hitting the word count is mandatory.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\nFAQ RULE: You must include an FAQ section at the end of the article. If the Creative Brief provides FAQs, you MUST use those exact questions. If the brief does NOT provide FAQs, formulate 3-5 of your own highly relevant FAQs based on the generated content.\n\n{{ $('Keyword Strategist').first().json.keyword_strategy.system_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.structure_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.eeat_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.style_prompt_injection }}",
+        "text": "=# PRIMARY CONSTRAINT - Word Count (MANDATORY)\nTarget: {{ $('Webhook1').first().json.body.word_count }} words\nAcceptable range: {{ $json.word_count * 0.9 }} to {{ $json.word_count * 1.1 }} words\n\nYou MUST hit this word count target. Do not include the word count in your final article output.\n\n# KEYWORD PLACEMENT RULES (content will be scored against these)\nPrimary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}\nSecondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}\nSemantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}\n\n## PLACEMENT CHECKLIST:\n1. H1 title must contain the primary keyword (exact wording, not paraphrased)\n2. Primary keyword must appear naturally within the first 100 words\n3. Primary keyword (or close variation) must appear in at least one H2 subheading\n4. Primary keyword must appear in the final paragraph\n5. Every secondary keyword must appear at least once in the body\n6. Every semantic keyword must appear at least once in the body\n7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings\n8. Never bold or italicize keywords in body text\n\n## EXAMPLE — CORRECT keyword placement:\nIf primary keyword = \"causes of anxiety in young adults\":\nGOOD H1: \"Understanding the Causes of Anxiety in Young Adults\"\nGOOD Intro: \"The causes of anxiety in young adults are complex, involving biology, environment, and social pressures.\"\nGOOD H2: \"What Causes Anxiety in Adolescence\" (secondary keyword as H2)\nGOOD Body: \"Teen social anxiety treatment often begins with identifying triggers.\" (secondary used naturally)\nGOOD Conclusion: \"Recognizing the causes of anxiety in young adults is the first step toward effective support.\"\n\n## EXAMPLE — WRONG keyword placement:\nBAD H1: \"Understanding Anxiety Disorders\" (primary keyword missing from H1)\nBAD Intro: \"Anxiety is a growing concern...\" (keyword not in first 100 words)\nBAD H2s: \"The Perfect Storm\" / \"The Path to Healing\" (no keywords in any H2)\nBAD: Secondaries never mentioned — \"teen boys\" never appears, \"social anxiety\" never appears\n# Global Rules\n1. Always mention the client's name ({{ $('Webhook1').first().json.body.client_name }}) naturally in the opening paragraph, within the first two sentences, unless explicitly instructed otherwise.\n2. Openings must be professional, relevant, and tied directly to the client's industry, audience, or problem space. Do not use jokes, unrelated stories, or casual metaphors unless requested in the brief.\n3. Tone should feel approachable and human — like trusted advice from someone with real experience. Avoid filler, clichés, or anything that feels AI-generated.\n4. Ensure every article begins with a clear, audience-focused hook that establishes why the content matters to the reader.\n5. Never substitute vague phrases like \"this company\" or \"the brand\" when {{ $('Webhook1').first().json.body.client_name }} should be used.\n\n# Writing Voice & Style\nWrite like you're having coffee with someone who asked for your honest advice:\n- Use natural speech: \"I think,\" \"Here's what works,\" \"Honestly,\" \"Look\"\n- Mix short punchy sentences with flowing ones\n- Include personal observations and mild controversy when relevant\n- Add parenthetical thoughts (we all do this) and natural rhetorical questions\n- Use contractions and start sentences with \"And,\" \"But,\" \"So\"\n\n# Content Approach\n- Share insights like you've experienced this firsthand\n- Include \"what I've noticed\" observations and real scenarios\n- Use everyday analogies, not business jargon\n- Disagree with common advice when you have better points\n- Admit limitations and when things don't always work\n\n# Critical: NEVER Use These AI Phrases\n\"You're Not Alone\" | \"You Are Not Alone\" | \"It's important to note\" | \"Additionally/Furthermore\" | \"In today's digital landscape\" | \"Streamline/leverage/optimize/enhance\" | \"In conclusion\" | Perfect bullet parallelism\n\n# Use These Natural Transitions Instead\n\"Also,\" \"Plus,\" \"Here's the deal,\" \"The thing is,\" \"So basically,\" \"Oh, and don't forget\"\n\n# Structure Requirements\n- Hook with natural conversation starter\n- Subheadings as questions or statements (not formal headings)\n- Include mild frustrations about misconceptions\n- End with genuine advice, not corporate wrap-up\n\n# Your Content Assignment\nTitle: {{ $json.brief_title }}\nBrief: {{ $('Webhook1').first().json.body.creative_brief }}\nTarget Audience: {{ $('Webhook1').first().json.body.audience }}\nSEO Keywords: {{ $('Webhook1').first().json.body.primary_keywords }}\n\n# Output Requirements\n- Write the complete article within {{ $json.word_count * 0.9 }}-{{ $json.word_count * 1.1 }} words\n- Do NOT include \"Word Count: X\" or any meta-information in your output\n- End with the final sentence of your article, nothing else\n\nAuthentic helpfulness is the goal, but hitting the word count is mandatory.\n\nIMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}\nEnsure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.\n\nFAQ RULE: Only include an FAQ section at the end of the article IF the Creative Brief explicitly provides FAQs or requests them. If the brief provides FAQs, you MUST use those exact questions. Do NOT formulate your own FAQs if they are not in the brief.\nIMPORTANT: The FAQ section (if included) does NOT count towards your final article word count target.\n\n{{ $('Keyword Strategist').item.json.system_prompt_injection }}\n\n{{ $('Keyword Strategist').item.json.structure_prompt_injection }}\n{{ $('Keyword Strategist').item.json.eeat_prompt_injection }}\n{{ $('Keyword Strategist').item.json.style_prompt_injection }}",
         "messages": {
           "messageValues": [
             {
-              "message": "=You are an expert content writer who creates authentic, helpful articles that sound like genuine advice from a knowledgeable friend. \n\nCRITICAL REQUIREMENT: Every article MUST be {{ $('Webhook1').first().json.body.word_count }} words. Acceptable range: {{ $json.word_count * 0.9 }} to {{ $json.word_count * 1.1 }} words. Count carefully and adjust before finalizing.\n\nYour writing feels natural and conversational, never corporate or AI-generated. You have deep expertise across many topics and share insights like someone who's actually lived and worked in these areas. \n\nCurrent date: {{ $now.toISO() }}\\n\\n{{ $('Keyword Strategist').first().json.eeat_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.style_prompt_injection }}"
+              "message": "=You are an expert content writer who creates authentic, helpful articles that sound like genuine advice from a knowledgeable friend. \n\nCRITICAL REQUIREMENT: Every article MUST be {{ $('Webhook1').first().json.body.word_count }} words for the main body (excluding the FAQ section). Acceptable range: {{ $json.word_count * 0.9 }} to {{ $json.word_count * 1.1 }} words. Count carefully and adjust before finalizing.\n\nYour writing feels natural and conversational, never corporate or AI-generated. You have deep expertise across many topics and share insights like someone who's actually lived and worked in these areas. \n\nCurrent date: {{ $now.toISO() }}\\n\\n{{ $('Keyword Strategist').first().json.eeat_prompt_injection }}\\n\\n{{ $('Keyword Strategist').first().json.style_prompt_injection }}"
             }
           ]
         },
@@ -3146,10 +3044,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        896,
-        1808
+        -11280,
+        -624
       ],
-      "id": "bdb9b5a6-702d-4cf4-92c4-38bd41b6db56",
+      "id": "02f684b8-a737-48de-94b3-7d6b7e8e2446",
       "name": "Claude Draft (Claude Opus 3)1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -3171,10 +3069,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        976,
-        2032
+        -11216,
+        -400
       ],
-      "id": "fd9734b0-c7c0-4b31-b480-fd0950593e4b",
+      "id": "6d8d1f13-5b2e-4f3c-b1a3-cc15555a45d8",
       "name": "Anthropic Chat Model4",
       "credentials": {
         "anthropicApi": {
@@ -3200,10 +3098,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7936,
-        528
+        -4240,
+        -1792
       ],
-      "id": "fc911153-ef36-4b1d-90cc-7addc0106b82",
+      "id": "b35a18f5-8913-4c5a-b31e-a5aeae7431dd",
       "name": "Max Iterations"
     },
     {
@@ -3223,353 +3121,133 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        7968,
-        1920
+        -4240,
+        -656
       ],
-      "id": "0cc1a5ad-c5d3-46ef-92c5-180d276d6e14",
+      "id": "9e6c8910-9db7-4c4f-9c69-1d5a6a5e2a2a",
       "name": "Max Iterations1"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "test_mode_check",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        -200,
-        1800
-      ],
-      "id": "5c059d17-ace8-499d-8e48-3046b860a497",
-      "name": "Is Test Mode?",
-      "notesInFlow": true,
-      "notes": "Routes test requests to skip Google Drive/Docs creation"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "test_exit_check_4",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        9500,
-        1000
-      ],
-      "id": "dd729a3d-c2eb-42e3-9995-de3d86f87609",
-      "name": "Is Test Exit 4?",
-      "notesInFlow": true,
-      "notes": "Test→Audit, Prod→Create document4"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "test_exit_check_5",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        9500,
-        1300
-      ],
-      "id": "ac0da16e-2dc1-4dbd-8771-268e73f628a8",
-      "name": "Is Test Exit 5?",
-      "notesInFlow": true,
-      "notes": "Test→Audit, Prod→Create document5"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "test_exit_check_6",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        9500,
-        1600
-      ],
-      "id": "e7a331a3-64a0-44e8-a4a3-c7be4c30e0fe",
-      "name": "Is Test Exit 6?",
-      "notesInFlow": true,
-      "notes": "Test→Audit, Prod→Create document6"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "test_exit_check_7",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        9500,
-        1900
-      ],
-      "id": "2845d38b-5daa-471a-8a54-7c8c91057684",
-      "name": "Is Test Exit 7?",
-      "notesInFlow": true,
-      "notes": "Test→Audit, Prod→Create document7"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "test_exit_check_15",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        9500,
-        2200
-      ],
-      "id": "4c6764f0-9c28-4db1-a0c6-6a94d55459dd",
-      "name": "Is Test Exit 15?",
-      "notesInFlow": true,
-      "notes": "Test→Audit, Prod→Create document15"
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "loose",
-            "version": 2
-          },
-          "conditions": [
-            {
-              "id": "test_exit_check_16",
-              "leftValue": "={{ $('Webhook1').item.json.body.request_status }}",
-              "rightValue": "test",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        9500,
-        2500
-      ],
-      "id": "988c3f1d-905b-4256-97ec-5583ac93ee5d",
-      "name": "Is Test Exit 16?",
-      "notesInFlow": true,
-      "notes": "Test→Audit, Prod→Create document16"
-    },
-    {
-      "parameters": {},
-      "id": "cc81d0d9-ea82-44fb-a9c0-3706740f20c0",
-      "name": "On Flow Error",
-      "type": "n8n-nodes-base.errorTrigger",
-      "typeVersion": 1,
-      "position": [
-        12000,
-        2800
-      ]
-    },
-    {
-      "parameters": {
-        "values": {
-          "string": [
-            {
-              "name": "status",
-              "value": "failed"
-            },
-            {
-              "name": "reason",
-              "value": "Workflow error or threshold not met"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "887773f1-3c37-49bc-99b4-4f098a5a6158",
-      "name": "Format Failure Result",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 1,
-      "position": [
-        12200,
-        2800
-      ]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://skywide-content-flow.vercel.app/api/test-callback",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"request_id\": \"{{ $('Webhook1').item.json.body.request_id }}\",\n  \"status\": \"failed\",\n  \"audit_data\": {\n    \"alignment_score\": 0,\n    \"alignment_summary\": \"System Error or Threshold Failure\",\n    \"passed\": false\n  }\n}",
-        "options": {
-          "timeout": 10000
-        }
-      },
-      "id": "912fe878-27b7-4468-a7ac-885c6fbea27d",
-      "name": "Send Failure Callback",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        12400,
-        2800
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "\n// === Capture Article Content ===\nconst inputData = $input.item.json;\nlet articleContent = inputData.message?.content\n    || inputData.text\n    || inputData.content\n    || inputData.article_content\n    || '';\n\nif (typeof articleContent === 'object') {\n    articleContent = JSON.stringify(articleContent);\n}\n\n// Fallback: try upstream nodes\nif (!articleContent || articleContent.length < 100) {\n    const tryNodes = [\n        'Document Export Sanitization3', 'Document Export Sanitization4',\n        'Document Export Sanitization6', 'Document Export Sanitization7',\n        'Document Export Sanitization',\n        '1st Improvement LLM2', '1st Improvement LLM3',\n        'Improvement LLM2', 'Improvement LLM3',\n        'Claude Humanised Readability Rewrite'\n    ];\n    for (const nodeName of tryNodes) {\n        try {\n            const data = $node[nodeName]?.json;\n            if (data) {\n                const text = data.message?.content || data.text || data.content || '';\n                if (text && typeof text === 'string' && text.length > (articleContent?.length || 0)) {\n                    articleContent = text;\n                }\n            }\n        } catch(e) {}\n    }\n}\n\n// === Capture Scoring Data from Scoring Agents ===\nlet scoringData = null;\n\n// Try each scoring agent in order (most recent first)\nconst scoringNodes = [\n    '2nd Scoring Agent2', '2nd Scoring Agent3',\n    '1st Scoring Agent2', '1st Scoring Agent3',\n    'Scoring7', 'Scoring1'\n];\n\nfor (const scoringNode of scoringNodes) {\n    try {\n        const data = $node[scoringNode]?.json;\n        const content = data?.message?.content;\n        if (content) {\n            // content could be JSON object or JSON string\n            scoringData = typeof content === 'string' ? JSON.parse(content) : content;\n            if (scoringData?.overallScore !== undefined) break;\n        }\n    } catch(e) {}\n}\n\n// Build structured audit_data\nconst requestId = $('Webhook1').item.json.body.request_id;\nconst title = $('Webhook1').item.json.body.title || 'Test Article';\nconst wordCount = articleContent ? articleContent.split(/\\s+/).filter(Boolean).length : 0;\n\nconst auditData = scoringData ? {\n    // 6 category scores\n    seoOptimization: scoringData.seoOptimization || 0,\n    humanAuthenticity: scoringData.humanAuthenticity || 0,\n    readabilityStructure: scoringData.readabilityStructure || 0,\n    engagementClarity: scoringData.engagementClarity || 0,\n    trustAuthority: scoringData.trustAuthority || 0,\n    conversionValue: scoringData.conversionValue || 0,\n    // Overall\n    overallScore: scoringData.overallScore || 0,\n    alignment_score: scoringData.overallScore || 0,\n    // Text fields\n    issues: scoringData.issues || '',\n    fixes: scoringData.fixes || '',\n    impact: scoringData.impact || '',\n    // Meta\n    alignment_summary: `Content scored ${scoringData.overallScore}/100 across 6 quality dimensions`,\n    passed: (scoringData.overallScore || 0) >= 80,\n    word_count: wordCount,\n    title: title\n} : {\n    alignment_score: 0,\n    alignment_summary: `Test completed - ${wordCount} words generated for \"${title}\"`,\n    passed: false,\n    word_count: wordCount,\n    title: title,\n    seoOptimization: 0, humanAuthenticity: 0, readabilityStructure: 0,\n    engagementClarity: 0, trustAuthority: 0, conversionValue: 0,\n    overallScore: 0, issues: 'Scoring data not available', fixes: '', impact: ''\n};\n\n// === Send Callback ===\nconsole.log('Sending callback for request:', requestId);\nconsole.log('Overall Score:', auditData.overallScore);\nconsole.log('Content Length:', articleContent.length);\n\ntry {\n    const response = await this.helpers.httpRequest({\n        method: 'POST',\n        url: 'https://skywide-content-flow.vercel.app/api/test-callback',\n        body: {\n            request_id: requestId,\n            status: 'completed',\n            audit_data: auditData,\n            content_markdown: articleContent\n        },\n        headers: { 'Content-Type': 'application/json' }\n    });\n    \n    return [{ json: {\n        success: true,\n        content_length: articleContent.length,\n        word_count: wordCount,\n        overall_score: auditData.overallScore,\n        scoring_source: scoringData ? 'real' : 'fallback',\n        api_response: response\n    }}];\n} catch (error) {\n    console.error('Callback failed:', error.message);\n    if (error.response) {\n        console.error('Response data:', JSON.stringify(error.response.data));\n        console.error('Response status:', error.response.status);\n    }\n    throw error;\n}\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        10800,
-        1200
-      ],
-      "id": "c7361bed-33de-4db2-b510-26e7117f4b6c",
-      "name": "Send Test Result",
-      "notesInFlow": true,
-      "notes": "Captures article content from upstream + sends callback in one step"
     },
     {
       "parameters": {
         "jsCode": "// Instruction Strategist v5 — Keywords + Structure + EEAT + Style\nconst input = $('Webhook1').first().json.body;\n\nfunction parseKeywords(raw) {\n  if (!raw || typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\n\nconst primary = (input.primary_keywords || '').trim();\nconst secondaryList = parseKeywords(input.secondary_keywords);       \nconst semanticList = parseKeywords(input.semantic_theme);\nconst wordCount = parseInt(input.word_count) || 1500;\nconst creativeBrief = (input.creative_brief || '').trim();\nconst clientName = (input.client_name || 'the client').trim();\n\n// Calculate target frequency (Backlinko: ~8 per 3200 words, scaled)\nconst targetFreq = Math.max(3, Math.round((wordCount / 3200) * 8));\n\n// Build secondary block\nconst allSecondary = [...secondaryList, ...semanticList]\n  .filter((v, i, a) => a.indexOf(v) === i);\n\nconst secondaryBlock = allSecondary\n  .map((kw, i) => '   ' + (i+1) + '. \"' + kw + '\" — use at least once, naturally woven into a sentence')\n  .join('\\n');\n\nconst keywordInjection = `\n### KEYWORD PLACEMENT RULES\n\n**PRIMARY KEYWORD:** \"${primary}\"\n\nWHERE TO PLACE IT (in order of importance):\n1. H1 TITLE — Must contain the primary keyword as-is (exact wording)\n2. FIRST 100 WORDS — Use it naturally within the opening paragraph\n3. ONE H2 HEADING — Include it (or a very close variation) in one H2\n4. FINAL PARAGRAPH — Reference it in the conclusion\n5. BODY TEXT — Use it approximately ${targetFreq} times total across the article \n\nHOW TO USE IT NATURALLY:\n- First use: exact match in a natural sentence\n- After first use: you may use natural variations\n- NEVER bold, italicize, or visually emphasize the keyword in body text\n- NEVER force it into a sentence where it sounds awkward\n\nDO vs DON'T:\nYES: \"When considering ${primary}, the most important factor is...\"\nYES: Use the keyword as part of a larger thought, not as a label\nNO: \"**${primary}** is important because...\" (bolded, sounds like a label)       \nNO: Starting 3+ sentences with the keyword phrase\n\n**SECONDARY & SEMANTIC KEYWORDS (use each at least once):**\n${secondaryBlock}\n\nFor question-form keywords: use them as a subheading or embed naturally like \"Many people ask, [keyword]?\"\n\n**H2 HEADING STRATEGY (Surfer SEO best practice):**\n- Each H2 should address a different subtopic or keyword family\n- Use the primary keyword in max ONE H2\n- Use secondary/semantic keywords or natural variations in other H2s\n- H2s should read like useful section titles, not keyword dumps\n`;\n\nlet structureInjection = '';\nif (creativeBrief) {\n  structureInjection = `\n### BRIEF STRUCTURE ENFORCEMENT\n\nYou MUST follow the structural outline and instructions provided in the Creative Brief below. Do not invent your own structure if an explicit outline is provided.\n\n**Creative Brief Instructions:**\n\"\"\"\n${creativeBrief}\n\"\"\"\n\n**Strict Adherence Rules:**\n- If the brief lists specific H2s or subheadings, you MUST use those exact subheadings.\n- If the brief dictates specific elements (like a bulleted list of symptoms, a comparison table, or FAQs), you MUST include them exactly as requested.\n- Maintain a logical hierarchy (H2 -> H3) without deviating from the brief's plan.\n`;\n} else {\n  structureInjection = `\n### BRIEF STRUCTURE ENFORCEMENT\n\nNo explicit creative brief structure provided. Please use a logical H2/H3 structure appropriate for the topic.\n`;\n}\n\nconst eeatInjection = `\n### EEAT FACTUAL ACCURACY & ZERO HALLUCINATION POLICY\n\nYou are writing a professional, publish-ready article. You MUST adhere to the following factual constraints:\n\n1. **NO FAKE EXPERTS:** NEVER fabricate names of people, experts, doctors, or clients (e.g. no \"Gregory V.\" or similar invented personas).\n2. **NO FAKE DATA:** NEVER invent statistics, citations, research studies, or case studies.\n3. **NO PLACEHOLDERS:** If a point logically requires a specific statistic, testimonial, or piece of data that is NOT provided in the creative brief, you MUST write around it naturally. NEVER use placeholders like [INSERT CLIENT STATISTIC] or [INSERT TESTIMONIAL]. The output must be 100% ready to publish and send to the client without them having to fill in the blanks.\n4. **REPRESENT THE CLIENT:** Only use \"${clientName}\" when representing the company. Do not substitute vague phrases like \"this company\" or \"the brand\".\n`;\n\nconst styleInjection = `\n### VOICE & STYLE ENFORCEMENT (CONTRACTOR VOICE)\n\nYou must write like a grounded, knowledgeable consultant giving direct advice from the field. \n\n**Format Rules:**\n- **Paragraphs MUST be short:** Maximum 2-3 sentences per paragraph. Use punchy, highly readable delivery. No dense UI blocks.\n\n**Tone Rules:**\n- Use natural speech: \"I think,\" \"Here's what works,\" \"Honestly,\" \"Look\"\n- Add parenthetical thoughts (we all do this) and natural rhetorical questions\n- Disagree with common advice when you have better points; admit limitations\n\n**BANNED PHRASES (NEVER USE THESE):**\n- \"Let's dive in\" / \"Let's explore\" / \"Let's delve\"\n- \"In today's digital landscape\" / \"In the modern world\"\n- \"The bottom line\" / \"In conclusion\"\n- \"Furthermore\" / \"Additionally\" / \"Moreover\"\n- \"Streamline\" / \"Leverage\" / \"Optimize\"\n- \"You're Not Alone\" / \"It's important to note\"\n`;\n\nreturn [{ json: {\n  system_prompt_injection: keywordInjection,\n  structure_prompt_injection: structureInjection,\n  eeat_prompt_injection: eeatInjection,\n  style_prompt_injection: styleInjection,\n  primary_keyword: primary,\n  secondary_keywords: allSecondary,\n  target_frequency: targetFreq\n}}];\n"
       },
-      "id": "7d080988-5d25-40a6-9330-994e1c6d1205",
+      "id": "70a11a69-8215-4673-ac23-b2018e217842",
       "name": "Keyword Strategist",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        200,
-        1760
+        -12400,
+        -672
       ]
     },
     {
       "parameters": {
         "jsCode": "// Keyword Validator v3 — Expert-weighted scoring\nconst content = $input.first().json.content || $input.first().json.text || '';\nconst input = $('Webhook1').first().json.body;\n\nconst primary = (input.primary_keywords || '').trim();\nfunction parseKeywords(raw) {\n  if (!raw || typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\nfunction escapeRegex(str) {\n  return str.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n}\n\nif (!primary) {\n  return [{ json: { score: 0, passed: false, issues: ['No primary keyword provided'] } }];\n}\n\nconst allSecondary = [...parseKeywords(input.secondary_keywords), ...parseKeywords(input.semantic_theme)]\n  .filter((v, i, a) => a.indexOf(v) === i);\n\nconst lower = content.toLowerCase();\nconst primaryLower = primary.toLowerCase();\nconst plainText = content.replace(/<[^>]*>/g, '').replace(/[#*_]/g, '');\nconst words = plainText.split(/\\s+/);\n\nlet score = 0;\nconst issues = [];\n\n// 1. H1 contains primary keyword (20 pts — highest SEO value per Backlinko/Google)\nconst h1Match = content.match(/<h1[^>]*>(.*?)<\\/h1>/i) || content.match(/^#\\s+(.+)$/m);\nconst h1Text = h1Match ? h1Match[1].toLowerCase() : '';\nif (!h1Match) {\n  issues.push('MISSING H1 TAG');\n} else if (h1Text.includes(primaryLower)) {\n  score += 20;\n} else {\n  issues.push('Primary keyword NOT in H1. Found: \"' + (h1Match[1] || '').substring(0, 60) + '\"');\n}\n\n// 2. Primary in first 100 words (15 pts — Backlinko: \"still makes a difference\")\nconst first100 = words.slice(0, 100).join(' ').toLowerCase();\nif (first100.includes(primaryLower)) {\n  score += 15;\n} else {\n  issues.push('Primary keyword NOT in first 100 words');\n}\n\n// 3. Primary (or close variation) in at least one H2 (15 pts)\nconst h2Matches = content.match(/<h2[^>]*>(.*?)<\\/h2>/gi) || content.match(/^##\\s+(.+)$/gm) || [];\nconst h2Texts = h2Matches.map(h => h.replace(/<[^>]*>/g, '').replace(/^##\\s+/, '').toLowerCase());\nconst primaryWords = primaryLower.split(/\\s+/);\nconst minMatchWords = Math.ceil(primaryWords.length * 0.6);\nconst primaryInH2 = h2Texts.some(h => {\n  if (h.includes(primaryLower)) return true;\n  const matchedWords = primaryWords.filter(w => h.includes(w));\n  return matchedWords.length >= minMatchWords;\n});\nif (primaryInH2) {\n  score += 15;\n} else {\n  issues.push('Primary keyword (or variation) NOT in any H2');\n}\n\n// 4. Primary in conclusion (10 pts)\nconst paragraphs = plainText.split(/\\n\\n+/).filter(p => p.trim().length > 30);\nconst lastPara = paragraphs.length > 0 ? paragraphs[paragraphs.length - 1].toLowerCase() : '';\nif (lastPara.includes(primaryLower)) {\n  score += 10;\n} else {\n  issues.push('Primary keyword NOT in conclusion');\n}\n\n// 5. Keyword frequency check (10 pts — Backlinko: ~8 per 3200 words)\nconst primaryRegex = new RegExp(escapeRegex(primaryLower), 'gi');\nconst primaryCount = (lower.match(primaryRegex) || []).length;\nconst wordCount = words.length;\nconst expectedFreq = Math.max(3, Math.round((wordCount / 3200) * 8));\nif (primaryCount >= expectedFreq - 1 && primaryCount <= expectedFreq * 2) {\n  score += 10;\n} else if (primaryCount >= 2) {\n  score += 5;\n  issues.push('Keyword frequency: ' + primaryCount + 'x (target: ~' + expectedFreq + 'x)');\n} else {\n  issues.push('Keyword used only ' + primaryCount + 'x (target: ~' + expectedFreq + 'x)');\n}\n\n// 6. All secondary/semantic keywords present (25 pts)\nconst secondaryResults = allSecondary.map(kw => ({\n  keyword: kw,\n  found: lower.includes(kw.toLowerCase())\n}));\nconst secondaryFound = secondaryResults.filter(s => s.found).length;\nconst secondaryTotal = allSecondary.length || 1;\nscore += Math.round((secondaryFound / secondaryTotal) * 25);\nconst missing = secondaryResults.filter(s => !s.found).map(s => s.keyword);\nif (missing.length > 0) {\n  issues.push('MISSING secondary/semantic: ' + missing.join(' | '));\n}\n\n// 7. H2 keyword distribution (5 pts bonus — Surfer SEO best practice)\nconst keywordsInH2 = allSecondary.filter(kw =>\n  h2Texts.some(h => h.includes(kw.toLowerCase()))\n);\nif (keywordsInH2.length >= 1) {\n  score += 5;\n}\n\n// 8. Keyword bolding penalty (informational)\nconst boldedKeyword = content.match(new RegExp('\\\\*\\\\*[^*]*' + escapeRegex(primaryLower) + '[^*]*\\\\*\\\\*', 'i'));\nif (boldedKeyword) {\n  issues.push('WARNING: Primary keyword is bolded in body text');\n}\n\nconst finalScore = Math.min(100, score);\nconst passed = finalScore >= 60 && h1Text.includes(primaryLower) && first100.includes(primaryLower);\n\nreturn [{ json: {\n  score: finalScore,\n  passed,\n  issues,\n  checks: {\n    primaryInH1: h1Text.includes(primaryLower),\n    primaryInFirst100: first100.includes(primaryLower),\n    primaryInH2: primaryInH2,\n    primaryInConclusion: lastPara.includes(primaryLower),\n    frequency: primaryCount + 'x (target: ~' + expectedFreq + 'x)',\n    secondaryCoverage: secondaryFound + '/' + allSecondary.length,\n    missingKeywords: missing,\n    secondaryInH2s: keywordsInH2\n  }\n}}];"
       },
-      "id": "cd0b1e80-3d5d-40d8-811e-c319d6130537",
+      "id": "c163cc51-25ea-4f6b-9c3c-5feb0ff5a054",
       "name": "Keyword Validator",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2200,
-        1600
+        -11952,
+        -672
       ]
+    },
+    {
+      "parameters": {
+        "folderId": "={{ $('Create folder1').item.json.id }}",
+        "title": "={{ $('Webhook1').first().json.body.title }} - OpenAI"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -3344,
+        -1904
+      ],
+      "id": "419150c6-993d-4b78-9769-6e788b6a236e",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "MtLhGZ2k5z3HZHk8",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=Overall Score: {{ $('1st Scoring Agent2').item.json.message.content.overallScore }}/100\n\nPotential Issues: {{ $('1st Scoring Agent2').item.json.message.content.issues }}\n\nPotential Fixes: {{ $('1st Scoring Agent2').item.json.message.content.fixes }}\n\nPotential Impact: {{ $('1st Scoring Agent2').item.json.message.content.impact }}\n\nCurrent Content:\n{{ $('Document Export Sanitization3').item.json.message.content }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -3120,
+        -1904
+      ],
+      "id": "0bc2dc15-d181-4f0a-a0f9-13c47d7f7f9f",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "MtLhGZ2k5z3HZHk8",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "={{ $('Create folder1').item.json.id }}",
+        "title": "={{ $('Webhook1').first().json.body.title }} - Claude"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -3408,
+        -752
+      ],
+      "id": "d5223f20-73bc-4a81-9d77-90119ae797f0",
+      "name": "Create a document17",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "MtLhGZ2k5z3HZHk8",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=Overall Score: {{ $('1st Scoring Agent3').item.json.message.content.overallScore }}/100\n\nPotential Issues: {{ $('1st Scoring Agent3').item.json.message.content.issues }}\n\nPotential Fixes: {{ $('1st Scoring Agent3').item.json.message.content.fixes }}\n\nPotential Impact: {{ $('1st Scoring Agent3').item.json.message.content.impact }}\n\nCurrent Content: {{ $('Document Export Sanitization4').item.json.message.content }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -3184,
+        -752
+      ],
+      "id": "a9714e46-5b3b-43b6-8b8c-82b5ea02bc4d",
+      "name": "Update a document17",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "MtLhGZ2k5z3HZHk8",
+          "name": "Google Docs account"
+        }
+      }
     }
   ],
   "pinData": {
@@ -4673,7 +4351,7 @@
       "main": [
         [
           {
-            "node": "Is Test Exit 4?",
+            "node": "Create a document7",
             "type": "main",
             "index": 0
           }
@@ -4689,13 +4367,7 @@
     },
     "Check Max Iterations2": {
       "main": [
-        [
-          {
-            "node": "Is Test Exit 5?",
-            "type": "main",
-            "index": 0
-          }
-        ],
+        [],
         [
           {
             "node": "Improvement LLM2",
@@ -4743,17 +4415,6 @@
         [
           {
             "node": "80 +?5",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Create a document4": {
-      "main": [
-        [
-          {
-            "node": "Update a document5",
             "type": "main",
             "index": 0
           }
@@ -4811,17 +4472,6 @@
         ]
       ]
     },
-    "Create a document5": {
-      "main": [
-        [
-          {
-            "node": "Update a document4",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "1st Improvement LLM3": {
       "main": [
         [
@@ -4866,7 +4516,7 @@
       "main": [
         [
           {
-            "node": "Is Test Exit 6?",
+            "node": "Create a document6",
             "type": "main",
             "index": 0
           }
@@ -4882,13 +4532,7 @@
     },
     "Check Max Iterations3": {
       "main": [
-        [
-          {
-            "node": "Is Test Exit 7?",
-            "type": "main",
-            "index": 0
-          }
-        ],
+        [],
         [
           {
             "node": "Improvement LLM3",
@@ -5092,17 +4736,6 @@
         ]
       ]
     },
-    "Document Export Sanitization3": {
-      "main": [
-        [
-          {
-            "node": "Is Test Exit 15?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "AI Agent": {
       "main": [
         [
@@ -5192,17 +4825,6 @@
         [
           {
             "node": "Edit Fields2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Document Export Sanitization4": {
-      "main": [
-        [
-          {
-            "node": "Is Test Exit 16?",
             "type": "main",
             "index": 0
           }
@@ -5304,17 +4926,6 @@
         ]
       ]
     },
-    "Document Export Sanitization6": {
-      "main": [
-        [
-          {
-            "node": "Is Test Exit 7?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "AI Agent2": {
       "main": [
         [
@@ -5404,17 +5015,6 @@
         [
           {
             "node": "Edit Fields6",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Document Export Sanitization7": {
-      "main": [
-        [
-          {
-            "node": "Is Test Exit 5?",
             "type": "main",
             "index": 0
           }
@@ -5538,154 +5138,6 @@
         ]
       ]
     },
-    "Is Test Mode?": {
-      "main": [
-        [
-          {
-            "node": "Clean1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create folder1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Is Test Exit 4?": {
-      "main": [
-        [
-          {
-            "node": "Send Test Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create a document4",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Is Test Exit 5?": {
-      "main": [
-        [
-          {
-            "node": "Send Test Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create a document5",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Is Test Exit 6?": {
-      "main": [
-        [
-          {
-            "node": "Send Test Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create a document6",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Is Test Exit 7?": {
-      "main": [
-        [
-          {
-            "node": "Send Test Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create a document7",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Is Test Exit 15?": {
-      "main": [
-        [
-          {
-            "node": "Send Test Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create a document15",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Is Test Exit 16?": {
-      "main": [
-        [
-          {
-            "node": "Send Test Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Create a document16",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "On Flow Error": {
-      "main": [
-        [
-          {
-            "node": "Format Failure Result",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Format Failure Result": {
-      "main": [
-        [
-          {
-            "node": "Send Failure Callback",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Keyword Strategist": {
       "main": [
         [
@@ -5697,11 +5149,77 @@
         ]
       ]
     },
+    "Document Export Sanitization3": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Keyword Validator": {
       "main": [
         [
           {
-            "node": "Is Test Mode?",
+            "node": "Create folder1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Export Sanitization4": {
+      "main": [
+        [
+          {
+            "node": "Create a document17",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Export Sanitization6": {
+      "main": [
+        [
+          {
+            "node": "Create a document16",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Document Export Sanitization7": {
+      "main": [
+        [
+          {
+            "node": "Create a document15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document17": {
+      "main": [
+        [
+          {
+            "node": "Update a document17",
             "type": "main",
             "index": 0
           }
@@ -5713,7 +5231,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "bab1564f-40b5-4fe8-ac85-bfa3dde6645e",
+  "versionId": "8fa5e49f-c1c0-4e08-98b7-48bebf7b0e54",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "a09af904c89d8bd1ffb34a0a4a29385c214bff1ce25df6d68c440d7ac472b65f"
@@ -5721,8 +5239,8 @@
   "id": "t3LNiuZIghvobde3",
   "tags": [
     {
-      "createdAt": "2025-07-03T19:19:08.912Z",
       "updatedAt": "2025-07-03T19:19:08.912Z",
+      "createdAt": "2025-07-03T19:19:08.912Z",
       "id": "MVboqPl4w8lxSrR1",
       "name": "SEOBrand"
     }

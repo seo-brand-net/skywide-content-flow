@@ -563,6 +563,18 @@ export default function MyRequests() {
                                                 </div>
                                             </div>
 
+                                            {selectedRequest.status.toLowerCase() === 'error' && selectedRequest.error_message && (
+                                                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-md p-4">
+                                                    <label className="text-sm font-medium text-red-800 dark:text-red-400 flex items-center gap-2">
+                                                        <AlertCircle className="w-4 h-4" />
+                                                        Error Details
+                                                    </label>
+                                                    <p className="text-red-700 dark:text-red-300 mt-2 whitespace-pre-wrap font-mono text-sm">
+                                                        {selectedRequest.error_message}
+                                                    </p>
+                                                </div>
+                                            )}
+
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="text-sm font-medium text-muted-foreground">Submitted</label>
