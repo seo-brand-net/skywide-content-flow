@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { triggerRunUpdate } from '@/lib/pusher/server';
 
 export async function POST(request: Request) {
@@ -17,7 +17,10 @@ export async function POST(request: Request) {
             );
         }
 
-        const supabase = await createClient();
+        const supabase = createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        );
 
         const formattedError = nodeName
             ? `Failed at stage '${nodeName}': ${errorMessage || 'Unknown error'}`
