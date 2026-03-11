@@ -35,7 +35,7 @@ export async function POST(request: Request) {
 
             if (req) {
                 await supabase.from('content_requests').update({
-                    status: 'error',
+                    status: 'cancelled',
                     error_message: formattedError,
                     updated_at: new Date().toISOString()
                 }).eq('id', req.id);
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
             if (runData) {
                 await supabase.from('content_requests').update({
-                    status: 'error',
+                    status: 'cancelled',
                     error_message: formattedError,
                     updated_at: new Date().toISOString()
                 }).eq('id', runData.content_request_id);
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
 
         if (pendingReq) {
             await supabase.from('content_requests').update({
-                status: 'error',
+                status: 'cancelled',
                 error_message: formattedError,
                 updated_at: new Date().toISOString()
             }).eq('id', pendingReq.id);
