@@ -87,6 +87,17 @@ export default function MyRequests() {
         }
     };
 
+    const getDisplayStatus = (request: typeof requests[0]) => {
+        if (request.status === 'cancelled' && request.error_message) return 'error';
+        if (request.status === 'completed') return 'complete';
+        return request.status.replace('_', ' ');
+    };
+
+    const getDisplayColor = (request: typeof requests[0]) => {
+        if (request.status === 'cancelled' && request.error_message) return getStatusColor('error');
+        return getStatusColor(request.status);
+    };
+
     const openDetailView = (request: ContentRequest) => {
         setSelectedRequest(request);
         setIsDetailModalOpen(true);
@@ -334,8 +345,8 @@ export default function MyRequests() {
                                                         </TableCell>
 
                                                         <TableCell className="py-5 px-4">
-                                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-tight shadow-sm border ${getStatusColor(request.status)}`}>
-                                                                {request.status === 'completed' ? 'complete' : request.status.replace('_', ' ')}
+                                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-tight shadow-sm border ${getDisplayColor(request)}`}>
+                                                                {getDisplayStatus(request)}
                                                             </span>
                                                         </TableCell>
 
@@ -549,8 +560,8 @@ export default function MyRequests() {
                                                 <div>
                                                     <label className="text-sm font-medium text-muted-foreground">Status</label>
                                                     <div className="mt-1">
-                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedRequest.status)}`}>
-                                                            {selectedRequest.status === 'completed' ? 'complete' : selectedRequest.status.replace('_', ' ')}
+                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDisplayColor(selectedRequest)}`}>
+                                                            {getDisplayStatus(selectedRequest)}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -563,8 +574,8 @@ export default function MyRequests() {
                                                 </div>
                                             </div>
 
-                                            {selectedRequest.status.toLowerCase() === 'error' && selectedRequest.error_message && (
-                                                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-md p-4">
+                                            {getDisplayStatus(selectedRequest) === 'error' && selectedRequest.error_message && (
+                                                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-md p-4 mt-4">
                                                     <label className="text-sm font-medium text-red-800 dark:text-red-400 flex items-center gap-2">
                                                         <AlertCircle className="w-4 h-4" />
                                                         Error Details
