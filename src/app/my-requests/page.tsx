@@ -80,6 +80,7 @@ export default function MyRequests() {
             case 'completed':
                 return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
             case 'failed':
+            case 'error':
             case 'cancelled':
                 return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
             default:
@@ -483,120 +484,146 @@ export default function MyRequests() {
 
                                 {selectedRequest && (
                                     <div className="space-y-6">
-                                        <div className="grid gap-4">
+                                        {/* Status Header Block */}
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-muted/30 p-4 rounded-lg border border-border/50">
                                             <div>
-                                                <label className="text-sm font-medium text-muted-foreground">Article Title</label>
-                                                <p className="text-foreground mt-1">{selectedRequest.article_title}</p>
+                                                <h3 className="text-lg font-semibold text-foreground">{selectedRequest.article_title}</h3>
+                                                <p className="text-sm text-muted-foreground mt-1">Request ID: {selectedRequest.id}</p>
                                             </div>
-
-                                            <div>
-                                                <label className="text-sm font-medium text-muted-foreground">Target Audience</label>
-                                                <p className="text-foreground mt-1">{selectedRequest.title_audience}</p>
+                                            <div className="flex flex-col items-end gap-2">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border ${getDisplayColor(selectedRequest)}`}>
+                                                    {getDisplayStatus(selectedRequest)}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                    <Clock className="w-3 h-3" />
+                                                    Updated: {formatDate(selectedRequest.updated_at)}
+                                                </span>
                                             </div>
+                                        </div>
 
-                                            <div>
-                                                <label className="text-sm font-medium text-muted-foreground">SEO Keywords</label>
-                                                <p className="text-foreground mt-1">{selectedRequest.seo_keywords}</p>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="text-sm font-medium text-muted-foreground">Client Name</label>
-                                                    <p className="text-foreground mt-1">{selectedRequest.client_name}</p>
-                                                </div>
-
-                                                <div>
-                                                    <label className="text-sm font-medium text-muted-foreground">Article Type</label>
-                                                    <p className="text-foreground mt-1">{selectedRequest.article_type}</p>
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <label className="text-sm font-medium text-muted-foreground">Creative Brief</label>
-                                                <p className="text-foreground mt-1 whitespace-pre-wrap">{selectedRequest.creative_brief}</p>
-                                            </div>
-
-                                            {/* Google Drive Documents Section */}
-                                            <div>
-                                                <label className="text-sm font-medium text-muted-foreground">Documents</label>
-                                                <div className="mt-1">
-                                                    {getGoogleDriveLink(selectedRequest.webhook_response) ? (
-                                                        <Button
-                                                            variant="outline"
-                                                            onClick={() => {
-                                                                const link = getGoogleDriveLink(selectedRequest.webhook_response);
-                                                                if (link) window.open(link, '_blank');
-                                                            }}
-                                                            className="w-full sm:w-auto"
-                                                        >
-                                                            <ExternalLink className="h-4 w-4 mr-2" />
-                                                            View Google Drive Documents
-                                                        </Button>
-                                                    ) : (
-                                                        <p className="text-muted-foreground">
-                                                            {selectedRequest.webhook_sent ? 'Documents pending - please check back later' : 'Request is being processed'}
+                                        {/* Error Alert (Prominent) */}
+                                        {getDisplayStatus(selectedRequest) === 'error' && selectedRequest.error_message && (
+                                            <div className="bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500 rounded-r-md p-4 shadow-sm">
+                                                <div className="flex items-start">
+                                                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 mr-3 flex-shrink-0" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="text-sm font-bold text-red-800 dark:text-red-300">Processing Error</h4>
+                                                        <div className="mt-2 text-sm text-red-700 dark:text-red-400 bg-red-100/50 dark:bg-red-900/20 p-3 rounded font-mono whitespace-pre-wrap break-words border border-red-200 dark:border-red-800/50">
+                                                            {selectedRequest.error_message}
+                                                        </div>
+                                                        <p className="mt-2 text-xs text-red-600 dark:text-red-500 font-medium">
+                                                            This request encountered an error during workflow execution and has been halted.
                                                         </p>
-                                                    )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* User Info (Admin Only) */}
+                                        {userRole === 'admin' && selectedRequest.profiles && (
+                                            <div className="flex items-center gap-3 bg-brand-blue-crayola/5 border border-brand-blue-crayola/20 p-3 rounded-lg">
+                                                <div className="h-8 w-8 rounded-full bg-brand-blue-crayola/20 flex items-center justify-center text-brand-blue-crayola font-bold">
+                                                    <User className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-foreground">{selectedRequest.profiles.full_name}</p>
+                                                    <p className="text-xs text-muted-foreground">{selectedRequest.profiles.email}</p>
+                                                </div>
+                                                <Badge
+                                                    variant={selectedRequest.profiles.role === 'admin' ? 'default' : 'secondary'}
+                                                    className="ml-auto text-[10px] uppercase"
+                                                >
+                                                    {selectedRequest.profiles.role}
+                                                </Badge>
+                                            </div>
+                                        )}
+
+                                        {/* Core Details Grid */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Client Name</label>
+                                                    <p className="text-sm font-medium text-foreground mt-1 bg-muted/40 p-2 rounded border border-border/50">
+                                                        {selectedRequest.client_name || 'N/A'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Target Audience</label>
+                                                    <p className="text-sm text-foreground mt-1">{selectedRequest.title_audience || 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Article Type</label>
+                                                    <p className="text-sm text-foreground mt-1">{selectedRequest.article_type || 'N/A'}</p>
                                                 </div>
                                             </div>
 
-                                            {userRole === 'admin' && selectedRequest.profiles && (
-                                                <div className="border-t border-border pt-4">
-                                                    <label className="text-sm font-medium text-muted-foreground">Submitted By</label>
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-foreground">{selectedRequest.profiles.full_name}</span>
-                                                        <span className="text-muted-foreground">({selectedRequest.profiles.email})</span>
-                                                        <Badge
-                                                            variant={selectedRequest.profiles.role === 'admin' ? 'default' : 'secondary'}
-                                                            className="text-xs"
-                                                        >
-                                                            {selectedRequest.profiles.role}
-                                                        </Badge>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-4">
                                                 <div>
-                                                    <label className="text-sm font-medium text-muted-foreground">Status</label>
-                                                    <div className="mt-1">
-                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getDisplayColor(selectedRequest)}`}>
-                                                            {getDisplayStatus(selectedRequest)}
-                                                        </span>
-                                                    </div>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">SEO Keywords</label>
+                                                    <p className="text-sm text-foreground mt-1">{selectedRequest.seo_keywords || 'None provided'}</p>
                                                 </div>
-
                                                 <div>
-                                                    <label className="text-sm font-medium text-muted-foreground">Webhook Status</label>
-                                                    <p className="text-foreground mt-1">
-                                                        {selectedRequest.webhook_sent ? '✓ Successfully sent' : '⏳ Pending'}
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Submitted On</label>
+                                                    <p className="text-sm text-foreground mt-1 flex items-center gap-1.5">
+                                                        <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                                        {formatDate(selectedRequest.created_at)}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Webhook Dispatch</label>
+                                                    <p className="text-sm text-foreground mt-1 flex items-center gap-1.5">
+                                                        <span className={`w-2 h-2 rounded-full ${selectedRequest.webhook_sent ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                                                        {selectedRequest.webhook_sent ? 'Successfully dispatched to workflow' : 'Pending dispatch'}
                                                     </p>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            {getDisplayStatus(selectedRequest) === 'error' && selectedRequest.error_message && (
-                                                <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-md p-4 mt-4">
-                                                    <label className="text-sm font-medium text-red-800 dark:text-red-400 flex items-center gap-2">
-                                                        <AlertCircle className="w-4 h-4" />
-                                                        Error Details
-                                                    </label>
-                                                    <p className="text-red-700 dark:text-red-300 mt-2 whitespace-pre-wrap font-mono text-sm">
-                                                        {selectedRequest.error_message}
-                                                    </p>
+                                        {/* Creative Brief */}
+                                        <div>
+                                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">Creative Brief</label>
+                                            <div className="bg-muted/20 border border-border/50 rounded-lg p-4 text-sm text-foreground whitespace-pre-wrap max-h-60 overflow-y-auto font-serif leading-relaxed">
+                                                {selectedRequest.creative_brief || <span className="text-muted-foreground italic">No brief provided.</span>}
+                                            </div>
+                                        </div>
+
+                                        {/* Google Drive Documents Section */}
+                                        <div className="pt-4 border-t border-border/50">
+                                            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 block">Exported Documents</label>
+                                            {getGoogleDriveLink(selectedRequest.webhook_response) ? (
+                                                <Button
+                                                    variant="default"
+                                                    onClick={() => {
+                                                        const link = getGoogleDriveLink(selectedRequest.webhook_response);
+                                                        if (link) window.open(link, '_blank');
+                                                    }}
+                                                    className="w-full sm:w-auto font-bold bg-[#1ca350] hover:bg-[#15823f] text-white shadow-md transition-all hover:-translate-y-0.5"
+                                                >
+                                                    <svg className="w-5 h-5 mr-2" viewBox="0 0 87.3 122.8" fill="currentColor">
+                                                        <path d="M54.1,28V0H6.2C2.8,0,0,2.8,0,6.2v110.4C0,120,2.8,122.8,6.2,122.8h74.9c3.4,0,6.2-2.8,6.2-6.2V33.2H59.3C56.4,33.2,54.1,30.9,54.1,28L54.1,28z" fill="#00A96B"/>
+                                                        <path d="M59.3,33.2h28L54.1,0v28C54.1,30.9,56.4,33.2,59.3,33.2L59.3,33.2z" fill="#008051"/>
+                                                    </svg>
+                                                    Open Google Drive Folder
+                                                </Button>
+                                            ) : (
+                                                <div className="flex items-center justify-center p-6 bg-muted/30 border border-border/50 border-dashed rounded-lg">
+                                                    <div className="text-center space-y-2">
+                                                        {getDisplayStatus(selectedRequest) === 'error' ? (
+                                                            <>
+                                                                <AlertCircle className="w-8 h-8 text-muted-foreground/50 mx-auto" />
+                                                                <p className="text-sm font-medium text-muted-foreground">Generation halted</p>
+                                                                <p className="text-xs text-muted-foreground">Documents were not exported due to an error.</p>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Loader2 className="w-8 h-8 text-brand-blue-crayola animate-spin mx-auto opacity-50" />
+                                                                <p className="text-sm font-medium text-foreground">Awaiting documents...</p>
+                                                                <p className="text-xs text-muted-foreground">The Google Drive folder link will appear here once the workflow finishes.</p>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             )}
-
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="text-sm font-medium text-muted-foreground">Submitted</label>
-                                                    <p className="text-foreground mt-1">{formatDate(selectedRequest.created_at)}</p>
-                                                </div>
-
-                                                <div>
-                                                    <label className="text-sm font-medium text-muted-foreground">Last Updated</label>
-                                                    <p className="text-foreground mt-1">{formatDate(selectedRequest.updated_at)}</p>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 )}
