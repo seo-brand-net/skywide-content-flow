@@ -75,13 +75,16 @@ export async function POST(request: Request) {
             }
         }
 
-        // ─── Strategy 3: fallback — most recent pending request ───────────
+        // ─── Strategy 3: fallback — most recent non-terminal request ─────
         // Handles the case where the workflow errored before the poller saved the executionId
-        console.log('[n8n Error Webhook] No execution match found, falling back to most recent pending request');
+        // OR the poller already moved status from 'pending' to 'in_progress'
+        console.log('[n8n Error Webhook] No execution match found, falling back to most recent non-terminal request');
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
         const { data: pendingReq, error: pendingErr } = await supabase
             .from('content_requests')
-            .select('id')
-            .eq('status', 'pending')
+            .select('id, status')
+            .in('status', ['pending', 'in_progress'])
+            .gte('created_at', thirtyMinutesAgo)
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
