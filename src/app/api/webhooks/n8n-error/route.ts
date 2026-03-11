@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { triggerRunUpdate } from '@/lib/pusher/server';
 
 export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { executionId, workflowId, workflowName, errorMessage, nodeName, runId } = body;
 
-        console.log(`[n8n Error Webhook] Received error for run ${runId || executionId}`);
-        console.log(`[n8n Error Webhook] Node: ${nodeName}, Error: ${errorMessage}`);
+        console.log(`[n8n Error Webhook] Received:`, JSON.stringify({ executionId, nodeName, errorMessage, runId }));
 
         if (!runId && !executionId) {
             return NextResponse.json(
@@ -17,6 +15,7 @@ export async function POST(request: Request) {
             );
         }
 
+        // Use service role client to bypass RLS — this endpoint is called by n8n with no user session
         const supabase = createSupabaseClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -25,25 +24,6 @@ export async function POST(request: Request) {
         const formattedError = nodeName
             ? `Failed at stage '${nodeName}': ${errorMessage || 'Unknown error'}`
             : (errorMessage || 'Unknown workflow error');
-
-        // Helper to mark a content_request as error
-        async function markRequestAsError(requestId: string) {
-            await supabase
-                .from('content_requests')
-                .update({
-                    status: 'error',
-                    error_message: formattedError,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('id', requestId);
-
-            await triggerRunUpdate(requestId, {
-                status: 'error',
-                error_message: formattedError
-            });
-
-            console.log(`[n8n Error Webhook] Successfully marked request ${requestId} as error`);
-        }
 
         // ─── Strategy 1: direct run_id from payload ───────────────────────
         if (runId) {
@@ -54,12 +34,18 @@ export async function POST(request: Request) {
                 .single();
 
             if (req) {
-                await markRequestAsError(req.id);
-                // Also mark the run as failed
+                await supabase.from('content_requests').update({
+                    status: 'error',
+                    error_message: formattedError,
+                    updated_at: new Date().toISOString()
+                }).eq('id', req.id);
+
                 await supabase.from('content_runs').update({
                     status: 'failed',
                     completed_at: new Date().toISOString()
                 }).eq('id', runId);
+
+                console.log(`[n8n Error Webhook] Marked request ${req.id} as error via run_id`);
                 return NextResponse.json({ success: true, requestId: req.id, method: 'run_id' });
             }
         }
@@ -73,21 +59,26 @@ export async function POST(request: Request) {
                 .single();
 
             if (runData) {
-                await markRequestAsError(runData.content_request_id);
+                await supabase.from('content_requests').update({
+                    status: 'error',
+                    error_message: formattedError,
+                    updated_at: new Date().toISOString()
+                }).eq('id', runData.content_request_id);
+
                 await supabase.from('content_runs').update({
                     status: 'failed',
                     completed_at: new Date().toISOString()
                 }).eq('id', runData.id);
+
+                console.log(`[n8n Error Webhook] Marked request ${runData.content_request_id} as error via executionId`);
                 return NextResponse.json({ success: true, requestId: runData.content_request_id, method: 'execution_id' });
             }
         }
 
         // ─── Strategy 3: fallback — most recent pending request ───────────
-        // This handles the case where the workflow errored before the poller
-        // had a chance to save the executionId to a content_run record
-        // (e.g., first node like Keyword Strategist fails immediately)
+        // Handles the case where the workflow errored before the poller saved the executionId
         console.log('[n8n Error Webhook] No execution match found, falling back to most recent pending request');
-        const { data: pendingReq } = await supabase
+        const { data: pendingReq, error: pendingErr } = await supabase
             .from('content_requests')
             .select('id')
             .eq('status', 'pending')
@@ -95,21 +86,30 @@ export async function POST(request: Request) {
             .limit(1)
             .single();
 
+        if (pendingErr) {
+            console.error('[n8n Error Webhook] Supabase error finding pending request:', pendingErr);
+        }
+
         if (pendingReq) {
-            await markRequestAsError(pendingReq.id);
+            await supabase.from('content_requests').update({
+                status: 'error',
+                error_message: formattedError,
+                updated_at: new Date().toISOString()
+            }).eq('id', pendingReq.id);
+
+            console.log(`[n8n Error Webhook] Marked request ${pendingReq.id} as error via fallback`);
             return NextResponse.json({ success: true, requestId: pendingReq.id, method: 'fallback_pending' });
         }
 
-        // Nothing found at all
         return NextResponse.json(
             { error: 'Could not find any matching content request to mark as error' },
             { status: 404 }
         );
 
     } catch (error: any) {
-        console.error('[n8n Error Webhook] Processing error:', error);
+        console.error('[n8n Error Webhook] UNCAUGHT ERROR:', error?.message, error?.stack);
         return NextResponse.json(
-            { error: 'Internal server error processing webhook' },
+            { error: 'Internal server error processing webhook', detail: error?.message },
             { status: 500 }
         );
     }
