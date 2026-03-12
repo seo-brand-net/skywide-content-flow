@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { withTimeout } from '@/utils/timeout';
 import { ABTestModal } from '@/components/ab-test-modal';
+import { v4 as uuidv4 } from 'uuid';
 
 
 interface FormData {
@@ -90,6 +91,8 @@ export default function Dashboard() {
         setIsSubmitting(true);
 
         try {
+            const runId = uuidv4();
+
             // 1. Save to Supabase database FIRST with timeout
             const { data: dbData, error: dbError } = await withTimeout(
                 supabase
@@ -108,7 +111,8 @@ export default function Dashboard() {
                         client_name: formData.clientName,
                         creative_brief: formData.creativeBrief,
                         page_intent: formData.pageIntent,
-                        status: 'pending'
+                        status: 'pending',
+                        current_run_id: runId
                     }])
                     .select(),
                 30000,
@@ -142,6 +146,7 @@ export default function Dashboard() {
                         tone: formData.tone,
                         page_intent: formData.pageIntent,
                         request_id: dbData[0].id,
+                        runId: runId,
                         user_id: user?.id,
                         timestamp: new Date().toISOString(),
                     }),

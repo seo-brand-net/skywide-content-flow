@@ -20,6 +20,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Beaker, FlaskConical, Sparkles, History } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { v4 as uuidv4 } from 'uuid';
 
 export function ABTestModal() {
     const router = useRouter();
@@ -50,6 +51,7 @@ export function ABTestModal() {
     };
 
     const triggerWebhook = async (path: string, requestId: string) => {
+        const runId = uuidv4();
         // Insert initial 'pending' row into Supabase -> test_results
         // This ensures the detail page doesn't 404 while waiting for n8n
         const { error: dbError } = await supabase
@@ -74,6 +76,7 @@ export function ABTestModal() {
             body: JSON.stringify({
                 path: path,
                 request_id: requestId, // Pass generated ID to n8n
+                runId: runId,
                 title: formData.articleTitle,
                 audience: formData.titleAudience,
                 client_name: formData.clientName,

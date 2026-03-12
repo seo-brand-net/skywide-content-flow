@@ -13,6 +13,7 @@ import { Loader2, CheckCircle2, XCircle, PlayCircle, History, Eye, X, Download, 
 import { Progress } from '@/components/ui/progress';
 import { generatePDFFromMarkdown, downloadPDFBlob } from '@/services/pdfGeneratorService';
 import { ABTestModal } from '@/components/ab-test-modal';
+import { v4 as uuidv4 } from 'uuid';
 
 // Lazy load the PDF viewer
 import dynamic from 'next/dynamic';
@@ -114,6 +115,7 @@ export default function TestExportPage() {
     const runSingleTest = async (pathId: string, pathName: string): Promise<TestResult> => {
         const mockData = getMockData();
         const requestId = crypto.randomUUID();
+        const runId = uuidv4();
 
         try {
             // 0. Pre-insert record for persistence
@@ -134,6 +136,7 @@ export default function TestExportPage() {
                     target_path: pathId,
                     request_status: 'test',
                     request_id: requestId,
+                    runId: runId,
                     user_id: user?.id,
                     timestamp: new Date().toISOString(),
                 }),

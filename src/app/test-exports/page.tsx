@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Play, CheckCircle2, XCircle, Beaker, FileSearch, History } from "lucide-react";
+import { v4 as uuidv4 } from 'uuid';
 
 const TEST_PATHS = [
     { id: "openai_qa_loop", name: "OpenAI QA Loop", description: "OpenAI QA Validator loop" },
@@ -46,6 +47,7 @@ export default function TestExportsPage() {
     const runTest = async (pathId: string) => {
         setRunning(pathId);
         const requestId = crypto.randomUUID();
+        const runId = uuidv4();
 
         try {
             const payload = {
@@ -63,6 +65,7 @@ export default function TestExportsPage() {
                 request_status: "test",
                 target_path: pathId,
                 request_id: requestId,
+                runId: runId,
                 user_id: user?.id || "test-user-id",
                 timestamp: new Date().toISOString()
             };
