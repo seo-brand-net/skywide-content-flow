@@ -111,8 +111,7 @@ export default function Dashboard() {
                         client_name: formData.clientName,
                         creative_brief: formData.creativeBrief,
                         page_intent: formData.pageIntent,
-                        status: 'pending',
-                        current_run_id: runId
+                        status: 'pending' // DO NOT set current_run_id yet due to FK constraint
                     }])
                     .select(),
                 30000,
@@ -121,6 +120,29 @@ export default function Dashboard() {
 
             if (dbError) {
                 throw new Error(`Database error: ${dbError.message}`);
+            }
+
+            const requestId = dbData[0].id;
+
+            // 1b. Create the content_runs row so current_run_id is valid
+            const { error: runError } = await supabase
+                .from('content_runs')
+                .insert([{
+                    id: runId,
+                    content_request_id: requestId,
+                    status: 'running',
+                    created_at: new Date().toISOString()
+                }]);
+            
+            if (runError) {
+                console.error("Warning: Failed to pre-insert content_runs:", runError);
+                // We don't hard fail here, just let n8n-start fallback handle it or fail gracefully later
+            } else {
+                // 1c. Update content_requests with current_run_id now that the run row exists
+                await supabase
+                    .from('content_requests')
+                    .update({ current_run_id: runId })
+                    .eq('id', requestId);
             }
 
             let webhookSuccess = false;
@@ -145,7 +167,7 @@ export default function Dashboard() {
                         semantic_theme: formData.semanticTheme,
                         tone: formData.tone,
                         page_intent: formData.pageIntent,
-                        request_id: dbData[0].id,
+                        request_id: requestId,
                         runId: runId,
                         user_id: user?.id,
                         timestamp: new Date().toISOString(),
