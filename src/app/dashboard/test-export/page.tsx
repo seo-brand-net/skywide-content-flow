@@ -141,7 +141,7 @@ export default function TestExportPage() {
                     is_ab_test: true, // Prevent proxy from creating prod content_runs
                     timestamp: new Date().toISOString(),
                 }),
-            });
+            })
 
             if (!triggerResponse.ok) throw new Error(`Trigger failed: ${triggerResponse.status}`);
 
