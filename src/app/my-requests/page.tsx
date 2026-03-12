@@ -12,7 +12,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { Eye, Clock, User, ExternalLink, Search, Loader2, AlertCircle } from 'lucide-react';
+import { Eye, Clock, User, ExternalLink, Search, Loader2, AlertCircle, RotateCcw, Send, Sparkles as Sparkles2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import {
     Select,
     SelectContent,
@@ -24,6 +27,8 @@ import {
 
 export default function MyRequests() {
     const { user } = useAuth();
+    const { toast } = useToast();
+    const queryClient = useQueryClient();
     const { userRole, loading: roleLoading, authError, isInitialLoading } = useUserRole(user?.id);
 
     // UI State
@@ -32,6 +37,10 @@ export default function MyRequests() {
     const [pageSize, setPageSize] = useState(10);
     const [selectedRequest, setSelectedRequest] = useState<ContentRequest | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isRetrying, setIsRetrying] = useState<string | null>(null);
+    const [isRevising, setIsRevising] = useState<string | null>(null);
+    const [revisionNotes, setRevisionNotes] = useState('');
+    const [showRevisionInput, setShowRevisionInput] = useState(false);
 
     // React Query for data fetching
     const {
@@ -102,6 +111,84 @@ export default function MyRequests() {
     const openDetailView = (request: ContentRequest) => {
         setSelectedRequest(request);
         setIsDetailModalOpen(true);
+        setShowRevisionInput(false);
+        setRevisionNotes(request.improvement_notes || '');
+    };
+
+    const handleRetry = async (requestId: string) => {
+        setIsRetrying(requestId);
+        try {
+            const response = await fetch('/api/content-requests/retry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Retry failed');
+            }
+
+            toast({
+                title: "Retry Initiated",
+                description: "The workflow has been restarted from the point of failure.",
+            });
+
+            // Refresh the list
+            queryClient.invalidateQueries({ queryKey: ['content_requests'] });
+        } catch (error: any) {
+            toast({
+                title: "Retry Failed",
+                description: error.message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsRetrying(null);
+        }
+    };
+
+    const handleRevise = async (requestId: string) => {
+        if (!revisionNotes.trim()) {
+            toast({
+                title: "Revision Notes Required",
+                description: "Please provide feedback for the revision.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsRevising(requestId);
+        try {
+            const response = await fetch('/api/content-requests/revise', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId, improvementNotes: revisionNotes }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Revision failed');
+            }
+
+            toast({
+                title: "Revision Requested",
+                description: "Your feedback has been submitted and a new generation run has started.",
+            });
+
+            setIsDetailModalOpen(false);
+            // Refresh the list
+            queryClient.invalidateQueries({ queryKey: ['content_requests'] });
+        } catch (error: any) {
+            toast({
+                title: "Revision Failed",
+                description: error.message,
+                variant: "destructive",
+            });
+        } finally {
+            setIsRevising(null);
+        }
     };
 
     const truncateText = (text: string, maxLength: number = 100) => {
@@ -395,6 +482,22 @@ export default function MyRequests() {
                                                                 <Eye className="h-3 w-3 mr-1.5" />
                                                                 Details
                                                             </Button>
+
+                                                            {getDisplayStatus(request) === 'error' && (
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        handleRetry(request.id);
+                                                                    }}
+                                                                    disabled={isRetrying === request.id}
+                                                                    className="text-xs font-bold text-amber-600 hover:bg-amber-100 hover:text-amber-700 transition-all ml-1"
+                                                                >
+                                                                    <RotateCcw className={`h-3 w-3 mr-1.5 ${isRetrying === request.id ? 'animate-spin' : ''}`} />
+                                                                    {isRetrying === request.id ? 'Retrying...' : 'Retry'}
+                                                                </Button>
+                                                            )}
                                                         </TableCell>
                                                     </TableRow>
                                                 );
@@ -625,6 +728,85 @@ export default function MyRequests() {
                                                 </div>
                                             )}
                                         </div>
+
+                                        {/* Revision Controls (Only for Completed) */}
+                                        {(selectedRequest.status === 'complete' || selectedRequest.status === 'completed') && (
+                                            <div className="pt-6 border-t border-border/50">
+                                                {!showRevisionInput ? (
+                                                    <Button 
+                                                        variant="outline" 
+                                                        onClick={() => setShowRevisionInput(true)}
+                                                        className="w-full sm:w-auto font-bold border-brand-blue-crayola text-brand-blue-crayola hover:bg-brand-blue-crayola/10"
+                                                    >
+                                                        <RotateCcw className="w-4 h-4 mr-2" />
+                                                        Request Revision
+                                                    </Button>
+                                                ) : (
+                                                    <div className="space-y-4 bg-brand-blue-crayola/5 p-4 rounded-xl border border-brand-blue-crayola/20">
+                                                        <div>
+                                                            <label className="text-sm font-bold text-brand-blue-crayola flex items-center gap-2 mb-2">
+                                                                <Sparkles2 className="w-4 h-4" />
+                                                                Revision Feedback
+                                                            </label>
+                                                            <Textarea
+                                                                placeholder="What would you like to improve? Be specific (e.g., 'Make the tone more clinical', 'Add a section about X', 'Fix the formatting of Y')"
+                                                                value={revisionNotes}
+                                                                onChange={(e) => setRevisionNotes(e.target.value)}
+                                                                className="min-h-[100px] text-sm bg-background"
+                                                            />
+                                                            <p className="text-[10px] text-muted-foreground mt-2 italic">
+                                                                Note: This will trigger a new AI generation run that incorporates your feedback.
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex justify-end gap-3">
+                                                            <Button 
+                                                                variant="ghost" 
+                                                                size="sm" 
+                                                                onClick={() => setShowRevisionInput(false)}
+                                                                className="font-bold"
+                                                            >
+                                                                Cancel
+                                                            </Button>
+                                                            <Button 
+                                                                size="sm" 
+                                                                onClick={() => handleRevise(selectedRequest.id)}
+                                                                disabled={isRevising === selectedRequest.id || !revisionNotes.trim()}
+                                                                className="bg-brand-blue-crayola text-white font-bold"
+                                                            >
+                                                                {isRevising === selectedRequest.id ? (
+                                                                    <>
+                                                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                                        Submitting...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Send className="w-4 h-4 mr-2" />
+                                                                        Submit Revision
+                                                                    </>
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Retry for Failed (In Modal too) */}
+                                        {getDisplayStatus(selectedRequest) === 'error' && (
+                                            <div className="pt-6 border-t border-border/50">
+                                                <Button 
+                                                    onClick={() => handleRetry(selectedRequest.id)}
+                                                    disabled={isRetrying === selectedRequest.id}
+                                                    className="w-full font-bold bg-amber-600 hover:bg-amber-700 text-white"
+                                                >
+                                                    <RotateCcw className={`w-4 h-4 mr-2 ${isRetrying === selectedRequest.id ? 'animate-spin' : ''}`} />
+                                                    {isRetrying === selectedRequest.id ? 'Retrying Failed Run...' : 'Retry Failed Execution'}
+                                                </Button>
+                                                <p className="text-[10px] text-muted-foreground mt-2 text-center">
+                                                    This will attempt to resume the workflow from the exact node that failed.
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </DialogContent>
