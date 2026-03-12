@@ -4,13 +4,16 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { requestId, executionId } = body;
+        // Support both camelCase and snake_case for requestId
+        const requestId = body.requestId || body.request_id;
+        const executionId = body.executionId || body.execution_id;
 
-        console.log(`[n8n Start Webhook] Received requestId: ${requestId}, executionId: ${executionId}`);
+        console.log(`[n8n Start Webhook] Received requestId: ${requestId}, executionId: ${executionId}`, body);
 
         if (!requestId || !executionId) {
+            console.error('[n8n Start Webhook] Payload missing fields:', { requestId, executionId, body });
             return NextResponse.json(
-                { error: 'Missing requestId or executionId' },
+                { error: 'Missing requestId or executionId', received: { requestId, executionId } },
                 { status: 400 }
             );
         }

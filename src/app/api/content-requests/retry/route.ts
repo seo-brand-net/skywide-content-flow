@@ -20,9 +20,11 @@ export async function POST(request: Request) {
             .single();
 
         if (reqError || !contentReq?.n8n_execution_id) {
-            console.error('Retry failed: No execution ID found', reqError);
+            console.error(`Retry failed for request ${requestId}: No execution ID found`, reqError);
             return NextResponse.json({ 
-                error: 'Could not find an execution ID to retry. This feature requires execution tracking started recently.' 
+                error: 'Could not find an execution ID to retry.',
+                detail: reqError ? reqError.message : 'The n8n_execution_id column is empty for this request. Was the workflow started recently with the updated tracking code?',
+                requestId
             }, { status: 404 });
         }
 
