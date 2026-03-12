@@ -66,6 +66,7 @@ export default function TestExportsPage() {
                 target_path: pathId,
                 request_id: requestId,
                 runId: runId,
+                is_ab_test: true,
                 user_id: user?.id || "test-user-id",
                 timestamp: new Date().toISOString()
             };

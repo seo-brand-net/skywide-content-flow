@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
     try {
@@ -18,6 +19,39 @@ export async function POST(request: Request) {
             // Actually, safer to just use the env var base if available, or replace the last part of the default URL.
             const baseUrl = process.env.N8N_BASE_URL?.replace(/\/$/, '') || 'https://n8n.skywide.bg'; // Fallback or strict
             targetUrl = `${baseUrl}/webhook/${path}`;
+        }
+
+        // ── Pre-process database records using service role ───────────────
+        if (payload.runId && payload.request_id && !payload.is_ab_test) {
+            const supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY!
+            );
+
+            // 1. Create the run record first so it exists
+            const { error: runError } = await supabase
+                .from('content_runs')
+                .insert([{
+                    id: payload.runId,
+                    content_request_id: payload.request_id,
+                    status: 'running',
+                    created_at: new Date().toISOString()
+                }]);
+
+            if (runError) {
+                console.error('[Proxy-n8n] Failed to insert content_runs:', runError);
+            } else {
+                // 2. Update the parent request to point to this new run
+                console.log(`[Proxy-n8n] ✅ Linking request ${payload.request_id} to run ${payload.runId}`);
+                const { error: reqError } = await supabase
+                    .from('content_requests')
+                    .update({ current_run_id: payload.runId })
+                    .eq('id', payload.request_id);
+
+                if (reqError) {
+                    console.error('[Proxy-n8n] Failed to update current_run_id:', reqError);
+                }
+            }
         }
 
         console.log(`[Proxy-n8n] 🚀 Sending to: ${targetUrl}`);

@@ -4,9 +4,9 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { runId, executionId } = body;
+        const { runId, executionId, requestId } = body;
 
-        console.log(`[n8n Start Webhook] Received runId: ${runId}, executionId: ${executionId}`);
+        console.log(`[n8n Start Webhook] Received runId: ${runId}, executionId: ${executionId}, requestId: ${requestId}`);
 
         if (!runId || !executionId) {
             return NextResponse.json(
@@ -21,19 +21,21 @@ export async function POST(request: Request) {
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
-        // ── Look up the parent content_request via current_run_id ─────────
-        // (content_runs rows may not be pre-created, so we resolve the
-        //  content_request_id here and upsert the run row ourselves)
-        const { data: contentRequest } = await supabase
-            .from('content_requests')
-            .select('id')
-            .eq('current_run_id', runId)
-            .single();
+        // ── Determine the parent content_request_id ───────────────────────
+        let finalRequestId = requestId;
 
-        if (!contentRequest) {
-            // The runId might not be set on the request yet (race condition) — 
-            // fall back to a bare update in case the row exists from a previous upsert
-            console.warn(`[n8n Start Webhook] No content_request found for runId ${runId} — attempting bare update`);
+        if (!finalRequestId) {
+            const { data: contentRequest } = await supabase
+                .from('content_requests')
+                .select('id')
+                .eq('current_run_id', runId)
+                .single();
+            
+            finalRequestId = contentRequest?.id;
+        }
+
+        if (!finalRequestId) {
+            console.warn(`[n8n Start Webhook] Could not resolve request_id for runId ${runId} — attempting bare update`);
             await supabase
                 .from('content_runs')
                 .update({ n8n_execution_id: executionId, status: 'running' })
@@ -42,13 +44,11 @@ export async function POST(request: Request) {
         }
 
         // ── Upsert the content_runs row ───────────────────────────────────
-        // This handles both: (a) row never existed, (b) row exists from a 
-        // previous revise action and just needs the execution ID stamped.
         const { error } = await supabase
             .from('content_runs')
             .upsert({
                 id: runId,
-                content_request_id: contentRequest.id,
+                content_request_id: finalRequestId,
                 n8n_execution_id: executionId,
                 status: 'running',
                 created_at: new Date().toISOString(),
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Failed to upsert content_runs' }, { status: 500 });
         }
 
-        console.log(`[n8n Start Webhook] ✅ Upserted run ${runId} → execution ${executionId} for request ${contentRequest.id}`);
-        return NextResponse.json({ success: true, requestId: contentRequest.id });
+        console.log(`[n8n Start Webhook] ✅ Upserted run ${runId} → execution ${executionId} for request ${finalRequestId}`);
+        return NextResponse.json({ success: true, requestId: finalRequestId });
 
     } catch (error: any) {
         console.error('[n8n Start Webhook] UNCAUGHT ERROR:', error?.message);

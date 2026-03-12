@@ -46,17 +46,27 @@ export async function POST(
     }
 
     // ── Look up the most recent run for this request ─────────────────────
+    console.log(`[Retry] Looking for most recent run for request: ${requestId}`);
     const { data: run, error: runError } = await supabase
         .from('content_runs')
         .select('id, n8n_execution_id')
         .eq('content_request_id', requestId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-    if (runError || !run) {
-        console.error('[Retry] No run found for request:', requestId, runError);
-        return NextResponse.json({ error: 'No run found for this request' }, { status: 404 });
+    if (runError) {
+        console.error('[Retry] DB Error looking up run:', runError);
+        return NextResponse.json({ error: 'Database error looking up run', detail: runError.message }, { status: 500 });
+    }
+
+    if (!run) {
+        console.error('[Retry] No run found in content_runs for request:', requestId);
+        return NextResponse.json({ 
+            error: 'No run found for this request', 
+            requestId,
+            hint: 'Ensure n8n has successfully started and called the start-webhook once for this request.'
+        }, { status: 404 });
     }
 
     if (!run.n8n_execution_id) {

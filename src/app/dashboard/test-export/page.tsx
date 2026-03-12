@@ -138,6 +138,7 @@ export default function TestExportPage() {
                     request_id: requestId,
                     runId: runId,
                     user_id: user?.id,
+                    is_ab_test: true, // Prevent proxy from creating prod content_runs
                     timestamp: new Date().toISOString(),
                 }),
             });
