@@ -4,15 +4,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useContentRequests, ContentRequest } from '@/hooks/useContentRequests';
 import { useEffect, useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
-import { Eye, Clock, User, ExternalLink, Search, Loader2, AlertCircle } from 'lucide-react';
+import { Eye, Clock, User, ExternalLink, Search, Loader2, AlertCircle, RefreshCw, PenLine } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -25,6 +27,7 @@ import {
 export default function MyRequests() {
     const { user } = useAuth();
     const { userRole, loading: roleLoading, authError, isInitialLoading } = useUserRole(user?.id);
+    const queryClient = useQueryClient();
 
     // UI State
     const [searchTerm, setSearchTerm] = useState('');
@@ -32,6 +35,14 @@ export default function MyRequests() {
     const [pageSize, setPageSize] = useState(10);
     const [selectedRequest, setSelectedRequest] = useState<ContentRequest | null>(null);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+    // Retry / Revision state
+    const [isRetrying, setIsRetrying] = useState(false);
+    const [retryToast, setRetryToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
+    const [revisionNotes, setRevisionNotes] = useState('');
+    const [isSubmittingRevision, setIsSubmittingRevision] = useState(false);
+    const [revisionToast, setRevisionToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     // React Query for data fetching
     const {
@@ -102,6 +113,58 @@ export default function MyRequests() {
     const openDetailView = (request: ContentRequest) => {
         setSelectedRequest(request);
         setIsDetailModalOpen(true);
+        setRetryToast(null);
+        setRevisionToast(null);
+    };
+
+    const handleRetry = async () => {
+        if (!selectedRequest) return;
+        setIsRetrying(true);
+        setRetryToast(null);
+        try {
+            const res = await fetch(`/api/content-requests/retry`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: selectedRequest.id }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setRetryToast({ type: 'error', message: data.error || 'Retry failed.' });
+            } else {
+                setRetryToast({ type: 'success', message: 'Execution retried successfully. Status will update shortly.' });
+                queryClient.invalidateQueries({ queryKey: ['content_requests'] });
+            }
+        } catch (e) {
+            setRetryToast({ type: 'error', message: 'Network error. Please try again.' });
+        } finally {
+            setIsRetrying(false);
+        }
+    };
+
+    const handleRevisionSubmit = async () => {
+        if (!selectedRequest) return;
+        setIsSubmittingRevision(true);
+        setRevisionToast(null);
+        try {
+            const res = await fetch(`/api/content-requests/revise`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId: selectedRequest.id, revisionNotes }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setRevisionToast({ type: 'error', message: data.error || 'Revision request failed.' });
+            } else {
+                setRevisionToast({ type: 'success', message: 'Revision started! The workflow is running again.' });
+                setIsRevisionModalOpen(false);
+                setRevisionNotes('');
+                queryClient.invalidateQueries({ queryKey: ['content_requests'] });
+            }
+        } catch (e) {
+            setRevisionToast({ type: 'error', message: 'Network error. Please try again.' });
+        } finally {
+            setIsSubmittingRevision(false);
+        }
     };
 
     const truncateText = (text: string, maxLength: number = 100) => {
@@ -501,7 +564,7 @@ export default function MyRequests() {
                                             </div>
                                         </div>
 
-                                        {/* Error Alert (Prominent) */}
+                                        {/* Error Alert (Prominent) + Retry */}
                                         {getDisplayStatus(selectedRequest) === 'error' && selectedRequest.error_message && (
                                             <div className="bg-red-50 dark:bg-red-950/30 border-l-4 border-red-500 rounded-r-md p-4 shadow-sm">
                                                 <div className="flex items-start">
@@ -514,6 +577,29 @@ export default function MyRequests() {
                                                         <p className="mt-2 text-xs text-red-600 dark:text-red-500 font-medium">
                                                             This request encountered an error during workflow execution and has been halted.
                                                         </p>
+                                                        {/* Retry button — admin only */}
+                                                        {userRole === 'admin' && (
+                                                            <div className="mt-3 flex flex-col gap-2">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="outline"
+                                                                    onClick={handleRetry}
+                                                                    disabled={isRetrying}
+                                                                    className="w-fit border-red-400 text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30 font-bold"
+                                                                >
+                                                                    {isRetrying ? (
+                                                                        <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Retrying...</>
+                                                                    ) : (
+                                                                        <><RefreshCw className="w-3.5 h-3.5 mr-1.5" />Retry Failed Execution</>  
+                                                                    )}
+                                                                </Button>
+                                                                {retryToast && (
+                                                                    <p className={`text-xs font-medium ${retryToast.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                                        {retryToast.message}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -591,20 +677,31 @@ export default function MyRequests() {
                                         <div className="pt-4 border-t border-border/50">
                                             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 block">Exported Documents</label>
                                             {getGoogleDriveLink(selectedRequest.webhook_response) ? (
-                                                <Button
-                                                    variant="default"
-                                                    onClick={() => {
-                                                        const link = getGoogleDriveLink(selectedRequest.webhook_response);
-                                                        if (link) window.open(link, '_blank');
-                                                    }}
-                                                    className="w-full sm:w-auto font-bold bg-[#1ca350] hover:bg-[#15823f] text-white shadow-md transition-all hover:-translate-y-0.5"
-                                                >
-                                                    <svg className="w-5 h-5 mr-2" viewBox="0 0 87.3 122.8" fill="currentColor">
-                                                        <path d="M54.1,28V0H6.2C2.8,0,0,2.8,0,6.2v110.4C0,120,2.8,122.8,6.2,122.8h74.9c3.4,0,6.2-2.8,6.2-6.2V33.2H59.3C56.4,33.2,54.1,30.9,54.1,28L54.1,28z" fill="#00A96B"/>
-                                                        <path d="M59.3,33.2h28L54.1,0v28C54.1,30.9,56.4,33.2,59.3,33.2L59.3,33.2z" fill="#008051"/>
-                                                    </svg>
-                                                    Open Google Drive Folder
-                                                </Button>
+                                                <div className="flex flex-col sm:flex-row gap-3">
+                                                    <Button
+                                                        variant="default"
+                                                        onClick={() => {
+                                                            const link = getGoogleDriveLink(selectedRequest.webhook_response);
+                                                            if (link) window.open(link, '_blank');
+                                                        }}
+                                                        className="w-full sm:w-auto font-bold bg-[#1ca350] hover:bg-[#15823f] text-white shadow-md transition-all hover:-translate-y-0.5"
+                                                    >
+                                                        <svg className="w-5 h-5 mr-2" viewBox="0 0 87.3 122.8" fill="currentColor">
+                                                            <path d="M54.1,28V0H6.2C2.8,0,0,2.8,0,6.2v110.4C0,120,2.8,122.8,6.2,122.8h74.9c3.4,0,6.2-2.8,6.2-6.2V33.2H59.3C56.4,33.2,54.1,30.9,54.1,28L54.1,28z" fill="#00A96B"/>
+                                                            <path d="M59.3,33.2h28L54.1,0v28C54.1,30.9,56.4,33.2,59.3,33.2L59.3,33.2z" fill="#008051"/>
+                                                        </svg>
+                                                        Open Google Drive Folder
+                                                    </Button>
+                                                    {/* Request Revision button */}
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => { setRevisionToast(null); setIsRevisionModalOpen(true); }}
+                                                        className="w-full sm:w-auto font-bold border-brand-blue-crayola/50 text-brand-blue-crayola hover:bg-brand-blue-crayola/10 transition-all"
+                                                    >
+                                                        <PenLine className="w-4 h-4 mr-2" />
+                                                        Request Revision
+                                                    </Button>
+                                                </div>
                                             ) : (
                                                 <div className="flex items-center justify-center p-6 bg-muted/30 border border-border/50 border-dashed rounded-lg">
                                                     <div className="text-center space-y-2">
@@ -624,9 +721,64 @@ export default function MyRequests() {
                                                     </div>
                                                 </div>
                                             )}
+                                            {/* Revision feedback toast */}
+                                            {revisionToast && (
+                                                <p className={`mt-3 text-xs font-medium ${revisionToast.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                    {revisionToast.message}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 )}
+                            </DialogContent>
+                        </Dialog>
+
+                        {/* Revision Notes Dialog */}
+                        <Dialog open={isRevisionModalOpen} onOpenChange={setIsRevisionModalOpen}>
+                            <DialogContent className="max-w-lg">
+                                <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2">
+                                        <PenLine className="w-5 h-5 text-brand-blue-crayola" />
+                                        Request Revision
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4 py-2">
+                                    <p className="text-sm text-muted-foreground">
+                                        Describe what you'd like changed or improved. The workflow will re-run with these notes included.
+                                    </p>
+                                    <Textarea
+                                        placeholder="e.g. Make the tone more conversational, expand the conclusion, add more examples..."
+                                        value={revisionNotes}
+                                        onChange={(e) => setRevisionNotes(e.target.value)}
+                                        rows={5}
+                                        className="resize-none text-sm"
+                                    />
+                                    {revisionToast && (
+                                        <p className={`text-xs font-medium ${revisionToast.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                            {revisionToast.message}
+                                        </p>
+                                    )}
+                                </div>
+                                <DialogFooter>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setIsRevisionModalOpen(false)}
+                                        disabled={isSubmittingRevision}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleRevisionSubmit}
+                                        disabled={isSubmittingRevision}
+                                        className="font-bold bg-brand-blue-crayola hover:bg-brand-blue-crayola/90"
+                                    >
+                                        {isSubmittingRevision ? (
+                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting...</>
+                                        ) : (
+                                            <>Submit Revision Request</>
+                                        )}
+                                    </Button>
+                                </DialogFooter>
                             </DialogContent>
                         </Dialog>
                     </>
