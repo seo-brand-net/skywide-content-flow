@@ -4,16 +4,13 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        // Support both camelCase and snake_case for requestId
-        const requestId = body.requestId || body.request_id;
-        const executionId = body.executionId || body.execution_id;
+        const { runId, executionId } = body;
 
-        console.log(`[n8n Start Webhook] Received requestId: ${requestId}, executionId: ${executionId}`, body);
+        console.log(`[n8n Start Webhook] Received runId: ${runId}, executionId: ${executionId}`);
 
-        if (!requestId || !executionId) {
-            console.error('[n8n Start Webhook] Payload missing fields:', { requestId, executionId, body });
+        if (!runId || !executionId) {
             return NextResponse.json(
-                { error: 'Missing requestId or executionId', received: { requestId, executionId } },
+                { error: 'Missing runId or executionId' },
                 { status: 400 }
             );
         }
@@ -24,18 +21,18 @@ export async function POST(request: Request) {
             process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
 
-        // Update the content_requests table with the n8n execution ID
+        // Update the content_runs table with the n8n execution ID
         const { error } = await supabase
-            .from('content_requests')
+            .from('content_runs')
             .update({
                 n8n_execution_id: executionId,
                 updated_at: new Date().toISOString()
             })
-            .eq('id', requestId);
+            .eq('id', runId);
 
         if (error) {
-            console.error('[n8n Start Webhook] Error updating content_requests:', error);
-            return NextResponse.json({ error: 'Failed to update content_requests' }, { status: 500 });
+            console.error('[n8n Start Webhook] Error updating content_runs:', error);
+            return NextResponse.json({ error: 'Failed to update content_runs' }, { status: 500 });
         }
 
         return NextResponse.json({ success: true });
