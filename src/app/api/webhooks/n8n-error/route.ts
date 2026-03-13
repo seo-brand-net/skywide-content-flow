@@ -95,38 +95,17 @@ export async function POST(request: Request) {
             }
         }
 
-        // ─── Strategy 3: fallback — most recent non-terminal request ─────
-        // Handles the case where the workflow errored before the poller saved the executionId
-        // OR the poller already moved status from 'pending' to 'in_progress'
-        console.log('[n8n Error Webhook] No execution match found, falling back to most recent non-terminal request');
-        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
-        const { data: pendingReq, error: pendingErr } = await supabase
-            .from('content_requests')
-            .select('id, status')
-            .in('status', ['pending', 'in_progress'])
-            .gte('created_at', thirtyMinutesAgo)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-        if (pendingErr) {
-            console.error('[n8n Error Webhook] Supabase error finding pending request:', pendingErr);
-        }
-
-        if (pendingReq) {
-            await supabase.from('content_requests').update({
-                status: 'cancelled',
-                error_message: formattedError,
-                updated_at: new Date().toISOString()
-            }).eq('id', pendingReq.id);
-
-            console.log(`[n8n Error Webhook] Marked request ${pendingReq.id} as error via fallback`);
-            return NextResponse.json({ success: true, request_id: pendingReq.id, method: 'fallback_pending' });
-        }
-
+        // ─── Strategy 3: LAST RESORT fallback — only if we have nothing else ─
+        // WARNING: This is inherently risky and may match the wrong request.
+        // Only runs if we truly have no executionId, no run_id, and no request_id.
+        // In that case we cannot safely identify the right request — return 422.
+        console.warn('[n8n Error Webhook] Cannot identify which request failed — no request_id, run_id, or executionId matched. Not updating any request status to avoid false positives.');
         return NextResponse.json(
-            { error: 'Could not find any matching content request to mark as error' },
-            { status: 404 }
+            { 
+                error: 'Could not identify a matching content request from the payload. Include request_id or run_id in the n8n error node payload for reliable matching.',
+                received: { executionId, run_id, request_id: undefined }
+            },
+            { status: 422 }
         );
 
     } catch (error: any) {

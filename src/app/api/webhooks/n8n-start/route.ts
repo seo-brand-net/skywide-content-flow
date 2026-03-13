@@ -59,6 +59,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Failed to upsert content_runs' }, { status: 500 });
         }
 
+        // Also update the parent request to confirm it is in progress and remap current_run_id
+        await supabase
+            .from('content_requests')
+            .update({ 
+                status: 'in_progress',
+                current_run_id: run_id,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', finalRequestId);
+
         console.log(`[n8n Start Webhook] ✅ Upserted run ${run_id} → execution ${executionId} for request ${finalRequestId}`);
         return NextResponse.json({ success: true, request_id: finalRequestId });
 

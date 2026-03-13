@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         );
 
         // 1. Update the Main Request
-        const { error: reqError } = await supabase
+        const { data: updatedReq, error: reqError } = await supabase
             .from('content_requests')
             .update({
                 status: 'complete',
@@ -32,25 +32,31 @@ export async function POST(request: Request) {
                 error_message: null,
                 updated_at: new Date().toISOString()
             })
-            .eq('id', request_id);
+            .eq('id', request_id)
+            .select('current_run_id')
+            .single();
 
         if (reqError) {
             console.error('[n8n Complete Webhook] Error updating content_requests:', reqError);
         }
 
-        // 2. Update the specific run if provided
-        if (run_id) {
+        // 2. Resolve run_id: use payload value first, then fall back to current_run_id on the request
+        const resolvedRunId = run_id || updatedReq?.current_run_id;
+
+        if (resolvedRunId) {
             const { error: runError } = await supabase
                 .from('content_runs')
                 .update({
                     status: 'completed',
                     completed_at: new Date().toISOString()
                 })
-                .eq('id', run_id);
+                .eq('id', resolvedRunId);
             
             if (runError) {
                 console.error('[n8n Complete Webhook] Error updating content_runs:', runError);
             }
+        } else {
+            console.warn('[n8n Complete Webhook] No run_id available to mark run as completed.');
         }
 
         console.log(`[n8n Complete Webhook] Successfully marked request ${request_id} as complete`);

@@ -141,14 +141,27 @@ export async function POST(
     });
 
     if (!webhookRes || !webhookRes.ok) {
-        console.error('[Revise] Webhook failed:', webhookRes?.status);
-        // We still return success for the DB update but note the webhook issue
+        const webhookStatus = webhookRes?.status ?? 0;
+        const webhookBody = await webhookRes?.json().catch(() => ({})) ?? {};
+        console.error(`[Revise] Webhook dispatch failed (${webhookStatus}):`, webhookBody);
+
+        // Rollback – mark the request back to cancelled so the user can retry
+        await supabase.from('content_requests').update({
+            status: 'cancelled',
+            error_message: `Revision webhook dispatch failed (${webhookStatus}). Please try again.`,
+            updated_at: new Date().toISOString(),
+        }).eq('id', requestId);
+
+        await supabase.from('content_runs').update({
+            status: 'failed',
+            completed_at: new Date().toISOString(),
+        }).eq('id', newRun.id);
+
         return NextResponse.json({
-            success: true,
-            warning: 'Run created but webhook dispatch may have failed.',
-            runId: newRun.id,
-        });
+            error: `Failed to dispatch revision to n8n (${webhookStatus})`,
+            detail: webhookBody,
+        }, { status: 502 });
     }
 
-    return NextResponse.json({ success: true, runId: newRun.id });
+    return NextResponse.json({ success: true, run_id: newRun.id });
 }
