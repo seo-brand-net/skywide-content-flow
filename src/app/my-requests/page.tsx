@@ -452,9 +452,6 @@ export default function MyRequests() {
                                                         <TableCell className="py-5 px-4">
                                                             <div className="flex items-center gap-2">
                                                                 <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-tight shadow-sm border whitespace-nowrap ${getDisplayColor(request)}`}>
-                                                                    {['in_progress', 'pending'].includes(request.status.toLowerCase()) && (
-                                                                        <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-                                                                    )}
                                                                     {getDisplayStatus(request)}
                                                                 </span>
                                                             </div>
