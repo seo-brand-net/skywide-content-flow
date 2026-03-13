@@ -43,7 +43,7 @@ export default function MyRequests() {
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
     // Retry / Revision state
-    const [isRetrying, setIsRetrying] = useState(false);
+    const [retryingRequestId, setRetryingRequestId] = useState<string | null>(null);
     const [retryToast, setRetryToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
     const [isRevisionModalOpen, setIsRevisionModalOpen] = useState(false);
     const [revisionNotes, setRevisionNotes] = useState('');
@@ -143,7 +143,7 @@ export default function MyRequests() {
         const targetRequest = requestToRetry || selectedRequest;
         if (!targetRequest) return;
         
-        setIsRetrying(true);
+        setRetryingRequestId(targetRequest.id);
         setRetryToast(null);
         try {
             // Immediate UI feedback within the local state for the modal
@@ -173,7 +173,7 @@ export default function MyRequests() {
             }
             setRetryToast({ type: 'error', message: 'Network error.' });
         } finally {
-            setIsRetrying(false);
+            setRetryingRequestId(null);
         }
     };
 
@@ -513,10 +513,10 @@ export default function MyRequests() {
                                                                                     variant="outline"
                                                                                     size="icon"
                                                                                     onClick={() => handleRetry(request)}
-                                                                                    disabled={isRetrying}
+                                                                                    disabled={retryingRequestId === request.id}
                                                                                     className="h-9 w-9 bg-red-500/10 border-red-500/20 text-red-600 hover:bg-red-500 hover:text-white transition-all shadow-sm"
                                                                                 >
-                                                                                    {isRetrying ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                                                                                    {retryingRequestId === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                                                                                 </Button>
                                                                             </TooltipTrigger>
                                                                             <TooltipContent><p className="font-bold">Retry Execution</p></TooltipContent>
@@ -666,10 +666,10 @@ export default function MyRequests() {
                                                                 size="sm"
                                                                 variant="outline"
                                                                 onClick={() => handleRetry(selectedRequest)}
-                                                                disabled={isRetrying}
+                                                                disabled={retryingRequestId === selectedRequest.id}
                                                                 className="w-full sm:w-fit border-red-400 text-red-700 hover:bg-red-500 hover:text-white dark:hover:bg-red-900/40 font-bold transition-all shadow-sm"
                                                             >
-                                                                {isRetrying ? (
+                                                                {retryingRequestId === selectedRequest.id ? (
                                                                     <><Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />Retrying...</>
                                                                 ) : (
                                                                     <><RefreshCw className="w-3.5 h-3.5 mr-2" />Retry Execution</>  
