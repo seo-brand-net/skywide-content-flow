@@ -4,13 +4,13 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { runId, executionId, requestId } = body;
+        const { run_id, executionId, request_id } = body;
 
-        console.log(`[n8n Start Webhook] Received runId: ${runId}, executionId: ${executionId}, requestId: ${requestId}`);
+        console.log(`[n8n Start Webhook] Received run_id: ${run_id}, executionId: ${executionId}, request_id: ${request_id}`);
 
-        if (!runId || !executionId) {
+        if (!run_id || !executionId) {
             return NextResponse.json(
-                { error: 'Missing runId or executionId' },
+                { error: 'Missing run_id or executionId' },
                 { status: 400 }
             );
         }
@@ -22,24 +22,24 @@ export async function POST(request: Request) {
         );
 
         // ── Determine the parent content_request_id ───────────────────────
-        let finalRequestId = requestId;
+        let finalRequestId = request_id;
 
         if (!finalRequestId) {
             const { data: contentRequest } = await supabase
                 .from('content_requests')
                 .select('id')
-                .eq('current_run_id', runId)
+                .eq('current_run_id', run_id)
                 .single();
             
             finalRequestId = contentRequest?.id;
         }
 
         if (!finalRequestId) {
-            console.warn(`[n8n Start Webhook] Could not resolve request_id for runId ${runId} — attempting bare update`);
+            console.warn(`[n8n Start Webhook] Could not resolve request_id for run_id ${run_id} — attempting bare update`);
             await supabase
                 .from('content_runs')
                 .update({ n8n_execution_id: executionId, status: 'running' })
-                .eq('id', runId);
+                .eq('id', run_id);
             return NextResponse.json({ success: true, method: 'fallback_update' });
         }
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         const { error } = await supabase
             .from('content_runs')
             .upsert({
-                id: runId,
+                id: run_id,
                 content_request_id: finalRequestId,
                 n8n_execution_id: executionId,
                 status: 'running',
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Failed to upsert content_runs' }, { status: 500 });
         }
 
-        console.log(`[n8n Start Webhook] ✅ Upserted run ${runId} → execution ${executionId} for request ${finalRequestId}`);
-        return NextResponse.json({ success: true, requestId: finalRequestId });
+        console.log(`[n8n Start Webhook] ✅ Upserted run ${run_id} → execution ${executionId} for request ${finalRequestId}`);
+        return NextResponse.json({ success: true, request_id: finalRequestId });
 
     } catch (error: any) {
         console.error('[n8n Start Webhook] UNCAUGHT ERROR:', error?.message);

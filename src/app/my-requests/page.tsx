@@ -154,7 +154,7 @@ export default function MyRequests() {
             const res = await fetch(`/api/content-requests/retry`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requestId: targetRequest.id }),
+                body: JSON.stringify({ request_id: targetRequest.id }),
             });
             const data = await res.json();
             if (!res.ok) {
@@ -185,7 +185,7 @@ export default function MyRequests() {
             const res = await fetch(`/api/content-requests/revise`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requestId: selectedRequest.id, revisionNotes }),
+                body: JSON.stringify({ request_id: selectedRequest.id, revisionNotes }),
             });
             const data = await res.json();
             if (!res.ok) {

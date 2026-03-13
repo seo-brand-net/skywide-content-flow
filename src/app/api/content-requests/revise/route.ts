@@ -22,11 +22,11 @@ export async function POST(
     }
 
     const body = await req.json().catch(() => ({}));
-    const requestId: string = body.requestId;
+    const requestId: string = body.request_id;
     const revisionNotes: string = (body.revisionNotes || '').trim();
 
     if (!requestId) {
-        return NextResponse.json({ error: 'Missing requestId in body' }, { status: 400 });
+        return NextResponse.json({ error: 'Missing request_id in body' }, { status: 400 });
     }
 
     // Use service-role client for DB reads/writes
@@ -93,8 +93,8 @@ export async function POST(
     // ── Fire the n8n webhook ──────────────────────────────────────────────
     const webhookUrl = process.env.N8N_CONTENT_ENGINE_WEBHOOK_URL!;
     const webhookPayload = {
-        runId: newRun.id,
-        requestId,
+        run_id: newRun.id,
+        request_id: requestId,
         articleTitle: contentRequest.article_title,
         titleAudience: contentRequest.title_audience,
         seoKeywords: contentRequest.seo_keywords,

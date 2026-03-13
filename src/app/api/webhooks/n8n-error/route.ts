@@ -4,13 +4,13 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { executionId, workflowId, workflowName, errorMessage, nodeName, runId, requestId } = body;
+        const { executionId, workflowId, workflowName, errorMessage, nodeName, run_id, request_id } = body;
 
-        console.log(`[n8n Error Webhook] Received:`, JSON.stringify({ executionId, nodeName, errorMessage, runId, requestId }));
+        console.log(`[n8n Error Webhook] Received:`, JSON.stringify({ executionId, nodeName, errorMessage, run_id, request_id }));
 
-        if (!runId && !executionId && !requestId) {
+        if (!run_id && !executionId && !request_id) {
             return NextResponse.json(
-                { error: 'Missing runId, executionId or requestId' },
+                { error: 'Missing run_id, executionId or request_id' },
                 { status: 400 }
             );
         }
@@ -26,31 +26,31 @@ export async function POST(request: Request) {
             : (errorMessage || 'Unknown workflow error');
 
         // ─── Strategy 0: direct request_id from payload (BEST) ────────────
-        if (requestId) {
+        if (request_id) {
             await supabase.from('content_requests').update({
                 status: 'cancelled',
                 error_message: formattedError,
                 updated_at: new Date().toISOString()
-            }).eq('id', requestId);
+            }).eq('id', request_id);
 
-            // If we also have a runId, update that run too
-            if (runId) {
+            // If we also have a run_id, update that run too
+            if (run_id) {
                 await supabase.from('content_runs').update({
                     status: 'failed',
                     completed_at: new Date().toISOString()
-                }).eq('id', runId);
+                }).eq('id', run_id);
             }
 
-            console.log(`[n8n Error Webhook] Marked request ${requestId} as error via direct requestId`);
-            return NextResponse.json({ success: true, requestId, method: 'request_id' });
+            console.log(`[n8n Error Webhook] Marked request ${request_id} as error via direct request_id`);
+            return NextResponse.json({ success: true, request_id, method: 'request_id' });
         }
 
         // ─── Strategy 1: direct run_id from payload ───────────────────────
-        if (runId) {
+        if (run_id) {
             const { data: req } = await supabase
                 .from('content_requests')
                 .select('id')
-                .eq('current_run_id', runId)
+                .eq('current_run_id', run_id)
                 .single();
 
             if (req) {
@@ -63,10 +63,10 @@ export async function POST(request: Request) {
                 await supabase.from('content_runs').update({
                     status: 'failed',
                     completed_at: new Date().toISOString()
-                }).eq('id', runId);
+                }).eq('id', run_id);
 
                 console.log(`[n8n Error Webhook] Marked request ${req.id} as error via run_id`);
-                return NextResponse.json({ success: true, requestId: req.id, method: 'run_id' });
+                return NextResponse.json({ success: true, request_id: req.id, method: 'run_id' });
             }
         }
 
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
                 }).eq('id', runData.id);
 
                 console.log(`[n8n Error Webhook] Marked request ${runData.content_request_id} as error via executionId`);
-                return NextResponse.json({ success: true, requestId: runData.content_request_id, method: 'execution_id' });
+                return NextResponse.json({ success: true, request_id: runData.content_request_id, method: 'execution_id' });
             }
         }
 
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
             }).eq('id', pendingReq.id);
 
             console.log(`[n8n Error Webhook] Marked request ${pendingReq.id} as error via fallback`);
-            return NextResponse.json({ success: true, requestId: pendingReq.id, method: 'fallback_pending' });
+            return NextResponse.json({ success: true, request_id: pendingReq.id, method: 'fallback_pending' });
         }
 
         return NextResponse.json(

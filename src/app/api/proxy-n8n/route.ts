@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         }
 
         // ── Pre-process database records using service role ───────────────
-        if (payload.runId && payload.request_id && !payload.is_ab_test) {
+        if (payload.run_id && payload.request_id && !payload.is_ab_test) {
             const supabase = createClient(
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
             const { error: runError } = await supabase
                 .from('content_runs')
                 .insert([{
-                    id: payload.runId,
+                    id: payload.run_id,
                     content_request_id: payload.request_id,
                     status: 'running',
                     created_at: new Date().toISOString()
@@ -42,10 +42,10 @@ export async function POST(request: Request) {
                 console.error('[Proxy-n8n] Failed to insert content_runs:', runError);
             } else {
                 // 2. Update the parent request to point to this new run
-                console.log(`[Proxy-n8n] ✅ Linking request ${payload.request_id} to run ${payload.runId}`);
+                console.log(`[Proxy-n8n] ✅ Linking request ${payload.request_id} to run ${payload.run_id}`);
                 const { error: reqError } = await supabase
                     .from('content_requests')
-                    .update({ current_run_id: payload.runId })
+                    .update({ current_run_id: payload.run_id })
                     .eq('id', payload.request_id);
 
                 if (reqError) {

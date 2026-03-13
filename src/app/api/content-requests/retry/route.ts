@@ -14,10 +14,10 @@ export async function POST(
     req: NextRequest,
 ) {
     const body = await req.json().catch(() => ({}));
-    const requestId: string = body.requestId;
+    const requestId: string = body.request_id;
 
     if (!requestId) {
-        return NextResponse.json({ error: 'Missing requestId in body' }, { status: 400 });
+        return NextResponse.json({ error: 'Missing request_id in body' }, { status: 400 });
     }
 
     // ── Auth check (admin only) ──────────────────────────────────────────
@@ -77,7 +77,7 @@ export async function POST(
         console.error('[Retry] No run found in content_runs for request:', requestId);
         return NextResponse.json({ 
             error: 'No run found for this request', 
-            requestId,
+            request_id: requestId,
             hint: 'Ensure n8n has successfully started and called the start-webhook once for this request.'
         }, { status: 404 });
     }

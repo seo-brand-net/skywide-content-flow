@@ -125,7 +125,7 @@
     {
       "parameters": {
         "resource": "folder",
-        "name": "={{ $json.body.client_name }}",
+        "name": "={{ $('Webhook1').first().json.body.title }}",
         "driveId": {
           "__rl": true,
           "mode": "list",
@@ -868,46 +868,13 @@
     },
     {
       "parameters": {
-        "method": "PATCH",
-        "url": "=https://obswcosfipqjvklqlnrj.supabase.co/rest/v1/content_requests",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            {
-              "name": "id",
-              "value": "=eq.{{ $('Webhook1').first().json.body.request_id }}"
-            }
-          ]
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            },
-            {
-              "name": "apikey",
-              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ic3djb3NmaXBxanZrbHFsbnJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NjYyNTksImV4cCI6MjA4MDQ0MjI1OX0.G8YV-Rmo3fZlXvwygIU8sAHu4o0c5kYFoqoJpE-CYE8"
-            },
-            {
-              "name": "Authorization",
-              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ic3djb3NmaXBxanZrbHFsbnJqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDg2NjI1OSwiZXhwIjoyMDgwNDQyMjU5fQ.3mRimqfkuFrcBZoFaY9xHHEaIBo7IH_nyP1mqfNMtPQ"
-            },
-            {
-              "name": "Prefer",
-              "value": "return=representation"
-            }
-          ]
-        },
+        "method": "POST",
+        "url": "https://skywide-content-flow.vercel.app/api/webhooks/n8n-complete",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"webhook_response\": \"https://drive.google.com/drive/u/0/folders/{{ $json.id }}\",\n  \"webhook_sent\": \"TRUE\",\n  \"status\": \"complete\"\n}",
+        "jsonBody": "={\n  \"request_id\": \"{{ $('Webhook1').first().json.body.request_id }}\",\n  \"run_id\": \"{{ $('Webhook1').first().json.body.run_id }}\",\n  \"webhook_response\": \"https://drive.google.com/drive/u/0/folders/{{ $json.id }}\"\n}",
         "options": {
           "allowUnauthorizedCerts": true,
-          "redirect": {
-            "redirect": {}
-          },
           "timeout": 10000
         }
       },
@@ -1962,7 +1929,7 @@
         "dataToSave": {
           "values": [
             {
-              "key": "requestId",
+              "key": "request_id",
               "value": "={{ $json.body.request_id }}"
             },
             {
@@ -3265,7 +3232,7 @@
         "url": "https://skywide-content-flow.vercel.app/api/webhooks/n8n-error",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"executionId\": \"{{$json.execution.id}}\",\n  \"errorMessage\": \"{{$json.execution.error.message}}\",\n  \"nodeName\": \"{{$json.execution.lastNodeExecuted}}\",\n  \"workflowId\": \"{{$workflow.id}}\",\n  \"workflowName\": \"{{$workflow.name}}\"\n}",
+        "jsonBody": "={\n  \"executionId\": \"{{$json.execution.id}}\",\n  \"errorMessage\": \"{{$json.execution.error.message}}\",\n  \"nodeName\": \"{{$json.execution.lastNodeExecuted}}\",\n  \"workflowId\": \"{{$workflow.id}}\",\n  \"workflowName\": \"{{$workflow.name}}\",\n  \"request_id\": \"{{ $('Webhook1').first().json.body.request_id }}\",\n  \"run_id\": \"{{ $('Webhook1').first().json.body.run_id }}\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
@@ -3283,7 +3250,7 @@
         "url": "https://skywide-content-flow.vercel.app/api/webhooks/n8n-start",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"executionId\": \"{{$execution.id}}\",\n  \"runId\": \"{{  $('Webhook1').first().json.body.runId }}\",\n  \"requestId\": \"{{ $('Webhook1').first().json.body.request_id }}\"\n}",
+        "jsonBody": "={\n  \"executionId\": \"{{$execution.id}}\",\n  \"run_id\": \"{{  $('Webhook1').first().json.body.run_id }}\",\n  \"request_id\": \"{{ $('Webhook1').first().json.body.request_id }}\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",
