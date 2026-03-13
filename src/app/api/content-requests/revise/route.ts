@@ -77,7 +77,7 @@ export async function POST(
     }
 
     // ── Reset request status & point to new run ───────────────────────────
-    await supabase
+    const { error: updateError } = await supabase
         .from('content_requests')
         .update({
             status: 'in_progress',
@@ -90,19 +90,43 @@ export async function POST(
         })
         .eq('id', requestId);
 
+    if (updateError) {
+        console.error('[Revise] Failed to update request status:', updateError);
+        return NextResponse.json({ error: 'Failed to update request status', detail: updateError.message }, { status: 500 });
+    }
+
     // ── Fire the n8n webhook ──────────────────────────────────────────────
     const webhookUrl = process.env.N8N_CONTENT_ENGINE_WEBHOOK_URL!;
     const webhookPayload = {
-        run_id: newRun.id,
+        // Shared fields (snake_case)
+        title: contentRequest.article_title,
+        audience: contentRequest.title_audience,
+        client_name: contentRequest.client_name,
+        creative_brief: contentRequest.creative_brief,
+        article_type: contentRequest.article_type,
+        word_count: contentRequest.word_count,
+        primary_keywords: Array.isArray(contentRequest.primary_keywords) 
+            ? contentRequest.primary_keywords.join(', ') 
+            : contentRequest.primary_keywords,
+        secondary_keywords: Array.isArray(contentRequest.secondary_keywords)
+            ? contentRequest.secondary_keywords.join(', ')
+            : contentRequest.secondary_keywords,
+        semantic_theme: Array.isArray(contentRequest.semantic_themes)
+            ? contentRequest.semantic_themes.join(', ')
+            : contentRequest.semantic_themes,
+        tone: contentRequest.tone,
+        page_intent: contentRequest.page_intent,
+        
+        // IDs and metadata
         request_id: requestId,
-        articleTitle: contentRequest.article_title,
-        titleAudience: contentRequest.title_audience,
-        seoKeywords: contentRequest.seo_keywords,
-        articleType: contentRequest.article_type,
-        clientName: contentRequest.client_name,
-        creativeBrief: contentRequest.creative_brief,
-        revisionNotes: revisionNotes,
-        isRevision: true,
+        run_id: newRun.id,
+        user_id: user.id,
+        timestamp: new Date().toISOString(),
+
+        // Revision specific fields
+        revision_notes: revisionNotes,
+        original_content: contentRequest.webhook_response,
+        is_revision: true,
     };
 
     console.log(`[Revise] Firing webhook for requestId ${requestId}, runId ${newRun.id}`);

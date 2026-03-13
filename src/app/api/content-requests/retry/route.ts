@@ -89,7 +89,36 @@ export async function POST(
         );
     }
 
-    // ── Call n8n Retry API ────────────────────────────────────────────────
+    // ── 1. Reset request + run status EARLIER for UI responsiveness ──────
+    console.log(`[Retry] Resetting status to in_progress for request: ${requestId}`);
+    const { error: updateReqError } = await supabase
+        .from('content_requests')
+        .update({
+            status: 'in_progress',
+            error_message: null,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('id', requestId);
+
+    if (updateReqError) {
+        console.error('[Retry] DB Error resetting request status:', updateReqError);
+        return NextResponse.json({ error: 'Failed to update request status', detail: updateReqError.message }, { status: 500 });
+    }
+
+    const { error: updateRunError } = await supabase
+        .from('content_runs')
+        .update({
+            status: 'running',
+            completed_at: null,
+        })
+        .eq('id', run.id);
+
+    if (updateRunError) {
+        console.error('[Retry] DB Error resetting run status:', updateRunError);
+        // Continue anyway as the request status is the main thing the UI sees
+    }
+
+    // ── 2. Call n8n Retry API ────────────────────────────────────────────────
     const n8nBase = process.env.N8N_BASE_URL!.replace(/\/$/, '');
     const retryUrl = `${n8nBase}/api/v1/executions/${run.n8n_execution_id}/retry`;
 
@@ -108,13 +137,23 @@ export async function POST(
     console.log(`[Retry] n8n response (${n8nRes.status}):`, JSON.stringify(n8nData).substring(0, 200));
 
     if (!n8nRes.ok) {
+        // Rollback request status to cancelled so the user can try again
+        await supabase
+            .from('content_requests')
+            .update({
+                status: 'cancelled',
+                error_message: `n8n retry failed: ${n8nData.message || 'Unknown error'}`,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', requestId);
+
         return NextResponse.json(
             { error: `n8n retry failed (${n8nRes.status})`, detail: n8nData },
             { status: 502 }
         );
     }
 
-    const newExecutionId = n8nData.id || n8nData.executionId; // n8n v1 usually returns 'id'
+    const newExecutionId = n8nData.id || n8nData.executionId; 
     if (newExecutionId) {
         console.log(`[Retry] Updating run ${run.id} with NEW executionId: ${newExecutionId}`);
         await supabase
@@ -123,23 +162,5 @@ export async function POST(
             .eq('id', run.id);
     }
 
-    // ── Reset request + run status ────────────────────────────────────────
-    await supabase
-        .from('content_requests')
-        .update({
-            status: 'in_progress',
-            error_message: null,
-            updated_at: new Date().toISOString(),
-        })
-        .eq('id', requestId);
-
-    await supabase
-        .from('content_runs')
-        .update({
-            status: 'running',
-            completed_at: null,
-        })
-        .eq('id', run.id);
-
-    return NextResponse.json({ success: true, executionId: run.n8n_execution_id });
+    return NextResponse.json({ success: true, executionId: newExecutionId || run.n8n_execution_id });
 }

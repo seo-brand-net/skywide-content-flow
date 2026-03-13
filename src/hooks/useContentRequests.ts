@@ -109,9 +109,11 @@ export function useContentRequests(options: {
             const data = query.state.data as any;
             if (!data?.requests) return false;
             const inProgress = data.requests.some((r: any) => 
-                ['in_progress', 'pending'].includes(r.status?.toLowerCase())
+                ['in_progress', 'pending', 'running'].includes(r.status?.toLowerCase())
             );
-            return inProgress ? 10000 : false; // Refetch every 10 seconds if any request is active
+            // Polling interval: 5 seconds if active, otherwise 30 seconds to keep UI fresh 
+            // and handle background updates without full page refresh.
+            return inProgress ? 5000 : 30000;
         },
         placeholderData: (previousData) => {
             if (!isActuallyEnabled && previousData) {

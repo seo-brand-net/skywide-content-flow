@@ -146,7 +146,21 @@ export default function MyRequests() {
         setRetryingRequestId(targetRequest.id);
         setRetryToast(null);
         try {
-            // Immediate UI feedback within the local state for the modal
+            // 1. Optimistic Update: Main Query Cache (affects the table)
+            queryClient.setQueryData(
+                ['content_requests', { currentPage, pageSize, userRole, userId: user?.id }],
+                (old: any) => {
+                    if (!old || !old.requests) return old;
+                    return {
+                        ...old,
+                        requests: old.requests.map((r: any) => 
+                            r.id === targetRequest.id ? { ...r, status: 'in_progress', error_message: null } : r
+                        )
+                    };
+                }
+            );
+
+            // 2. Optimistic Update: Detail Modal state
             if (selectedRequest && selectedRequest.id === targetRequest.id) {
                 setSelectedRequest(prev => prev ? { ...prev, status: 'in_progress', error_message: null } : null);
             }
@@ -162,9 +176,23 @@ export default function MyRequests() {
                 if (selectedRequest && selectedRequest.id === targetRequest.id) {
                     setSelectedRequest(prev => prev ? { ...prev, status: 'cancelled' } : null);
                 }
+                // Rollback query cache
+                queryClient.setQueryData(
+                    ['content_requests', { currentPage, pageSize, userRole, userId: user?.id }],
+                    (old: any) => {
+                        if (!old || !old.requests) return old;
+                        return {
+                            ...old,
+                            requests: old.requests.map((r: any) => 
+                                r.id === targetRequest.id ? { ...r, status: targetRequest.status } : r
+                            )
+                        };
+                    }
+                );
                 setRetryToast({ type: 'error', message: data.error || 'Retry failed.' });
             } else {
                 setRetryToast({ type: 'success', message: 'Execution retried successfully.' });
+                // We've already optimistically updated, but let's invalidate to be sure
                 queryClient.invalidateQueries({ queryKey: ['content_requests'] });
             }
         } catch (e) {
@@ -182,6 +210,22 @@ export default function MyRequests() {
         setIsSubmittingRevision(true);
         setRevisionToast(null);
         try {
+            // 1. Optimistic Update: Main Query Cache
+            queryClient.setQueryData(
+                ['content_requests', { currentPage, pageSize, userRole, userId: user?.id }],
+                (old: any) => {
+                    if (!old || !old.requests) return old;
+                    return {
+                        ...old,
+                        requests: old.requests.map((r: any) => 
+                            r.id === selectedRequest.id ? { ...r, status: 'in_progress', error_message: null } : r
+                        )
+                    };
+                }
+            );
+
+            // 2. Optimistic Update: Detail Modal
+            setSelectedRequest(prev => prev ? { ...prev, status: 'in_progress', error_message: null } : null);
             const res = await fetch(`/api/content-requests/revise`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -189,6 +233,21 @@ export default function MyRequests() {
             });
             const data = await res.json();
             if (!res.ok) {
+                // Rollback status
+                setSelectedRequest(prev => prev ? { ...prev, status: 'complete' } : null);
+                // Rollback query cache
+                queryClient.setQueryData(
+                    ['content_requests', { currentPage, pageSize, userRole, userId: user?.id }],
+                    (old: any) => {
+                        if (!old || !old.requests) return old;
+                        return {
+                            ...old,
+                            requests: old.requests.map((r: any) => 
+                                r.id === selectedRequest.id ? { ...r, status: 'complete' } : r
+                            )
+                        };
+                    }
+                );
                 setRevisionToast({ type: 'error', message: data.error || 'Revision request failed.' });
             } else {
                 setRevisionToast({ type: 'success', message: 'Revision started!' });
@@ -452,7 +511,12 @@ export default function MyRequests() {
                                                         <TableCell className="py-5 px-4">
                                                             <div className="flex items-center gap-2">
                                                                 <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-tight shadow-sm border whitespace-nowrap ${getDisplayColor(request)}`}>
-                                                                    {getDisplayStatus(request)}
+                                                                    {(retryingRequestId === request.id || (selectedRequest?.id === request.id && isSubmittingRevision)) && (
+                                                                        <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                                                                    )}
+                                                                    {retryingRequestId === request.id ? 'Retrying...' : 
+                                                                     (selectedRequest?.id === request.id && isSubmittingRevision) ? 'Revising...' : 
+                                                                     getDisplayStatus(request)}
                                                                 </span>
                                                             </div>
                                                         </TableCell>

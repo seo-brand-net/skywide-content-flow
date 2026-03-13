@@ -147,7 +147,7 @@ export default function Dashboard() {
                         tone: formData.tone,
                         page_intent: formData.pageIntent,
                         request_id: requestId,
-                        runId: runId,
+                        run_id: runId,
                         user_id: user?.id,
                         timestamp: new Date().toISOString(),
                     }),
