@@ -105,6 +105,14 @@ export function useContentRequests(options: {
             return { requests: (data || []) as ContentRequest[], totalCount: count || 0 };
         },
         enabled: isActuallyEnabled,
+        refetchInterval: (query) => {
+            const data = query.state.data as any;
+            if (!data?.requests) return false;
+            const inProgress = data.requests.some((r: any) => 
+                ['in_progress', 'pending'].includes(r.status?.toLowerCase())
+            );
+            return inProgress ? 10000 : false; // Refetch every 10 seconds if any request is active
+        },
         placeholderData: (previousData) => {
             if (!isActuallyEnabled && previousData) {
                 console.log('[useContentRequests] ⏸️ Query disabled, providing cached placeholderData');

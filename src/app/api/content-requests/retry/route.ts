@@ -28,21 +28,34 @@ export async function POST(
         return NextResponse.json({ error: 'Unauthorised' }, { status: 401 });
     }
 
-    // Use service-role client for DB writes
     const supabase = createSupabaseClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Verify caller is admin
+    // ── Fetch the request to check ownership ─────────────────────────────
+    const { data: contentRequest, error: fetchError } = await supabase
+        .from('content_requests')
+        .select('user_id')
+        .eq('id', requestId)
+        .single();
+
+    if (fetchError || !contentRequest) {
+        return NextResponse.json({ error: 'Content request not found' }, { status: 404 });
+    }
+
+    // Verify caller is admin or owner
     const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single();
 
-    if (profile?.role !== 'admin') {
-        return NextResponse.json({ error: 'Forbidden – admin only' }, { status: 403 });
+    const isAdmin = profile?.role === 'admin';
+    const isOwner = contentRequest.user_id === user.id;
+
+    if (!isAdmin && !isOwner) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // ── Look up the most recent run for this request ─────────────────────

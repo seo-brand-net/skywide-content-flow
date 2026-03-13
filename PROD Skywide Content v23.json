@@ -9,11 +9,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        37104,
-        10608
+        12784,
+        3232
       ],
       "typeVersion": 1,
-      "id": "057e68b5-9023-4e4e-b6ac-75c7a8490065",
+      "id": "c37df578-9f18-4d1d-a8cf-00fd61cdcc30",
       "name": "Sticky Note"
     },
     {
@@ -22,11 +22,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        37712,
-        11056
+        13392,
+        3680
       ],
       "typeVersion": 1,
-      "id": "e92855d2-9437-4469-aeba-5f7109252ee7",
+      "id": "d113c377-8a71-4926-aab5-dcf6bb98266a",
       "name": "Sticky Note5"
     },
     {
@@ -100,10 +100,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        37872,
-        12352
+        13760,
+        4976
       ],
-      "id": "4d25394c-dfa4-4a76-8727-4db4ff1980d1",
+      "id": "a7313440-74eb-4b51-9b73-993b877cc359",
       "name": "Clean1"
     },
     {
@@ -115,10 +115,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        36528,
-        12448
+        12208,
+        5072
       ],
-      "id": "f300f1b0-14d3-4805-93a0-ff0584c07183",
+      "id": "ec56d49f-b037-43ee-9a58-d79e0c335f1e",
       "name": "Webhook1",
       "webhookId": "c9d7ab2c-298f-4b57-be8e-235a1c25f1ef"
     },
@@ -143,10 +143,10 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        37648,
-        12448
+        13536,
+        5072
       ],
-      "id": "dda787bc-aaa4-47f8-8575-7231fc070935",
+      "id": "29a983e6-a91f-4d32-9f5f-65fa35be23f8",
       "name": "Create folder1",
       "notesInFlow": true,
       "credentials": {
@@ -179,10 +179,10 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        38672,
-        12352
+        14560,
+        4976
       ],
-      "id": "de641757-99e6-4596-9c86-170456616c90",
+      "id": "9ce6f976-7ae2-4ee6-9a12-c6e2e4e2bcbf",
       "name": "Data Check & Research Gaps1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -202,10 +202,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        38448,
-        12352
+        14336,
+        4976
       ],
-      "id": "2d5273b9-40c2-4f21-a4b9-54f805c7e5d1",
+      "id": "ba8520b7-e721-4dc2-ab9d-ba75f517e859",
       "name": "Merge3"
     },
     {
@@ -235,10 +235,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        38896,
-        12204
+        14784,
+        4832
       ],
-      "id": "51b58dff-bfa7-4ba5-a01e-13ee122d50cd",
+      "id": "d3930d55-ce43-419a-a094-033860f4b77e",
       "name": "OpenAI Keyword Check + Semantic Gap1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -265,10 +265,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        38896,
-        12500
+        14784,
+        5120
       ],
-      "id": "eebd1f7f-cec1-483c-b15d-213279df6298",
+      "id": "fb199542-fd4d-4b3e-a5ca-c260c064f070",
       "name": "Claude Keyword Check + Semantic Gap1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -290,10 +290,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        38968,
-        12724
+        14864,
+        5344
       ],
-      "id": "19e2ab25-a79c-4851-ba4c-cb5f92959f91",
+      "id": "e25df404-678d-4866-8dcf-5eed5a763211",
       "name": "Anthropic Chat Model5",
       "credentials": {
         "anthropicApi": {
@@ -311,10 +311,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        39248,
-        12352
+        15136,
+        4976
       ],
-      "id": "4d8394d7-0d64-4bf9-9853-df9e805ce759",
+      "id": "d348ba42-3ff4-4d88-94f6-14436b6bb143",
       "name": "Merge5"
     },
     {
@@ -333,10 +333,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        39696,
-        12352
+        15584,
+        4976
       ],
-      "id": "b1693aff-d3da-4356-8f3f-19ecea280a9d",
+      "id": "e8e1e1dd-c2fc-451b-922b-d7727793cfc9",
       "name": "Claude Apply Recommendations1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -357,10 +357,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        39768,
-        12576
+        15664,
+        5200
       ],
-      "id": "bc886e3d-1c12-45f5-aed4-33346c615c19",
+      "id": "ed4c4e11-f660-4675-9b4f-c110d634a616",
       "name": "Anthropic Chat Model6",
       "credentials": {
         "anthropicApi": {
@@ -395,10 +395,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        40048,
-        12204
+        15936,
+        4832
       ],
-      "id": "ef9c8bcb-9b4e-4b29-8c45-911be2124e29",
+      "id": "c6d628e8-b2c3-4466-9b61-e13833e47260",
       "name": "OpenAI EEAT Injection1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -425,10 +425,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        40048,
-        12500
+        15936,
+        5120
       ],
-      "id": "70faf0b5-8b5a-49f6-88b2-394c0802a4e0",
+      "id": "08382dfa-eed3-43b7-a881-3ef17f06e11b",
       "name": "Claude EEAT Injection1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -442,10 +442,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        40400,
-        12352
+        16288,
+        4976
       ],
-      "id": "cf1952d7-4dbf-4e01-b8aa-c110646a2c9e",
+      "id": "2c096269-1365-4d9d-88b2-fde54decc2dc",
       "name": "Merge6"
     },
     {
@@ -464,10 +464,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        40120,
-        12724
+        16016,
+        5344
       ],
-      "id": "1cb6d32f-ed25-4bc1-96bf-bc754adef874",
+      "id": "5483fd03-0838-4930-94d2-709d8eca8254",
       "name": "Anthropic Chat Model7",
       "credentials": {
         "anthropicApi": {
@@ -502,10 +502,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        40848,
-        12352
+        16736,
+        4976
       ],
-      "id": "3530c111-d055-4bca-9138-83f90b74d01b",
+      "id": "07d59c44-c930-48ab-bb0a-7f29a20b7ea0",
       "name": "OpenAI SEO Optimization1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -542,10 +542,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        41424,
-        12204
+        17312,
+        4832
       ],
-      "id": "8f049fad-a5a6-49e1-a242-3799d3160761",
+      "id": "39e3cf00-37fe-494c-87da-7f2038b5e08d",
       "name": "OpenAI NLP & PR Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -572,10 +572,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        41424,
-        12500
+        17312,
+        5120
       ],
-      "id": "c3bcf0ac-a6d2-403a-8792-943b3901acc3",
+      "id": "7925723a-4378-43ca-8c97-471d91108484",
       "name": "Claude NLP & PR Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -596,10 +596,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        41496,
-        12724
+        17392,
+        5344
       ],
-      "id": "99ecff82-4913-4af5-8b81-afb9c0368af1",
+      "id": "27f8629a-dc32-4538-9948-47dc01a5d0ba",
       "name": "Anthropic Chat Model11",
       "credentials": {
         "anthropicApi": {
@@ -617,10 +617,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        41776,
-        12352
+        17664,
+        4976
       ],
-      "id": "f755f53b-5f2f-4e24-946e-9ea438f8576f",
+      "id": "c6299b34-bc02-4060-b491-8033cc53eea1",
       "name": "Merge7"
     },
     {
@@ -639,10 +639,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        42296,
-        13108
+        18192,
+        5728
       ],
-      "id": "80a6e9f1-f5ef-4962-8480-424df1d1d7e2",
+      "id": "86a46b26-85b9-40cb-a275-d14e5e95c531",
       "name": "Anthropic Chat Model12",
       "credentials": {
         "anthropicApi": {
@@ -666,10 +666,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        42872,
-        13108
+        18768,
+        5728
       ],
-      "id": "cc35f6ae-7ac2-4c66-9b65-fc3b2b8c3b45",
+      "id": "0f582368-42a8-46c1-a293-500aca32ab79",
       "name": "Anthropic Chat Model13",
       "credentials": {
         "anthropicApi": {
@@ -694,10 +694,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        42800,
-        12884
+        18688,
+        5504
       ],
-      "id": "9ba765a2-d9f3-4ca4-89d0-7b5bf8946fc5",
+      "id": "7acd2bd5-434a-4924-8951-06eb59d16df5",
       "name": "Claude Final SEO Snippet Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -728,10 +728,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        42224,
-        11744
+        18112,
+        4368
       ],
-      "id": "cc271ea1-9671-4aaa-9ab3-6866a08eb5e8",
+      "id": "a03a52fa-cc3c-4150-9522-a6369bbda2eb",
       "name": "OpenAI Humanised Readability Rewrite",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -768,10 +768,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        43152,
-        11744
+        19040,
+        4368
       ],
-      "id": "3091befa-6f56-4443-9276-0dd0b4c08d41",
+      "id": "5087759c-ab60-46dc-89e1-f5a82affd07a",
       "name": "Document Export Sanitization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -787,10 +787,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        42000,
-        11744
+        17888,
+        4368
       ],
-      "id": "74f6a67a-9e3c-4cd1-8597-890fc50b1dc0",
+      "id": "f9b1d531-2bcf-4819-bf8c-4f3eb79b3cf8",
       "name": "Wait6",
       "webhookId": "7a372933-6525-4c44-92e4-7743d0a44c8b"
     },
@@ -799,10 +799,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        42000,
-        12884
+        17888,
+        5504
       ],
-      "id": "4fabce41-a6e0-4e2a-ae97-676bb4fd0845",
+      "id": "3152f449-6a6d-4b8e-83b2-2ad9876931c1",
       "name": "Wait7",
       "webhookId": "7a372933-6525-4c44-92e4-7743d0a44c8b"
     },
@@ -811,10 +811,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        42576,
-        11744
+        18464,
+        4368
       ],
-      "id": "537cf176-72cd-4214-9c53-d7cda1f02054",
+      "id": "a7d98eca-4751-4e21-a10e-74a2ca6f29ab",
       "name": "Wait8",
       "webhookId": "a748588d-97b9-4b52-99b1-31c0affeeab3"
     },
@@ -823,10 +823,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        42576,
-        12884
+        18464,
+        5504
       ],
-      "id": "9108b414-0f1d-4bfb-9b67-c55447465602",
+      "id": "301e523c-3cb7-40ab-8f3e-e80a603d5845",
       "name": "Wait10",
       "webhookId": "49d694d9-d5d4-4509-867a-89cc50a2f04b"
     },
@@ -835,10 +835,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        40624,
-        12352
+        16512,
+        4976
       ],
-      "id": "5e92964d-3460-4143-b855-26340fb1487b",
+      "id": "36e7ac82-5a6d-4b6b-95cf-0d2c6b66dd08",
       "name": "Wait14",
       "webhookId": "2db62569-3f26-4159-85e0-9a8b47a13344"
     },
@@ -847,10 +847,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        41200,
-        12204
+        17088,
+        4832
       ],
-      "id": "7a2d3bdd-3f08-4375-9097-0aec6d5467dd",
+      "id": "27b6d630-bb80-4e8c-9109-776bdd494f5a",
       "name": "Wait17",
       "webhookId": "e0466a06-d809-467b-b0d1-3171ddae30a6"
     },
@@ -859,10 +859,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        39472,
-        12352
+        15360,
+        4976
       ],
-      "id": "bc426e24-55b5-4040-bfe9-256f5148f80a",
+      "id": "52875406-8a30-46fd-b8e5-f5245e10f517",
       "name": "Wait18",
       "webhookId": "be177216-d87e-494c-b058-1d021b29a470"
     },
@@ -914,10 +914,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        37872,
-        12544
+        13760,
+        5168
       ],
-      "id": "ecdbf794-18ed-4dbd-96fe-aeafd98c58f6",
+      "id": "4d550814-0627-4f11-ab8f-dff4ce8594ef",
       "name": "Google Drive Notification1",
       "notesInFlow": true,
       "notes": "Add G-Drive Link to Skywide Dashboard"
@@ -938,10 +938,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        44080,
-        11984
+        19968,
+        4608
       ],
-      "id": "1d197a38-b018-465e-a5e1-d999b94b5800",
+      "id": "82b7167a-e0a5-4b3c-b8ed-427941da07b0",
       "name": "1st Improvement LLM2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -973,10 +973,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        44432,
-        11984
+        20320,
+        4608
       ],
-      "id": "3a8facb8-8daa-4b52-baf5-0f153a361b9e",
+      "id": "b66ff287-b940-467c-8d78-2ad72d45c66d",
       "name": "2nd Scoring Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1002,10 +1002,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        43856,
-        11744
+        19744,
+        4368
       ],
-      "id": "9e1da4a0-547c-4cb4-987b-de9f9c21a9b7",
+      "id": "1ae24159-8093-477e-8bcc-638644f25e2d",
       "name": "80+ ?2",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1024,10 +1024,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        44848,
-        11984
+        20736,
+        4608
       ],
-      "id": "7c25d878-d4c7-4dc8-8d48-9c6a77eb6cde",
+      "id": "feca9f51-4227-4cdf-bee5-a8b2447491d7",
       "name": "80 +?4",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1068,10 +1068,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        45360,
-        11956
+        21248,
+        4576
       ],
-      "id": "183c8c95-dfbc-4dd1-9868-ab677ec6e468",
+      "id": "d3bef2c5-e5a2-409a-a122-c01744fc8e66",
       "name": "Check Max Iterations2",
       "notesInFlow": true,
       "notes": "Prevent infinite loops by checking if we've tried too many times"
@@ -1093,10 +1093,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        45136,
-        12080
+        21024,
+        4704
       ],
-      "id": "1e978255-3092-474a-9f32-ff15641ac7c5",
+      "id": "453c3139-0736-4455-9912-8cb7fc24df33",
       "name": "Max Iterations2"
     },
     {
@@ -1115,10 +1115,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        45584,
-        11956
+        21472,
+        4576
       ],
-      "id": "95b748a8-ef58-4fd3-8b53-5037121580cc",
+      "id": "ec341c63-5217-4534-b4c3-3c5fa8bc50c5",
       "name": "Improvement LLM2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1139,10 +1139,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        45656,
-        12180
+        21552,
+        4800
       ],
-      "id": "47652584-58b8-40d8-89bf-e355a6c54189",
+      "id": "49c17763-249b-48fd-90b2-c97b3edc82cb",
       "name": "Anthropic Chat Model18",
       "credentials": {
         "anthropicApi": {
@@ -1178,10 +1178,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        45936,
-        11956
+        21824,
+        4576
       ],
-      "id": "9b864821-99b8-4a15-acd0-2729dae2ab49",
+      "id": "f9809dc4-d2a2-4ddf-82d0-479e6a6ca82b",
       "name": "Scoring7",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1200,10 +1200,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        47888,
-        11860
+        23776,
+        4480
       ],
-      "id": "287efafe-adff-439b-a622-d0298bf69099",
+      "id": "c7407d66-b81a-4590-b720-63c71ae76b02",
       "name": "Create a document15",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1228,10 +1228,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        48112,
-        11860
+        24000,
+        4480
       ],
-      "id": "4db3c73f-06b4-4365-be88-bdb8d314a8ce",
+      "id": "9fb41968-47aa-4bc9-b8c3-6d5e92df454d",
       "name": "Update a document15",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1256,10 +1256,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        44152,
-        12208
+        20048,
+        4832
       ],
-      "id": "4d9b377a-e605-4f59-a57a-4b0741bdddb2",
+      "id": "9742ad7e-baeb-4845-99dc-703505bad97a",
       "name": "Anthropic Chat Model19",
       "credentials": {
         "anthropicApi": {
@@ -1295,10 +1295,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        43504,
-        11744
+        19392,
+        4368
       ],
-      "id": "6163b1ec-7d93-4f1c-b8bc-7662414de36d",
+      "id": "c2e187c5-e645-43df-92cb-557b587dc9de",
       "name": "1st Scoring Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1326,10 +1326,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        46288,
-        12080
+        22176,
+        4704
       ],
-      "id": "402c54c6-4b36-4ddb-9b12-2ebd71895675",
+      "id": "e4f0f130-0b60-4094-99ce-69a2f347e2df",
       "name": "80 +?5",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1349,10 +1349,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        44080,
-        13124
+        19968,
+        5744
       ],
-      "id": "217db76c-9901-4667-a09a-09deae9e16d4",
+      "id": "b031935b-0434-424d-a061-4d1afdc229df",
       "name": "1st Improvement LLM3",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1384,10 +1384,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        44432,
-        13124
+        20320,
+        5744
       ],
-      "id": "3339a578-c13c-4f08-921b-6bc20589e872",
+      "id": "d9eb50ed-75a5-4afd-ad0b-75c6c3aad664",
       "name": "2nd Scoring Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1413,10 +1413,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        43856,
-        12884
+        19744,
+        5504
       ],
-      "id": "2b9a5dc4-d892-4ba9-aef0-ab87517a5acf",
+      "id": "53bb8529-6d93-4532-b571-654cccf5771a",
       "name": "80+ ?3",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1435,10 +1435,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        44848,
-        13124
+        20736,
+        5744
       ],
-      "id": "65c4f595-d14e-4190-a238-35b92fb3cbe7",
+      "id": "a6851f2e-60fd-4aa5-9716-17f043be8452",
       "name": "80 +?6",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1479,10 +1479,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        45360,
-        13096
+        21248,
+        5712
       ],
-      "id": "aa07944b-651f-4b11-a33e-94dae0013cb7",
+      "id": "f718caa0-d63f-4e30-a000-57238610c5dc",
       "name": "Check Max Iterations3",
       "notesInFlow": true,
       "notes": "Prevent infinite loops by checking if we've tried too many times"
@@ -1504,10 +1504,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        45136,
-        13220
+        21024,
+        5840
       ],
-      "id": "a14fe0bb-c008-4af7-a217-22464d4cc6cb",
+      "id": "06ea1cfd-4bf0-4e5a-953c-6dd56e4d8c68",
       "name": "Max Iterations3"
     },
     {
@@ -1526,10 +1526,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        45584,
-        13096
+        21472,
+        5712
       ],
-      "id": "bd3a70a1-787e-4c27-b3ec-e4d828fdbc86",
+      "id": "0e1be3a5-7e76-44f6-942c-2f3fc8a7cf65",
       "name": "Improvement LLM3",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1550,10 +1550,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        45656,
-        13320
+        21552,
+        5936
       ],
-      "id": "7886ef59-cebe-4538-8872-9aaa8b02f084",
+      "id": "0d97b5fb-efb3-40a1-922b-a266e2d4cb94",
       "name": "Anthropic Chat Model20",
       "credentials": {
         "anthropicApi": {
@@ -1589,10 +1589,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        45936,
-        13096
+        21824,
+        5712
       ],
-      "id": "501633f9-b74c-4eec-a365-15352c41cee3",
+      "id": "a39c6b21-9597-4d52-9ab0-c5d992bcf750",
       "name": "Scoring1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1611,10 +1611,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        45136,
-        12904
+        21024,
+        5520
       ],
-      "id": "cd2934b5-9e6e-4ee2-91e1-371ef7bd9a52",
+      "id": "fdb255c7-01ca-4d85-9d73-4f532daa087c",
       "name": "Create a document6",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1631,10 +1631,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        47888,
-        12708
+        23776,
+        5328
       ],
-      "id": "16113fd7-5309-43b9-a3df-5346b79eec46",
+      "id": "90d71627-8a40-45c2-8e57-152d08f43c92",
       "name": "Create a document16",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1659,10 +1659,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        48112,
-        12708
+        24000,
+        5328
       ],
-      "id": "cfaa3476-c82e-4368-93d3-6b089ef9060d",
+      "id": "02e86364-6efa-4105-8170-9d8c54431ef5",
       "name": "Update a document16",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1687,10 +1687,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        44152,
-        13348
+        20048,
+        5968
       ],
-      "id": "8d375055-431e-4991-be1a-f36ebb58f8b1",
+      "id": "c3305117-5697-4a04-8b07-e4e5996edfa9",
       "name": "Anthropic Chat Model21",
       "credentials": {
         "anthropicApi": {
@@ -1726,10 +1726,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        43504,
-        12884
+        19392,
+        5504
       ],
-      "id": "7523b1a7-0c71-41ae-8b4d-57f0abcb6030",
+      "id": "3e53d0df-5aa0-48b9-8457-74cc3dde1a01",
       "name": "1st Scoring Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1758,10 +1758,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        45360,
-        12904
+        21248,
+        5520
       ],
-      "id": "e9e480d2-1625-4615-99b1-938761b00ef3",
+      "id": "790b0da7-ebcf-4432-9482-91c0db25ba31",
       "name": "Update a document7",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1785,10 +1785,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        46288,
-        13220
+        22176,
+        5840
       ],
-      "id": "83ec6d9b-30c5-4eea-b701-f457b0fc501a",
+      "id": "cf96c62e-3a8f-4360-b060-21e5a3c271b2",
       "name": "80 +?7",
       "notes": "Checks if content score meets the target threshold of 85"
     },
@@ -1800,10 +1800,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        45136,
-        11764
+        21024,
+        4384
       ],
-      "id": "d99fb10b-fd23-4d33-b7fe-7439812d7266",
+      "id": "d2237296-685c-4364-914f-54bd4c80c594",
       "name": "Create a document7",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1838,10 +1838,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        42800,
-        11744
+        18688,
+        4368
       ],
-      "id": "0681fb44-ff6a-4cc9-b5f1-100087a1553f",
+      "id": "fb651bc7-2337-46e5-b057-7b86465e4884",
       "name": "Final SEO Snippet Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1878,10 +1878,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        43152,
-        12884
+        19040,
+        5504
       ],
-      "id": "58b56a59-019e-4515-b6b5-b1031d298842",
+      "id": "fc5c0f8d-f394-4272-ab7d-a076af868a6b",
       "name": "Document Export Sanitization5",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1919,10 +1919,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        38096,
-        12204
+        13984,
+        4832
       ],
-      "id": "0b155f2b-92f5-4e24-b1ec-9cbbee539bff",
+      "id": "d128553b-dc8c-4315-b03b-f28701eb052d",
       "name": "OpenAI Draft (GPT-4O)1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1949,10 +1949,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        42224,
-        12884
+        18112,
+        5504
       ],
-      "id": "97fb9931-b041-41bc-884b-87b8caa92d78",
+      "id": "517b63c8-164f-4b8a-85b1-9d425c3074fd",
       "name": "Claude Humanised Readability Rewrite",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -1975,10 +1975,10 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        37200,
-        12448
+        13088,
+        5072
       ],
-      "id": "9f8702f8-283f-4e86-b223-3d0e2d0e849e",
+      "id": "bf5b1165-661d-47a1-83de-9ba80e764dfd",
       "name": "Execution Data1"
     },
     {
@@ -1997,10 +1997,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        45360,
-        11764
+        21248,
+        4384
       ],
-      "id": "a9be372c-ee34-4cbe-8ad5-3fd62ac80698",
+      "id": "0e536e75-30ef-46a3-87ce-beb2509063f3",
       "name": "Update a document6",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -2029,10 +2029,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        45584,
-        11424
+        21472,
+        4048
       ],
-      "id": "f9a35391-0472-461d-b756-78b09eb08177",
+      "id": "f4bc8b71-dccb-406d-873c-198a0bb35366",
       "name": "QA Rewriter Agent",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2061,10 +2061,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        46000,
-        11548
+        21888,
+        4176
       ],
-      "id": "1c80a26a-842a-47e1-a9fb-4f75a4bab3f5"
+      "id": "002c608b-4ce1-4151-880a-cfd8685526e0"
     },
     {
       "parameters": {
@@ -2092,10 +2092,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        45584,
-        11232
+        21472,
+        3856
       ],
-      "id": "81ab316a-45bc-4fe6-a6c1-4395b00e0f65",
+      "id": "7962bbed-200e-4cb8-9998-641c512e0429",
       "name": "Document Export Sanitization3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2116,10 +2116,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        44784,
-        11328
+        20672,
+        3952
       ],
-      "id": "1461bc41-d30f-4718-b3ef-b5dcea7a747c",
+      "id": "667a11dd-da0a-437c-baf3-b0c1d0a6ac94",
       "name": "AI Agent",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2131,10 +2131,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        44920,
-        11552
+        20816,
+        4176
       ],
-      "id": "42aa337a-2abe-4fab-afa3-0c9b7a9160d2",
+      "id": "0e57ddeb-ecbe-4b17-a7c8-b493e7353111",
       "name": "Structured Output Parser"
     },
     {
@@ -2152,10 +2152,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        44792,
-        11552
+        20688,
+        4176
       ],
-      "id": "fe749b43-341f-4dfb-86e7-55375493ef17",
+      "id": "78dcc7d5-6d47-4388-a0e7-b5a07a128bfc",
       "name": "OpenAI Chat Model",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2183,10 +2183,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        44144,
-        11452
+        20032,
+        4080
       ],
-      "id": "f6f96931-8adc-4d59-88bb-b8e57bd85c14",
+      "id": "63b5a4d9-da7b-4e0e-8238-732c81ee83ff",
       "name": "Edit Fields"
     },
     {
@@ -2206,10 +2206,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        44496,
-        11328
+        20384,
+        3952
       ],
-      "id": "df121a45-5fb0-4d76-8796-166c72d04fce",
+      "id": "89c8ed3c-e740-4c69-a1d7-4c601bd75c3b",
       "name": "Edit Fields1"
     },
     {
@@ -2257,10 +2257,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        45360,
-        11328
+        21248,
+        3952
       ],
-      "id": "14b8dfa6-bdc0-4d04-b1a9-070432c91b1b",
+      "id": "e0e30924-2fb5-4e01-a224-52b43e971ab8",
       "name": "If"
     },
     {
@@ -2283,10 +2283,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        45584,
-        12564
+        21472,
+        5184
       ],
-      "id": "b37d740f-ebf1-46cc-ba88-600c76b9236b",
+      "id": "681d0d7e-d473-4614-9be4-0e2912f5b483",
       "name": "QA Rewriter Agent1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2321,10 +2321,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        46000,
-        12688
+        21888,
+        5312
       ],
-      "id": "64ec0cfb-9076-4407-9897-8945cfd1f7d3"
+      "id": "33fd9beb-c036-45f0-b69c-2e253a42d2a9"
     },
     {
       "parameters": {
@@ -2352,10 +2352,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        45584,
-        12372
+        21472,
+        4992
       ],
-      "id": "94747b8b-395c-4e44-bac8-2161a6e529e8",
+      "id": "9cb4a3ac-f5a2-46cb-a887-57f71f32eb97",
       "name": "Document Export Sanitization4",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2376,10 +2376,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        44784,
-        12468
+        20672,
+        5088
       ],
-      "id": "c3e5c91d-f328-49f4-af1f-5361520bfa0f",
+      "id": "906a3711-6f5d-4dd0-a0a2-fa42a80e9c92",
       "name": "AI Agent1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2391,10 +2391,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        44920,
-        12692
+        20816,
+        5312
       ],
-      "id": "fafacc18-540d-490e-9950-12a0a7974f6a",
+      "id": "32ad8f64-31d2-4579-b856-01bec71e70d4",
       "name": "Structured Output Parser1"
     },
     {
@@ -2412,10 +2412,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        44792,
-        12692
+        20688,
+        5312
       ],
-      "id": "39981383-a89f-4195-afa8-59263ae5eefa",
+      "id": "88922df5-2b30-4dae-b2ad-8c5e3e9f3bab",
       "name": "OpenAI Chat Model1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2443,10 +2443,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        44144,
-        12592
+        20032,
+        5216
       ],
-      "id": "327f2ed7-be29-44c4-b40b-57f71223bbb3",
+      "id": "16f53f6e-7852-4d84-95da-6980b21c9095",
       "name": "Edit Fields2"
     },
     {
@@ -2466,10 +2466,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        44496,
-        12468
+        20384,
+        5088
       ],
-      "id": "252774c3-6b71-4fea-b3d0-974b09410b61",
+      "id": "1a2bb268-7997-43f2-99fb-809ca7f5bde4",
       "name": "Edit Fields3"
     },
     {
@@ -2517,10 +2517,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        45360,
-        12468
+        21248,
+        5088
       ],
-      "id": "be2958ad-5c2e-4c76-a5e3-42c917b0f5c8",
+      "id": "bf952d7d-4751-48b9-9098-5ebb6e3466c4",
       "name": "If1"
     },
     {
@@ -2543,10 +2543,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        47536,
-        12900
+        23424,
+        5520
       ],
-      "id": "194c9c82-b5d9-45d9-ba14-7253ae066bd7",
+      "id": "9fcde712-71e8-4ab6-839f-1773498c5045",
       "name": "QA Rewriter Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2581,10 +2581,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        47888,
-        13316
+        23776,
+        5936
       ],
-      "id": "88893401-f75d-435b-b0a8-1bc93917f7f5"
+      "id": "b3a3b605-fa15-462d-af50-725f198eb184"
     },
     {
       "parameters": {
@@ -2612,10 +2612,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        47536,
-        12708
+        23424,
+        5328
       ],
-      "id": "fc34e790-22c4-484b-ac1e-25f74a3ecf30",
+      "id": "6c3d140d-8e15-47af-a80f-cd20f68ee531",
       "name": "Document Export Sanitization6",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2636,10 +2636,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        46960,
-        12804
+        22848,
+        5424
       ],
-      "id": "0f527c57-a1f0-4bd8-9b87-f533e92c97ae",
+      "id": "0e955c7f-c47b-4601-87d2-6bf83c5c6712",
       "name": "AI Agent2",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2651,10 +2651,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        47096,
-        13028
+        22992,
+        5648
       ],
-      "id": "a64f2963-d43b-4d7c-83db-b16fbe8f6334",
+      "id": "c762621d-dab2-4403-b0a8-12f7d334a1f5",
       "name": "Structured Output Parser2"
     },
     {
@@ -2670,10 +2670,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        46968,
-        13028
+        22864,
+        5648
       ],
-      "id": "2471b2aa-116e-4c3d-879e-2fd316c6a46e",
+      "id": "e0d88157-bbad-4f5d-8cde-21831f805346",
       "name": "OpenAI Chat Model2",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2701,10 +2701,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        46512,
-        13220
+        22400,
+        5840
       ],
-      "id": "50a4564d-fb14-4d21-94f0-b4b7e0a5816b",
+      "id": "87bbb94e-ed41-4b38-8398-01477261d965",
       "name": "Edit Fields4"
     },
     {
@@ -2724,10 +2724,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        46736,
-        12804
+        22624,
+        5424
       ],
-      "id": "3a1316be-8d80-4ee6-839e-69f0fbb93e95",
+      "id": "d4736f0b-3562-4355-8e18-14695dd5f88c",
       "name": "Edit Fields5"
     },
     {
@@ -2766,10 +2766,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        47312,
-        12804
+        23200,
+        5424
       ],
-      "id": "b99ed85c-e6c3-4416-9453-badc161b9d3a",
+      "id": "ad3c3c48-d8ca-4f45-a89b-f861fdf176d5",
       "name": "If2"
     },
     {
@@ -2792,10 +2792,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        47536,
-        12292
+        23424,
+        4912
       ],
-      "id": "d497c32c-7cab-4e76-915c-dfa5060b9108",
+      "id": "85b00687-861c-4db7-84cb-22e5758360d9",
       "name": "QA Rewriter Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2830,10 +2830,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        47888,
-        12416
+        23776,
+        5040
       ],
-      "id": "f43e4f02-9462-4bdd-a5de-b28625e899c8"
+      "id": "874354c7-d1c6-471d-870f-753e9df2f917"
     },
     {
       "parameters": {
@@ -2861,10 +2861,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        47536,
-        11860
+        23424,
+        4480
       ],
-      "id": "ac7a6b2f-3334-4c00-a18e-c7d7d49d8e6b",
+      "id": "52a9b8ea-ab65-45a3-b0eb-17eb7559d18b",
       "name": "Document Export Sanitization7",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2885,10 +2885,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        46960,
-        11956
+        22848,
+        4576
       ],
-      "id": "a5b30a87-c0bb-442c-83b8-b5d33100ff0a",
+      "id": "ca754abe-73d1-41b7-b3f9-0d3ef213ca97",
       "name": "AI Agent3",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -2900,10 +2900,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        47096,
-        12180
+        22992,
+        4800
       ],
-      "id": "eb33d059-8c3f-4279-b69e-1e08ce0a63b3",
+      "id": "e3394baa-428d-49ef-bd0f-482ea7228420",
       "name": "Structured Output Parser3"
     },
     {
@@ -2919,10 +2919,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        46968,
-        12180
+        22864,
+        4800
       ],
-      "id": "71f92163-600b-47f0-85d3-edfac8fcde92",
+      "id": "901b271d-174f-41d3-b43e-5a83ef7d710c",
       "name": "OpenAI Chat Model3",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -2956,10 +2956,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        46512,
-        12080
+        22400,
+        4704
       ],
-      "id": "f68bb882-e906-4c8e-b8bd-319a4d636b1f",
+      "id": "396cf1d8-484f-4029-8db5-945f5d0db0a3",
       "name": "Edit Fields6"
     },
     {
@@ -2979,10 +2979,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        46736,
-        11956
+        22624,
+        4576
       ],
-      "id": "040097ff-3d8f-412b-a7b8-c1c6b22193d8",
+      "id": "a2875098-5277-4c4a-82e5-f366a4a1a248",
       "name": "Edit Fields7"
     },
     {
@@ -3021,10 +3021,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        47312,
-        11956
+        23200,
+        4576
       ],
-      "id": "3226c8b5-ed82-40dd-8e9c-039fb3d6be8f",
+      "id": "d305dffa-0b00-4a24-a3a3-6ebd20b20ecc",
       "name": "If3"
     },
     {
@@ -3043,10 +3043,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        38096,
-        12500
+        13984,
+        5120
       ],
-      "id": "978e8a36-8a2a-45c6-95a7-06a6f2743280",
+      "id": "6a26157d-8bfb-48f6-a205-daf2a309326c",
       "name": "Claude Draft (Claude Opus 3)1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -3068,10 +3068,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        38168,
-        12724
+        14064,
+        5344
       ],
-      "id": "1ca6f79f-6d0a-4662-b50a-abfb48e9594b",
+      "id": "79fddd58-9347-4fb1-bcb8-352e10773724",
       "name": "Anthropic Chat Model4",
       "credentials": {
         "anthropicApi": {
@@ -3097,10 +3097,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        45136,
-        11328
+        21024,
+        3952
       ],
-      "id": "a9e4b373-6f40-41ed-816b-6185d489167b",
+      "id": "9f2147ed-175c-460b-8ee5-29b64f1cd53a",
       "name": "Max Iterations"
     },
     {
@@ -3120,36 +3120,36 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        45136,
-        12468
+        21024,
+        5088
       ],
-      "id": "789e2956-f367-40bf-b1a7-c027f7f33d71",
+      "id": "54baba01-b0c8-4f10-9789-d45fab5f7140",
       "name": "Max Iterations1"
     },
     {
       "parameters": {
-        "jsCode": "throw new Error(\"Something goes wrong\");\n\n// Instruction Strategist v6 — Keywords + Structure + EEAT + Style + Brief Enforcement\nconst input = $('Webhook1').first().json.body;\n\nfunction parseKeywords(raw) {\n  if (!raw) return [];\n  // Accept both array format [\"kw1\", \"kw2\"] and string format \"kw1, kw2\"\n  if (Array.isArray(raw)) {\n    return raw.flatMap(item => item.split(',').map(k => k.trim())).filter(k => k.length > 0);\n  }\n  if (typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\n\n// Normalize: primary_keywords can arrive as array [\"kw\"] or string \"kw\"\nconst rawPrimary = input.primary_keywords;\nconst primary = (Array.isArray(rawPrimary) \n  ? rawPrimary.join(', ') \n  : (rawPrimary || '')\n).trim();\nconst secondaryList = parseKeywords(input.secondary_keywords);       \nconst semanticList = parseKeywords(input.semantic_theme);\nlet wordCount = parseInt(input.word_count) || 1500; // will be overridden by brief below\nconst creativeBrief = (input.creative_brief || '').trim();\nconst clientName = (input.client_name || 'the client').trim();\n\n// SMART WORD COUNT — Brief takes priority over form value\n// Now that creativeBrief is defined, detect the real word count target\nif (creativeBrief) {\n  const globalWcPatterns = [\n    /target\\s+word\\s+count[:\\s~]*([\\d,]+)/i,\n    /word\\s+count[:\\s~]*([\\d,]+)/i,\n    /reading\\s+time[^\\n]*?([\\d,]+)\\s*words/i,\n    /approximately\\s+([\\d,]+)\\s*words/i,\n    /~([\\d,]+)\\s*words?(?:\\s+total|\\s+for\\s+the\\s+(?:article|blog|post))?/i,\n    /([\\d,]+)[\\s-]*word\\s+(?:article|blog|post|target)/i,\n  ];\n  let briefGlobalWc = 0;\n  for (const pattern of globalWcPatterns) {\n    const match = creativeBrief.match(pattern);\n    if (match) {\n      const parsed = parseInt(match[1].replace(/,/g, ''));\n      if (parsed >= 200 && parsed <= 10000) { briefGlobalWc = parsed; break; }\n    }\n  }\n  if (briefGlobalWc > 0) {\n    wordCount = briefGlobalWc;\n  } else {\n    const sectionWcPattern = /(?:~|\\(|about\\s*)(\\d+)(?:\\s*-\\s*(\\d+))?\\s*words?/gi;\n    let sectionTotal = 0, sectionCount = 0, sectionMatch;\n    while ((sectionMatch = sectionWcPattern.exec(creativeBrief)) !== null) {\n      const low = parseInt(sectionMatch[1]);\n      const high = sectionMatch[2] ? parseInt(sectionMatch[2]) : low;\n      const avg = Math.round((low + high) / 2);\n      if (avg >= 50 && avg <= 500) { sectionTotal += avg; sectionCount++; }\n    }\n    if (sectionCount >= 2 && sectionTotal >= 300) { wordCount = sectionTotal; }\n  }\n}\n\n// Calculate target frequency (Backlinko: ~8 per 3200 words, scaled)\nconst targetFreq = Math.max(3, Math.round((wordCount / 3200) * 8));\n\n// Build secondary block\nconst allSecondary = [...secondaryList, ...semanticList]\n  .filter((v, i, a) => a.indexOf(v) === i);\n\nconst secondaryBlock = allSecondary\n  .map((kw, i) => '   ' + (i+1) + '. \"' + kw + '\" — use at least once, naturally woven into a sentence')\n  .join('\\n');\n\n// ========== NEW: Parse Creative Brief for structural elements ==========\n\n// Extract FAQ questions from brief — robust multi-strategy parsing\nlet briefFAQs = [];\n\n// Strategy 1: Find the FAQ section header and grab everything after it\nconst faqHeaderPatterns = [\n  /FAQ\\s*Section[^\\n]*/i,\n  /FAQ[s]?\\s*[:(]/i,\n  /Frequently\\s+Asked\\s+Questions/i\n];\n\nlet faqSectionStart = -1;\nfor (const pattern of faqHeaderPatterns) {\n  const match = creativeBrief.match(pattern);\n  if (match) {\n    faqSectionStart = match.index + match[0].length;\n    break;\n  }\n}\n\nif (faqSectionStart > -1) {\n  // Grab all lines after the FAQ header\n  const afterFaq = creativeBrief.substring(faqSectionStart);\n  const lines = afterFaq.split('\\n')\n    .map(line => line.trim())\n    .filter(line => line.length > 0);\n  \n  // Extract lines that look like questions (end with ? or start with Q:/number)\n  const questions = [];\n  for (const line of lines) {\n    // Stop if we hit another major section header\n    if (/^(H[2-4]|##|Meta|Title|Tone|Brand|Audience|Internal|CTA|Conclusion|Key\\s*Takeaway)/i.test(line)) break;\n    \n    const cleaned = line\n      .replace(/^[-*•\\d]+[.)\\s]+/, '')  // Remove list markers\n      .replace(/^Q[:\\s]+/i, '')           // Remove Q: prefix\n      .trim();\n    \n    if (cleaned.endsWith('?') && cleaned.length > 10) {\n      questions.push(cleaned);\n    }\n  }\n  \n  if (questions.length > 0) briefFAQs = questions;\n}\n\n// Strategy 2: Fallback — find ALL question-mark lines in the brief\nif (briefFAQs.length === 0) {\n  const allQuestions = creativeBrief.split('\\n')\n    .map(line => line.trim())\n    .filter(line => line.endsWith('?') && line.length > 15)\n    .map(line => line.replace(/^[-*•\\d]+[.)\\s]+/, '').replace(/^Q[:\\s]+/i, '').trim());\n  \n  if (allQuestions.length >= 2) {\n    briefFAQs = allQuestions;\n  }\n}\n\n// Extract H2/heading structure from brief\nlet briefHeadings = [];\nconst headingPatterns = [\n  /H2[s]?[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Headings?[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Outline[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Structure[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Sections?[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i\n];\n\nfor (const pattern of headingPatterns) {\n  const match = creativeBrief.match(pattern);\n  if (match) {\n    const headingBlock = match[1];\n    const headings = headingBlock.split('\\n')\n      .map(line => line.trim())\n      .filter(line => line.length > 3)\n      .map(line => line.replace(/^[-*•\\d]+[.)\\s]+/, '').replace(/^H[23]:\\s*/i, '').trim())\n      .filter(line => line.length > 3);\n    if (headings.length > 0) briefHeadings = headings;\n    break;\n  }\n}\n\n\n// Extract section-level word counts from brief (e.g., \"~100 words\" or \"(100 words)\")\nlet sectionWordCounts = [];\nconst sectionWcPattern = /(?:H2|##)[^\\n]*?([^\\n]+)[^\\n]*?(?:~|\\(|about\\s*)(\\d+)\\s*words/gi;\nlet swcMatch;\nwhile ((swcMatch = sectionWcPattern.exec(creativeBrief)) !== null) {\n    sectionWordCounts.push({ heading: swcMatch[1].trim(), wordCount: parseInt(swcMatch[2]) });\n}\n\n// Calculate total from section targets if available\nlet totalSectionWords = sectionWordCounts.reduce((sum, s) => sum + s.wordCount, 0);\n\n// ========== Build injection strings ==========\n\nconst keywordInjection = `\n### KEYWORD PLACEMENT RULES\n\n**PRIMARY KEYWORD:** \"${primary}\"\n\nWHERE TO PLACE IT (in order of importance):\n1. H1 TITLE — Must contain the primary keyword as-is (exact wording)\n2. FIRST 100 WORDS — Use it naturally within the opening paragraph\n3. ONE H2 HEADING — Include it (or a very close variation) in one H2\n4. FINAL PARAGRAPH — Reference it in the conclusion\n5. BODY TEXT — Use it approximately ${targetFreq} times total across the article \n\nHOW TO USE IT NATURALLY:\n- First use: exact match in a natural sentence\n- After first use: you may use natural variations\n- NEVER bold, italicize, or visually emphasize the keyword in body text\n- NEVER force it into a sentence where it sounds awkward\n\nDO vs DON'T:\nYES: \"When considering ${primary}, the most important factor is...\"\nYES: Use the keyword as part of a larger thought, not as a label\nNO: \"**${primary}** is important because...\" (bolded, sounds like a label)       \nNO: Starting 3+ sentences with the keyword phrase\n\n**SECONDARY & SEMANTIC KEYWORDS (use each at least once):**\n${secondaryBlock}\n\nFor question-form keywords: use them as a subheading or embed naturally like \"Many people ask, [keyword]?\"\n\n**H2 HEADING STRATEGY (Surfer SEO best practice):**\n- Each H2 should address a different subtopic or keyword family\n- Use the primary keyword in max ONE H2\n- Use secondary/semantic keywords or natural variations in other H2s\n- H2s should read like useful section titles, not keyword dumps\n`;\n\n// ========== SECONDARY KEYWORD CHECKLIST (new) ==========\nlet secondaryChecklist = '';\nif (allSecondary.length > 0) {\n  secondaryChecklist = `\n### SECONDARY & SEMANTIC KEYWORD CHECKLIST (MANDATORY)\n\nYou MUST include EVERY keyword listed below at least once in the article body. This is non-negotiable.\nBefore submitting, verify each one is present:\n\n${allSecondary.map((kw, i) => '[ ] \"' + kw + '\" — MUST appear at least once').join('\\n')}\n\nFAILURE TO INCLUDE ANY OF THESE KEYWORDS IS A CRITICAL ERROR that will result in a failed quality score.\nDo NOT rely only on the primary keyword. The secondary and semantic keywords are equally mandatory.\n`;\n}\n\n// ========== BRIEF AUTHORITY PREAMBLE (new) ==========\nconst briefAuthorityPreamble = `\n### HIERARCHY OF AUTHORITY (READ FIRST)\n\nThe Creative Brief is the HIGHEST AUTHORITY for this content. When any optimization rule, SEO suggestion, or style guideline CONFLICTS with specific instructions in the Creative Brief, the Creative Brief ALWAYS wins.\n\nSpecifically:\n1. If the brief specifies H2 headings or an outline, you MUST use those exact headings. Do NOT invent your own outline.\n2. If the brief specifies FAQs, you MUST use those exact FAQ questions verbatim. Do NOT substitute your own FAQs.\n3. If the brief specifies paragraph lengths, section sizes, or specific word counts for sections, those override the global word count cap for that section.\n4. If the brief requests specific elements (tables, comparison charts, numbered lists, case studies), you MUST include them.\n5. If the brief specifies tone, angle, or approach, that overrides the default \"friend giving advice\" tone.\n\nThe global word count target applies to the MAIN BODY of the article. FAQs are ADDITIONAL to the main body word count.\\n\\nWORD COUNT IS A HARD CONSTRAINT. The target word count has been automatically calculated from the Creative Brief (either from its explicit total, or by summing its per-section targets). You MUST write to this target ±10%. Do NOT write 200 words less OR 200 words more than the target. Too short is as wrong as too long. The brief's word count always overrides any other guidance.\n\nDO NOT let SEO optimization, EEAT enhancement, NLP optimization, or any other downstream improvement override the brief's explicit instructions.\n`;\n\n// ========== FAQ INJECTION (new) ==========\nlet faqInjection = '';\nif (briefFAQs.length > 0) {\n  faqInjection = `\n### FAQ SECTION (MANDATORY — FROM CREATIVE BRIEF)\n\nThe Creative Brief provided the following FAQ questions. You MUST include ALL of them verbatim in an FAQ section at the end of the article.\n\n**Use these EXACT questions (do not rephrase, reorder, or substitute):**\n${briefFAQs.map((q, i) => (i+1) + '. ' + q).join('\\n')}\n\nRules:\n- Use the exact question text from the brief as H3 headings\n- Write concise, helpful answers (2-4 sentences each)\n- The FAQ section does NOT count toward the main body word count\n- Do NOT add extra FAQs beyond what the brief specifies\n- Do NOT remove or replace any of these FAQs\n- Each FAQ answer should be 2-4 sentences, concise and helpful\n- The FAQ section MUST appear at the END of the article, after the last H2 section\n`;\n} else {\n  faqInjection = `\n### FAQ SECTION (CHECK THE BRIEF)\n\nIMPORTANT: Re-read the Creative Brief above carefully. If the brief contains ANY lines that end with a question mark (?), those are FAQ questions and you MUST include them verbatim as an FAQ section at the end of the article.\n\nLook for patterns like:\n- \"FAQ Section\" followed by questions\n- Lines ending with \"?\" that appear grouped together\n- Any mention of \"FAQs\" or \"Frequently Asked Questions\"\n\nIf the brief truly has NO FAQ questions at all, then generate 3-5 relevant FAQs based on the content.\n\nRules:\n- Use each FAQ question as an H3 heading\n- Write concise answers (2-4 sentences each)\n- The FAQ section does NOT count toward the main body word count\n`;\n}\n\n// ========== BRIEF ENFORCER INJECTION (new) ==========\nlet briefEnforcerInjection = '';\nif (creativeBrief) {\n  briefEnforcerInjection = `\n### CREATIVE BRIEF STRUCTURE ENFORCEMENT (MANDATORY)\n\nYou MUST follow the structural outline and instructions provided in the Creative Brief below. Do not invent your own structure if an explicit outline is provided.\n\n**Creative Brief Instructions:**\n\\\"\\\"\\\"\n${creativeBrief}\n\\\"\\\"\\\"\n\n**Strict Adherence Rules:**\n- If the brief lists specific H2s or subheadings, you MUST use those exact subheadings (you may adjust wording slightly for SEO, but the topic of each section must match).\n- If the brief specifies FAQs, you MUST use those exact FAQ questions verbatim. Do NOT substitute your own FAQs.\n- If the brief specifies paragraph lengths, section sizes, or specific word counts for sections, those override the global word count cap for that section.\n- If the brief requests specific elements (tables, comparison charts, numbered lists, case studies), you MUST include them.\n- If the brief specifies tone, angle, or approach, that overrides the default \"friend giving advice\" tone.\n- Maintain a logical hierarchy (H2 -> H3) without deviating from the brief's plan.\n- When optimizing or rewriting, you may improve WITHIN the brief's structure but you may NOT replace the structure itself.\n\n**CRITICAL — STRICT OUTLINE ADHERENCE:**\n- You MUST follow the exact sequence of H2 sections provided in the brief. Do NOT invent or insert new H2 content sections that are not in the brief's outline.\n- If the brief lists 6 H2 topics, your article must cover exactly those 6 H2 topics. No more, no less.\n- The article structure and sections must perfectly mirror the provided brief.\n\n**WORD COUNT PER SECTION:**\n- If the brief specifies per-section word counts (e.g., \"~100 words\" per H2), those are your section budgets. Aim to hit each within ±25%.\n- Always prioritize hitting the TOTAL word count target. If you need to write slightly more in a section to hit the total, do it.\n- Do NOT treat per-section estimates as hard ceilings — they are pacing guides. A complete, useful section is always preferred over an artificially short one.\n`;\n} else {\n  briefEnforcerInjection = `\n### BRIEF STRUCTURE ENFORCEMENT\n\nNo explicit creative brief structure provided. Please use a logical H2/H3 structure appropriate for the topic.\n`;\n}\n\nconst eeatInjection = `\n### EEAT FACTUAL ACCURACY & ZERO HALLUCINATION POLICY\n\nYou are writing a professional, publish-ready article. You MUST adhere to the following factual constraints:\n\n1. **NO FAKE EXPERTS:** NEVER fabricate names of people, experts, doctors, or clients (e.g. no \"Gregory V.\" or similar invented personas).\n2. **NO FAKE DATA:** NEVER invent statistics, citations, research studies, or case studies.\n3. **NO PLACEHOLDERS:** If a point logically requires a specific statistic, testimonial, or piece of data that is NOT provided in the creative brief, you MUST write around it naturally. NEVER use placeholders like [INSERT CLIENT STATISTIC] or [INSERT TESTIMONIAL]. The output must be 100% ready to publish and send to the client without them having to fill in the blanks.\n4. **REPRESENT THE CLIENT:** Only use \"${clientName}\" when representing the company. Do not substitute vague phrases like \"this company\" or \"the brand\".\n`;\n\nconst styleInjection = `\n### VOICE & STYLE ENFORCEMENT (CONTRACTOR VOICE)\n\nYou must write like a grounded, knowledgeable consultant giving direct advice from the field. \n\n**Format Rules:**\n- **Paragraphs MUST be short:** Maximum 2-3 sentences per paragraph. Use punchy, highly readable delivery. No dense UI blocks.\n\n**Tone Rules:**\n- Use natural speech: \"I think,\" \"Here's what works,\" \"Honestly,\" \"Look\"\n- Add parenthetical thoughts (we all do this) and natural rhetorical questions\n- Disagree with common advice when you have better points; admit limitations\n\n**BANNED PHRASES (NEVER USE THESE):**\n- \"Let's dive in\" / \"Let's explore\" / \"Let's delve\"\n- \"In today's digital landscape\" / \"In the modern world\"\n- \"The bottom line\" / \"In conclusion\"\n- \"Furthermore\" / \"Additionally\" / \"Moreover\"\n- \"Streamline\" / \"Leverage\" / \"Optimize\"\n- \"You're Not Alone\" / \"It's important to note\"\n`;\n\nreturn [{ json: {\n  system_prompt_injection: keywordInjection,\n  structure_prompt_injection: briefEnforcerInjection,\n  eeat_prompt_injection: eeatInjection,\n  style_prompt_injection: styleInjection,\n  brief_authority_preamble: briefAuthorityPreamble,\n  faq_injection: faqInjection,\n  secondary_keyword_checklist: secondaryChecklist,\n  brief_enforcer_injection: briefEnforcerInjection,\n  keyword_strategy: {\n    system_prompt_injection: keywordInjection\n  },\n  primary_keyword: primary,\n  secondary_keywords: allSecondary,\n  target_frequency: targetFreq,\n  detected_brief_faqs: briefFAQs,\n  detected_brief_headings: briefHeadings\n}}];\n"
+        "jsCode": "// Instruction Strategist v6 — Keywords + Structure + EEAT + Style + Brief Enforcement\nconst input = $('Webhook1').first().json.body;\n\nfunction parseKeywords(raw) {\n  if (!raw) return [];\n  // Accept both array format [\"kw1\", \"kw2\"] and string format \"kw1, kw2\"\n  if (Array.isArray(raw)) {\n    return raw.flatMap(item => item.split(',').map(k => k.trim())).filter(k => k.length > 0);\n  }\n  if (typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\n\n// Normalize: primary_keywords can arrive as array [\"kw\"] or string \"kw\"\nconst rawPrimary = input.primary_keywords;\nconst primary = (Array.isArray(rawPrimary) \n  ? rawPrimary.join(', ') \n  : (rawPrimary || '')\n).trim();\nconst secondaryList = parseKeywords(input.secondary_keywords);       \nconst semanticList = parseKeywords(input.semantic_theme);\nlet wordCount = parseInt(input.word_count) || 1500; // will be overridden by brief below\nconst creativeBrief = (input.creative_brief || '').trim();\nconst clientName = (input.client_name || 'the client').trim();\n\n// SMART WORD COUNT — Brief takes priority over form value\n// Now that creativeBrief is defined, detect the real word count target\nif (creativeBrief) {\n  const globalWcPatterns = [\n    /target\\s+word\\s+count[:\\s~]*([\\d,]+)/i,\n    /word\\s+count[:\\s~]*([\\d,]+)/i,\n    /reading\\s+time[^\\n]*?([\\d,]+)\\s*words/i,\n    /approximately\\s+([\\d,]+)\\s*words/i,\n    /~([\\d,]+)\\s*words?(?:\\s+total|\\s+for\\s+the\\s+(?:article|blog|post))?/i,\n    /([\\d,]+)[\\s-]*word\\s+(?:article|blog|post|target)/i,\n  ];\n  let briefGlobalWc = 0;\n  for (const pattern of globalWcPatterns) {\n    const match = creativeBrief.match(pattern);\n    if (match) {\n      const parsed = parseInt(match[1].replace(/,/g, ''));\n      if (parsed >= 200 && parsed <= 10000) { briefGlobalWc = parsed; break; }\n    }\n  }\n  if (briefGlobalWc > 0) {\n    wordCount = briefGlobalWc;\n  } else {\n    const sectionWcPattern = /(?:~|\\(|about\\s*)(\\d+)(?:\\s*-\\s*(\\d+))?\\s*words?/gi;\n    let sectionTotal = 0, sectionCount = 0, sectionMatch;\n    while ((sectionMatch = sectionWcPattern.exec(creativeBrief)) !== null) {\n      const low = parseInt(sectionMatch[1]);\n      const high = sectionMatch[2] ? parseInt(sectionMatch[2]) : low;\n      const avg = Math.round((low + high) / 2);\n      if (avg >= 50 && avg <= 500) { sectionTotal += avg; sectionCount++; }\n    }\n    if (sectionCount >= 2 && sectionTotal >= 300) { wordCount = sectionTotal; }\n  }\n}\n\n// Calculate target frequency (Backlinko: ~8 per 3200 words, scaled)\nconst targetFreq = Math.max(3, Math.round((wordCount / 3200) * 8));\n\n// Build secondary block\nconst allSecondary = [...secondaryList, ...semanticList]\n  .filter((v, i, a) => a.indexOf(v) === i);\n\nconst secondaryBlock = allSecondary\n  .map((kw, i) => '   ' + (i+1) + '. \"' + kw + '\" — use at least once, naturally woven into a sentence')\n  .join('\\n');\n\n// ========== NEW: Parse Creative Brief for structural elements ==========\n\n// Extract FAQ questions from brief — robust multi-strategy parsing\nlet briefFAQs = [];\n\n// Strategy 1: Find the FAQ section header and grab everything after it\nconst faqHeaderPatterns = [\n  /FAQ\\s*Section[^\\n]*/i,\n  /FAQ[s]?\\s*[:(]/i,\n  /Frequently\\s+Asked\\s+Questions/i\n];\n\nlet faqSectionStart = -1;\nfor (const pattern of faqHeaderPatterns) {\n  const match = creativeBrief.match(pattern);\n  if (match) {\n    faqSectionStart = match.index + match[0].length;\n    break;\n  }\n}\n\nif (faqSectionStart > -1) {\n  // Grab all lines after the FAQ header\n  const afterFaq = creativeBrief.substring(faqSectionStart);\n  const lines = afterFaq.split('\\n')\n    .map(line => line.trim())\n    .filter(line => line.length > 0);\n  \n  // Extract lines that look like questions (end with ? or start with Q:/number)\n  const questions = [];\n  for (const line of lines) {\n    // Stop if we hit another major section header\n    if (/^(H[2-4]|##|Meta|Title|Tone|Brand|Audience|Internal|CTA|Conclusion|Key\\s*Takeaway)/i.test(line)) break;\n    \n    const cleaned = line\n      .replace(/^[-*•\\d]+[.)\\s]+/, '')  // Remove list markers\n      .replace(/^Q[:\\s]+/i, '')           // Remove Q: prefix\n      .trim();\n    \n    if (cleaned.endsWith('?') && cleaned.length > 10) {\n      questions.push(cleaned);\n    }\n  }\n  \n  if (questions.length > 0) briefFAQs = questions;\n}\n\n// Strategy 2: Fallback — find ALL question-mark lines in the brief\nif (briefFAQs.length === 0) {\n  const allQuestions = creativeBrief.split('\\n')\n    .map(line => line.trim())\n    .filter(line => line.endsWith('?') && line.length > 15)\n    .map(line => line.replace(/^[-*•\\d]+[.)\\s]+/, '').replace(/^Q[:\\s]+/i, '').trim());\n  \n  if (allQuestions.length >= 2) {\n    briefFAQs = allQuestions;\n  }\n}\n\n// Extract H2/heading structure from brief\nlet briefHeadings = [];\nconst headingPatterns = [\n  /H2[s]?[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Headings?[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Outline[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Structure[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i,\n  /Sections?[:\\s]*\\n([\\s\\S]*?)(?=\\n\\n|$)/i\n];\n\nfor (const pattern of headingPatterns) {\n  const match = creativeBrief.match(pattern);\n  if (match) {\n    const headingBlock = match[1];\n    const headings = headingBlock.split('\\n')\n      .map(line => line.trim())\n      .filter(line => line.length > 3)\n      .map(line => line.replace(/^[-*•\\d]+[.)\\s]+/, '').replace(/^H[23]:\\s*/i, '').trim())\n      .filter(line => line.length > 3);\n    if (headings.length > 0) briefHeadings = headings;\n    break;\n  }\n}\n\n\n// Extract section-level word counts from brief (e.g., \"~100 words\" or \"(100 words)\")\nlet sectionWordCounts = [];\nconst sectionWcPattern = /(?:H2|##)[^\\n]*?([^\\n]+)[^\\n]*?(?:~|\\(|about\\s*)(\\d+)\\s*words/gi;\nlet swcMatch;\nwhile ((swcMatch = sectionWcPattern.exec(creativeBrief)) !== null) {\n    sectionWordCounts.push({ heading: swcMatch[1].trim(), wordCount: parseInt(swcMatch[2]) });\n}\n\n// Calculate total from section targets if available\nlet totalSectionWords = sectionWordCounts.reduce((sum, s) => sum + s.wordCount, 0);\n\n// ========== Build injection strings ==========\n\nconst keywordInjection = `\n### KEYWORD PLACEMENT RULES\n\n**PRIMARY KEYWORD:** \"${primary}\"\n\nWHERE TO PLACE IT (in order of importance):\n1. H1 TITLE — Must contain the primary keyword as-is (exact wording)\n2. FIRST 100 WORDS — Use it naturally within the opening paragraph\n3. ONE H2 HEADING — Include it (or a very close variation) in one H2\n4. FINAL PARAGRAPH — Reference it in the conclusion\n5. BODY TEXT — Use it approximately ${targetFreq} times total across the article \n\nHOW TO USE IT NATURALLY:\n- First use: exact match in a natural sentence\n- After first use: you may use natural variations\n- NEVER bold, italicize, or visually emphasize the keyword in body text\n- NEVER force it into a sentence where it sounds awkward\n\nDO vs DON'T:\nYES: \"When considering ${primary}, the most important factor is...\"\nYES: Use the keyword as part of a larger thought, not as a label\nNO: \"**${primary}** is important because...\" (bolded, sounds like a label)       \nNO: Starting 3+ sentences with the keyword phrase\n\n**SECONDARY & SEMANTIC KEYWORDS (use each at least once):**\n${secondaryBlock}\n\nFor question-form keywords: use them as a subheading or embed naturally like \"Many people ask, [keyword]?\"\n\n**H2 HEADING STRATEGY (Surfer SEO best practice):**\n- Each H2 should address a different subtopic or keyword family\n- Use the primary keyword in max ONE H2\n- Use secondary/semantic keywords or natural variations in other H2s\n- H2s should read like useful section titles, not keyword dumps\n`;\n\n// ========== SECONDARY KEYWORD CHECKLIST (new) ==========\nlet secondaryChecklist = '';\nif (allSecondary.length > 0) {\n  secondaryChecklist = `\n### SECONDARY & SEMANTIC KEYWORD CHECKLIST (MANDATORY)\n\nYou MUST include EVERY keyword listed below at least once in the article body. This is non-negotiable.\nBefore submitting, verify each one is present:\n\n${allSecondary.map((kw, i) => '[ ] \"' + kw + '\" — MUST appear at least once').join('\\n')}\n\nFAILURE TO INCLUDE ANY OF THESE KEYWORDS IS A CRITICAL ERROR that will result in a failed quality score.\nDo NOT rely only on the primary keyword. The secondary and semantic keywords are equally mandatory.\n`;\n}\n\n// ========== BRIEF AUTHORITY PREAMBLE (new) ==========\nconst briefAuthorityPreamble = `\n### HIERARCHY OF AUTHORITY (READ FIRST)\n\nThe Creative Brief is the HIGHEST AUTHORITY for this content. When any optimization rule, SEO suggestion, or style guideline CONFLICTS with specific instructions in the Creative Brief, the Creative Brief ALWAYS wins.\n\nSpecifically:\n1. If the brief specifies H2 headings or an outline, you MUST use those exact headings. Do NOT invent your own outline.\n2. If the brief specifies FAQs, you MUST use those exact FAQ questions verbatim. Do NOT substitute your own FAQs.\n3. If the brief specifies paragraph lengths, section sizes, or specific word counts for sections, those override the global word count cap for that section.\n4. If the brief requests specific elements (tables, comparison charts, numbered lists, case studies), you MUST include them.\n5. If the brief specifies tone, angle, or approach, that overrides the default \"friend giving advice\" tone.\n\nThe global word count target applies to the MAIN BODY of the article. FAQs are ADDITIONAL to the main body word count.\\n\\nWORD COUNT IS A HARD CONSTRAINT. The target word count has been automatically calculated from the Creative Brief (either from its explicit total, or by summing its per-section targets). You MUST write to this target ±10%. Do NOT write 200 words less OR 200 words more than the target. Too short is as wrong as too long. The brief's word count always overrides any other guidance.\n\nDO NOT let SEO optimization, EEAT enhancement, NLP optimization, or any other downstream improvement override the brief's explicit instructions.\n`;\n\n// ========== FAQ INJECTION (new) ==========\nlet faqInjection = '';\nif (briefFAQs.length > 0) {\n  faqInjection = `\n### FAQ SECTION (MANDATORY — FROM CREATIVE BRIEF)\n\nThe Creative Brief provided the following FAQ questions. You MUST include ALL of them verbatim in an FAQ section at the end of the article.\n\n**Use these EXACT questions (do not rephrase, reorder, or substitute):**\n${briefFAQs.map((q, i) => (i+1) + '. ' + q).join('\\n')}\n\nRules:\n- Use the exact question text from the brief as H3 headings\n- Write concise, helpful answers (2-4 sentences each)\n- The FAQ section does NOT count toward the main body word count\n- Do NOT add extra FAQs beyond what the brief specifies\n- Do NOT remove or replace any of these FAQs\n- Each FAQ answer should be 2-4 sentences, concise and helpful\n- The FAQ section MUST appear at the END of the article, after the last H2 section\n`;\n} else {\n  faqInjection = `\n### FAQ SECTION (CHECK THE BRIEF)\n\nIMPORTANT: Re-read the Creative Brief above carefully. If the brief contains ANY lines that end with a question mark (?), those are FAQ questions and you MUST include them verbatim as an FAQ section at the end of the article.\n\nLook for patterns like:\n- \"FAQ Section\" followed by questions\n- Lines ending with \"?\" that appear grouped together\n- Any mention of \"FAQs\" or \"Frequently Asked Questions\"\n\nIf the brief truly has NO FAQ questions at all, then generate 3-5 relevant FAQs based on the content.\n\nRules:\n- Use each FAQ question as an H3 heading\n- Write concise answers (2-4 sentences each)\n- The FAQ section does NOT count toward the main body word count\n`;\n}\n\n// ========== BRIEF ENFORCER INJECTION (new) ==========\nlet briefEnforcerInjection = '';\nif (creativeBrief) {\n  briefEnforcerInjection = `\n### CREATIVE BRIEF STRUCTURE ENFORCEMENT (MANDATORY)\n\nYou MUST follow the structural outline and instructions provided in the Creative Brief below. Do not invent your own structure if an explicit outline is provided.\n\n**Creative Brief Instructions:**\n\\\"\\\"\\\"\n${creativeBrief}\n\\\"\\\"\\\"\n\n**Strict Adherence Rules:**\n- If the brief lists specific H2s or subheadings, you MUST use those exact subheadings (you may adjust wording slightly for SEO, but the topic of each section must match).\n- If the brief specifies FAQs, you MUST use those exact FAQ questions verbatim. Do NOT substitute your own FAQs.\n- If the brief specifies paragraph lengths, section sizes, or specific word counts for sections, those override the global word count cap for that section.\n- If the brief requests specific elements (tables, comparison charts, numbered lists, case studies), you MUST include them.\n- If the brief specifies tone, angle, or approach, that overrides the default \"friend giving advice\" tone.\n- Maintain a logical hierarchy (H2 -> H3) without deviating from the brief's plan.\n- When optimizing or rewriting, you may improve WITHIN the brief's structure but you may NOT replace the structure itself.\n\n**CRITICAL — STRICT OUTLINE ADHERENCE:**\n- You MUST follow the exact sequence of H2 sections provided in the brief. Do NOT invent or insert new H2 content sections that are not in the brief's outline.\n- If the brief lists 6 H2 topics, your article must cover exactly those 6 H2 topics. No more, no less.\n- The article structure and sections must perfectly mirror the provided brief.\n\n**WORD COUNT PER SECTION:**\n- If the brief specifies per-section word counts (e.g., \"~100 words\" per H2), those are your section budgets. Aim to hit each within ±25%.\n- Always prioritize hitting the TOTAL word count target. If you need to write slightly more in a section to hit the total, do it.\n- Do NOT treat per-section estimates as hard ceilings — they are pacing guides. A complete, useful section is always preferred over an artificially short one.\n`;\n} else {\n  briefEnforcerInjection = `\n### BRIEF STRUCTURE ENFORCEMENT\n\nNo explicit creative brief structure provided. Please use a logical H2/H3 structure appropriate for the topic.\n`;\n}\n\nconst eeatInjection = `\n### EEAT FACTUAL ACCURACY & ZERO HALLUCINATION POLICY\n\nYou are writing a professional, publish-ready article. You MUST adhere to the following factual constraints:\n\n1. **NO FAKE EXPERTS:** NEVER fabricate names of people, experts, doctors, or clients (e.g. no \"Gregory V.\" or similar invented personas).\n2. **NO FAKE DATA:** NEVER invent statistics, citations, research studies, or case studies.\n3. **NO PLACEHOLDERS:** If a point logically requires a specific statistic, testimonial, or piece of data that is NOT provided in the creative brief, you MUST write around it naturally. NEVER use placeholders like [INSERT CLIENT STATISTIC] or [INSERT TESTIMONIAL]. The output must be 100% ready to publish and send to the client without them having to fill in the blanks.\n4. **REPRESENT THE CLIENT:** Only use \"${clientName}\" when representing the company. Do not substitute vague phrases like \"this company\" or \"the brand\".\n`;\n\nconst styleInjection = `\n### VOICE & STYLE ENFORCEMENT (CONTRACTOR VOICE)\n\nYou must write like a grounded, knowledgeable consultant giving direct advice from the field. \n\n**Format Rules:**\n- **Paragraphs MUST be short:** Maximum 2-3 sentences per paragraph. Use punchy, highly readable delivery. No dense UI blocks.\n\n**Tone Rules:**\n- Use natural speech: \"I think,\" \"Here's what works,\" \"Honestly,\" \"Look\"\n- Add parenthetical thoughts (we all do this) and natural rhetorical questions\n- Disagree with common advice when you have better points; admit limitations\n\n**BANNED PHRASES (NEVER USE THESE):**\n- \"Let's dive in\" / \"Let's explore\" / \"Let's delve\"\n- \"In today's digital landscape\" / \"In the modern world\"\n- \"The bottom line\" / \"In conclusion\"\n- \"Furthermore\" / \"Additionally\" / \"Moreover\"\n- \"Streamline\" / \"Leverage\" / \"Optimize\"\n- \"You're Not Alone\" / \"It's important to note\"\n`;\n\nreturn [{ json: {\n  system_prompt_injection: keywordInjection,\n  structure_prompt_injection: briefEnforcerInjection,\n  eeat_prompt_injection: eeatInjection,\n  style_prompt_injection: styleInjection,\n  brief_authority_preamble: briefAuthorityPreamble,\n  faq_injection: faqInjection,\n  secondary_keyword_checklist: secondaryChecklist,\n  brief_enforcer_injection: briefEnforcerInjection,\n  keyword_strategy: {\n    system_prompt_injection: keywordInjection\n  },\n  primary_keyword: primary,\n  secondary_keywords: allSecondary,\n  target_frequency: targetFreq,\n  detected_brief_faqs: briefFAQs,\n  detected_brief_headings: briefHeadings\n}}];\n"
       },
-      "id": "9212f491-4c58-4038-8df8-834bc3432627",
+      "id": "ddceb9e2-0966-486b-a444-ed2dfaafad18",
       "name": "Keyword Strategist",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        36976,
-        12448
+        12768,
+        5072
       ]
     },
     {
       "parameters": {
         "jsCode": "// Keyword Validator v3 — Expert-weighted scoring\nconst content = $input.first().json.content || $input.first().json.text || '';\nconst input = $('Webhook1').first().json.body;\n\nconst primary = (input.primary_keywords || '').trim();\nfunction parseKeywords(raw) {\n  if (!raw || typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\nfunction escapeRegex(str) {\n  return str.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n}\n\nif (!primary) {\n  return [{ json: { score: 0, passed: false, issues: ['No primary keyword provided'] } }];\n}\n\nconst allSecondary = [...parseKeywords(input.secondary_keywords), ...parseKeywords(input.semantic_theme)]\n  .filter((v, i, a) => a.indexOf(v) === i);\n\nconst lower = content.toLowerCase();\nconst primaryLower = primary.toLowerCase();\nconst plainText = content.replace(/<[^>]*>/g, '').replace(/[#*_]/g, '');\nconst words = plainText.split(/\\s+/);\n\nlet score = 0;\nconst issues = [];\n\n// 1. H1 contains primary keyword (20 pts — highest SEO value per Backlinko/Google)\nconst h1Match = content.match(/<h1[^>]*>(.*?)<\\/h1>/i) || content.match(/^#\\s+(.+)$/m);\nconst h1Text = h1Match ? h1Match[1].toLowerCase() : '';\nif (!h1Match) {\n  issues.push('MISSING H1 TAG');\n} else if (h1Text.includes(primaryLower)) {\n  score += 20;\n} else {\n  issues.push('Primary keyword NOT in H1. Found: \"' + (h1Match[1] || '').substring(0, 60) + '\"');\n}\n\n// 2. Primary in first 100 words (15 pts — Backlinko: \"still makes a difference\")\nconst first100 = words.slice(0, 100).join(' ').toLowerCase();\nif (first100.includes(primaryLower)) {\n  score += 15;\n} else {\n  issues.push('Primary keyword NOT in first 100 words');\n}\n\n// 3. Primary (or close variation) in at least one H2 (15 pts)\nconst h2Matches = content.match(/<h2[^>]*>(.*?)<\\/h2>/gi) || content.match(/^##\\s+(.+)$/gm) || [];\nconst h2Texts = h2Matches.map(h => h.replace(/<[^>]*>/g, '').replace(/^##\\s+/, '').toLowerCase());\nconst primaryWords = primaryLower.split(/\\s+/);\nconst minMatchWords = Math.ceil(primaryWords.length * 0.6);\nconst primaryInH2 = h2Texts.some(h => {\n  if (h.includes(primaryLower)) return true;\n  const matchedWords = primaryWords.filter(w => h.includes(w));\n  return matchedWords.length >= minMatchWords;\n});\nif (primaryInH2) {\n  score += 15;\n} else {\n  issues.push('Primary keyword (or variation) NOT in any H2');\n}\n\n// 4. Primary in conclusion (10 pts)\nconst paragraphs = plainText.split(/\\n\\n+/).filter(p => p.trim().length > 30);\nconst lastPara = paragraphs.length > 0 ? paragraphs[paragraphs.length - 1].toLowerCase() : '';\nif (lastPara.includes(primaryLower)) {\n  score += 10;\n} else {\n  issues.push('Primary keyword NOT in conclusion');\n}\n\n// 5. Keyword frequency check (10 pts — Backlinko: ~8 per 3200 words)\nconst primaryRegex = new RegExp(escapeRegex(primaryLower), 'gi');\nconst primaryCount = (lower.match(primaryRegex) || []).length;\nconst wordCount = words.length;\nconst expectedFreq = Math.max(3, Math.round((wordCount / 3200) * 8));\nif (primaryCount >= expectedFreq - 1 && primaryCount <= expectedFreq * 2) {\n  score += 10;\n} else if (primaryCount >= 2) {\n  score += 5;\n  issues.push('Keyword frequency: ' + primaryCount + 'x (target: ~' + expectedFreq + 'x)');\n} else {\n  issues.push('Keyword used only ' + primaryCount + 'x (target: ~' + expectedFreq + 'x)');\n}\n\n// 6. All secondary/semantic keywords present (25 pts)\nconst secondaryResults = allSecondary.map(kw => ({\n  keyword: kw,\n  found: lower.includes(kw.toLowerCase())\n}));\nconst secondaryFound = secondaryResults.filter(s => s.found).length;\nconst secondaryTotal = allSecondary.length || 1;\nscore += Math.round((secondaryFound / secondaryTotal) * 25);\nconst missing = secondaryResults.filter(s => !s.found).map(s => s.keyword);\nif (missing.length > 0) {\n  issues.push('MISSING secondary/semantic: ' + missing.join(' | '));\n}\n\n// 7. H2 keyword distribution (5 pts bonus — Surfer SEO best practice)\nconst keywordsInH2 = allSecondary.filter(kw =>\n  h2Texts.some(h => h.includes(kw.toLowerCase()))\n);\nif (keywordsInH2.length >= 1) {\n  score += 5;\n}\n\n// 8. Keyword bolding penalty (informational)\nconst boldedKeyword = content.match(new RegExp('\\\\*\\\\*[^*]*' + escapeRegex(primaryLower) + '[^*]*\\\\*\\\\*', 'i'));\nif (boldedKeyword) {\n  issues.push('WARNING: Primary keyword is bolded in body text');\n}\n\nconst finalScore = Math.min(100, score);\nconst passed = finalScore >= 60 && h1Text.includes(primaryLower) && first100.includes(primaryLower);\n\nreturn [{ json: {\n  score: finalScore,\n  passed,\n  issues,\n  checks: {\n    primaryInH1: h1Text.includes(primaryLower),\n    primaryInFirst100: first100.includes(primaryLower),\n    primaryInH2: primaryInH2,\n    primaryInConclusion: lastPara.includes(primaryLower),\n    frequency: primaryCount + 'x (target: ~' + expectedFreq + 'x)',\n    secondaryCoverage: secondaryFound + '/' + allSecondary.length,\n    missingKeywords: missing,\n    secondaryInH2s: keywordsInH2\n  }\n}}];"
       },
-      "id": "f0382e70-abbc-4024-89f0-fdaed6977108",
+      "id": "2aee9d42-13cb-45f4-a007-9d0d85c4dce9",
       "name": "Keyword Validator",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        37424,
-        12448
+        13312,
+        5072
       ]
     },
     {
@@ -3160,10 +3160,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        46000,
-        11232
+        21888,
+        3856
       ],
-      "id": "48f9ccb6-31df-4320-8f7f-550253d789c9",
+      "id": "fe014732-b1f5-4bde-b70c-78ce10a36952",
       "name": "Create a document",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -3188,10 +3188,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        46288,
-        11232
+        22176,
+        3856
       ],
-      "id": "f015f09c-0e09-4d13-b1bd-7413c55f8b00",
+      "id": "cd2a52df-5305-4ed3-ace5-57eaaa797212",
       "name": "Update a document",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -3208,10 +3208,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        46000,
-        12372
+        21888,
+        4992
       ],
-      "id": "48cc574d-778a-4185-a12c-a6f3134fc103",
+      "id": "dbaeddab-f16d-425e-8741-5110ef8a869e",
       "name": "Create a document17",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -3236,10 +3236,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        46288,
-        12372
+        22176,
+        4992
       ],
-      "id": "41e5b371-348f-46d1-9900-916c143b0af7",
+      "id": "2d78ad9d-1701-4073-8fb8-355c5edff436",
       "name": "Update a document17",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -3253,10 +3253,10 @@
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
       "position": [
-        36528,
-        13540
+        12208,
+        6160
       ],
-      "id": "8c677983-8166-4e05-bba5-7102b44772f8",
+      "id": "177d0d08-f95a-41dd-b481-21cbacfc99d2",
       "name": "Error Trigger"
     },
     {
@@ -3271,10 +3271,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        36752,
-        13540
+        12432,
+        6160
       ],
-      "id": "3322140f-2f8a-484a-bfcf-1bb72df810a2",
+      "id": "15c2e183-771f-49bb-9ca4-51f455d1f773",
       "name": "Send Error to Dashboard"
     },
     {
@@ -3289,10 +3289,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        36752,
-        12448
+        12432,
+        5072
       ],
-      "id": "97dd8846-46d9-458d-a748-b8d1a16eecdb",
+      "id": "41ceed45-15c4-43ee-a39a-b7e2f8c2d0e6",
       "name": "Startup Update"
     }
   ],

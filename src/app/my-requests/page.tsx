@@ -22,6 +22,12 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 
 export default function MyRequests() {
@@ -60,6 +66,22 @@ export default function MyRequests() {
 
     const requests = queryData?.requests || [];
     const totalCount = queryData?.totalCount || 0;
+
+    // Sync selectedRequest with fresh background data
+    useEffect(() => {
+        if (selectedRequest && requests.length > 0) {
+            const updated = requests.find(r => r.id === selectedRequest.id);
+            if (updated) {
+                // Only update if something meaningful changed to avoid re-render loops
+                if (updated.status !== selectedRequest.status || 
+                    updated.updated_at !== selectedRequest.updated_at ||
+                    updated.error_message !== selectedRequest.error_message ||
+                    updated.webhook_response !== selectedRequest.webhook_response) {
+                    setSelectedRequest(updated);
+                }
+            }
+        }
+    }, [requests, selectedRequest]);
 
     // Improved loading logic: Only block everything if we have NO user session.
     // Otherwise, let the data query handle the skeletons.
@@ -117,25 +139,39 @@ export default function MyRequests() {
         setRevisionToast(null);
     };
 
-    const handleRetry = async () => {
-        if (!selectedRequest) return;
+    const handleRetry = async (requestToRetry?: ContentRequest) => {
+        const targetRequest = requestToRetry || selectedRequest;
+        if (!targetRequest) return;
+        
         setIsRetrying(true);
         setRetryToast(null);
         try {
+            // Immediate UI feedback within the local state for the modal
+            if (selectedRequest && selectedRequest.id === targetRequest.id) {
+                setSelectedRequest(prev => prev ? { ...prev, status: 'in_progress', error_message: null } : null);
+            }
+
             const res = await fetch(`/api/content-requests/retry`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requestId: selectedRequest.id }),
+                body: JSON.stringify({ requestId: targetRequest.id }),
             });
             const data = await res.json();
             if (!res.ok) {
+                // Rollback status if retry initiation failed
+                if (selectedRequest && selectedRequest.id === targetRequest.id) {
+                    setSelectedRequest(prev => prev ? { ...prev, status: 'cancelled' } : null);
+                }
                 setRetryToast({ type: 'error', message: data.error || 'Retry failed.' });
             } else {
-                setRetryToast({ type: 'success', message: 'Execution retried successfully. Status will update shortly.' });
+                setRetryToast({ type: 'success', message: 'Execution retried successfully.' });
                 queryClient.invalidateQueries({ queryKey: ['content_requests'] });
             }
         } catch (e) {
-            setRetryToast({ type: 'error', message: 'Network error. Please try again.' });
+            if (selectedRequest && selectedRequest.id === targetRequest.id) {
+                setSelectedRequest(prev => prev ? { ...prev, status: 'cancelled' } : null);
+            }
+            setRetryToast({ type: 'error', message: 'Network error.' });
         } finally {
             setIsRetrying(false);
         }
@@ -155,16 +191,22 @@ export default function MyRequests() {
             if (!res.ok) {
                 setRevisionToast({ type: 'error', message: data.error || 'Revision request failed.' });
             } else {
-                setRevisionToast({ type: 'success', message: 'Revision started! The workflow is running again.' });
+                setRevisionToast({ type: 'success', message: 'Revision started!' });
                 setIsRevisionModalOpen(false);
                 setRevisionNotes('');
                 queryClient.invalidateQueries({ queryKey: ['content_requests'] });
             }
         } catch (e) {
-            setRevisionToast({ type: 'error', message: 'Network error. Please try again.' });
+            setRevisionToast({ type: 'error', message: 'Network error.' });
         } finally {
             setIsSubmittingRevision(false);
         }
+    };
+
+    const handleOpenRevisionModal = (request: ContentRequest) => {
+        setSelectedRequest(request);
+        setRevisionToast(null);
+        setIsRevisionModalOpen(true);
     };
 
     const truncateText = (text: string, maxLength: number = 100) => {
@@ -353,10 +395,9 @@ export default function MyRequests() {
                                                 {userRole === 'admin' && <TableHead className="font-bold text-foreground py-4 px-4 min-w-[150px]">User</TableHead>}
                                                 <TableHead className="font-bold text-foreground py-4 px-4 min-w-[120px]">Client</TableHead>
                                                 <TableHead className="font-bold text-foreground py-4 px-4 min-w-[100px]">Type</TableHead>
-                                                <TableHead className="font-bold text-foreground py-4 px-4 min-w-[120px]">Status</TableHead>
+                                                <TableHead className="font-bold text-foreground py-4 px-4 min-w-[140px]">Status</TableHead>
                                                 <TableHead className="font-bold text-foreground py-4 px-4 min-w-[160px]">Submitted</TableHead>
-                                                <TableHead className="font-bold text-foreground py-4 px-4 text-center min-w-[120px]">View Docs</TableHead>
-                                                <TableHead className="font-bold text-foreground py-4 px-4 text-center min-w-[100px]">Actions</TableHead>
+                                                <TableHead className="font-bold text-foreground py-4 px-4 text-center min-w-[160px]">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -409,55 +450,97 @@ export default function MyRequests() {
                                                         </TableCell>
 
                                                         <TableCell className="py-5 px-4">
-                                                            <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-tight shadow-sm border ${getDisplayColor(request)}`}>
-                                                                {getDisplayStatus(request)}
-                                                            </span>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-tight shadow-sm border whitespace-nowrap ${getDisplayColor(request)}`}>
+                                                                    {['in_progress', 'pending'].includes(request.status.toLowerCase()) && (
+                                                                        <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                                                                    )}
+                                                                    {getDisplayStatus(request)}
+                                                                </span>
+                                                            </div>
                                                         </TableCell>
 
-                                                        <TableCell className="py-5 px-4">
+                                                        <TableCell className="py-5 px-4 whitespace-nowrap">
                                                             <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
                                                                 <Clock className="w-3 h-3" />
                                                                 {formatDate(request.created_at)}
                                                             </div>
                                                         </TableCell>
 
-                                                        <TableCell className="py-5 px-4 text-center">
-                                                            {googleDriveLink && (request.status === 'complete' || request.status === 'completed') ? (
-                                                                <Button
-                                                                    variant="default"
-                                                                    size="sm"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        window.open(googleDriveLink, '_blank');
-                                                                    }}
-                                                                    className="text-xs font-bold bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 transition-all hover:scale-105 shadow-md"
-                                                                >
-                                                                    <ExternalLink className="h-3 w-3 mr-1.5" />
-                                                                    View Docs
-                                                                </Button>
-                                                            ) : (
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    disabled
-                                                                    className="text-xs font-bold bg-muted/60 text-muted-foreground border-none cursor-not-allowed opacity-50 select-none"
-                                                                >
-                                                                    <Clock className="h-3 w-3 mr-1.5" />
-                                                                    {request.status.toUpperCase()}
-                                                                </Button>
-                                                            )}
-                                                        </TableCell>
+                                                        <TableCell className="py-5 px-4">
+                                                            <div className="flex items-center justify-center gap-1">
+                                                                <TooltipProvider>
+                                                                    {/* Details (Always) */}
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                onClick={() => openDetailView(request)}
+                                                                                className="h-9 w-9 border border-border/50 hover:bg-brand-blue-crayola/10 hover:text-brand-blue-crayola transition-all"
+                                                                            >
+                                                                                <Eye className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent><p className="font-bold">View Full Details</p></TooltipContent>
+                                                                    </Tooltip>
 
-                                                        <TableCell className="py-5 px-4 text-center">
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => openDetailView(request)}
-                                                                className="text-xs font-bold hover:bg-brand-blue-crayola/10 hover:text-brand-blue-crayola transition-all"
-                                                            >
-                                                                <Eye className="h-3 w-3 mr-1.5" />
-                                                                Details
-                                                            </Button>
+                                                                    {/* View Docs (If Complete) */}
+                                                                    {googleDriveLink && (request.status === 'complete' || request.status === 'completed') && (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger asChild>
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="icon"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        window.open(googleDriveLink, '_blank');
+                                                                                    }}
+                                                                                    className="h-9 w-9 bg-emerald-500/10 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                                                                                >
+                                                                                    <ExternalLink className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent><p className="font-bold">Open Google Drive</p></TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
+
+                                                                    {/* Retry (If Failed/Error) */}
+                                                                    {(getDisplayStatus(request) === 'error' || request.status === 'failed') && (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger asChild>
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="icon"
+                                                                                    onClick={() => handleRetry(request)}
+                                                                                    disabled={isRetrying}
+                                                                                    className="h-9 w-9 bg-red-500/10 border-red-500/20 text-red-600 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                                                                >
+                                                                                    {isRetrying ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                                                                                </Button>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent><p className="font-bold">Retry Execution</p></TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
+
+                                                                    {/* Revise (If Complete) */}
+                                                                    {(request.status === 'complete' || request.status === 'completed') && (
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger asChild>
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="icon"
+                                                                                    onClick={() => handleOpenRevisionModal(request)}
+                                                                                    className="h-9 w-9 bg-brand-blue-crayola/10 border-brand-blue-crayola/20 text-brand-blue-crayola hover:bg-brand-blue-crayola hover:text-white transition-all shadow-sm"
+                                                                                >
+                                                                                    <PenLine className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent><p className="font-bold">Request Revision</p></TooltipContent>
+                                                                        </Tooltip>
+                                                                    )}
+                                                                </TooltipProvider>
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 );
@@ -577,29 +660,27 @@ export default function MyRequests() {
                                                         <p className="mt-2 text-xs text-red-600 dark:text-red-500 font-medium">
                                                             This request encountered an error during workflow execution and has been halted.
                                                         </p>
-                                                        {/* Retry button — admin only */}
-                                                        {userRole === 'admin' && (
-                                                            <div className="mt-3 flex flex-col gap-2">
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="outline"
-                                                                    onClick={handleRetry}
-                                                                    disabled={isRetrying}
-                                                                    className="w-fit border-red-400 text-red-700 hover:bg-red-100 dark:hover:bg-red-900/30 font-bold"
-                                                                >
-                                                                    {isRetrying ? (
-                                                                        <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Retrying...</>
-                                                                    ) : (
-                                                                        <><RefreshCw className="w-3.5 h-3.5 mr-1.5" />Retry Failed Execution</>  
-                                                                    )}
-                                                                </Button>
-                                                                {retryToast && (
-                                                                    <p className={`text-xs font-medium ${retryToast.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                                                        {retryToast.message}
-                                                                    </p>
+                                                        {/* Retry button — available to owner and admins */}
+                                                        <div className="mt-4">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => handleRetry(selectedRequest)}
+                                                                disabled={isRetrying}
+                                                                className="w-full sm:w-fit border-red-400 text-red-700 hover:bg-red-500 hover:text-white dark:hover:bg-red-900/40 font-bold transition-all shadow-sm"
+                                                            >
+                                                                {isRetrying ? (
+                                                                    <><Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" />Retrying...</>
+                                                                ) : (
+                                                                    <><RefreshCw className="w-3.5 h-3.5 mr-2" />Retry Execution</>  
                                                                 )}
-                                                            </div>
-                                                        )}
+                                                            </Button>
+                                                            {retryToast && (
+                                                                <p className={`mt-2 text-xs font-bold ${retryToast.type === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                                    {retryToast.message}
+                                                                </p>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
