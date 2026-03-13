@@ -4,13 +4,13 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { executionId, workflowId, workflowName, errorMessage, nodeName, runId } = body;
+        const { executionId, workflowId, workflowName, errorMessage, nodeName, runId, requestId } = body;
 
-        console.log(`[n8n Error Webhook] Received:`, JSON.stringify({ executionId, nodeName, errorMessage, runId }));
+        console.log(`[n8n Error Webhook] Received:`, JSON.stringify({ executionId, nodeName, errorMessage, runId, requestId }));
 
-        if (!runId && !executionId) {
+        if (!runId && !executionId && !requestId) {
             return NextResponse.json(
-                { error: 'Missing runId or executionId' },
+                { error: 'Missing runId, executionId or requestId' },
                 { status: 400 }
             );
         }
@@ -24,6 +24,26 @@ export async function POST(request: Request) {
         const formattedError = nodeName
             ? `Failed at stage '${nodeName}': ${errorMessage || 'Unknown error'}`
             : (errorMessage || 'Unknown workflow error');
+
+        // ─── Strategy 0: direct request_id from payload (BEST) ────────────
+        if (requestId) {
+            await supabase.from('content_requests').update({
+                status: 'cancelled',
+                error_message: formattedError,
+                updated_at: new Date().toISOString()
+            }).eq('id', requestId);
+
+            // If we also have a runId, update that run too
+            if (runId) {
+                await supabase.from('content_runs').update({
+                    status: 'failed',
+                    completed_at: new Date().toISOString()
+                }).eq('id', runId);
+            }
+
+            console.log(`[n8n Error Webhook] Marked request ${requestId} as error via direct requestId`);
+            return NextResponse.json({ success: true, requestId, method: 'request_id' });
+        }
 
         // ─── Strategy 1: direct run_id from payload ───────────────────────
         if (runId) {

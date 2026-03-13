@@ -91,14 +91,23 @@ export async function POST(
         body: JSON.stringify({ loadWorkflowFromDatabase: true }),
     });
 
-    const n8nData = await n8nRes.text();
-    console.log(`[Retry] n8n response (${n8nRes.status}):`, n8nData.substring(0, 200));
+    const n8nData: any = await n8nRes.json().catch(() => ({}));
+    console.log(`[Retry] n8n response (${n8nRes.status}):`, JSON.stringify(n8nData).substring(0, 200));
 
     if (!n8nRes.ok) {
         return NextResponse.json(
             { error: `n8n retry failed (${n8nRes.status})`, detail: n8nData },
             { status: 502 }
         );
+    }
+
+    const newExecutionId = n8nData.id || n8nData.executionId; // n8n v1 usually returns 'id'
+    if (newExecutionId) {
+        console.log(`[Retry] Updating run ${run.id} with NEW executionId: ${newExecutionId}`);
+        await supabase
+            .from('content_runs')
+            .update({ n8n_execution_id: newExecutionId })
+            .eq('id', run.id);
     }
 
     // ── Reset request + run status ────────────────────────────────────────
