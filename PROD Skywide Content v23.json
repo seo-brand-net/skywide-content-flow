@@ -3265,7 +3265,7 @@
         "url": "https://skywide-content-flow.vercel.app/api/webhooks/n8n-error",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"executionId\": \"{{$execution.id}}\",\n  \"errorMessage\": \"{{$json.execution.error.message}}\",\n  \"nodeName\": \"{{$json.execution.lastNodeExecuted}}\",\n  \"workflowId\": \"{{$workflow.id}}\",\n  \"workflowName\": \"{{$workflow.name}}\",\n  \"runId\": \"{{$('Webhook1').first().json.body.runId}}\",\n  \"requestId\": \"{{$('Webhook1').first().json.body.request_id}}\"\n}",
+        "jsonBody": "={\n  \"executionId\": \"{{$json.execution.id}}\",\n  \"errorMessage\": \"{{$json.execution.error.message}}\",\n  \"nodeName\": \"{{$json.execution.lastNodeExecuted}}\",\n  \"workflowId\": \"{{$workflow.id}}\",\n  \"workflowName\": \"{{$workflow.name}}\"\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequest",

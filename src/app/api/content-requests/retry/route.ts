@@ -88,7 +88,7 @@ export async function POST(
             'Content-Type': 'application/json',
             'X-N8N-API-KEY': process.env.N8N_API_KEY!,
         },
-        body: JSON.stringify({ loadWorkflowFromDatabase: true }),
+        body: JSON.stringify({ loadWorkflow: true }),
     });
 
     const n8nData: any = await n8nRes.json().catch(() => ({}));
