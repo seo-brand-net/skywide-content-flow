@@ -125,7 +125,9 @@ export async function POST(
 
         // Revision specific fields
         revision_notes: revisionNotes,
-        original_content: contentRequest.webhook_response,
+        // Prefer raw_content (actual article text) over webhook_response (which is a Drive folder URL).
+        // raw_content is saved by the n8n-complete webhook from the Perplexity output.
+        original_content: contentRequest.raw_content || contentRequest.webhook_response,
         is_revision: true,
     };
 

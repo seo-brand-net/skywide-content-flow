@@ -9,9 +9,9 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { request_id, run_id, webhook_response } = body;
+        const { request_id, run_id, webhook_response, raw_content } = body;
 
-        console.log(`[n8n Complete Webhook] Received:`, { request_id, run_id, webhook_response });
+        console.log(`[n8n Complete Webhook] Received:`, { request_id, run_id, webhook_response, hasRawContent: !!raw_content });
 
         if (!request_id) {
             return NextResponse.json({ error: 'Missing request_id' }, { status: 400 });
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
             .update({
                 status: 'complete',
                 webhook_response: webhook_response || null,
+                raw_content: raw_content || null,
                 webhook_sent: true,
                 error_message: null,
                 updated_at: new Date().toISOString()
