@@ -1,0 +1,169 @@
+Indexing Automation
+What Needs to Be Built
+Client selection UI: A dropdown (or equivalent) on the site where a user selects a client, then clicks a button to trigger the indexing automation for that client. Same interaction pattern as the Content Brief Automation.
+Manual trigger: A user should be able to select any client and manually run the automation at any time.
+Automated schedule: The system should automatically run the indexing automation for every active client every 14 days without manual intervention. This is a core requirement - the entire point is to eliminate the manual indexing work our specialists currently do.
+Results display: After the script runs, the response should be displayed to the user so they can see how many URLs were submitted, errored, or rate limited for each search engine.
+Apps Script Endpoint
+The deployed Apps Script URL here: . It accepts a POST request with a JSON body and returns a JSON response. All authentication and API logic is handled by the script - the site just needs to send the right parameters and handle the response.
+Parameters to Send (POST Body)
+Parameter
+Required
+Description
+workbook_url
+Yes
+Full Google Sheets URL for the client's workbook.
+tab_name
+Yes
+Name of the sheet tab containing the URLs to index (e.g., "Indexing Automation").
+gsc_property
+Yes
+The client's Google Search Console property. Must be in the exact format it appears in GSC - see "GSC Property Format" section below.
+bing_site_url
+No
+The client's site URL as it appears in Bing Webmaster Tools. If omitted, Bing indexing is skipped for that client.
+
+
+
+
+
+
+GSC Property Format (Important)
+Google Search Console properties come in two formats. The value sent in gsc_property must match exactly or the API call will fail with a permission error for that client.
+Type
+Format
+Example
+Domain property
+sc-domain:example.com
+sc-domain:fortheinjured.com
+URL-prefix property
+https://www.example.com/
+https://agribilt.com/
+
+
+URL-prefix properties must include the trailing slash. We will provide the correct format for each client when they are added to the system.
+POST Request Format
+When the button is clicked, the site sends a POST request to the deployment URL with a JSON body:
+{
+  "workbook_url": "https://docs.google.com/spreadsheets/d/abc123.../edit",
+  "tab_name": "Indexing Automation",
+  "gsc_property": "https://agribilt.com/",
+  "bing_site_url": "https://agribilt.com"
+}
+Response from the Script
+The script returns JSON. A successful run looks like this:
+{
+  "success": true,
+  "summary": {
+    "google": {
+      "newUrls": 5, "existingUrls": 10,
+      "submitted": 15, "errors": 0, "rateLimited": 0
+    },
+    "bing": {
+      "newUrls": 5, "existingUrls": 10,
+      "submitted": 15, "errors": 0, "rateLimited": 0
+    },
+    "errorDetails": []
+  }
+}
+If the script fails entirely (bad parameters, auth failure, workbook not found), it returns:
+{ "success": false, "error": "Error message here" }
+
+If Bing is not configured for a client (no bing_site_url sent), the bing field in the summary will be the string "Bing not configured - skipped" instead of an object.
+Client Configuration
+Each client in the dropdown needs four values stored. We will provide these for each client as they are onboarded:
+Field
+Example
+Notes
+workbook_url
+https://docs.google.com/spreadsheets/d/abc123.../edit
+Client's Google Sheet
+tab_name
+Indexing Automation
+Tab name within the sheet
+gsc_property
+https://agribilt.com/ or sc-domain:example.com
+Exact GSC format - see above
+bing_site_url
+https://agribilt.com
+Optional - omit to skip Bing
+
+
+Automated Scheduling
+The automated 14-day schedule is a core requirement. Every 14 days, the system should loop through all active clients and trigger the indexing automation for each one - no manual intervention required. This replaces the manual work our specialists currently do each month. Most likely we will run into errors if we do every client in one day. So we may have to stagger over a few days but each client should run every 14 days.
+The script handles its own rate limiting and prioritization internally. If a client has more URLs than the daily limit allows, the script marks the extras as "Rate Limited" and they will be processed on the next run. No special handling is needed on the site side for this - just trigger the script and let it do its thing.
+Note: Google has a rate limit of 200 URL submissions per day per client property, so if the automated schedule triggers all clients at once, each client's run is independent and has its own 200 limit. Running all clients on the same day is fine.
+Workbook Tab Structure
+Each client's workbook will have a tab with 7 columns. Our team populates column A (URLs) manually. The script fills in columns B through G automatically. This is provided for reference - the developer does not need to interact with the workbook structure.
+Col
+Header
+Populated By
+Purpose
+A
+URL
+Team (manual)
+URLs to be indexed
+B
+Google Status
+Script
+Submitted / Error / Rate Limited
+C
+Google Last Submitted
+Script
+Timestamp of last Google submission
+D
+Google Attempts
+Script
+Total Google submission count
+E
+Bing Status
+Script
+Submitted / Error / Rate Limited
+F
+Bing Last Submitted
+Script
+Timestamp of last Bing submission
+G
+Bing Attempts
+Script
+Total Bing submission count
+
+
+How the Script Works (For Reference)
+This is how the Apps Script processes URLs internally. The developer does not need to replicate any of this logic - it is handled entirely by the script. This is provided for context only.
+Google and Bing are processed independently with their own priority queues and date tracking.
+For each engine, new URLs (no date in that engine's column) are submitted first in row order.
+Previously submitted URLs are then processed oldest date first.
+Every URL gets resubmitted on every run - there is no skip logic.
+Google rate limit: 200/day per property. Bing rate limit: 10,000/day per site.
+When a rate limit is hit, remaining URLs are marked "Rate Limited" and will be prioritized on the next run.
+
+Client Workbooks (Tab Name = ‘Indexing Automation’)
+AgriBilt: https://docs.google.com/spreadsheets/d/1L2obyQjLNUtL2zrTbwMqT6BjePdOgGM1KekX-vLadbk/edit?gid=177527161#gid=177527161
+Anderson Seafoods:
+https://docs.google.com/spreadsheets/d/1z9TUbye6zLrT-m5b3Mh01OWdT3pSDI6CvXprOGZEg34/edit?gid=1589872104#gid=1589872104
+Glyk Gelato:
+https://docs.google.com/spreadsheets/d/1W4bQWeAZYsQcuqrisHQvilJ2kIlP-Fa5IutXKoy3-H8/edit?gid=1589872104#gid=1589872104
+
+
+DIR Salon:
+https://docs.google.com/spreadsheets/d/1ZNYosHujVNtFvwdJUeNLt9d8srkneZHP5e9WD-pF9x0/edit?gid=2121259813#gid=2121259813
+Zen Renovations:
+https://docs.google.com/spreadsheets/d/1U4vZgYhSoQaXpCsoPxbPeSJmMZaXs2F3LE2Zjt3DNrQ/edit?gid=217284013#gid=217284013
+
+GSC and Bing Property Formats
+AgriBilt
+GSC: https://agribilt.com/
+Bing: https://agribilt.com
+Anderson Seafoods
+GSC: https://www.shopandersonseafoods.com/
+Bing: https://www.shopandersonseafoods.com/
+Glyk Gelato
+GSC: https://glyk.com/
+Bing: https://glyk.com/
+DIR Salon
+GSC: https://www.dirsalonfurniture.com/
+Bing: https://www.dirsalonfurniture.com/
+Zen Renovations
+GSC: https://zen-renovations.com/
+Bing: https://zen-renovations.com/

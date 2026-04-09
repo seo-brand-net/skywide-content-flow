@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, FileText, BarChart, Settings, LogOut, Users, MessageSquare, Search, Sparkles } from 'lucide-react';
+import { Home, FileText, BarChart, Settings, LogOut, Users, MessageSquare, Search, Sparkles, Globe } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -13,6 +13,7 @@ const navItems = [
     { icon: FileText, label: 'My Requests', path: '/my-requests' },
     { icon: Sparkles, label: 'AI Rewriter', path: '/ai-rewriter' },
     { icon: FileText, label: 'Content Briefs', path: '/content-briefs' },
+    // { icon: Globe, label: 'Indexing', path: '/indexing' },
     { icon: MessageSquare, label: 'Features', path: '/features' },
     { icon: Search, label: 'Research', path: '/research' },
     { icon: Settings, label: 'Settings', path: '/settings' },
@@ -23,6 +24,7 @@ const adminNavItems = [
     { icon: FileText, label: 'My Requests', path: '/my-requests' },
     { icon: Sparkles, label: 'AI Rewriter', path: '/ai-rewriter' },
     { icon: FileText, label: 'Content Briefs', path: '/content-briefs' },
+    // { icon: Globe, label: 'Indexing', path: '/indexing' },
     { icon: MessageSquare, label: 'Features', path: '/features' },
     { icon: Search, label: 'Research', path: '/research' },
     { icon: Users, label: 'Invite Users', path: '/invite-users' },

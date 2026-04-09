@@ -324,8 +324,8 @@
 const CONFIG = {
   CLAUDE_MODEL: "claude-sonnet-4-20250514",
   CLAUDE_MAX_TOKENS: 24000,
-  CODE_VERSION: "2.1.3",
-  MAX_ROWS_PER_RUN: 5,
+  CODE_VERSION: "2.1.1",
+  MAX_ROWS_PER_RUN: 2,
   // SHEET_NAME is now dynamic or uses this as default
   DEFAULT_SHEET_NAME: "Content Brief Automation",
   DOCS_FOLDER_ID: "1nk3KsqlCv5-ndsayI-K1EC8aJXqvoAVQ",
@@ -341,7 +341,7 @@ const CONFIG = {
   WEB_FETCH_MAX_CONTENT_TOKENS: 80000,
   AHREFS_SERP_COUNTRY: 'us',
   AHREFS_SERP_TOP_POSITIONS: 20,
-  AHREFS_MAX_COMPETITOR_URLS: 10,
+  AHREFS_MAX_COMPETITOR_URLS: 13,
   AHREFS_SKIP_DOMAINS: [
     'reddit.com', 'quora.com', 'wikipedia.org', 'youtube.com',
     'yelp.com', 'bbb.org', 'glassdoor.com', 'indeed.com',
@@ -1551,17 +1551,19 @@ function rowToObject(row, headerMap) {
   return obj;
 }
 
+function hasUrlColumn(sh) {
+  if (!sh || sh.getLastColumn() === 0) return false;
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
+    .map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
+  const urlAliases = ['url', 'target_url', 'target-url', 'website_url'];
+  return headers.some(h => urlAliases.includes(h));
+}
+
 function discoverDataSheet(ssOverride) {
   const ss = ssOverride || SpreadsheetApp.getActive();
   if (!ss) throw new Error("No active spreadsheet found for discovery.");
   let sheet = ss.getActiveSheet();
-  function hasUrlColumn(sh) {
-    if (!sh || sh.getLastColumn() === 0) return false;
-    const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]
-      .map(h => String(h || '').toLowerCase().trim().replace(/[\s_]+/g, '_'));
-    const urlAliases = ['url', 'target_url', 'target-url', 'website_url'];
-    return headers.some(h => urlAliases.includes(h));
-  }
+  
   if (sheet && hasUrlColumn(sheet)) return sheet;
   debugLog('SHEET_DISCOVERY', `Targeting spreadsheet "${ss.getName()}". Searching for 'url' column...`);
   const target = ss.getSheets().find(sh => hasUrlColumn(sh));
@@ -1576,7 +1578,8 @@ function getSheetFromUrl(ss, url) {
   const gidMatch = url.match(/[?#]gid=([0-9]+)/);
   if (gidMatch) {
     const gid = parseInt(gidMatch[1]);
-    return ss.getSheets().find(s => s.getSheetId() === gid) || null;
+    const sheet = ss.getSheets().find(s => s.getSheetId() === gid);
+    if (sheet && hasUrlColumn(sheet)) return sheet;
   }
   return null;
 }
@@ -1622,7 +1625,6 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
     safeAlert('No new rows to process', 'Batch Information');
     return;
   }
-  
   targets.forEach(r => {
     const idCol = headers['id']?.index;
     let rowIdString = (idCol !== undefined) ? String(data[r][idCol] || '') : '';
@@ -1706,12 +1708,15 @@ function runBriefGeneration(overrideFolderId, workbookUrl, fallbackClientId, ove
       sheet.getRange(r + 1, headers['notes'].index + 1).setValue(
         String(e.message || e).substring(0, 1000)
       );
-      // Since we updated data[r] in the first loop, rowObj is now fully accurate!
       const rowObj = rowToObject(data[r], headers);
       if (!rowObj.client_id && fallbackClientId) rowObj.client_id = fallbackClientId;
       rowObj.user_id = overrideUserId || rowObj.user_id || '';
-      
-      notifyDashboardStatus({ ...rowObj, run_id: runId, status: 'ERROR', notes: e.toString() }, null);
+      const idCol = headers['id']?.index;
+      if (!rowObj.id && idCol !== undefined) {
+        const freshId = sheet.getRange(r + 1, idCol + 1).getValue();
+        rowObj.id = freshId;
+      }
+      notifyDashboardStatus({ ...rowObj, status: 'ERROR', notes: e.toString() }, null);
     }
     if (targets.indexOf(r) < targets.length - 1) {
       const delay = calculateOptimalDelay();
@@ -2674,6 +2679,17 @@ Include your regular CLIENT RESEARCH NOTES first, then the DISCOVERED COMPETITOR
   let phase2Message;
   
   if (ahrefsSerpData && ahrefsSerpData.competitors.length >= 3) {
+    // Filter out homepage URLs before Phase 2 — they rank on domain authority, not content depth
+    var homepageFiltered = ahrefsSerpData.competitors.filter(function(c) { return isHomepageUrl(c.url); });
+    if (homepageFiltered.length > 0) {
+      ahrefsSerpData.competitors = ahrefsSerpData.competitors.filter(function(c) { return !isHomepageUrl(c.url); });
+      debugLog('HOMEPAGE_COMPETITORS_FILTERED', {
+        removed: homepageFiltered.length,
+        removed_urls: homepageFiltered.map(function(c) { return c.url; }),
+        remaining: ahrefsSerpData.competitors.length
+      });
+    }
+
     // Build competitor content blocks from server-side pre-fetched content
     var competitorsWithContent = ahrefsSerpData.competitors.filter(function(c) { 
       return c.extracted_content && c.extracted_content.length > 100; 
@@ -3978,7 +3994,7 @@ function recalculateWordCountRange(brief, strategy) {
   const serverLookup = {};
   if (strategy.server_word_counts) {
     strategy.server_word_counts.forEach(c => {
-      const key = c.url.replace(/\/+$/, '').toLowerCase();
+      const key = c.url.replace(/^(https?:\/\/)www\./, '$1').replace(/\/+$/, '').toLowerCase();
       serverLookup[key] = { word_count: c.word_count, url: c.url };
     });
   }
@@ -3988,7 +4004,7 @@ function recalculateWordCountRange(brief, strategy) {
   const excluded = [];
   
   competitors.forEach(c => {
-    const key = (c.url || '').replace(/\/+$/, '').toLowerCase();
+    const key = (c.url || '').replace(/^(https?:\/\/)www\./, '$1').replace(/\/+$/, '').toLowerCase();
     const isHomepage = isHomepageUrl(c.url);
     const serverEntry = serverLookup[key];
     const wc = (serverEntry && serverEntry.word_count > 0) 
@@ -4007,13 +4023,13 @@ function recalculateWordCountRange(brief, strategy) {
   
   // If homepage filtering left us with < 2 data points, supplement from remaining Ahrefs URLs
   if (matched.length < 2 && strategy.server_word_counts) {
-    const matchedUrls = new Set(matched.map(m => m.url.replace(/\/+$/, '').toLowerCase()));
-    const excludedUrls = new Set(excluded.map(e => e.url.replace(/\/+$/, '').toLowerCase()));
+    const matchedUrls = new Set(matched.map(m => m.url.replace(/^(https?:\/\/)www\./, '$1').replace(/\/+$/, '').toLowerCase()));
+    const excludedUrls = new Set(excluded.map(e => e.url.replace(/^(https?:\/\/)www\./, '$1').replace(/\/+$/, '').toLowerCase()));
     
     // Check Ahrefs URLs that Claude didn't analyze (and weren't already excluded)
     strategy.server_word_counts.forEach(c => {
       if (matched.length >= 4) return;  // Cap at 4 data points
-      const key = c.url.replace(/\/+$/, '').toLowerCase();
+      const key = c.url.replace(/^(https?:\/\/)www\./, '$1').replace(/\/+$/, '').toLowerCase();
       if (matchedUrls.has(key) || excludedUrls.has(key)) return;
       if (excludeHomepages && isHomepageUrl(c.url)) return;
       if (c.word_count <= 0) return;
@@ -4172,18 +4188,60 @@ function fetchCompetitorWordCounts(competitors) {
   try {
     responses = UrlFetchApp.fetchAll(requests);
   } catch (e) {
-    // fetchAll crashed (e.g. one bad DNS poisoning the batch) — fall back to individual fetches
+    // fetchAll crashed (timeout, DNS error, etc.) — fall back to individual fetches
     debugLog('SERVER_WORD_COUNTS_FETCHALL_ERROR', e.message.substring(0, 200));
-    debugLog('SERVER_WORD_COUNTS_FALLBACK', 'Retrying ' + competitors.length + ' URLs individually');
+    
+    // Parse the URL that caused the crash from the error message to skip it
+    var failedUrlMatch = e.message.match(/https?:\/\/[^\s,)]+/);
+    var failedUrl = failedUrlMatch ? failedUrlMatch[0].replace(/\/+$/, '') : null;
+    if (failedUrl) {
+      debugLog('SERVER_WORD_COUNTS_SKIP_URL', { url: failedUrl, reason: 'caused fetchAll crash' });
+    }
+    
+    debugLog('SERVER_WORD_COUNTS_FALLBACK', 'Retrying ' + competitors.length + ' URLs individually (with time budget)');
     responses = [];
+    var fallbackStart = Date.now();
+    var FALLBACK_TIME_BUDGET_MS = 2 * 60 * 1000; // 2 minutes
+    var MIN_COMPETITORS_BEFORE_STOP = 4;
+    var successfulFetches = 0;
+    
     for (var i = 0; i < requests.length; i++) {
+      // Skip the URL that caused fetchAll to crash — guaranteed to timeout again
+      var compUrlClean = competitors[i].url.replace(/\/+$/, '');
+      if (failedUrl && (compUrlClean === failedUrl || compUrlClean.indexOf(failedUrl) === 0 || failedUrl.indexOf(compUrlClean) === 0)) {
+        debugLog('SERVER_WORD_COUNTS_INDIVIDUAL_SKIP', { url: competitors[i].url, reason: 'caused fetchAll crash' });
+        responses.push(null);
+        continue;
+      }
+      
+      // Time budget check: if over 2 min and have 4+ successful fetches, stop
+      var elapsed = Date.now() - fallbackStart;
+      if (elapsed > FALLBACK_TIME_BUDGET_MS && successfulFetches >= MIN_COMPETITORS_BEFORE_STOP) {
+        debugLog('SERVER_WORD_COUNTS_TIME_BUDGET', {
+          elapsed_ms: elapsed,
+          elapsed_sec: Math.round(elapsed / 1000),
+          successful: successfulFetches,
+          remaining_skipped: requests.length - i
+        });
+        // Mark remaining URLs as skipped
+        for (var j = i; j < requests.length; j++) {
+          responses.push(null);
+        }
+        break;
+      }
+      
       try {
-        responses.push(UrlFetchApp.fetch(requests[i].url, {
+        var resp = UrlFetchApp.fetch(requests[i].url, {
           muteHttpExceptions: true,
           followRedirects: true,
           validateHttpsCertificates: false,
           headers: requests[i].headers
-        }));
+        });
+        responses.push(resp);
+        // Track successful fetches (HTTP 200-399 = server responded with content)
+        if (resp.getResponseCode() >= 200 && resp.getResponseCode() < 400) {
+          successfulFetches++;
+        }
       } catch (fetchErr) {
         // This individual URL failed (DNS, timeout, etc.) — push null placeholder
         debugLog('SERVER_WORD_COUNTS_INDIVIDUAL_ERROR', {
@@ -4193,6 +4251,13 @@ function fetchCompetitorWordCounts(competitors) {
         responses.push(null);
       }
     }
+    
+    debugLog('SERVER_WORD_COUNTS_FALLBACK_COMPLETE', {
+      total_attempted: responses.filter(function(r) { return r !== null; }).length,
+      skipped: responses.filter(function(r) { return r === null; }).length,
+      successful_fetches: successfulFetches,
+      elapsed_ms: Date.now() - fallbackStart
+    });
   }
   
   // Process responses (same order as requests)
@@ -4416,10 +4481,24 @@ function validateSecondaryKeywordDistribution(brief, strategy) {
       }
       
       // Check H2 headings (level 2)
-      if (section.level === 2 && headingLower.includes(secondaryLower)) {
-        keywordResult.inH2 = true;
-        keywordResult.totalOccurrences++;
-        keywordResult.locations.push(`H2: "${section.heading}"`);
+      if (section.level === 2) {
+        if (headingLower.includes(secondaryLower)) {
+          // Exact substring match
+          keywordResult.inH2 = true;
+          keywordResult.totalOccurrences++;
+          keywordResult.locations.push(`H2: "${section.heading}"`);
+        } else if (!keywordResult.inH2) {
+          // Word-level match: all words from the keyword must appear in the heading
+          // Catches cases like "what do you need for car insurance" → "What Information Do You Need for Car Insurance Quotes"
+          var kwWords = secondaryLower.split(/\s+/).filter(function(w) { return w.length > 0; });
+          var headingWords = headingLower.split(/\s+/).filter(function(w) { return w.length > 0; });
+          var allWordsPresent = kwWords.every(function(w) { return headingWords.indexOf(w) > -1; });
+          if (allWordsPresent && kwWords.length >= 3) {
+            keywordResult.inH2 = true;
+            keywordResult.totalOccurrences++;
+            keywordResult.locations.push(`H2 (word match): "${section.heading}"`);
+          }
+        }
       }
       
       // Count other occurrences (guidance text, keywords_to_include for non-AFP sections)
@@ -4453,6 +4532,42 @@ function validateSecondaryKeywordDistribution(brief, strategy) {
     
     results.keywords.push(keywordResult);
   });
+  
+  // ─── H2 OVERLAP RELAXATION ──────────────────────────────────────────
+  // If secondary keywords share 80%+ word overlap (e.g. "fractional cfo vs full time cfo"
+  // and "fractional cfo vs full time cfo cost comparison"), relax the H2 requirement.
+  // If any keyword in the overlap cluster has an H2, all related keywords pass the H2 check.
+  // AFP and 3x occurrence requirements still apply independently.
+  var keywordsWithH2 = results.keywords.filter(function(k) { return k.inH2; });
+  var keywordsWithoutH2 = results.keywords.filter(function(k) { return !k.inH2; });
+  
+  if (keywordsWithH2.length > 0 && keywordsWithoutH2.length > 0) {
+    keywordsWithoutH2.forEach(function(failedKw) {
+      var failedWords = failedKw.keyword.toLowerCase().split(/\s+/);
+      var isRelated = keywordsWithH2.some(function(passedKw) {
+        var passedWords = passedKw.keyword.toLowerCase().split(/\s+/);
+        var shorter = failedWords.length <= passedWords.length ? failedWords : passedWords;
+        var longer = failedWords.length <= passedWords.length ? passedWords : failedWords;
+        var overlap = shorter.filter(function(w) { return longer.indexOf(w) > -1; }).length;
+        return overlap / shorter.length >= 0.8;
+      });
+      
+      if (isRelated) {
+        failedKw.inH2 = true;
+        // Remove the H2 error for this keyword
+        var errorMsg = 'Secondary keyword "' + failedKw.keyword + '" NOT found in any H2 heading';
+        results.errors = results.errors.filter(function(e) { return e !== errorMsg; });
+        debugLog('SECONDARY_H2_OVERLAP', {
+          keyword: failedKw.keyword,
+          reason: 'H2 requirement satisfied by related keyword with 80%+ word overlap'
+        });
+      }
+    });
+    
+    // Re-check allValid after overlap relaxation
+    results.allValid = results.errors.length === 0;
+  }
+  // ─── END H2 OVERLAP RELAXATION ──────────────────────────────────────
   
   debugLog('SECONDARY_KEYWORD_VALIDATION', {
     keywords: results.keywords,
@@ -4801,6 +4916,8 @@ function calculateQualityScore(brief, strategy) {
     let allInH2 = true;
     let totalMet = 0;
     
+    // First pass: check each keyword individually
+    var secondaryResults = [];
     secondaryKeywords.forEach(secondaryLower => {
       let inH2 = false;
       let inAFP = false;
@@ -4818,9 +4935,19 @@ function calculateQualityScore(brief, strategy) {
           }
         }
         
-        if (section.level === 2 && headingLower.includes(secondaryLower)) {
-          inH2 = true;
-          count++;
+        if (section.level === 2) {
+          if (headingLower.includes(secondaryLower)) {
+            inH2 = true;
+            count++;
+          } else if (!inH2) {
+            var scoringKwWords = secondaryLower.split(/\s+/).filter(function(w) { return w.length > 0; });
+            var scoringHeadingWords = headingLower.split(/\s+/).filter(function(w) { return w.length > 0; });
+            var scoringAllPresent = scoringKwWords.every(function(w) { return scoringHeadingWords.indexOf(w) > -1; });
+            if (scoringAllPresent && scoringKwWords.length >= 3) {
+              inH2 = true;
+              count++;
+            }
+          }
         }
         
         if (!section.is_afp_guidance && section.level !== 0) {
@@ -4829,9 +4956,31 @@ function calculateQualityScore(brief, strategy) {
         }
       });
       
-      if (!inAFP) allInAFP = false;
-      if (!inH2) allInH2 = false;
-      if (inAFP && inH2 && count >= 3) totalMet++;
+      secondaryResults.push({ keyword: secondaryLower, inH2: inH2, inAFP: inAFP, count: count });
+    });
+    
+    // H2 overlap relaxation: if keywords share 80%+ words, share H2 satisfaction
+    var scoringWithH2 = secondaryResults.filter(function(k) { return k.inH2; });
+    var scoringWithoutH2 = secondaryResults.filter(function(k) { return !k.inH2; });
+    if (scoringWithH2.length > 0 && scoringWithoutH2.length > 0) {
+      scoringWithoutH2.forEach(function(failedKw) {
+        var failedWords = failedKw.keyword.split(/\s+/);
+        var isRelated = scoringWithH2.some(function(passedKw) {
+          var passedWords = passedKw.keyword.split(/\s+/);
+          var shorter = failedWords.length <= passedWords.length ? failedWords : passedWords;
+          var longer = failedWords.length <= passedWords.length ? passedWords : failedWords;
+          var overlap = shorter.filter(function(w) { return longer.indexOf(w) > -1; }).length;
+          return overlap / shorter.length >= 0.8;
+        });
+        if (isRelated) failedKw.inH2 = true;
+      });
+    }
+    
+    // Calculate final scores from results
+    secondaryResults.forEach(function(r) {
+      if (!r.inAFP) allInAFP = false;
+      if (!r.inH2) allInH2 = false;
+      if (r.inAFP && r.inH2 && r.count >= 3) totalMet++;
     });
     
     const metRate = totalMet / secondaryKeywords.length;
@@ -6120,7 +6269,7 @@ function resetRowStatus(rowId, runId, keyword, workbookUrl) {
     throw new Error("Row not found for restart. Tried matching by ID, run_id, and primary_keyword.");
   }
   
-  // Update the sheet
+  // Reset the row
   sheet.getRange(targetRowIndex + 1, statusCol + 1).setValue('NEW');
   if (urlCol !== undefined) sheet.getRange(targetRowIndex + 1, urlCol + 1).clearContent();
   if (errorNotesCol !== undefined) sheet.getRange(targetRowIndex + 1, errorNotesCol + 1).clearContent();

@@ -69,9 +69,11 @@ export default function ContentBriefActivityLog() {
     const rows = queryData?.rows || [];
     const totalCount = queryData?.totalCount || 0;
 
-    // Only block if we have NO user detected yet.
+    // Only block the full page if there's no user yet (unauthenticated).
+    // Once user is known, let the page render immediately and show the inline
+    // table loader instead of a full-page skeleton.
     const isAuthResolving = !user && (roleLoading || isInitialLoading);
-    const loading = isAuthResolving || (isQueryLoading && !isPlaceholderData);
+    const loading = isAuthResolving; // no longer blocks on isQueryLoading
     const isInternalLoading = isQueryLoading || isPlaceholderData;
     const error = queryError ? (queryError as any).message : null;
 
