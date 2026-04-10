@@ -6,12 +6,13 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { indexing_client_id, workbook_url, tab_name, gsc_property, bing_site_url } = body;
+        const { indexing_client_id, workbook_url, tab_name, gsc_property, bing_site_url, user_id } = body;
 
         console.log('[proxy-indexing-script] Incoming request:', {
             indexing_client_id,
             gsc_property,
-            hasBing: !!bing_site_url
+            hasBing: !!bing_site_url,
+            user_id: user_id || 'none (scheduled)'
         });
 
         const indexingAppsScriptUrl = process.env.INDEXING_APPS_SCRIPT_URL;
@@ -31,7 +32,8 @@ export async function POST(request: Request) {
                 .insert([{
                     indexing_client_id,
                     triggered_by: body.triggered_by || 'manual',
-                    status: 'pending'
+                    status: 'pending',
+                    ...(user_id ? { user_id } : {})
                 }])
                 .select('id')
                 .single();

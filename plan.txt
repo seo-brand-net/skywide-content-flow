@@ -1,0 +1,45 @@
+Indexing Layout Refactor
+This plan outlines the steps to refactor the Indexing feature's user interface to match the layout and user experience of the Content Briefs section.
+
+Background
+Currently, the /indexing page has a side-by-side layout: a component for selecting a client and running indexing on the left, and the run history for only that specific client on the right.
+
+The goal is to adopt the "Global Dashboard + Generation Subpage" pattern used by Content Briefs:
+
+/indexing will become a global history dashboard showing all indexing runs across all clients in a large, searchable table.
+It will track and display exactly who ran the manual indexing (or display "Skywide" if it was initiated automatically by cron).
+The current manual runner UI will be moved to /indexing/run, accessible via a primary CTA button on the global dashboard.
+Proposed Changes
+Database Updates
+We need to track the user who initiated the run.
+
+[NEW] supabase/migrations/[timestamp]_add_user_id_to_indexing_runs.sql
+Create a migration to add an optional user_id UUID column to the indexing_runs table.
+Set a foreign key reference to profiles(id) so we can join to fetch the user's name.
+Backend Updates
+The proxy route needs to accept and store the user ID.
+
+[MODIFY] src/app/api/proxy-indexing-script/route.ts
+Update the POST handler to accept an optional user_id in the request body.
+When creating the initial pending indexing_runs record, insert user_id alongside indexing_client_id and triggered_by.
+Frontend Updates
+[MODIFY] src/app/indexing/page.tsx -> [RENAME] src/app/indexing/run/page.tsx
+Move the existing side-by-side indexing UI into a subdirectory (run or manual).
+Update any relative imports or title tags.
+Update the API call in runMutation to pass user: user?.id in the JSON body so the proxy script knows who initiated it.
+[NEW] src/app/indexing/page.tsx
+Create a new global "Indexing History" page matching the layout of /content-briefs.
+Implement a React Query hook to fetch all indexing_runs joined with indexing_clients (for the name) and profiles (for the triggering user's name).
+Display a robust table with components similar to ContentBriefActivityLog:
+Columns: Client Name, Triggered By (User's Full Name or "Skywide (Auto)"), Status, Run Date, Google Summary, Bing Summary, Actions (Expand Details).
+Add a top-right CTA button: <Button onClick={() => router.push('/indexing/run')}>Run Indexing</Button>.
+User Review Required
+IMPORTANT
+
+Moving the current UI to /indexing/run means users will have to click the global list first, then click "Run Indexing" to actually trigger it. Does this layout structure work for you?
+Let me know if you approve this plan and I will begin the refactor immediately!
+Verification Plan
+Create the database migration and apply it seamlessly.
+Verify the new /indexing page loads without errors and shows a global table.
+Test a manual trigger from /indexing/run and confirm that the user_id is successfully captured and displayed in the global table as the user's name.
+Verify cron triggers show up as "Skywide (Auto)".
