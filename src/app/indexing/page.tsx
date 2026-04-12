@@ -47,6 +47,10 @@ interface GoogleSummary {
 interface BingSummary {
     submitted?: number;
     errors?: number;
+    new_urls?: number;
+    existing_urls?: number;
+    rate_limited?: number;
+    [key: string]: any;
 }
 
 interface IndexingRunRow {
@@ -114,7 +118,9 @@ function TriggerCell({ run, profilesMap }: {
 function GoogleSummaryCompact({ summary }: { summary: GoogleSummary }) {
     return (
         <div className="flex flex-col items-center gap-0.5">
-            <span className="text-green-500 font-bold text-sm">+{summary.new_urls ?? 0}</span>
+            <span className="text-green-500 font-bold text-[13px]">
+                +{summary.new_urls ?? 0} <span className="font-normal text-[10px] text-green-600/70">new</span>
+            </span>
             <span className="text-muted-foreground text-[10px]">{summary.submitted ?? 0} submitted</span>
         </div>
     );
@@ -155,21 +161,27 @@ function BingSummaryFull({ summary }: { summary: BingSummary | null }) {
             </div>
         );
     }
+    const stats = [
+        { label: 'New URLs',    value: summary.new_urls ?? '—',    color: 'text-green-500' },
+        { label: 'Existing',    value: summary.existing_urls ?? '—', color: 'text-blue-500' },
+        { label: 'Submitted',   value: summary.submitted ?? '—',   color: 'text-brand-blue-crayola' },
+        { label: 'Errors',      value: summary.errors ?? '—',      color: 'text-destructive' },
+        { label: 'Rate Limited',value: summary.rate_limited ?? '—', color: 'text-yellow-500' },
+    ];
+
     return (
         <div className="p-4 bg-muted/20 rounded-xl border border-border/50">
             <div className="flex items-center gap-2 mb-3">
                 <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex-shrink-0" />
                 <span className="text-xs font-bold text-foreground uppercase tracking-wider">Bing Indexing</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-                <div className="text-center">
-                    <p className="text-xl font-bold text-brand-blue-crayola">{summary.submitted ?? '—'}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Submitted</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-xl font-bold text-destructive">{summary.errors ?? '—'}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Errors</p>
-                </div>
+            <div className="grid grid-cols-5 gap-3">
+                {stats.map(stat => (
+                    <div key={stat.label} className="text-center">
+                        <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</p>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -199,7 +211,7 @@ export default function IndexingHistoryPage() {
                     indexing_clients ( name, gsc_property )
                 `)
                 .order('created_at', { ascending: false })
-                .limit(200);
+                .limit(500);
             if (error) throw error;
             return data as IndexingRunRow[];
         },
@@ -467,8 +479,10 @@ export default function IndexingHistoryPage() {
                                                     <td className="px-4 py-5 text-center">
                                                         {run.bing_summary ? (
                                                             <div className="flex flex-col items-center gap-0.5">
-                                                                <span className="text-blue-500 font-bold text-sm">{run.bing_summary.submitted ?? 0}</span>
-                                                                <span className="text-muted-foreground text-[10px]">submitted</span>
+                                                                <span className="text-blue-500 font-bold text-[13px]">
+                                                                    +{run.bing_summary.new_urls ?? 0} <span className="font-normal text-[10px] text-blue-600/70">new</span>
+                                                                </span>
+                                                                <span className="text-muted-foreground text-[10px]">{run.bing_summary.submitted ?? 0} submitted</span>
                                                             </div>
                                                         ) : (
                                                             <span className="text-muted-foreground text-[10px] italic">skipped</span>

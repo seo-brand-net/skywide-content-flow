@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,12 +58,16 @@ interface GoogleSummary {
 interface BingSummary {
     submitted?: number;
     errors?: number;
+    new_urls?: number;
+    existing_urls?: number;
+    rate_limited?: number;
     [key: string]: any;
 }
 
 interface IndexingRun {
     id: string;
     indexing_client_id: string;
+    user_id: string;
     triggered_by: 'manual' | 'scheduled';
     status: 'pending' | 'success' | 'error';
     google_summary: GoogleSummary | null;
@@ -100,16 +104,25 @@ function StatusBadge({ status }: { status: IndexingRun['status'] }) {
     );
 }
 
-function TriggeredByBadge({ triggeredBy }: { triggeredBy: string }) {
-    const isScheduled = triggeredBy === 'scheduled';
+function TriggerCell({ run, profilesMap }: { run: any, profilesMap: Record<string, any> }) {
+    const isScheduled = run.triggered_by === 'scheduled';
+    const profile = run.user_id ? profilesMap[run.user_id] : null;
+
+    const displayName = isScheduled
+        ? 'Skywide'
+        : (profile?.full_name || profile?.email || 'Manual');
+
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${isScheduled
-            ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
-            : 'bg-brand-blue-crayola/10 text-brand-blue-crayola border-brand-blue-crayola/20'
-        }`}>
-            {isScheduled ? <RotateCcw className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
-            {isScheduled ? 'Scheduled' : 'Manual'}
-        </span>
+        <div className="flex flex-col gap-1">
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border w-fit ${isScheduled
+                ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+                : 'bg-brand-blue-crayola/10 text-brand-blue-crayola border-brand-blue-crayola/20'
+                }`}>
+                {isScheduled ? <RotateCcw className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
+                {isScheduled ? 'Auto' : 'Manual'}
+            </span>
+            <span className="text-[11px] text-muted-foreground">{displayName}</span>
+        </div>
     );
 }
 
@@ -150,21 +163,27 @@ function BingSummaryCard({ summary, skipped }: { summary: BingSummary | null; sk
         );
     }
 
+    const stats = [
+        { label: 'New URLs', value: summary.new_urls ?? '—', color: 'text-green-500' },
+        { label: 'Existing', value: summary.existing_urls ?? '—', color: 'text-blue-500' },
+        { label: 'Submitted', value: summary.submitted ?? '—', color: 'text-brand-blue-crayola' },
+        { label: 'Errors', value: summary.errors ?? '—', color: 'text-destructive' },
+        { label: 'Rate Limited', value: summary.rate_limited ?? '—', color: 'text-yellow-500' },
+    ];
+
     return (
         <div className="p-4 bg-muted/20 rounded-xl border border-border/50">
             <div className="flex items-center gap-2 mb-3">
                 <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex-shrink-0" />
                 <span className="text-xs font-bold text-foreground uppercase tracking-wider">Bing Indexing</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-                <div className="text-center">
-                    <p className="text-xl font-bold text-brand-blue-crayola">{summary.submitted ?? '—'}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Submitted</p>
-                </div>
-                <div className="text-center">
-                    <p className="text-xl font-bold text-destructive">{summary.errors ?? '—'}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Errors</p>
-                </div>
+            <div className="grid grid-cols-5 gap-3">
+                {stats.map(stat => (
+                    <div key={stat.label} className="text-center">
+                        <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</p>
+                    </div>
+                ))}
             </div>
         </div>
     );
@@ -212,6 +231,30 @@ export default function IndexingRunPage() {
             return data as IndexingRun[];
         },
         enabled: !!selectedClientId && !!user?.id
+    });
+
+    // ── Resolve user names separately (user_id → profiles) ───────────────────
+    const userIds = useMemo(() => {
+        const ids = runs
+            .map(r => r.user_id)
+            .filter((id): id is string => !!id);
+        return [...new Set(ids)];
+    }, [runs]);
+
+    const { data: profilesMap = {} } = useQuery({
+        queryKey: ['profiles_by_ids_run_page', userIds],
+        queryFn: async () => {
+            if (userIds.length === 0) return {};
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('id, full_name, email')
+                .in('id', userIds);
+            if (error) return {};
+            return Object.fromEntries(
+                (data || []).map((p: any) => [p.id, p])
+            ) as Record<string, { id: string; full_name: string | null; email: string | null }>;
+        },
+        enabled: userIds.length > 0
     });
 
     // ── Derived state ────────────────────────────────────────────────────────
@@ -415,24 +458,31 @@ export default function IndexingRunPage() {
                                         </Button>
 
                                         {/* Run Indexing CTA */}
-                                        <Button
-                                            className="w-full h-12 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold text-sm shadow-lg shadow-brand-blue-crayola/20"
-                                            onClick={handleRunIndexing}
-                                            disabled={runMutation.isPending}
-                                            id="run-indexing-btn"
-                                        >
-                                            {runMutation.isPending ? (
-                                                <span className="flex items-center gap-2">
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                    Submitting URLs...
-                                                </span>
-                                            ) : (
-                                                <span className="flex items-center gap-2">
-                                                    <Zap className="w-4 h-4" />
-                                                    Run Indexing
-                                                </span>
+                                        <div className="space-y-2">
+                                            <Button
+                                                className="w-full h-12 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold text-sm shadow-lg shadow-brand-blue-crayola/20 disabled:opacity-50"
+                                                onClick={handleRunIndexing}
+                                                disabled={runMutation.isPending || !currentClient.is_active}
+                                                id="run-indexing-btn"
+                                            >
+                                                {runMutation.isPending ? (
+                                                    <span className="flex items-center gap-2">
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        Submitting URLs...
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-2">
+                                                        <Zap className="w-4 h-4" />
+                                                        Run Indexing
+                                                    </span>
+                                                )}
+                                            </Button>
+                                            {!currentClient.is_active && (
+                                                <p className="text-[11px] text-yellow-500 text-center">
+                                                    This client is paused — enable it to run indexing.
+                                                </p>
                                             )}
-                                        </Button>
+                                        </div>
                                     </div>
                                 )}
 
@@ -583,7 +633,7 @@ export default function IndexingRunPage() {
                                                                 </div>
                                                             </td>
                                                             <td className="px-4 py-4">
-                                                                <TriggeredByBadge triggeredBy={run.triggered_by} />
+                                                                <TriggerCell run={run} profilesMap={profilesMap} />
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
                                                                 <StatusBadge status={run.status} />
@@ -591,22 +641,22 @@ export default function IndexingRunPage() {
                                                             <td className="px-4 py-4 text-center">
                                                                 {run.google_summary ? (
                                                                     <div className="flex flex-col items-center gap-0.5">
-                                                                        <span className="text-green-500 font-bold">
-                                                                            +{run.google_summary.new_urls ?? 0}
+                                                                        <span className="text-green-500 font-bold text-[13px]">
+                                                                            +{run.google_summary.new_urls ?? 0} <span className="font-normal text-[10px] text-green-600/70">new</span>
                                                                         </span>
-                                                                        <span className="text-muted-foreground text-[10px]">new</span>
+                                                                        <span className="text-muted-foreground text-[10px]">{run.google_summary.submitted ?? 0} submitted</span>
                                                                     </div>
                                                                 ) : (
-                                                                    <span className="text-muted-foreground">—</span>
+                                                                    <span className="text-muted-foreground text-[10px] italic">skipped</span>
                                                                 )}
                                                             </td>
                                                             <td className="px-4 py-4 text-center">
                                                                 {run.bing_summary ? (
                                                                     <div className="flex flex-col items-center gap-0.5">
-                                                                        <span className="text-blue-500 font-bold">
-                                                                            {run.bing_summary.submitted ?? 0}
+                                                                        <span className="text-blue-500 font-bold text-[13px]">
+                                                                            +{run.bing_summary.new_urls ?? 0} <span className="font-normal text-[10px] text-blue-600/70">new</span>
                                                                         </span>
-                                                                        <span className="text-muted-foreground text-[10px]">submitted</span>
+                                                                        <span className="text-muted-foreground text-[10px]">{run.bing_summary.submitted ?? 0} submitted</span>
                                                                     </div>
                                                                 ) : (
                                                                     <span className="text-muted-foreground text-[10px] italic">skipped</span>

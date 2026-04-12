@@ -8,14 +8,16 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
  * Filters clients whose last_run_at is >= 14 days ago (or never run).
  * Processes clients sequentially to respect per-client API quotas.
  * 
- * Secured with: ?secret=GAS_CALLBACK_SECRET
+ * Secured via Authorization: Bearer <CRON_SECRET> header.
+ * Vercel automatically sends this header when invoking cron routes.
+ * For manual testing: pass the header explicitly.
  */
 export async function GET(request: Request) {
-    const url = new URL(request.url);
-    const secret = url.searchParams.get('secret');
-
-    // Validate the secret to prevent unauthorized triggers
-    if (process.env.GAS_CALLBACK_SECRET && secret !== process.env.GAS_CALLBACK_SECRET) {
+    // Validate via Authorization header (Vercel's recommended cron auth pattern).
+    // Keeps the secret out of URLs, query params, and server logs.
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -51,18 +53,10 @@ export async function GET(request: Request) {
         console.log(`[cron/indexing-automation] Found ${dueClients.length} client(s) due for indexing:`, 
                     dueClients.map(c => c.name));
 
-        const results: Array<{
-            client_id: string;
-            client_name: string;
-            status: 'success' | 'error';
-            run_id?: string;
-            error?: string;
-        }> = [];
-
-        // Process clients sequentially to respect per-client API quotas
-        for (const client of dueClients) {
+        // Run all clients concurrently to drastically reduce total cron duration
+        // This prevents 5 clients taking 60s each from hitting Vercel's 300s timeout ceiling
+        const processingPromises = dueClients.map(async (client) => {
             console.log(`[cron/indexing-automation] Processing: ${client.name}`);
-
             try {
                 const response = await fetch(`${baseUrl}/api/proxy-indexing-script`, {
                     method: 'POST',
@@ -79,43 +73,58 @@ export async function GET(request: Request) {
 
                 const result = await response.json();
 
-                if (!response.ok) {
-                    console.error(`[cron/indexing-automation] Failed for ${client.name}:`, result);
-                    results.push({
-                        client_id: client.id,
-                        client_name: client.name,
-                        status: 'error',
-                        error: result.message || 'Proxy returned non-200'
-                    });
-                    // Continue to next client — don't let one failure block others
-                    continue;
-                }
-
-                // Update last_run_at on success
+                // Always update last_run_at regardless of success/failure.
+                // This prevents a broken client from being retried every single day
+                // instead of every 14 days like all other clients.
                 await supabaseAdmin
                     .from('indexing_clients')
                     .update({ last_run_at: new Date().toISOString() })
                     .eq('id', client.id);
 
-                results.push({
-                    client_id: client.id,
-                    client_name: client.name,
-                    status: 'success',
-                    run_id: result.run_id
-                });
+                if (!response.ok) {
+                    console.error(`[cron/indexing-automation] Failed for ${client.name}:`, result);
+                    return {
+                        client_id: client.id,
+                        client_name: client.name,
+                        status: 'error' as const,
+                        error: result.message || result.error || 'Proxy returned non-200'
+                    };
+                }
 
                 console.log(`[cron/indexing-automation] ✓ ${client.name} indexed successfully`);
+                return {
+                    client_id: client.id,
+                    client_name: client.name,
+                    status: 'success' as const,
+                    run_id: result.run_id
+                };
 
             } catch (clientError: any) {
                 console.error(`[cron/indexing-automation] Exception for ${client.name}:`, clientError);
-                results.push({
+                // Still bump last_run_at on exception to prevent tight retry loops
+                await supabaseAdmin
+                    .from('indexing_clients')
+                    .update({ last_run_at: new Date().toISOString() })
+                    .eq('id', client.id)
+                    .then(() => {}); // fire-and-forget
+                return {
                     client_id: client.id,
                     client_name: client.name,
-                    status: 'error',
+                    status: 'error' as const,
                     error: clientError.message
-                });
+                };
             }
-        }
+        });
+
+        // Wait for all fetches to securely resolve
+        const settledResults = await Promise.allSettled(processingPromises);
+        
+        // Extract out the mapped objects
+        const results = settledResults.map(res => 
+            res.status === 'fulfilled' 
+                ? res.value 
+                : { client_id: 'unknown', client_name: 'Unknown', status: 'error' as const, error: String(res.reason) }
+        );
 
         const successCount = results.filter(r => r.status === 'success').length;
         const errorCount = results.filter(r => r.status === 'error').length;

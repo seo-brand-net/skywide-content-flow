@@ -2,11 +2,11 @@
   "framework": "nextjs",
   "crons": [
     {
-      "path": "/api/cron/sweep-timeouts?secret=the-gas-callback-random-string-10103636",
+      "path": "/api/cron/sweep-timeouts",
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/cron/indexing-automation?secret=the-gas-callback-random-string-10103636",
+      "path": "/api/cron/indexing-automation",
       "schedule": "0 3 * * *"
     }
   ],
