@@ -102,11 +102,10 @@ function TriggerCell({ run, profilesMap }: {
 
     return (
         <div className="flex flex-col gap-1">
-            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border w-fit ${
-                isScheduled
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border w-fit ${isScheduled
                     ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
                     : 'bg-brand-blue-crayola/10 text-brand-blue-crayola border-brand-blue-crayola/20'
-            }`}>
+                }`}>
                 {isScheduled ? <RotateCcw className="w-2.5 h-2.5" /> : <Play className="w-2.5 h-2.5" />}
                 {isScheduled ? 'Auto' : 'Manual'}
             </span>
@@ -162,11 +161,11 @@ function BingSummaryFull({ summary }: { summary: BingSummary | null }) {
         );
     }
     const stats = [
-        { label: 'New URLs',    value: summary.new_urls ?? '—',    color: 'text-green-500' },
-        { label: 'Existing',    value: summary.existing_urls ?? '—', color: 'text-blue-500' },
-        { label: 'Submitted',   value: summary.submitted ?? '—',   color: 'text-brand-blue-crayola' },
-        { label: 'Errors',      value: summary.errors ?? '—',      color: 'text-destructive' },
-        { label: 'Rate Limited',value: summary.rate_limited ?? '—', color: 'text-yellow-500' },
+        { label: 'New URLs', value: summary.new_urls ?? '—', color: 'text-green-500' },
+        { label: 'Existing', value: summary.existing_urls ?? '—', color: 'text-blue-500' },
+        { label: 'Submitted', value: summary.submitted ?? '—', color: 'text-brand-blue-crayola' },
+        { label: 'Errors', value: summary.errors ?? '—', color: 'text-destructive' },
+        { label: 'Rate Limited', value: summary.rate_limited ?? '—', color: 'text-yellow-500' },
     ];
 
     return (
@@ -239,7 +238,7 @@ export default function IndexingHistoryPage() {
                 .in('id', userIds);
             if (error) return {};
             return Object.fromEntries(
-                (data || []).map(p => [p.id, p])
+                (data || []).map((p: any) => [p.id, p])
             ) as Record<string, { id: string; full_name: string | null; email: string | null }>;
         },
         enabled: userIds.length > 0
