@@ -111,7 +111,7 @@ export function ABTestModal() {
 
                 // Fire both concurrently but handle them individually to see who fails
                 const results = await Promise.allSettled([
-                    triggerWebhook('content-test', testId),
+                    triggerWebhook('content-engine-test-unique', testId),
                     triggerWebhook('content-test-original', originalId)
                 ]);
 
@@ -138,7 +138,7 @@ export function ABTestModal() {
                 }
             } else {
                 const testId = crypto.randomUUID();
-                await triggerWebhook('content-test', testId);
+                await triggerWebhook('content-engine-test-unique', testId);
                 toast({
                     title: "Test Started",
                     description: "New Logic triggered (v23). Redirecting...",

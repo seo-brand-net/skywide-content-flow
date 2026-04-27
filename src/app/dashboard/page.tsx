@@ -240,148 +240,103 @@ export default function Dashboard() {
 
     const fillRealTestData = () => {
         setFormData({
-            articleTitle: "Anxiety and School Pressure: Managing Stress Without Burning Out",
-            titleAudience: "Parents of teens dealing with school burn out",
-            clientName: "The Ridge RTC",
-            creativeBrief: `Do NOT deviate from this outline. 
+            articleTitle: "Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses",
+            titleAudience: "Professional Engineers",
+            clientName: "Align PEO",
+            creativeBrief: `Blog Title: Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses Reading Time: ~6 minutes Target Word Count: ~1,000 words
 
-Blog Brief: Anxiety and School Pressure: Managing Stress Without Burning Out
-Reading Time: ~6 minutes
-Target Word Count: ~800 words
-Audience
-Parents and caregivers of teens and adolescents experiencing academic stress, overwhelm, or anxiety related to school performance — particularly middle and high school students.
-Tone
-Supportive, validating, educational, clinical yet accessible — reassuring without minimizing stress or over-pathologizing.
-Brand Positioning (The Ridge)
-Adolescent-focused, evidence-based, trauma-informed, skills-oriented — emphasizing emotional regulation, balance, and resilience rather than perfection or pressure.
+Audience Licensed Professional Engineers in Wisconsin approaching their renewal deadline who need to understand the ethics PDH requirement — what qualifies, how many hours are needed, and where to find approved courses quickly.
+Tone Clear, no-nonsense, and helpful. These are busy professionals who want answers fast. Authoritative without being bureaucratic. Slightly more practical/transactional than editorial.
+Brand Positioning PDH Pro as the go-to source for DSPS-compliant ethics courses — convenient, state-specific, and designed to meet Wisconsin's requirements without wasted time.
 
 SEO Guidelines
-Focus Keyword
-Teen School Anxiety
-Must appear in:
-H1 (title)
-First paragraph
-At least two additional times naturally throughout the article
-Primary Keyword
-High School Anxiety
-Must appear in:
-At least one H2 heading
-At least two additional times naturally in the body
-Long-Tail Keywords
-Use each once organically:
-How to Deal With Anxiety at School Teenager
-How to Help Teenager With School Anxiety
+Primary Keyword: ethics for wisconsin professional engineers Must appear in: H1 (title), first paragraph, at least two additional times naturally throughout
+Secondary Keyword: wisconsin pe ethics renewal requirement Must appear in: at least one H2 heading, at least two additional times naturally in the body
+Semantic Themes (use each once organically):
+professional engineer ethics course
+pe continuing education ethics
+Internal Links (verify URLs before publishing)
+Wisconsin PE Ethics Courses — https://pdh-pro.com/courses/ethics/
+Wisconsin PE Continuing Education — https://pdh-pro.com/pe-continuing-education/wisconsin/
+Full Course Catalog — https://pdh-pro.com/courses/
+How PDH Pro Works — https://pdh-pro.com/how-it-works/
 
 Table of Contents
 Introduction
-Understanding Teen School Anxiety
-High School Anxiety and Academic Pressure
-Signs School Stress Is Becoming a Problem
-Why Teens Burn Out
-How to Deal With Anxiety at School Teenager
-How to Help Teenager With School Anxiety
-When School Anxiety Needs Professional Support
+Wisconsin PE Ethics: The Basics
+Understanding the Wisconsin PE Ethics Renewal Requirement
+What Topics Count as Ethics for Wisconsin Professional Engineers?
+What Does NOT Count Toward the Ethics Requirement?
+Where to Find Approved Ethics Courses
+How to Document Ethics PDH Hours
+Ethics and the Broader Renewal Picture
 FAQs
 Conclusion
 Key Takeaways
 Cited Sources
 
-Internal Links:
-https://theridgertc.com/what-we-treat/teen-anxiety-treatment/
-https://theridgertc.com/what-we-treat/school-refusal-treatment-program/
-https://theridgertc.com/how-we-treat/residential-treatment-centers-for-youth/
-https://theridgertc.com/contact/
-https://paradigmtreatment.com/teen-anxiety-school-refusal/
-
 Content Outline & Writing Instructions
-1. Introduction (≈90–110 words)
-Purpose: Normalize school-related stress and frame burnout prevention.
-Acknowledge the pressure teens face from academics, extracurriculars, testing, and expectations.
-Introduce Teen School Anxiety as a common and understandable response to chronic stress.
-Emphasize that unmanaged school pressure can lead to burnout, emotional exhaustion, and anxiety.
-Use the focus keyword naturally in the first paragraph.
-
-2. Understanding Teen School Anxiety (≈90–100 words)
-Purpose: Define school-related anxiety in adolescents.
-Explain how school anxiety differs from normal stress or motivation.
-Discuss how performance pressure, comparison, and fear of failure contribute to anxiety.
-Reinforce that Teen School Anxiety affects emotional, physical, and cognitive functioning.
-
-3. High School Anxiety and Academic Pressure (≈90–100 words)
-Purpose: Address developmental and environmental factors.
-Use High School Anxiety in the H2 and body copy.
-Discuss increased workload, testing, college pressure, and social comparison.
-Explain how adolescent brain development makes stress regulation more challenging.
-Emphasize that anxiety is not a sign of weakness or lack of effort.
-
-4. Signs School Stress Is Becoming a Problem (≈80–90 words)
-Purpose: Help parents recognize red flags.
-Emotional signs: irritability, worry, perfectionism, emotional shutdown.
-Physical signs: headaches, stomachaches, fatigue, sleep disruption.
-Behavioral signs: avoidance, school refusal, declining grades, burnout symptoms.
-Emphasize patterns over isolated incidents.
-
-5. Why Teens Burn Out (≈80–90 words)
-Purpose: Explain burnout without blame.
-Describe chronic stress, lack of recovery time, and constant performance demands.
-Discuss internal pressure vs. external expectations.
-Reinforce that burnout is a nervous system response, not laziness.
-
-6. How to Deal With Anxiety at School Teenager (≈90–110 words)
-Purpose: Offer teen-centered coping strategies.
-Introduce How to Deal With Anxiety at School Teenager organically.
-Suggest skills such as pacing, grounding techniques, realistic goal-setting, and breaks.
-Emphasize learning stress-management skills rather than avoiding school entirely.
-Reinforce that support should be collaborative, not punitive.
-
-7. How to Help Teenager With School Anxiety (≈90–110 words)
-Purpose: Guide parents toward supportive responses.
-Introduce How to Help Teenager With School Anxiety naturally.
-Encourage open conversations about pressure and expectations.
-Suggest validating emotions while helping teens build coping tools.
-Emphasize flexibility, balance, and emotional safety over achievement.
-
-8. When School Anxiety Needs Professional Support (≈80–90 words)
-Purpose: Normalize seeking help.
-Explain when anxiety interferes with attendance, sleep, mood, or functioning.
-Emphasize that early intervention prevents long-term burnout.
-Position The Ridge's adolescent-focused, skills-based approach as supportive and developmentally appropriate.
-
-9. FAQs (≈100 words total)
-Q1: Is school anxiety normal for teens?
-A: Some stress is normal, but persistent anxiety is not something teens should handle alone.
-Q2: Can anxiety affect academic performance?
-A: Yes — anxiety can impair focus, memory, and motivation.
-Q3: Should parents reduce academic expectations?
-A: Balance and flexibility often support better long-term outcomes than pressure.
-Q4: Can teens learn to manage school stress effectively?
-A: Yes — with skills, support, and guidance, teens can build resilience.
-
-10. Conclusion (≈70–80 words)
-Reinforce that Teen School Anxiety is common but manageable.
-Emphasize that addressing High School Anxiety early helps prevent burnout.
-Encourage families to prioritize emotional well-being alongside academic success.
-Reinforce that support, skills, and balance make a meaningful difference.
-
+1. Introduction Purpose: Establish relevance immediately.
+Open by noting that for ethics for wisconsin professional engineers, the requirement is small in credit hours but non-negotiable for renewal.
+State that many engineers are unclear on exactly what topics qualify — and risk submitting courses that don't meet DSPS standards.
+Use primary keyword naturally in the first paragraph.
+Preview: this article breaks down what counts, what doesn't, and where to find approved courses fast.
+2. Wisconsin PE Ethics: The Basics Purpose: Establish the rule clearly.
+Wisconsin requires 2 PDH hours in professional or business ethics as part of the 30-hour renewal requirement.
+Renewal cycle is biennial (every two years), with renewal deadlines tied to the license expiration date.
+The ethics component is a minimum — additional ethics hours may be taken but only 2 are mandated.
+3. Understanding the Wisconsin PE Ethics Renewal Requirement (H2 — use secondary keyword) Purpose: Expand on what DSPS actually specifies.
+Clarify that the wisconsin pe ethics renewal requirement is governed by Wisconsin Administrative Code Ch. A-E 240.
+Ethics PDH must cover professional or business ethics — not general soft skills or compliance.
+DSPS does not maintain a pre-approved course list; the engineer is responsible for ensuring course content qualifies.
+Re-use secondary keyword: engineers who misunderstand the wisconsin pe ethics renewal requirement risk rejected hours during an audit.
+4. What Topics Count as Ethics for Wisconsin Professional Engineers? (use semantic themes) Purpose: Define qualifying content clearly.
+Topics that qualify: NSPE Code of Ethics, engineering judgment and duty to the public, conflicts of interest, client confidentiality, professional responsibility in design, whistleblowing obligations.
+A professional engineer ethics course that addresses one or more of these areas will generally satisfy DSPS requirements.
+Pe continuing education ethics content from NSPE, state boards, or accredited providers like PDH Pro typically qualifies.
+Re-use primary keyword: the clearest way to satisfy the ethics for wisconsin professional engineers requirement is through a course explicitly designed around professional codes of conduct.
+5. What Does NOT Count Toward the Ethics Requirement? Purpose: Prevent common mistakes.
+General compliance training (e.g., workplace harassment, OSHA) does not qualify as engineering ethics.
+Business ethics courses not specific to professional engineering practice are typically insufficient.
+Self-study without structured content or a certificate of completion may not meet documentation requirements.
+6. Where to Find Approved Ethics Courses Purpose: Direct readers toward a solution — including PDH Pro.
+PDH Pro offers Wisconsin-compliant ethics courses designed specifically for Professional Engineers.
+Courses are available online, self-paced, and include a certificate of completion for your records.
+Link to PDH Pro's ethics course page.
+Also mention NSPE (nspe.org) as a secondary resource for ethics content.
+7. How to Document Ethics PDH Hours Purpose: Remove ambiguity around recordkeeping.
+DSPS does not require upfront submission of PDH records but may audit at any time.
+Retain documentation for a minimum of four years: course certificate, provider name, topic, date completed, hours.
+PDH Pro certificates include all required information for audit compliance.
+8. Ethics and the Broader Renewal Picture Purpose: Zoom out and frame the full 30-hour requirement.
+The 2 ethics hours sit within a 30-PDH biennial requirement.
+Remaining 28 hours may come from a wide range of technical and professional development topics.
+Link to the Wisconsin PE continuing education overview page on PDH Pro.
+9. FAQs Q1: How many ethics hours are required for Wisconsin PE renewal? A: Wisconsin requires 2 PDH hours in professional or business ethics as part of the 30-hour biennial renewal requirement.
+Q2: What counts as a professional engineer ethics course in Wisconsin? A: Courses covering the NSPE Code of Ethics, professional responsibility, conflicts of interest, or duties to the public generally qualify. DSPS does not pre-approve courses; the engineer is responsible for content verification.
+Q3: Does Wisconsin require ethics PE continuing education from a specific provider? A: No — Wisconsin does not maintain a pre-approved provider list. Courses must simply meet the content standards outlined in A-E 240.
+Q4: Can I take more than 2 hours of ethics and count them all? A: Additional ethics hours may be taken but only 2 are required. Extra hours count toward your general 30-PDH total.
+10. Conclusion
+Reiterate the core message: ethics for wisconsin professional engineers is a 2-hour, every-renewal requirement that's easy to satisfy when you know what qualifies.
+Encourage engineers not to treat it as an afterthought — completing it through a structured, purpose-built course protects your license and simplifies documentation.
+Close with a clear path to PDH Pro's ethics courses.
 11. Key Takeaways
-Teen school anxiety is a common response to chronic academic pressure.
-High school anxiety can escalate without support.
-Burnout reflects nervous system overload, not lack of effort.
-Knowing how to deal with anxiety at school helps teens stay engaged.
-Knowing how to help a teenager with school anxiety starts with validation and balance.
-
+Wisconsin PEs must complete 2 PDH hours of professional or business ethics per renewal cycle.
+The wisconsin pe ethics renewal requirement is governed by Administrative Code Ch. A-E 240.
+Qualifying content must address professional engineering ethics specifically — not general compliance training.
+DSPS does not pre-approve courses; engineers are responsible for content compliance.
+Retaining certificates for at least four years protects against audit risk.
 12. Cited Sources
-Include authoritative sources such as:
-CDC – Youth Stress & Mental Health
-American Academy of Pediatrics – School Stress in Adolescents
-National Institute of Mental Health (NIMH) – Anxiety Disorders in Teens
-Child Mind Institute – School Anxiety & Burnout`,
+Wisconsin DSPS — Professional Engineer Continuing Education Requirements — https://dsps.wi.gov/Pages/Professions/ProfessionalEngineer/Default.aspx
+Wisconsin Administrative Code Ch. A-E 240 — https://docs.legis.wisconsin.gov/code/admin_code/a-e/240
+NSPE — Code of Ethics for Engineers — https://www.nspe.org/resources/ethics/code-ethics
+NCEES — PE Licensing Resources — https://ncees.org/engineering/pe/`,
             articleType: "Blogs",
-            wordCount: "800",
-            primaryKeyword: "Teen School Anxiety",
-            secondaryKeyword: "High School Anxiety",
-            semanticTheme: "How to Deal With Anxiety at School as a Teenager, How to Help Teenager With School Anxiety",
-            tone: "Professional, compassionate",
+            wordCount: "1000",
+            primaryKeyword: "ethics for wisconsin professional engineers",
+            secondaryKeyword: "wisconsin pe ethics renewal requirement",
+            semanticTheme: "professional engineer ethics course, pe continuing education ethics",
+            tone: "Professional",
             pageIntent: "Informational"
         });
     };

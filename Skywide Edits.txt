@@ -1,0 +1,48 @@
+﻿Source document: https://docs.google.com/document/d/1JPPuFt7XUk-dz7B8OcoanRX1IlhW6p_jGmpePFOpMH8/edit?usp=sharing 
+The three rules below replace the tracked changes and comments in the document attached above. Each rule applies everywhere the matching language appears in the prompts, not just the first place it was marked up. Some of these patterns appear in 15+ prompts (Keyword Check, EEAT Injection, SEO Optimization, NLP Optimization, Humanized Readability, Document Export Sanitization, Scoring Agents, etc.). Please apply the rule to all of them.
+Rule 1 — Client name goes in the closing paragraph, not the opening
+Anywhere a prompt instructs that the client name ({{ $('Webhook1').first().json.body.client_name }}) must appear in the opening paragraph or within the first two sentences, change it to say the closing paragraph, and drop the "first two sentences" qualifier (it doesn't make sense for a closing paragraph).
+Examples of language to replace:
+* The opening paragraph must include {{ client_name }} within the first two sentences
+* Always mention the client's name ({{ client_name }}) naturally in the opening paragraph, within the first two sentences
+* Opening paragraph must include {{ client_name }} within first two sentences (scoring-agent variant)
+Replacement pattern:
+* The closing paragraph must include {{ client_name }}
+* Always mention the client's name ({{ client_name }}) naturally in the closing paragraph
+* Closing paragraph includes {{ client_name }} (scoring-agent variant)
+Rule 2 — Write in first-person brand voice, not as an outside advisor
+Anywhere a prompt tells the model to write in second person / neutral third person / "as an outside expert" / "not in the company's voice," replace it with an instruction to write in the company's first-person brand voice ("we," "our"), with second person ("you") allowed selectively.
+Examples of language to replace:
+* Never write from the company's perspective ("we," "our," "join us"). Always write in second person ("you") or neutral third person, as an outside expert giving advice about {{ client_name }}.
+* Do not write in the company's voice for {{ client_name }} ("we," "our," "join us"). Write in second person ("you") or neutral third person.
+* Always write in second person ("you") or neutral third person, never in first person for {{ client_name }}.
+* Always use second person ("you") or neutral third person.
+* Uses second person ("you") or neutral third person throughout. (scoring-agent variant)
+Replacement pattern (instruction form):
+* Primarily write from the company's perspective using first-person language ("we," "our") for {{ client_name }}. Second-person ("you") can be used selectively, but avoid neutral third-party commentary.
+Replacement pattern (scoring-agent variant, rewritten as a criterion):
+* Uses first-person brand voice ("we," "our") throughout; second person is used selectively, not neutral third person.
+Rule 3 — Expanded tone rules and "avoid" list
+Anywhere a prompt has a short tone rule like "Tone should feel approachable and human — like trusted advice from someone with real experience" (often followed by something like "Avoid filler, clichés, or anything that feels AI-generated"), replace the whole block with the expanded version below.
+Replacement block:
+Tone should feel approachable and human, like trusted advice from someone with real experience. However, make sure the phrasing comes off as professional, not overly personal or casual. For all content requests:
+* Avoid AI-sounding, generic, redundant, and robotic language.
+* Avoid clichéd phrases or metaphors, such as "journey" and "navigate/navigating," "in the ever-changing/ever-evolving landscape/terrain of," and "seamless/seamlessly."
+* Restrict the usage of the words "comprehensive" and "integrate/integrated."
+* Do NOT use em-dashes.
+* Avoid correlative constructions/emphatic coordinations, such as "not only … but also" and "not just / more than…but also" and other amplifying, additive rhetorical clauses.
+* Make sure sentences are concise, and paragraphs are short.
+Preserve the numbering/list style of the surrounding prompt when inserting this block.
+Summary
+Rule
+	What changes
+	Where to apply
+	1
+	"Opening paragraph" / "first two sentences" → "closing paragraph"
+	Every prompt with a client-name placement rule (~16 prompts)
+	2
+	Advisor / second- or third-person voice → first-person brand voice
+	Every prompt with a voice rule (~15 prompts)
+	3
+	Short tone line → expanded tone rules + detailed "avoid" list
+	Every prompt with a short "approachable / avoid filler" tone rule

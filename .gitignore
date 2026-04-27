@@ -55,3 +55,14 @@ excel_structure.json
 
 # Windows reserved names
 nul
+
+# Temporary test outputs
+test-output-old.txt
+test-output-new.txt
+article-result.txt
+
+# Temporary scripts
+apply_prompt_edits.js
+verify_prompt_review.js
+fix_cross_references.py
+update_strategist_script.js
