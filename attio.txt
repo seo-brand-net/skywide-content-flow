@@ -1,0 +1,257 @@
+CRM Migration &
+Automation Plan
+Pipedrive → Attio → Lead Scoring & Nurture Automation
+Month 1
+Pipedrive → Attio Migration
+30 days
+Month 2
+CRM Setup & Lead Scoring
+30 days
+Month 3
+Automation & Nurture
+30 days
+Target outcome: 20–30% increase in qualified discovery calls within 90 days
+Baseline: ~10 leads per 100 inbound convert to meaningful conversations
+Confidential · Page 1
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Project Overview
+This document outlines the 90-day plan to migrate the SEO agency’s CRM from Pipedrive to Attio, configure the
+system with proper pipeline stages and lead scoring, and implement automated nurture sequences to replace
+manual BDR functions.
+Key objectives
+• Migrate all existing Pipedrive records cleanly to Attio with zero data loss
+• Build pipeline stages that map to Danielle’s real-world process
+• Implement a 5–7 factor lead scoring model integrating behavioral and firmographic data
+• Automate nurture sequences that act as a BDR replacement for warm inbound leads
+• Achieve full funnel visibility with reporting on conversion rates by stage
+Key milestones
+Week 1–2 Audit Pipedrive, export all data, map fields to Attio schema, set up Attio workspace
+Week 3–4 Import data, validate records, connect forms & integrations, train Danielle on Attio
+Week 5–6 Build pipeline stages, design lead scoring model (5–7 factors), integrate behavioral data
+Week 7–8 Integrate firmographic enrichment (PDL / Datagma), build routing rules for SMB vs enterprise
+Week 9–10 Build nurture sequences, configure AI-assisted follow-up drafts, set up automation triggers
+Week 11–12 QA full funnel, finalise reporting dashboards, hand off to Danielle, 90-day review
+Confidential · Page 2
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Month 1 — Pipedrive → Attio Migration
+Audit existing data, map fields, migrate cleanly, validate records, and get the team live on Attio
+Week 1 — Audit & Field Mapping
+Day Task Focus
+Monda
+y
+Full Pipedrive data audit — contacts, deals, notes, activities CRM
+Tuesda
+y
+Document all custom fields and deal stages currently in Pipedrive CRM
+Wedne
+sday
+Call with Danielle — map her Excel process to formal CRM stages Call
+Thursd
+ay
+Design Attio workspace: objects, attributes, relationships CRM
+Friday Document full field mapping spec (Pipedrive field → Attio field) Data
+Week 2 — Attio Setup & Pipedrive Export
+Day Task Focus
+Monda
+y
+Set up Attio workspace, configure objects (People, Companies, Deals) CRM
+Tuesda
+y
+Export Pipedrive data (CSV + API backup), clean and deduplicate records Data
+Wedne
+sday
+Transform exported data into Attio import format Data
+Thursd
+ay
+Test import with a small sample batch, verify field mapping accuracy CRM
+Friday Review and sign off on field mapping with Danielle before full import Review
+Week 3 — Full Import & Integration
+Day Task Focus
+Monda
+y
+Run full data import into Attio — contacts, companies, deals CRM
+Tuesda
+y
+Validate imported records — spot check 50+ records for accuracy Data
+Wedne
+sday
+Reconnect website forms to Attio via API / Zapier Integrations
+Thursd
+ay
+Connect Gmail to Attio for automatic activity logging Integrations
+Friday Test end-to-end: form submit → Attio record created correctly QA
+Confidential · Page 3
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Week 4 — Team Onboarding & Go-Live
+Day Task Focus
+Monda
+y
+Build Danielle’s custom list views and filters in Attio CRM
+Tuesda
+y
+Attio walkthrough with Danielle — views, tasks, deal management Training
+Wedne
+sday
+Danielle solo practice day — log issues and questions Training
+Thursd
+ay
+Fix any issues from Danielle’s feedback, finalise views and workflows CRM
+Friday Deactivate Pipedrive, confirm Attio is sole CRM — go live Go-live
+Confidential · Page 4
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Month 2 — CRM Configuration & Lead Scoring
+Build proper pipeline stages, lead scoring model, behavioral data integration and routing rules
+Week 5 — Pipeline Stages & Scoring Model Design
+Day Task Focus
+Monda
+y
+Workshop with Danielle — map full funnel from inbound lead to close Call
+Tuesda
+y
+Build pipeline stages in Attio (New Lead → Qualified → Discovery →
+Proposal → Closed)
+CRM
+Wedne
+sday
+Design lead scoring rubric — select 5–7 factors with weights Scoring
+Thursd
+ay
+Define score thresholds: hot / warm / cold / disqualified Scoring
+Friday Review scoring model with Mike and Danielle for sign-off Review
+Week 6 — Behavioral Data & Website Tracking
+Day Task Focus
+Monda
+y
+Audit existing website tracking setup (pages viewed, content consumed) Data
+Tuesda
+y
+Set up / verify event tracking for key intent signals (pricing page, case
+studies)
+Tracking
+Wedne
+sday
+Pipe behavioral events into Attio via API or integration Integrations
+Thursd
+ay
+Map behavioral signals to scoring fields in Attio Scoring
+Friday Test full path: visit high-intent page → lead score updates in Attio QA
+Week 7 — Firmographic Enrichment
+Day Task Focus
+Monda
+y
+Set up People Data Labs (or Datagma) API connection Integrations
+Tuesda
+y
+Auto-enrich new leads on creation: company size, industry, revenue Data
+Wedne
+sday
+Map enrichment fields to scoring factors in Attio Scoring
+Thursd
+ay
+Define disqualification rules (micro businesses, unrealistic expectations) CRM
+Friday Test enrichment and scoring on 20 real inbound leads, validate scores QA
+Confidential · Page 5
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Week 8 — Routing Rules & Reporting
+Day Task Focus
+Monda
+y
+Build SMB vs enterprise routing logic based on firmographic data and score CRM
+Tuesda
+y
+Configure round-robin assignment for SMB, specialist routing for enterprise CRM
+Wedne
+sday
+Build reporting dashboard: qualified leads per week, conversion by stage Reporting
+Thursd
+ay
+Review dashboard with Danielle and Mike — align on success metrics Review
+Friday Month 2 retro — scoring model calibration based on early live data Retro
+Confidential · Page 6
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Month 3 — Automation & Nurture Sequences
+Build AI-assisted follow-up, nurture flows, BDR-replacement sequences and long-term optimization loop
+Week 9 — Nurture Sequence Design
+Day Task Focus
+Monda
+y
+Map nurture tracks by lead bucket (hot / warm / cold / re-engage) Automation
+Tuesda
+y
+Write email sequence copy — value-first, personalised, non-generic Content
+Wedne
+sday
+Design re-engagement sequence for leads dropped after 3–4 touches Automation
+Thursd
+ay
+Set up AI visibility audit trigger — auto-send on high-intent signal Automation
+Friday Review sequence copy with Mike and Danielle for tone and value fit Review
+Week 10 — Automation Build & AI Follow-Up
+Day Task Focus
+Monda
+y
+Build automation triggers in Attio (score crosses threshold → enrol
+sequence)
+Automation
+Tuesda
+y
+Set up AI-generated follow-up draft suggestions for salespeople AI
+Wedne
+sday
+Build low-touch automated outreach for cold and long-nurture leads Automation
+Thursd
+ay
+Connect sequences to Attio stages — auto-advance on reply or meeting
+booked
+Integrations
+Friday End-to-end test: new inbound lead → scored → routed → sequence enrolled QA
+Week 11 — QA, Refinement & Edge Cases
+Day Task Focus
+Monda
+y
+Run 10 test leads through full funnel — log any scoring or routing errors QA
+Tuesda
+y
+Fix edge cases — duplicate handling, enrichment failures, unsubscribes Automation
+Wedne
+sday
+Tune scoring weights based on first 30 days of live data Scoring
+Thursd
+ay
+Refine sequence timing and subject lines based on open and reply rates Automation
+Friday Danielle review — confirm workflow feels manageable day-to-day Review
+Confidential · Page 7
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Week 12 — Handoff, Dashboards & Ongoing Optimization
+Day Task Focus
+Monda
+y
+Finalise reporting dashboard — qualified calls, stage conversion, pipeline
+value
+Reporting
+Tuesda
+y
+Document full system: scoring logic, sequences, routing rules Docs
+Wedne
+sday
+Final Danielle training — running reports, adjusting sequences, adding leads Training
+Thursd
+ay
+90-day results review with Mike and Michael — qualified calls vs 10%
+baseline
+Review
+Friday Roadmap for month 4+: predictive scoring, deeper AI automation Roadmap
+Confidential · Page 8
+CRM Migration & Automation Plan | Pipedrive → Attio → Lead Automation
+Success Metrics & Next Steps
+Primary success metrics
+Metric Baseline Target (90 days)
+Qualified discovery calls ~10 per 100 inbound leads +20–30% increase
+Leads dropped after 3–4 touches High — no re-engagement system Reduced significantly
+Funnel stage visibility Manual Excel tracking only Full CRM visibility
+Pipeline reporting None Automated dashboards
+Immediate next steps
+• Matthew Piwko: Begin Pipedrive audit this week and deliver formal strategy proposal
+• Mike Salvaggio & Michael Abitbol: Confirm scope and kick off Month 1
+• Danielle: Schedule initial process mapping call (Week 1, Wednesday)
+• All: Align on Attio as chosen CRM platform before migration begins

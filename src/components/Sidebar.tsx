@@ -29,6 +29,7 @@ const adminNavItems = [
     { icon: Search, label: 'Research', path: '/research' },
     { icon: Users, label: 'Invite Users', path: '/invite-users' },
     { icon: BarChart, label: 'Analytics', path: '/analytics' },
+    { icon: Users, label: 'Clients', path: '/settings/clients' },
     { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 

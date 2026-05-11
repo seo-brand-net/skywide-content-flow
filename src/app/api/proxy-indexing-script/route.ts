@@ -149,16 +149,28 @@ export async function POST(request: Request) {
             }
         }
 
-        // Update the run record with results, using retry backoff logic
+        // Update the run record with results
         if (runId) {
-            await updateRunRecordWithRetry(runId, {
-                status: isSuccess ? 'success' : 'error',
-                google_summary: mappedGoogleSummary,
-                bing_summary: mappedBingSummary,
-                error_message: isSuccess ? null : (gasData?.error || gasData?.message || 'Apps Script returned an error'),
-                error_details: isSuccess ? null : gasData,
-                completed_at: new Date().toISOString()
-            });
+            await supabaseAdmin
+                .from('indexing_runs')
+                .update({
+                    status: isSuccess ? 'success' : 'error',
+                    google_summary: mappedGoogleSummary,
+                    bing_summary: mappedBingSummary,
+                    error_message: isSuccess ? null : (gasData?.error || gasData?.message || 'Apps Script returned an error'),
+                    error_details: isSuccess ? null : gasData,
+                    completed_at: new Date().toISOString()
+                })
+                .eq('id', runId);
+        }
+
+        // Reset the 14-day scheduling clock on the client so manual runs
+        // are treated the same as scheduled runs for next-due calculation.
+        if (isSuccess && indexing_client_id) {
+            await supabaseAdmin
+                .from('indexing_clients')
+                .update({ last_run_at: new Date().toISOString() })
+                .eq('id', indexing_client_id);
         }
 
         if (!isSuccess) {
