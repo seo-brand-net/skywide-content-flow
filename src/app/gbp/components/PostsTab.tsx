@@ -154,23 +154,38 @@ export function PostsTab() {
                                             <tr className="bg-muted/10">
                                                 <td colSpan={5} className="px-8 py-6">
                                                     <div className="space-y-4 max-w-4xl">
-                                                        <div>
-                                                            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Post Content</h4>
-                                                            <p className="text-sm whitespace-pre-wrap bg-background p-4 rounded-lg border border-border/50">{post.post_body || 'Generating...'}</p>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 gap-4">
-                                                            <div>
-                                                                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Image Prompt</h4>
-                                                                <p className="text-xs text-muted-foreground bg-background p-3 rounded-lg border border-border/50">{post.image_prompt || 'N/A'}</p>
+                                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                                            <div className="lg:col-span-2 space-y-4">
+                                                                <div>
+                                                                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Post Content</h4>
+                                                                    <p className="text-sm whitespace-pre-wrap bg-background p-4 rounded-lg border border-border/50">{post.post_body || 'Generating...'}</p>
+                                                                </div>
+                                                                <div className="grid grid-cols-2 gap-4">
+                                                                    <div>
+                                                                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5" /> Image Prompt</h4>
+                                                                        <p className="text-xs text-muted-foreground bg-background p-3 rounded-lg border border-border/50">{post.image_prompt || 'N/A'}</p>
+                                                                    </div>
+                                                                    <div>
+                                                                        <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5"><ExternalLink className="w-3.5 h-3.5" /> Target Link</h4>
+                                                                        {post.link_url ? (
+                                                                            <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-blue-crayola hover:underline flex items-center gap-1 bg-brand-blue-crayola/5 p-3 rounded-lg border border-brand-blue-crayola/20 break-all">
+                                                                                {post.link_url}
+                                                                            </a>
+                                                                        ) : (
+                                                                            <p className="text-xs text-muted-foreground">N/A</p>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div>
-                                                                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5"><ExternalLink className="w-3.5 h-3.5" /> Target Link</h4>
-                                                                {post.link_url ? (
-                                                                    <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-blue-crayola hover:underline flex items-center gap-1 bg-brand-blue-crayola/5 p-3 rounded-lg border border-brand-blue-crayola/20 break-all">
-                                                                        {post.link_url}
-                                                                    </a>
+                                                            <div className="lg:col-span-1 border border-border/50 rounded-lg overflow-hidden bg-muted/20 flex flex-col items-center justify-center min-h-[200px]">
+                                                                {post.image_url ? (
+                                                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                                                    <img src={post.image_url} alt="Generated post image" className="w-full h-full object-cover" />
                                                                 ) : (
-                                                                    <p className="text-xs text-muted-foreground">N/A</p>
+                                                                    <div className="flex flex-col items-center gap-2 text-muted-foreground/50 p-4 text-center">
+                                                                        <ImageIcon className="w-10 h-10" />
+                                                                        <span className="text-xs">No image generated</span>
+                                                                    </div>
                                                                 )}
                                                             </div>
                                                         </div>

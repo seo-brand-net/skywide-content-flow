@@ -21,7 +21,7 @@
     {
       "parameters": {
         "method": "GET",
-        "url": "={{ 'https://skywide.vercel.app/api/gbp/client-config?client_id=' + $json.body.client_id }}",
+        "url": "={{ 'https://skywide-content-flow.vercel.app/api/gbp/client-config?client_id=' + $json.body.client_id }}",
         "options": {}
       },
       "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -299,7 +299,7 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1,
       "position": [
-        1712,
+        1962,
         -544
       ],
       "webhookId": "3c168212-1e56-415f-8d7e-f3e549d55d28"
@@ -407,7 +407,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        1968,
+        2218,
         -544
       ],
       "credentials": {
@@ -420,7 +420,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://skywide.vercel.app/api/gbp/posts",
+        "url": "https://skywide-content-flow.vercel.app/api/gbp/posts",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
@@ -447,6 +447,10 @@
             {
               "name": "link_url",
               "value": "={{ $('Choose Best Link').item.json.choices[0].message.content }}"
+            },
+            {
+              "name": "image_url",
+              "value": "={{ $('Generate Image with DALL-E').item.json.data[0].url }}"
             }
           ]
         },
@@ -457,9 +461,32 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        2224,
+        2474,
         -544
       ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "={{ $json.message.content }}",
+        "model": "dall-e-3",
+        "size": "1024x1024",
+        "quality": "standard"
+      },
+      "id": "e8a9f0b1-1234-5678-9abc-def012345678",
+      "name": "Generate Image with DALL-E",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [
+        950,
+        -848
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "open-ai-credentials-id-here",
+          "name": "OpenAI account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -579,7 +606,7 @@
       "main": [
         [
           {
-            "node": "Wait 1s",
+            "node": "Generate Image with DALL-E",
             "type": "main",
             "index": 0
           }
@@ -613,6 +640,17 @@
         [
           {
             "node": "Loop Over Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image with DALL-E": {
+      "main": [
+        [
+          {
+            "node": "Wait 1s",
             "type": "main",
             "index": 0
           }

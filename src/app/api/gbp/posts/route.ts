@@ -17,7 +17,7 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
  */
 export async function POST(request: Request) {
     const body = await request.json();
-    const { gbp_client_id, location_id, post_topic, post_body, image_prompt, link_url } = body;
+    const { gbp_client_id, location_id, post_topic, post_body, image_prompt, link_url, image_url } = body;
 
     if (!gbp_client_id || !post_topic) {
         return NextResponse.json({ error: 'gbp_client_id and post_topic are required' }, { status: 400 });
@@ -36,6 +36,43 @@ export async function POST(request: Request) {
         return NextResponse.json({ skipped: true, reason: 'Post already exists for this topic' });
     }
 
+    // Process image_url if provided
+    let permanent_image_url = null;
+    if (image_url) {
+        try {
+            console.log(`Downloading image from ${image_url}...`);
+            const imgRes = await fetch(image_url);
+            if (imgRes.ok) {
+                const arrayBuffer = await imgRes.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                const fileName = `${gbp_client_id}/${Date.now()}.png`;
+
+                const { data: uploadData, error: uploadError } = await supabaseAdmin
+                    .storage
+                    .from('gbp_images')
+                    .upload(fileName, buffer, {
+                        contentType: 'image/png',
+                        upsert: false
+                    });
+
+                if (uploadError) {
+                    console.error('Storage upload error:', uploadError);
+                } else {
+                    const { data: publicUrlData } = supabaseAdmin
+                        .storage
+                        .from('gbp_images')
+                        .getPublicUrl(fileName);
+                    
+                    permanent_image_url = publicUrlData.publicUrl;
+                }
+            } else {
+                console.error(`Failed to download image from n8n. Status: ${imgRes.status}`);
+            }
+        } catch (e) {
+            console.error('Error handling image download:', e);
+        }
+    }
+
     const { data, error } = await supabaseAdmin
         .from('gbp_posts')
         .insert([{
@@ -45,6 +82,7 @@ export async function POST(request: Request) {
             post_body: post_body || null,
             image_prompt: image_prompt || null,
             link_url: link_url || null,
+            image_url: permanent_image_url,
             status: 'DRAFT',
             generated_at: new Date().toISOString(),
         }])

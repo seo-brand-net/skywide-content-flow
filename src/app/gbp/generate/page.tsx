@@ -27,17 +27,24 @@ function PostCard({ post }: { post: any }) {
 
     return (
         <div className="bg-card border border-border/50 rounded-2xl overflow-hidden hover:border-brand-blue-crayola/30 hover:shadow-lg transition-all duration-200 flex flex-col">
-            {/* Image Prompt Visual */}
-            <div className="relative h-36 bg-gradient-to-br from-brand-blue-crayola/10 via-purple-500/5 to-transparent flex items-center justify-center p-4 border-b border-border/30">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue-crayola/10 to-transparent" />
-                {post.image_prompt ? (
-                    <p className="relative text-[11px] text-muted-foreground italic text-center leading-relaxed line-clamp-4 z-10">
-                        {post.image_prompt}
-                    </p>
+            {/* Image Prompt Visual / Generated Image */}
+            <div className="relative h-48 bg-gradient-to-br from-brand-blue-crayola/10 via-purple-500/5 to-transparent flex items-center justify-center border-b border-border/30 overflow-hidden">
+                {post.image_url ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={post.image_url} alt={post.post_topic} className="w-full h-full object-cover" />
                 ) : (
-                    <Image className="w-8 h-8 text-muted-foreground/30" />
+                    <>
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-brand-blue-crayola/10 to-transparent" />
+                        {post.image_prompt ? (
+                            <p className="relative text-[11px] text-muted-foreground italic text-center leading-relaxed line-clamp-4 z-10 px-4">
+                                {post.image_prompt}
+                            </p>
+                        ) : (
+                            <Image className="w-8 h-8 text-muted-foreground/30" />
+                        )}
+                    </>
                 )}
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 right-3 z-20">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusCfg.cls}`}>
                         {statusCfg.label}
                     </span>
