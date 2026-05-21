@@ -314,7 +314,7 @@
         },
         "sheetName": {
           "__rl": true,
-          "value": "GBP Posts",
+          "value": "={{ $('Webhook Trigger').item.json.body.tab_name || 'GBP Posts' }}",
           "mode": "name"
         },
         "columns": {
@@ -450,7 +450,7 @@
             },
             {
               "name": "image_url",
-              "value": "={{ $('Generate Image with DALL-E').item.json.data[0].url }}"
+              "value": "={{ $('Generate Image with DALL-E').item.json.data[0].b64_json }}"
             }
           ]
         },
@@ -467,16 +467,19 @@
     },
     {
       "parameters": {
-        "resource": "image",
-        "prompt": "={{ $json.message.content }}",
-        "model": "dall-e-3",
-        "size": "1024x1024",
-        "quality": "standard"
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-image-1\",\n  \"prompt\": {{ JSON.stringify($json.choices[0].message.content)   \n}},\n  \"size\": \"1024x1024\",\n  \"quality\": \"auto\",\n  \"n\": 1\n}",
+        "options": {}
       },
       "id": "e8a9f0b1-1234-5678-9abc-def012345678",
       "name": "Generate Image with DALL-E",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
       "position": [
         950,
         -848

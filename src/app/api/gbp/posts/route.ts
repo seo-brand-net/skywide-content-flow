@@ -40,13 +40,24 @@ export async function POST(request: Request) {
     let permanent_image_url = null;
     if (image_url) {
         try {
-            console.log(`Downloading image from ${image_url}...`);
-            const imgRes = await fetch(image_url);
-            if (imgRes.ok) {
-                const arrayBuffer = await imgRes.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-                const fileName = `${gbp_client_id}/${Date.now()}.png`;
+            let buffer;
+            if (image_url.startsWith('http')) {
+                console.log(`Downloading image from ${image_url}...`);
+                const imgRes = await fetch(image_url);
+                if (imgRes.ok) {
+                    const arrayBuffer = await imgRes.arrayBuffer();
+                    buffer = Buffer.from(arrayBuffer);
+                } else {
+                    console.error(`Failed to download image from n8n. Status: ${imgRes.status}`);
+                }
+            } else {
+                console.log('Received base64 image data from n8n...');
+                const base64Data = image_url.replace(/^data:image\/\w+;base64,/, "");
+                buffer = Buffer.from(base64Data, 'base64');
+            }
 
+            if (buffer) {
+                const fileName = `${gbp_client_id}/${Date.now()}.png`;
                 const { data: uploadData, error: uploadError } = await supabaseAdmin
                     .storage
                     .from('gbp_images')
@@ -65,11 +76,9 @@ export async function POST(request: Request) {
                     
                     permanent_image_url = publicUrlData.publicUrl;
                 }
-            } else {
-                console.error(`Failed to download image from n8n. Status: ${imgRes.status}`);
             }
         } catch (e) {
-            console.error('Error handling image download:', e);
+            console.error('Error handling image download/upload:', e);
         }
     }
 

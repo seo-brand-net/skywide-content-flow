@@ -16,6 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth as useAuthHook } from '@/hooks/useAuth';
+import { Layout } from '@/components/Layout';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface GbpPost {
@@ -138,23 +139,8 @@ export default function GbpPage() {
         );
     }, [posts, search]);
 
-    const handleApprove = async (id: string) => {
-        const { error } = await supabase.from('gbp_posts').update({ status: 'APPROVED', reviewed_by: user?.id }).eq('id', id);
-        if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
-        toast({ title: 'Post Approved' });
-        queryClient.invalidateQueries({ queryKey: ['gbp_posts_dashboard'] });
-    };
-
-    const handleRequestChanges = async (id: string) => {
-        const { error } = await supabase.from('gbp_posts').update({ status: 'DRAFT' }).eq('id', id);
-        if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
-        toast({ title: 'Marked for revision' });
-        queryClient.invalidateQueries({ queryKey: ['gbp_posts_dashboard'] });
-    };
-
     // ── Stats
     const totalPosts = posts.length;
-    const draftCount = posts.filter(p => p.status === 'DRAFT').length;
     const approvedCount = posts.filter(p => p.status === 'APPROVED').length;
     const thisMonth = posts.filter(p => {
         const d = new Date(p.created_at);
@@ -171,8 +157,9 @@ export default function GbpPage() {
     const exportClientName = clients.find((c: any) => c.id === clientFilter)?.name || 'All Clients';
 
     return (
-        <div className="min-h-screen bg-background p-8">
-            <div className="max-w-7xl mx-auto">
+        <Layout>
+            <div className="min-h-screen bg-background p-8">
+                <div className="max-w-7xl mx-auto">
 
                 {/* ── Header */}
                 <div className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -201,10 +188,9 @@ export default function GbpPage() {
                 </div>
 
                 {/* ── Stats Row */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                     {[
                         { label: 'Total Posts', value: totalPosts, icon: FileText, color: 'text-brand-blue-crayola', bg: 'bg-brand-blue-crayola/10' },
-                        { label: 'Pending Review', value: draftCount, icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-500/10' },
                         { label: 'Approved', value: approvedCount, icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10' },
                         { label: 'This Month', value: thisMonth, icon: Zap, color: 'text-purple-500', bg: 'bg-purple-500/10' },
                     ].map(stat => (
@@ -303,12 +289,6 @@ export default function GbpPage() {
                                                     </td>
                                                     <td className="px-4 py-4 text-center">
                                                         <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            {post.status === 'DRAFT' && (
-                                                                <>
-                                                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-green-500 hover:bg-green-500/10" title="Approve" onClick={() => handleApprove(post.id)}><Check className="w-3.5 h-3.5" /></Button>
-                                                                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-yellow-500 hover:bg-yellow-500/10" title="Request Changes" onClick={() => handleRequestChanges(post.id)}><X className="w-3.5 h-3.5" /></Button>
-                                                                </>
-                                                            )}
                                                             <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground" onClick={() => setExpandedId(expandedId === post.id ? null : post.id)}>
                                                                 {expandedId === post.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                                                             </Button>
@@ -336,10 +316,6 @@ export default function GbpPage() {
                                                                         </div>
                                                                     )}
                                                                     <div className="flex gap-2 pt-1">
-                                                                        {post.status === 'DRAFT' && <>
-                                                                            <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white h-8 text-xs gap-1.5 flex-1" onClick={() => handleApprove(post.id)}><Check className="w-3.5 h-3.5" />Approve</Button>
-                                                                            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5 flex-1 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10" onClick={() => handleRequestChanges(post.id)}><X className="w-3.5 h-3.5" />Revise</Button>
-                                                                        </>}
                                                                         <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={() => exportPostsToPdf([post], post.gbp_clients?.name || 'Post')}><Download className="w-3.5 h-3.5" />PDF</Button>
                                                                     </div>
                                                                 </div>
@@ -357,5 +333,6 @@ export default function GbpPage() {
                 </Card>
             </div>
         </div>
+        </Layout>
     );
 }
