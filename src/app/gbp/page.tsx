@@ -26,6 +26,7 @@ interface GbpPost {
     post_topic: string;
     post_body: string | null;
     image_prompt: string | null;
+    image_url: string | null;
     link_url: string | null;
     status: 'DRAFT' | 'APPROVED' | 'PUBLISHED';
     reviewed_by: string | null;
@@ -71,10 +72,10 @@ function exportPostsToPdf(posts: GbpPost[], clientName: string) {
         <div class="post">
             <div style="display:flex;justify-content:space-between;align-items:flex-start">
                 <h2>${p.post_topic}</h2>
-                <span class="badge">${p.status}</span>
             </div>
             ${p.gbp_locations ? `<p style="font-size:12px;color:#9ca3af;margin:2px 0 0">${p.gbp_locations.location_name}, ${p.gbp_locations.state}</p>` : ''}
             <div class="body">${p.post_body || 'Content pending...'}</div>
+            ${p.image_url ? `<div style="margin: 14px 0; text-align: center;"><img src="${p.image_url}" alt="Generated post image" style="max-width:100%;height:auto;border-radius:8px;max-height:300px;object-fit:contain;border:1px solid #e5e7eb;" /></div>` : ''}
             <div class="meta-row">
                 <div class="meta-item" style="flex:2"><label>Image Prompt</label><p>${p.image_prompt || '—'}</p></div>
                 <div class="meta-item" style="flex:1"><label>Link URL</label><p>${p.link_url || '—'}</p></div>
@@ -95,7 +96,6 @@ export default function GbpPage() {
     const queryClient = useQueryClient();
 
     const [clientFilter, setClientFilter] = useState('all');
-    const [statusFilter, setStatusFilter] = useState('all');
     const [search, setSearch] = useState('');
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -112,7 +112,7 @@ export default function GbpPage() {
 
     // ── Posts log
     const { data: posts = [], isLoading, refetch } = useQuery({
-        queryKey: ['gbp_posts_dashboard', clientFilter, statusFilter],
+        queryKey: ['gbp_posts_dashboard', clientFilter],
         queryFn: async () => {
             let q = supabase.from('gbp_posts').select(`
                 *,
@@ -120,7 +120,6 @@ export default function GbpPage() {
                 gbp_locations(location_name, city, state)
             `).order('created_at', { ascending: false }).limit(500);
             if (clientFilter !== 'all') q = q.eq('gbp_client_id', clientFilter);
-            if (statusFilter !== 'all') q = q.eq('status', statusFilter);
             const { data, error } = await q;
             if (error) throw error;
             return data as GbpPost[];
@@ -141,7 +140,6 @@ export default function GbpPage() {
 
     // ── Stats
     const totalPosts = posts.length;
-    const approvedCount = posts.filter(p => p.status === 'APPROVED').length;
     const thisMonth = posts.filter(p => {
         const d = new Date(p.created_at);
         const now = new Date();
@@ -152,7 +150,7 @@ export default function GbpPage() {
     if (isAppLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-brand-blue-crayola" /></div>;
 
     const exportable = clientFilter !== 'all'
-        ? filtered.filter(p => p.status === 'APPROVED')
+        ? filtered
         : [];
     const exportClientName = clients.find((c: any) => c.id === clientFilter)?.name || 'All Clients';
 
@@ -188,10 +186,9 @@ export default function GbpPage() {
                 </div>
 
                 {/* ── Stats Row */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-2 gap-4 mb-8">
                     {[
                         { label: 'Total Posts', value: totalPosts, icon: FileText, color: 'text-brand-blue-crayola', bg: 'bg-brand-blue-crayola/10' },
-                        { label: 'Approved', value: approvedCount, icon: CheckCircle2, color: 'text-green-500', bg: 'bg-green-500/10' },
                         { label: 'This Month', value: thisMonth, icon: Zap, color: 'text-purple-500', bg: 'bg-purple-500/10' },
                     ].map(stat => (
                         <div key={stat.label} className="bg-card border border-border/50 rounded-xl p-5">
@@ -224,15 +221,7 @@ export default function GbpPage() {
                                         {clients.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-[140px] h-10 bg-background/50"><SelectValue placeholder="All Statuses" /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Statuses</SelectItem>
-                                        <SelectItem value="DRAFT">Draft</SelectItem>
-                                        <SelectItem value="APPROVED">Approved</SelectItem>
-                                        <SelectItem value="PUBLISHED">Published</SelectItem>
-                                    </SelectContent>
-                                </Select>
+
                                 {clientFilter !== 'all' && exportable.length > 0 && (
                                     <Button variant="outline" size="sm" className="h-10 gap-2 font-bold" onClick={() => exportPostsToPdf(exportable, exportClientName)}>
                                         <Download className="w-3.5 h-3.5" /> Export PDF ({exportable.length})
@@ -262,10 +251,10 @@ export default function GbpPage() {
                                 <table className="w-full text-left text-sm border-collapse">
                                     <thead>
                                         <tr className="bg-muted/20 border-b border-border/50">
+                                            <th className="px-6 py-4 font-bold text-foreground w-[60px] text-center">Img</th>
                                             <th className="px-6 py-4 font-bold text-foreground">Topic</th>
                                             <th className="px-4 py-4 font-bold text-foreground">Client</th>
                                             <th className="px-4 py-4 font-bold text-foreground">Location</th>
-                                            <th className="px-4 py-4 font-bold text-foreground text-center">Status</th>
                                             <th className="px-4 py-4 font-bold text-foreground">Date</th>
                                             <th className="px-4 py-4 font-bold text-foreground text-center">Actions</th>
                                         </tr>
@@ -274,13 +263,23 @@ export default function GbpPage() {
                                         {filtered.map(post => (
                                             <React.Fragment key={post.id}>
                                                 <tr className="hover:bg-muted/20 transition-colors group">
+                                                    <td className="px-6 py-4 text-center">
+                                                        {post.image_url ? (
+                                                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-border/50 bg-background inline-flex items-center justify-center">
+                                                                <img src={post.image_url} alt="Post" className="w-full h-full object-cover" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-border/50 border-dashed bg-muted/10 inline-flex items-center justify-center text-muted-foreground/30">
+                                                                <Image className="w-4 h-4" />
+                                                            </div>
+                                                        )}
+                                                    </td>
                                                     <td className="px-6 py-4">
                                                         <p className="font-semibold text-foreground text-sm max-w-[280px] truncate">{post.post_topic}</p>
                                                         {post.post_body && <p className="text-xs text-muted-foreground mt-0.5 max-w-[280px] truncate">{post.post_body}</p>}
                                                     </td>
                                                     <td className="px-4 py-4 text-sm font-medium text-foreground">{post.gbp_clients?.name || '—'}</td>
                                                     <td className="px-4 py-4 text-xs text-muted-foreground">{post.gbp_locations ? `${post.gbp_locations.location_name}, ${post.gbp_locations.state}` : '—'}</td>
-                                                    <td className="px-4 py-4 text-center"><StatusBadge status={post.status} /></td>
                                                     <td className="px-4 py-4">
                                                         <div className="flex flex-col gap-0.5">
                                                             <span className="text-xs font-medium text-foreground">{new Date(post.generated_at || post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -300,9 +299,17 @@ export default function GbpPage() {
                                                     <tr className="bg-muted/10">
                                                         <td colSpan={6} className="px-8 py-6">
                                                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-w-5xl">
-                                                                <div className="lg:col-span-2 space-y-1">
-                                                                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Post Content</p>
-                                                                    <p className="text-sm whitespace-pre-line bg-background p-4 rounded-xl border border-border/50 leading-relaxed">{post.post_body || 'Content pending...'}</p>
+                                                                <div className="lg:col-span-2 space-y-4">
+                                                                    <div>
+                                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Post Content</p>
+                                                                        <p className="text-sm whitespace-pre-line bg-background p-4 rounded-xl border border-border/50 leading-relaxed">{post.post_body || 'Content pending...'}</p>
+                                                                    </div>
+                                                                    {post.image_url && (
+                                                                        <div>
+                                                                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><Image className="w-3 h-3" />Generated Image</p>
+                                                                            <img src={post.image_url} alt="Generated post image" className="rounded-xl border border-border/50 max-h-[300px] object-contain bg-background" />
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                                 <div className="space-y-4">
                                                                     <div>

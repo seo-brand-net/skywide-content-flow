@@ -490,6 +490,68 @@
           "name": "OpenAI account"
         }
       }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Get Client Config').item.json.sheet_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Webhook Trigger').item.json.body.tab_name || $('Get Client Config').item.json.topics_tab_name || 'Topics' }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Generated Date": "={{ $now }}",
+            "Post Topic": "={{ $('Loop Over Topics').item.json['Post Topic'] || $('Loop Over Topics').item.json['Topic'] || $('Loop Over Topics').item.json['Post'] }}"
+          },
+          "matchingColumns": [
+            "Post Topic"
+          ],
+          "schema": [
+            {
+              "id": "Post Topic",
+              "displayName": "Post Topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Generated Date",
+              "displayName": "Generated Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "update-topic-dedup-001",
+      "name": "Update Topic Generated Date",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        2730,
+        -544
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MLJNnAPCCgmc4dul",
+          "name": "Google Sheets account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -642,7 +704,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Topics",
+            "node": "Update Topic Generated Date",
             "type": "main",
             "index": 0
           }
@@ -654,6 +716,17 @@
         [
           {
             "node": "Wait 1s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Topic Generated Date": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Topics",
             "type": "main",
             "index": 0
           }
