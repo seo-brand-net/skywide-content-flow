@@ -1,0 +1,206 @@
+// Instruction Strategist v7 (AI Powered) — Bulletproof Structural Extraction
+const input = $('Webhook1').first().json.body;
+
+function parseKeywords(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.flatMap(item => item.split(',').map(k => k.trim())).filter(k => k.length > 0);
+  }
+  if (typeof raw !== 'string') return [];
+  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);
+}
+
+const rawPrimary = input.primary_keywords;
+const primary = (Array.isArray(rawPrimary) ? rawPrimary.join(', ') : rawPrimary) || '';
+const secondary = parseKeywords(input.secondary_keywords);
+const semantic = parseKeywords(input.semantic_themes);
+
+// EXTRACT AI PARSED JSON FROM PREVIOUS NODE
+// Depending on n8n version, Langchain OpenAI nodes output to message.content or choices[0]
+let aiOutputRAW = $('Parse Creative Brief (LLM)').first().json.message?.content 
+               || $('Parse Creative Brief (LLM)').first().json.text 
+               || $('Parse Creative Brief (LLM)').first().json.choices?.[0]?.message?.content 
+               || '{}';
+               
+let aiData = { headings: [], faqs: [] };
+try {
+    if (typeof aiOutputRAW === "object" && aiOutputRAW !== null) { 
+        aiData = aiOutputRAW; 
+    } else if (typeof aiOutputRAW === "string") { 
+        let cleanedRAW = aiOutputRAW;
+        // Strip markdown JSON wrapping
+        cleanedRAW = cleanedRAW.replace(/^[\s\S]*?```json\s*/, '').replace(/```[\s\S]*$/, '').trim();
+        // In case it's just ``` without json
+        cleanedRAW = cleanedRAW.replace(/^[\s\S]*?```\s*/, '').replace(/```[\s\S]*$/, '').trim();
+        // Ultimate fallback: Try to extract everything from first { to last }
+        const match = cleanedRAW.match(/\{[\s\S]*\}/);
+        if (match) {
+            cleanedRAW = match[0];
+        }
+        aiData = JSON.parse(cleanedRAW); 
+    }
+} catch(e) {
+    console.log("Failed to parse AI node output", e);
+}
+
+const briefHeadings = aiData.headings || [];
+const faqArray = aiData.faqs || [];
+
+let faqInjection = '';
+if (faqArray.length > 0) {
+  faqInjection = '### MANDATORY FAQS TO INCLUDE\n\nAt the end of the article, you MUST include an FAQ section incorporating exactly these questions and answers if provided.\n\n';
+  faqArray.forEach(faq => {
+    faqInjection += `- Q: ${faq.question}\n`;
+    if (faq.answer && faq.answer.trim() !== '') {
+      faqInjection += `  A: (Incorporate this information into your answer: ${faq.answer})\n`;
+    }
+  });
+}
+
+const creativeBrief = input.creative_brief || '';
+let briefEnforcerInjection = '';
+
+if (creativeBrief) {
+  briefEnforcerInjection = `
+### CREATIVE BRIEF STRUCTURE ENFORCEMENT (MANDATORY)
+
+You MUST follow the structural outline and instructions provided in the Creative Brief below. Do not invent your own structure if an explicit outline is provided.
+
+CRITICAL INSTRUCTIONS:
+- You must write the article conforming strictly to the "Content Outline & Writing Instructions" or similar structural outline section provided in the brief.
+- If the brief lists specific H2s or subheadings, you MUST use those exact subheadings in your response.
+- Do NOT invent your own H2s if the outline already specifies them.
+
+`;
+
+  if (briefHeadings.length > 0) {
+    briefEnforcerInjection += `\nWe have automatically parsed the requested outline bindings. YOU MUST USE THESE EXACT HEADINGS:\n`;
+    briefHeadings.forEach((h, i) => {
+        briefEnforcerInjection += `${i + 1}. ${h}\n`;
+    });
+    briefEnforcerInjection += `\nDo not deviate from these boundaries.\n`;
+  }
+}
+
+// Ensure first paragraph injection
+let firstParagraphInjection = '';
+if (input.client_name) {
+  firstParagraphInjection = `The opening paragraph MUST organically mention the client (${input.client_name}) within the first two sentences. Do NOT substitute the company name with "the company" or "the brand."`;
+}
+
+// Optional secondary/semantic keyword injection
+let secondaryKeywordChecklist = '';
+if (secondary.length > 0 || semantic.length > 0) {
+  secondaryKeywordChecklist = '### SUPPLEMENTARY KEYWORDS TO WEAVE NATURALLY:\n';
+  if (secondary.length > 0) {
+    secondaryKeywordChecklist += 'Secondary Keywords:\n' + secondary.map(k => '- ' + k).join('\n') + '\n\n';
+  }
+  if (semantic.length > 0) {
+    secondaryKeywordChecklist += 'Semantic Themes:\n' + semantic.map(sem => '- ' + sem).join('\n') + '\n';
+  }
+}
+
+let briefAuthorityPreamble = '';
+if (input.tone) {
+  briefAuthorityPreamble = `The tone of this article should strictly be: ${input.tone}. Ensure the voice remains authentic.`;
+}
+
+
+let factCheckReport = '';
+try {
+  let raw = $('Pre-Draft Fact Checker').first().json;
+  factCheckReport = raw.message?.content || raw.choices?.[0]?.message?.content || raw.text || '';
+} catch(e) { console.log('Fact check extract failed', e); }
+
+
+
+// ── Build system_prompt_injection (fact check + guardrails) ──────────────────
+// This is the primary injection point for factual constraints in the drafting nodes.
+// It wraps the Pre-Draft Fact Checker report and all editorial guardrails.
+
+let systemPromptInjection = '';
+
+if (factCheckReport && factCheckReport.length > 50) {
+  systemPromptInjection += `
+⚠️ PRE-VERIFIED FACTS MANIFEST — MANDATORY CONSTRAINTS ⚠️
+The following fact-check report was produced by a primary source verification agent.
+You MUST follow these constraints when drafting:
+
+${factCheckReport}
+
+CRITICAL USAGE RULES:
+- Claims marked VERIFIED: Use the exact figures and attributions provided.
+- Claims marked UNVERIFIED or REMOVE: Do NOT include them. Use qualitative language instead (e.g. "research suggests" or "studies indicate").
+- Do NOT introduce any new statistics, percentages, or quantified claims not in this report.
+`;
+}
+
+systemPromptInjection += `
+
+MANDATORY OUTPUT STRUCTURE:
+- Line 1 of your response MUST be: Meta Title: [title here]
+- Line 2 MUST be: Meta Description: [description here]
+- The main article title MUST use a single # (H1). Never start with ##.
+- Include an FAQ section if the brief specifies one.
+
+FORBIDDEN PHRASES — NEVER USE THESE:
+- "you're not alone" / "you are not alone"
+- "you might be surprised"
+- "it's worth noting" / "it is worth noting"
+- "needless to say"
+- "as you may know"
+- "in today's world" / "in today's fast-paced world"
+- "our patients report" / "we've seen patients" / "some of our patients"
+- Any fabricated clinical anecdote or testimonial unless a direct quote is in the brief
+- "we've seen [X]% improvement" or "we've watched clients achieve" unless a cited source is provided
+
+CITATION INTEGRITY:
+- Every cited source MUST match its label exactly. Do NOT relabel a paper with a different title.
+- If a statistic cannot be traced to an independent primary source, use qualitative language.
+- Mechanism of action, serum changes, and clinical response rates are DISTINCT medical concepts — keep them separate.
+`;
+
+const eeatPromptInjection = `
+### E-E-A-T SIGNALS:
+Demonstrate Experience, Expertise, Authoritativeness, and Trustworthiness by:
+- Citing real, named primary sources (government agencies, peer-reviewed studies, professional associations)
+- Using precise, measured language rather than superlatives
+- Acknowledging limitations of evidence where appropriate
+- Attributing claims to specific organizations or studies, not vague "experts say"
+`;
+
+const stylePromptInjection = `
+### TONE & STYLE:
+- Write in a clear, direct, and professional tone
+- Avoid generic AI-sounding openers and closers
+- Do not pad the article with filler sentences
+- Use active voice wherever possible
+`;
+
+const structurePromptInjection = `
+### STRUCTURAL REQUIREMENTS:
+- Meta Title and Meta Description MUST appear on the first two lines
+- Use # for the article H1 title (only one H1 per article)
+- Use ## for major sections and ### for subsections
+- Conclude with an FAQ section if specified in the brief
+`;
+
+return {
+  json: {
+    fact_check_report: factCheckReport,
+    primary_keyword_joined: primary,
+    secondary_keywords_arr: secondary,
+    semantic_themes_arr: semantic,
+    brief_enforcer_injection: briefEnforcerInjection,
+    faq_injection: faqInjection,
+    first_paragraph_client_injection: firstParagraphInjection,
+    secondary_keyword_checklist: secondaryKeywordChecklist,
+    brief_authority_preamble: briefAuthorityPreamble,
+    detected_brief_headings: briefHeadings,
+    detected_faqs: faqArray,
+    system_prompt_injection: systemPromptInjection,
+    eeat_prompt_injection: eeatPromptInjection,
+    style_prompt_injection: stylePromptInjection,
+    structure_prompt_injection: structurePromptInjection
+  }
+};

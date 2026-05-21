@@ -35,7 +35,6 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
     const [formData, setFormData] = useState({
         name: '',
         industry: '',
-        sitemap_url: '',
         key_selling_point: '',
         sheet_id: '',
         topics_tab_name: 'Topics',
@@ -58,7 +57,7 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
     const removeLocation = (id: string) => setLocations(prev => prev.filter(l => l.id !== id));
 
     const reset = () => {
-        setFormData({ name: '', industry: '', sitemap_url: '', key_selling_point: '', sheet_id: '', topics_tab_name: 'Topics' });
+        setFormData({ name: '', industry: '', key_selling_point: '', sheet_id: '', topics_tab_name: 'Topics' });
         setLocations([]);
         setLocInput({ location_name: '', city: '', state: '', sheet_tab_name: '' });
         setIsMultiLocation(false);
@@ -67,7 +66,7 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.name || !formData.industry || !formData.sitemap_url) return;
+        if (!formData.name || !formData.industry) return;
         if (isMultiLocation && locations.length === 0) {
             toast({ title: 'Add at least one location', variant: 'destructive' });
             return;
@@ -81,7 +80,6 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
                 .insert([{
                     name: formData.name,
                     industry: formData.industry,
-                    sitemap_url: formData.sitemap_url,
                     key_selling_point: formData.key_selling_point || null,
                     sheet_id: formData.sheet_id || null,
                     topics_tab_name: formData.topics_tab_name || 'Topics',
@@ -126,7 +124,7 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
         }
     };
 
-    const isValid = formData.name.trim() && formData.industry.trim() && formData.sitemap_url.trim();
+    const isValid = formData.name.trim() && formData.industry.trim();
 
     return (
         <Dialog open={isOpen} onOpenChange={(o) => { setIsOpen(o); if (!o) reset(); }}>
@@ -156,14 +154,6 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
                         <Label htmlFor="gbp-industry" className="text-sm font-semibold">Industry <span className="text-destructive">*</span></Label>
                         <Input id="gbp-industry" value={formData.industry} onChange={e => setFormData({ ...formData, industry: e.target.value })}
                             placeholder="e.g. Dermatology, Digital Marketing, HVAC" required className="bg-background border-input" />
-                    </div>
-
-                    {/* Sitemap URL */}
-                    <div className="space-y-2">
-                        <Label htmlFor="gbp-sitemap" className="text-sm font-semibold">Sitemap URL <span className="text-destructive">*</span></Label>
-                        <Input id="gbp-sitemap" value={formData.sitemap_url} onChange={e => setFormData({ ...formData, sitemap_url: e.target.value })}
-                            placeholder="https://example.com/page-sitemap.xml" required className="bg-background border-input" />
-                        <p className="text-xs text-muted-foreground">Used by n8n to pick the most relevant internal link per post.</p>
                     </div>
 
                     {/* Key Selling Point */}

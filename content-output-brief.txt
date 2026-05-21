@@ -1,0 +1,280 @@
+Note: New blog post (not optimization).
+Proposed URL: /florida-sinkholes-and-seawalls. 
+Target keyword: sinkholes in florida (2,000 vol). 
+Target word count: 1,500 words.
+
+Strategic angle: the head term is dominated by .gov/.edu/news domains (Florida DEP, UF Museum, water management districts). FSS won't outrank those. The blog plays a different game: distinguishing karst sinkholes (the famous Florida ones) from waterfront subsidence sinkholes that form from soil washing through failing seawalls. This sub-segment is FSS's natural authority territory and isn't well-covered in the SERP.
+
+FSS - New Blog - Florida Sinkholes & Seawalls
+CONTENT BRIEF
+Page: New Blog Post 
+Page Type: Educational / Authority Builder 
+Search Intent: Informational with Mid-Funnel Pull-Through (Florida waterfront homeowners diagnosing what they're seeing) 
+Recommended Word Count: 1,500 to 2,000 words 
+URL: /florida-sinkholes-and-seawalls (recommended)
+
+
+Strategic Note on Targeting
+The primary keyword "sinkholes in florida" (2,000 vol) is dominated by .gov, .edu, and major news domains (Florida DEP, Florida Museum at UF, Southwest Florida Water Management District, ClickOrlando). FSS will not outrank those for the head term. The strategic play is to own a defensible sub-segment: sinkholes that appear on Florida waterfront properties due to soil washing through failing seawalls.
+
+This is a distinction the SERP does not currently make well. Most "Florida sinkholes" content covers karst limestone collapse (Seffner 2013, Eagles Nest, Sinkhole Alley). Waterfront subsidence sinkholes are a different mechanism with a different solution. Owning that distinction is the angle.
+
+
+Keyword Priority & Usage Guidance
+Primary Keyword (Core Target - Highest Priority)
+sinkholes in florida (2,000 vol, KD 1, $0.60 CPC)
+
+Use in:
+
+Title tag
+H1
+First 100 words
+2 to 4 natural mentions
+Secondary Keywords (High Importance)
+florida sinkholes (600 vol)
+florida sinkhole (800 vol)
+sinkhole florida (600 vol)
+what causes sinkholes in florida (100 vol)
+sinkholes near me (200 vol)
+sinkhole insurance florida (150 vol, commercial intent, address briefly)
+sinkhole repair florida (40 vol)
+sinkhole alley florida (150 vol)
+biggest sinkhole in florida (150 vol)
+Niche / Differentiator Keywords (Own the Sub-Segment)
+seawall sinkhole (20 vol, KD 0)
+sinkhole behind seawall (10 vol)
+sinkhole near seawall
+seawall sinkhole repair
+canal sinkhole florida
+waterfront sinkhole florida
+
+These are the keywords FSS can realistically rank #1 for. Volume is small but intent is exact-match.
+Long-Tail / PAA Opportunities (Appearing in SERP)
+Are sinkholes a problem in Florida?
+Where is Florida's sinkhole alley?
+Are there sinkholes in Florida now?
+Which part of Florida has the most sinkholes?
+What causes sinkholes in Florida?
+Are sinkholes near my seawall covered by insurance?
+Semantic / Contextual Keywords (Support Authority - Do Not Force)
+karst topography
+limestone bedrock
+aquifer
+soil subsidence
+cover-collapse sinkhole
+cover-subsidence sinkhole
+solution sinkhole
+hydrostatic pressure
+soil migration
+seawall failure
+erosion behind seawall
+polyurethane injection
+void filling
+compaction grouting
+Tampa Bay
+Hernando County
+Pasco County
+Hillsborough County
+
+
+Title Tag (≤ 60 Characters)
+Recommended options:
+
+Sinkholes in Florida: A Waterfront Homeowner's Guide
+Florida Sinkholes & Seawalls: What Homeowners Should Know
+Sinkholes in Florida: Karst vs. Seawall Subsidence
+
+
+Meta Description (≤ 160 Characters)
+Recommended: Not all Florida sinkholes are limestone collapses. Many waterfront sinkholes form from soil loss behind failing seawalls. Here's how to tell the difference.
+
+
+Content Structure & Outline
+H1: Sinkholes in Florida: What Waterfront Homeowners Need to Know
+Opening (150 to 200 words - Direct + Differentiated)
+
+Acknowledge the topic directly: Florida has more sinkholes than any other state. The famous ones (Seffner 2013, Eagles Nest, Sinkhole Alley around Pasco, Hernando, and Hillsborough Counties) are limestone-collapse sinkholes caused by Florida's karst geology.
+
+Then pivot fast: For waterfront homeowners, there's a second kind of sinkhole that's far more common and almost never covered in mainstream sinkhole content. It forms when soil migrates through a failing seawall, leaving voids behind the wall that collapse into pits, soft spots, or full sinkholes in the yard.
+
+Promise: This guide explains both types, why waterfront sinkholes are often misdiagnosed, what causes them, and what to do if you see warning signs on your property.
+
+Position FSS: As a licensed Florida marine contractor (CBC 1265946), FSS sees seawall-driven sinkholes on residential and commercial waterfront properties across the state.
+
+Note to writer: Lead with the broader "sinkholes in florida" framing for keyword capture, then narrow to the waterfront angle by paragraph two. Don't bury the hook.
+
+
+Quick Overview (AI Overview Target Section)
+Florida Sinkholes at a Glance
+
+Florida has the highest concentration of sinkholes in the United States due to its limestone-and-aquifer geology
+"Sinkhole Alley" runs through Pasco, Hernando, and Hillsborough Counties in Central Florida
+Most famous Florida sinkholes are cover-collapse sinkholes from karst limestone dissolution
+On waterfront property, a second type is common: subsidence sinkholes caused by soil migration through failing seawalls
+Waterfront subsidence sinkholes are not always covered by standard sinkhole insurance and are usually addressed through seawall repair, not foundation work
+Early warning signs include soft spots, pits, depressions, or shifting pavers near the wall
+
+This section helps win featured snippets and AI Overviews on the head query.
+
+
+H2: The Two Types of Florida Sinkholes
+Brief comparison table:
+
+Type
+Cause
+Where It Happens
+Who Fixes It
+Karst (cover-collapse, cover-subsidence, solution)
+Limestone bedrock dissolution by groundwater
+Central Florida "Sinkhole Alley," any karst zone
+Geotechnical engineers, foundation contractors
+Waterfront subsidence
+Soil migration through failing seawall seams or cracks
+Behind seawalls on canals, intracoastal, lakefront
+Marine contractor / seawall specialist
+
+
+Brief explanation of each:
+
+Karst sinkholes: Florida's bedrock is limestone. Groundwater dissolves limestone over thousands of years, creating underground voids. When the soil above can't bridge the void anymore, it collapses. This is the type that swallowed Jeff Bush in Seffner in 2013 and the type the Florida DEP, FGS, and water management districts primarily document.
+
+Waterfront subsidence sinkholes: When a seawall develops cracks, gaps, or seam failures, every tide cycle pulls soil through the wall and into the water. Over months or years, voids form behind the wall. Eventually, the surface gives way: a paver shifts, a depression opens up, or a pit forms in the yard. Homeowners often think they have a karst sinkhole. They usually have a seawall failure.
+
+Internally link to /seawalls-101 (or the new seawall-failure page when live).
+
+
+H2: What Causes Sinkholes in Florida?
+Cover the geological side first to capture "what causes sinkholes in florida" (100 vol):
+
+Limestone bedrock and acidic groundwater
+The Floridan Aquifer and its role in dissolution
+Drought and heavy rain cycles that accelerate collapse
+Human activity (groundwater pumping, construction loading)
+
+Then cover the waterfront side as a parallel section:
+
+Saltwater corrosion and tidal cycling
+Seam failures and cracking in concrete seawalls
+Failed filter fabric allowing soil to migrate through the wall
+Hurricane and storm surge damage that opens new failure points
+Aging seawall infrastructure (1960s to 1980s walls reaching end-of-life)
+
+Note to writer: Confirm with FSS team how often they encounter waterfront sinkholes that homeowners initially thought were karst sinkholes. Anecdotal frequency data here strengthens the angle.
+
+
+H2: Florida's Sinkhole Alley (and Why Waterfront Properties Face Different Risks)
+Address the search demand for "sinkhole alley florida" (150 vol) and "florida sinkhole map" (800 vol) without trying to outrank the DEP:
+
+Sinkhole Alley: Pasco, Hernando, Hillsborough Counties
+Other higher-risk karst areas: Marion, Citrus, Lake, Sumter Counties
+Note that Florida Department of Environmental Protection maintains an interactive sinkhole map (link out)
+Pivot: Waterfront sinkholes are not concentrated in Sinkhole Alley. They appear anywhere Florida has waterfront seawalls, which is statewide: Tampa Bay, Cape Coral, Naples, Fort Lauderdale, Miami, Jacksonville, the Keys, the Atlantic coast
+
+Note to writer: Link out to Florida DEP's sinkhole map or the FGS sinkhole types page (geodata.dep.state.fl.us). An external link to an authoritative source on the karst side reinforces E-E-A-T without trying to compete with them on volume queries.
+
+
+H2: Warning Signs of a Sinkhole Behind Your Seawall
+This is where the page captures intent from waterfront homeowners actively diagnosing what they're seeing. Numbered list:
+
+Pits, depressions, or soft spots in the yard near the seawall
+Pavers, patios, or decks are settling, cracking, or shifting toward the water
+A pothole that keeps reappearing after being filled with gravel or dirt
+Visible gaps between seawall panels
+Cracks in the concrete cap
+Standing water on the land side of the wall after rain
+The wall itself is leaning, bowing, or bulging
+Visible erosion or scour at the toe of the wall (at low tide)
+
+Note to writer: This list overlaps deliberately with the seawall failure warning signs. Cross-reference and link to the seawall failure page (or /seawalls-101 until that page is live).
+
+CTA: "Schedule a Free Waterfront Evaluation"
+
+
+H2: Sinkhole Insurance in Florida (and the Waterfront Catch)
+Brief section addressing "sinkhole insurance florida" (150 vol). Important caveat upfront:
+
+Note to writer: Do not provide legal or insurance advice. Keep this section general, reference the Florida statute framework only at a high level, and direct readers to their carrier and a licensed agent.
+
+Cover at high level:
+
+Florida law requires homeowners insurance to include "catastrophic ground cover collapse" coverage
+Optional "sinkhole loss" coverage is available as an endorsement and covers more types of damage
+Insurance coverage typically applies to karst sinkholes that meet specific structural criteria
+Waterfront subsidence sinkholes caused by seawall failure are usually treated as a seawall maintenance issue, not a covered sinkhole event
+Practical implication: many waterfront homeowners discover their "sinkhole" isn't covered because the cause is seawall failure, not geological collapse
+
+This section answers a common search and reinforces the need for seawall repair as the actual fix.
+
+
+H2: How to Fix a Sinkhole Behind a Seawall
+Walk the reader toward conversion. Brief overview of the repair process:
+
+Free waterfront evaluation to identify the cause (karst vs. seawall-driven)
+If seawall-driven: locate the failure points (cracks, seams, panel gaps, tieback failure)
+Stabilize the soil and fill voids using polyurethane injection, compaction grouting, or sand backfill
+Repair the seawall failure points to stop further soil loss
+Restore surface (re-seed yard, reset pavers)
+
+Note to writer: For karst sinkholes, the homeowner needs a geotechnical engineer or foundation specialist, not FSS. State this clearly. FSS handles the waterfront subsidence type. Honesty here builds trust.
+
+Internally link:
+
+/seawall-repair
+/soil-stabilization-grouting (when live)
+/seawall-storm-evaluation (when live)
+/before-and-after-pics
+
+
+FAQs
+Keep answers 2 to 3 sentences. 5 to 6 FAQs total, mapped to PAA queries.
+
+Are sinkholes a problem in Florida? Yes. Florida has the highest concentration of sinkholes in the United States due to its limestone bedrock geology. Most are concentrated in Central Florida's "Sinkhole Alley" (Pasco, Hernando, and Hillsborough Counties), though sinkholes can occur statewide.
+Where is Florida's Sinkhole Alley? Sinkhole Alley refers to a region of Central Florida with the highest density of documented karst sinkholes, primarily Pasco, Hernando, and Hillsborough Counties. Other karst-prone areas include Marion, Citrus, Lake, and Sumter Counties.
+What causes sinkholes in Florida? Most Florida sinkholes form when groundwater dissolves the limestone bedrock beneath the surface, creating underground voids that eventually collapse. Drought, heavy rain, and human activity (groundwater pumping, construction) can accelerate the process.
+What's the difference between a karst sinkhole and a waterfront sinkhole? Karst sinkholes form from limestone bedrock dissolution and require geotechnical evaluation. Waterfront sinkholes near a seawall typically form when soil migrates through cracks or seams in the wall, leaving voids that collapse, and are addressed by repairing the seawall.
+Are sinkholes near my seawall covered by insurance? Usually no, if the sinkhole is caused by seawall failure rather than karst collapse. Florida sinkhole insurance typically applies to geological sinkhole events that meet specific structural criteria. Waterfront subsidence is usually treated as a seawall maintenance issue. Confirm with your insurance carrier.
+How do I fix a sinkhole behind my seawall? Repair starts with a professional evaluation to identify the cause. If the cause is seawall failure, fixing the underlying seawall (tieback reinforcement, seam sealing, void filling) stops the soil migration that's creating the sinkhole. Surface restoration follows.
+
+
+Internal Linking Strategy
+Link TO:
+
+/seawall-repair (main service page)
+/seawalls-101 (educational anchor)
+/soil-stabilization-grouting (when live; cite the repair method)
+/seawall-storm-evaluation (when live)
+/new-seawall-construction (replacement context)
+/before-and-after-pics
+/contact
+Relevant city pages where waterfront sinkholes are common (Cape Coral has the strongest natural fit, Tampa, Naples, Fort Lauderdale)
+
+External Links (Outbound, Authoritative):
+
+Florida DEP sinkholes page (floridadep.gov/fgs/sinkholes)
+Florida Geological Survey sinkhole types (geodata.dep.state.fl.us)
+
+Open external links in a new tab. No-follow not necessary on .gov sources.
+
+
+E-E-A-T Signals to Include
+Licensed Florida marine contractor perspective (CBC 1265946)
+Clear distinction between karst and waterfront subsidence (most content does not draw this line)
+Honest acknowledgment that karst sinkholes are out of FSS's scope
+Florida-specific geographic and geological context
+Reference to the Florida DEP and FGS as authoritative sources on the karst side
+Specific repair method names (polyurethane injection, compaction grouting)
+Real warning signs FSS sees on actual properties
+Insurance framing positions FSS as understanding the procurement reality, not just the engineering
+
+
+Conversion Strategy
+CTA placement:
+
+After "Warning Signs of a Sinkhole Behind Your Seawall" section (peak intent moment)
+After "How to Fix a Sinkhole Behind a Seawall" section
+After FAQ section
+
+Primary CTA: "Schedule a Free Waterfront Evaluation" Secondary CTA: "Request a Free Estimate" | "(888) 426-1002"
+
+Tone: educational and credible, not alarmist. Florida sinkhole content can easily veer into clickbait (the famous Jeff Bush story and similar). Stay measured, factual, and useful. The reader should leave understanding what they have, who fixes it, and what to do next.
+

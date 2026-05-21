@@ -108,7 +108,7 @@
     },
     {
       "parameters": {
-        "url": "={{ $('Get Client Config').item.json.sitemap_url }}",
+        "url": "https://www.seobrand.com/page-sitemap.xml",
         "options": {
           "response": {
             "response": {}
@@ -202,7 +202,7 @@
             {
               "id": "2ce22899-0142-4ea8-911d-73c8e0366d90",
               "name": "=Post Topic",
-              "value": "={{ $('Loop Over Topics').item.json[\"Post Topic\"] }}",
+              "value": "={{ $('Loop Over Topics').item.json[\"Post Topic\"] || $('Loop Over Topics').item.json[\"Post\"] || $('Loop Over Topics').item.json[\"Topic\"] }}",
               "type": "string"
             },
             {
