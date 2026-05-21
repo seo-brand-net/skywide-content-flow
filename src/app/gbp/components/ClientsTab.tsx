@@ -117,7 +117,6 @@ export function ClientsTab() {
                                     <tr className="bg-muted/20 border-b border-border/50">
                                         <th className="px-6 py-4 font-bold text-foreground">Client Name</th>
                                         <th className="px-4 py-4 font-bold text-foreground">Industry</th>
-                                        <th className="px-4 py-4 font-bold text-foreground">Sitemap URL</th>
                                         <th className="px-4 py-4 font-bold text-foreground text-center">Locations</th>
                                         <th className="px-4 py-4 font-bold text-foreground text-center">Status</th>
                                         <th className="px-4 py-4 font-bold text-foreground text-center">Actions</th>
@@ -129,12 +128,6 @@ export function ClientsTab() {
                                             <tr className="hover:bg-muted/30 transition-colors group">
                                                 <td className="px-6 py-4 font-semibold text-foreground">{client.name}</td>
                                                 <td className="px-4 py-4 text-muted-foreground">{client.industry}</td>
-                                                <td className="px-4 py-4">
-                                                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                                        <Globe className="w-3.5 h-3.5" />
-                                                        <span className="truncate max-w-[200px]" title={client.sitemap_url}>{client.sitemap_url}</span>
-                                                    </div>
-                                                </td>
                                                 <td className="px-4 py-4 text-center">
                                                     <span className="inline-flex items-center justify-center bg-brand-blue-crayola/10 text-brand-blue-crayola font-bold px-2.5 py-0.5 rounded-full text-xs">
                                                         {client.gbp_locations?.length || 0}
