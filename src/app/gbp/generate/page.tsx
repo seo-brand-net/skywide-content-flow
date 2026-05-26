@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { Layout } from '@/components/Layout';
 
 // ─── Post Card (grid item) ────────────────────────────────────────────────────
 function PostCard({ post }: { post: any }) {
@@ -177,7 +178,7 @@ export default function GbpGeneratePage() {
                 : locations.find((l: any) => l.id === selectedLocationId)?.location_name || 'this location';
 
             setLastTriggered(new Date().toLocaleTimeString());
-            toast({ title: '🚀 Automation Triggered', description: `n8n is generating posts for ${locLabel}. Posts will appear here in real time.` });
+            toast({ title: '🚀 Generation Started', description: `Generating posts for ${locLabel}. They will appear here shortly.` });
             queryClient.invalidateQueries({ queryKey: ['gbp_posts_generate', selectedClientId] });
         } catch (err: any) {
             toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -191,8 +192,9 @@ export default function GbpGeneratePage() {
     const approvedCount = posts.filter((p: any) => p.status === 'APPROVED').length;
 
     return (
-        <div className="min-h-screen bg-background p-8">
-            <div className="max-w-screen-2xl mx-auto">
+        <Layout>
+            <div className="min-h-screen bg-background p-8">
+                <div className="max-w-screen-2xl mx-auto">
 
                 {/* Header */}
                 <div className="mb-10">
@@ -203,9 +205,9 @@ export default function GbpGeneratePage() {
                         <div className="p-2.5 bg-brand-blue-crayola/10 rounded-xl">
                             <Zap className="w-6 h-6 text-brand-blue-crayola" />
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground">Generate GBP Posts</h1>
+                        <h1 className="text-3xl font-bold text-foreground">Generate Posts</h1>
                     </div>
-                    <p className="text-muted-foreground ml-14">Select a client and trigger the automation — posts appear live as they generate.</p>
+                    <p className="text-muted-foreground ml-14">Select a client workspace to generate and manage Google Business Profile posts.</p>
                 </div>
 
                 {/* Two-Column Layout */}
@@ -216,7 +218,7 @@ export default function GbpGeneratePage() {
                         <Card className="bg-card border-border/50 shadow-sm overflow-hidden sticky top-8">
                             <CardHeader className="bg-muted/40 border-b border-border/50 py-4">
                                 <CardTitle className="text-base flex items-center gap-2">
-                                    <MapPin className="w-4 h-4 text-brand-blue-crayola" /> Client Setup
+                                    <MapPin className="w-4 h-4 text-brand-blue-crayola" /> Configuration
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-6 space-y-6">
@@ -270,7 +272,7 @@ export default function GbpGeneratePage() {
                                         </Select>
                                         {selectedLocationId === 'all' && (
                                             <p className="text-[11px] text-brand-blue-crayola bg-brand-blue-crayola/5 border border-brand-blue-crayola/20 rounded-lg px-3 py-2">
-                                                Will trigger {locations.length} separate n8n runs — one per location.
+                                                Generate posts across all {locations.length} active locations.
                                             </p>
                                         )}
                                     </div>
@@ -296,8 +298,8 @@ export default function GbpGeneratePage() {
                                             className="w-full h-12 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20"
                                         >
                                             {isTriggering
-                                                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Triggering n8n...</>
-                                                : <><Zap className="w-4 h-4 mr-2" />{isMultiLocation && selectedLocationId === 'all' ? `Run All ${locations.length} Locations` : 'Generate Posts'}</>
+                                                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating posts...</>
+                                                : <><Zap className="w-4 h-4 mr-2" />{isMultiLocation && selectedLocationId === 'all' ? `Generate for All ${locations.length} Locations` : 'Generate Posts'}</>
                                             }
                                         </Button>
                                         {lastTriggered && (
@@ -311,7 +313,7 @@ export default function GbpGeneratePage() {
                                 {/* Posts mini-stats */}
                                 {selectedClientId && posts.length > 0 && (
                                     <div className="border-t border-border/40 pt-4 space-y-2">
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Posts This Client</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Generation Overview</p>
                                         <div className="grid grid-cols-3 gap-2">
                                             {[
                                                 { label: 'Total', value: posts.length, color: 'text-foreground' },
@@ -359,7 +361,7 @@ export default function GbpGeneratePage() {
                                 </div>
                                 <div>
                                     <p className="font-semibold text-foreground">No client selected</p>
-                                    <p className="text-sm text-muted-foreground mt-1">Choose a client on the left to see their generated posts</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Select a client from the menu to view or create their posts.</p>
                                 </div>
                             </div>
                         ) : postsLoading ? (
@@ -374,7 +376,7 @@ export default function GbpGeneratePage() {
                                 </div>
                                 <div>
                                     <p className="font-semibold text-foreground">No posts yet</p>
-                                    <p className="text-sm text-muted-foreground mt-1">Hit "Generate Posts" to kick off the automation run</p>
+                                    <p className="text-sm text-muted-foreground mt-1">Click "Generate Posts" to create new posts for this client.</p>
                                 </div>
                             </div>
                         ) : (
@@ -388,5 +390,6 @@ export default function GbpGeneratePage() {
                 </div>
             </div>
         </div>
+        </Layout>
     );
 }

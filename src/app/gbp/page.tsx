@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-    MapPin, Zap, FileText, CheckCircle2, Clock, Search, RefreshCw,
+    MapPin, Zap, FileText, CheckCircle2, Clock, Search, RefreshCw, Building2,
     Loader2, ChevronDown, ChevronUp, Check, X, ExternalLink, Image, Download, Settings
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -169,7 +169,7 @@ export default function GbpPage() {
                             <h1 className="text-3xl font-bold text-foreground">GBP Automation</h1>
                         </div>
                         <p className="text-muted-foreground">
-                            {totalPosts} post{totalPosts !== 1 ? 's' : ''} generated across all clients
+                            Manage and review content across your client portfolio
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -242,9 +242,9 @@ export default function GbpPage() {
                             </div>
                         ) : filtered.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-64 gap-3 opacity-50">
-                                <MapPin className="w-10 h-10" />
-                                <p className="text-lg font-bold">No posts yet</p>
-                                <p className="text-sm text-muted-foreground">Click "Generate Posts" to trigger the first automation run.</p>
+                                <FileText className="w-10 h-10" />
+                                <p className="text-lg font-bold">No content found</p>
+                                <p className="text-sm text-muted-foreground">Click "Generate Posts" to create your first batch of content.</p>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
@@ -275,8 +275,8 @@ export default function GbpPage() {
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <p className="font-semibold text-foreground text-sm max-w-[280px] truncate">{post.post_topic}</p>
-                                                        {post.post_body && <p className="text-xs text-muted-foreground mt-0.5 max-w-[280px] truncate">{post.post_body}</p>}
+                                                        <p className="font-semibold text-foreground text-sm max-w-[300px] truncate">{post.post_topic}</p>
+                                                        {post.post_body && <p className="text-xs text-muted-foreground mt-1 max-w-[350px] line-clamp-2 leading-relaxed">{post.post_body}</p>}
                                                     </td>
                                                     <td className="px-4 py-4 text-sm font-medium text-foreground">{post.gbp_clients?.name || '—'}</td>
                                                     <td className="px-4 py-4 text-xs text-muted-foreground">{post.gbp_locations ? `${post.gbp_locations.location_name}, ${post.gbp_locations.state}` : '—'}</td>
@@ -296,34 +296,63 @@ export default function GbpPage() {
                                                 </tr>
 
                                                 {expandedId === post.id && (
-                                                    <tr className="bg-muted/10">
-                                                        <td colSpan={6} className="px-8 py-6">
-                                                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 max-w-5xl">
-                                                                <div className="lg:col-span-2 space-y-4">
-                                                                    <div>
-                                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Post Content</p>
-                                                                        <p className="text-sm whitespace-pre-line bg-background p-4 rounded-xl border border-border/50 leading-relaxed">{post.post_body || 'Content pending...'}</p>
-                                                                    </div>
-                                                                    {post.image_url && (
-                                                                        <div>
-                                                                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1"><Image className="w-3 h-3" />Generated Image</p>
-                                                                            <img src={post.image_url} alt="Generated post image" className="rounded-xl border border-border/50 max-h-[300px] object-contain bg-background" />
+                                                    <tr className="bg-muted/5">
+                                                        <td colSpan={6} className="px-8 py-8 border-t border-border/20 shadow-inner">
+                                                            <div className="flex flex-col lg:flex-row gap-10 max-w-6xl items-start">
+                                                                <div className="w-full lg:w-[360px] shrink-0">
+                                                                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Post Preview</p>
+                                                                    <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden font-sans">
+                                                                        <div className="p-4 flex items-start gap-3">
+                                                                            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white font-bold text-sm">
+                                                                                {post.gbp_clients?.name?.charAt(0) || 'B'}
+                                                                            </div>
+                                                                            <div className="mt-0.5">
+                                                                                <p className="text-[15px] font-bold text-gray-900 leading-tight tracking-tight">{post.gbp_clients?.name}</p>
+                                                                                <p className="text-[13px] text-gray-500 mt-0.5">{post.generated_at ? 'Just now' : 'Just now'} · <span className="opacity-70">🌍</span></p>
+                                                                            </div>
                                                                         </div>
-                                                                    )}
+                                                                        <div className="px-4 pb-3 text-[14px] text-gray-800 whitespace-pre-line leading-[1.5]">
+                                                                            {post.post_body || 'Content pending...'}
+                                                                        </div>
+                                                                        {post.image_url && (
+                                                                            <div className="w-full aspect-square bg-gray-100 border-t border-b border-gray-100 relative">
+                                                                                <img src={post.image_url} alt="Post preview" className="absolute inset-0 w-full h-full object-cover" />
+                                                                            </div>
+                                                                        )}
+                                                                        {post.link_url && (
+                                                                            <div 
+                                                                                className="px-4 py-3.5 bg-gray-50 flex items-center justify-between group hover:bg-gray-100 transition-colors cursor-pointer" 
+                                                                                onClick={() => window.open(post.link_url!, '_blank')}
+                                                                            >
+                                                                                <span className="text-[14px] font-medium text-blue-600 group-hover:underline">Learn more</span>
+                                                                                <ExternalLink className="w-4 h-4 text-blue-600 opacity-50" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                                <div className="space-y-4">
+
+                                                                <div className="flex-1 space-y-7 pt-1">
                                                                     <div>
-                                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1"><Image className="w-3 h-3" />Image Prompt</p>
-                                                                        <p className="text-xs text-muted-foreground bg-background p-3 rounded-xl border border-border/50 italic leading-relaxed">{post.image_prompt || '—'}</p>
+                                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5"><Image className="w-3.5 h-3.5" />Image Prompt Used</p>
+                                                                        <p className="text-sm text-muted-foreground bg-background p-4 rounded-xl border border-border/50 italic leading-relaxed">{post.image_prompt || '—'}</p>
                                                                     </div>
                                                                     {post.link_url && (
                                                                         <div>
-                                                                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1"><ExternalLink className="w-3 h-3" />Target Link</p>
-                                                                            <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="text-xs text-brand-blue-crayola hover:underline break-all bg-brand-blue-crayola/5 p-2.5 rounded-xl border border-brand-blue-crayola/20 block">{post.link_url}</a>
+                                                                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5"><ExternalLink className="w-3.5 h-3.5" />Target Link</p>
+                                                                            <div className="flex items-center gap-3">
+                                                                                <a href={post.link_url} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-brand-blue-crayola hover:underline break-all bg-brand-blue-crayola/5 py-2.5 px-4 rounded-xl border border-brand-blue-crayola/20 truncate max-w-md inline-block">
+                                                                                    {post.link_url}
+                                                                                </a>
+                                                                            </div>
                                                                         </div>
                                                                     )}
-                                                                    <div className="flex gap-2 pt-1">
-                                                                        <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={() => exportPostsToPdf([post], post.gbp_clients?.name || 'Post')}><Download className="w-3.5 h-3.5" />PDF</Button>
+                                                                    <div className="pt-5 border-t border-border/50">
+                                                                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5"><Download className="w-3.5 h-3.5" />Export Options</p>
+                                                                        <div className="flex gap-3">
+                                                                            <Button size="sm" variant="outline" className="h-10 px-5 font-bold gap-2 bg-background shadow-sm hover:bg-muted/50" onClick={() => exportPostsToPdf([post], post.gbp_clients?.name || 'Post')}>
+                                                                                <FileText className="w-4 h-4" /> Export as PDF
+                                                                            </Button>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>

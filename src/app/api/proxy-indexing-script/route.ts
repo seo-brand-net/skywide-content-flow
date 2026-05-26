@@ -118,8 +118,23 @@ export async function POST(request: Request) {
 
         console.log('[proxy-indexing-script] Apps Script response:', gasData);
 
-        // Determine overall status
-        const isSuccess = gasResponse.ok && gasData?.status !== 'error' && gasData?.success !== false;
+        // Intercept "0 URLs" or "empty URLs" error and treat it as a success with 0 submitted
+        const errorMsg = String(gasData?.error || gasData?.message || '').toLowerCase();
+        const isEmptyUrlsError = errorMsg.includes('0 url') || errorMsg.includes('no url') || errorMsg.includes('empty');
+
+        let isSuccess = gasResponse.ok && gasData?.status !== 'error' && gasData?.success !== false;
+
+        if (!isSuccess && isEmptyUrlsError) {
+            isSuccess = true;
+            gasData = {
+                status: 'success',
+                summary: {
+                    google: { newUrls: 0, existingUrls: 0, submitted: 0, errors: 0, rateLimited: 0 },
+                    bing: { newUrls: 0, existingUrls: 0, submitted: 0, errors: 0, rateLimited: 0 }
+                },
+                message: 'No URLs found in the workbook (Skipped smoothly)'
+            };
+        }
 
         // Map payload format to our DB schema
         let mappedGoogleSummary = null;

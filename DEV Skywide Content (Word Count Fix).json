@@ -1,5 +1,5 @@
 {
-  "name": "DEV Skywide Content (Word Count Fix)",
+  "name": "DEV Skywide Content (Word Count Fix) + QA Pipeline",
   "nodes": [
     {
       "parameters": {
@@ -3141,7 +3141,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Instruction Strategist v7 (AI Powered) — Bulletproof Structural Extraction\nconst input = $('Webhook1').first().json.body;\n\nfunction parseKeywords(raw) {\n  if (!raw) return [];\n  if (Array.isArray(raw)) {\n    return raw.flatMap(item => item.split(',').map(k => k.trim())).filter(k => k.length > 0);\n  }\n  if (typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\n\nconst rawPrimary = input.primary_keywords;\nconst primary = (Array.isArray(rawPrimary) ? rawPrimary.join(', ') : rawPrimary) || '';\nconst secondary = parseKeywords(input.secondary_keywords);\nconst semantic = parseKeywords(input.semantic_themes);\n\n// EXTRACT AI PARSED JSON FROM PREVIOUS NODE\n// Depending on n8n version, Langchain OpenAI nodes output to message.content or choices[0]\nlet aiOutputRAW = $('Parse Creative Brief (LLM)').first().json.message?.content \n               || $('Parse Creative Brief (LLM)').first().json.text \n               || $('Parse Creative Brief (LLM)').first().json.choices?.[0]?.message?.content \n               || '{}';\n               \nlet aiData = { headings: [], faqs: [] };\ntry {\n    if (typeof aiOutputRAW === \"object\" && aiOutputRAW !== null) { \n        aiData = aiOutputRAW; \n    } else if (typeof aiOutputRAW === \"string\") { \n        let cleanedRAW = aiOutputRAW;\n        // Strip markdown JSON wrapping\n        cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```json\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n        // In case it's just ``` without json\n        cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n        // Ultimate fallback: Try to extract everything from first { to last }\n        const match = cleanedRAW.match(/\\{[\\s\\S]*\\}/);\n        if (match) {\n            cleanedRAW = match[0];\n        }\n        aiData = JSON.parse(cleanedRAW); \n    }\n} catch(e) {\n    console.log(\"Failed to parse AI node output\", e);\n}\n\nconst briefHeadings = aiData.headings || [];\nconst faqArray = aiData.faqs || [];\n\nlet faqInjection = '';\nif (faqArray.length > 0) {\n  faqInjection = '### MANDATORY FAQS TO INCLUDE\\n\\nAt the end of the article, you MUST include an FAQ section incorporating exactly these questions and answers if provided.\\n\\n';\n  faqArray.forEach(faq => {\n    faqInjection += `- Q: ${faq.question}\\n`;\n    if (faq.answer && faq.answer.trim() !== '') {\n      faqInjection += `  A: (Incorporate this information into your answer: ${faq.answer})\\n`;\n    }\n  });\n}\n\nconst creativeBrief = input.creative_brief || '';\nlet briefEnforcerInjection = '';\n\nif (creativeBrief) {\n  briefEnforcerInjection = `\n### 🚨 STRICT CREATIVE BRIEF ENFORCEMENT 🚨\n\nYou are an exact-match structural formatter. You MUST follow the outline provided in the Creative Brief below with absolute precision. DO NOT deviate.\n\nCRITICAL STRUCTURAL INSTRUCTIONS:\n1. HEADINGS (H2/H3): You must use ONLY the H2s and H3s explicitly listed in the brief. Do NOT invent your own H2s. Do NOT rephrase them.\n2. LISTS & FORMATTING: If the brief asks for a numbered list, step-by-step guide, or specific formatting (e.g., \"H3: Step 1\"), you MUST output exactly that format. Do not convert lists into standard paragraphs.\n3. LEAD PARAGRAPH / HOOK: If the brief provides a \"Suggested Lead Paragraph\" or \"AI Overview Hook\", you MUST use it exactly or paraphrase it extremely closely as your opening paragraph.\n4. META & H1: If the brief dictates a specific Meta Title, Meta Description, or H1, you must use EXACTLY the text provided.\n\n`;\n\n  if (briefHeadings.length > 0) {\n    briefEnforcerInjection += `\\nWe have automatically parsed the requested outline bindings. YOU MUST USE THESE EXACT HEADINGS (in order):\\n`;\n    briefHeadings.forEach((h, i) => {\n        briefEnforcerInjection += `${i + 1}. ${h}\\n`;\n    });\n    briefEnforcerInjection += `\\n⛔ DO NOT add any extra H2s that are not on this list. DO NOT deviate from these boundaries. ⛔\\n`;\n  }\n}\n\n// Ensure first paragraph injection\nlet firstParagraphInjection = '';\nif (input.client_name) {\n  firstParagraphInjection = `The opening paragraph MUST organically mention the client (${input.client_name}) within the first two sentences. Do NOT substitute the company name with \"the company\" or \"the brand.\"`;\n}\n\n// Optional secondary/semantic keyword injection\nlet secondaryKeywordChecklist = '';\nif (secondary.length > 0 || semantic.length > 0) {\n  secondaryKeywordChecklist = '### SUPPLEMENTARY KEYWORDS TO WEAVE NATURALLY:\\n';\n  if (secondary.length > 0) {\n    secondaryKeywordChecklist += 'Secondary Keywords:\\n' + secondary.map(k => '- ' + k).join('\\n') + '\\n\\n';\n  }\n  if (semantic.length > 0) {\n    secondaryKeywordChecklist += 'Semantic Themes:\\n' + semantic.map(sem => '- ' + sem).join('\\n') + '\\n';\n  }\n}\n\nlet briefAuthorityPreamble = '';\nif (input.tone) {\n  briefAuthorityPreamble = `The tone of this article should strictly be: ${input.tone}. Ensure the voice remains authentic.`;\n}\n\n\nlet factCheckReport = '';\ntry {\n  let raw = $('Pre-Draft Fact Checker').first().json;\n  factCheckReport = raw.message?.content || raw.choices?.[0]?.message?.content || raw.text || '';\n} catch(e) { console.log('Fact check extract failed', e); }\n\n\n\n// ── Build system_prompt_injection (fact check + guardrails) ──────────────────\n// This is the primary injection point for factual constraints in the drafting nodes.\n// It wraps the Pre-Draft Fact Checker report and all editorial guardrails.\n\nlet systemPromptInjection = '';\n\nif (factCheckReport && factCheckReport.length > 50) {\n  systemPromptInjection += `\n⚠️ PRE-VERIFIED FACTS MANIFEST — MANDATORY CONSTRAINTS ⚠️\nThe following fact-check report was produced by a primary source verification agent.\nYou MUST follow these constraints when drafting:\n\n${factCheckReport}\n\nCRITICAL USAGE RULES:\n- Claims marked VERIFIED: Use the exact figures and attributions provided.\n- Claims marked UNVERIFIED or REMOVE: Do NOT include them. Use qualitative language instead (e.g. \"research suggests\" or \"studies indicate\").\n- Do NOT introduce any new statistics, percentages, or quantified claims not in this report.\n`;\n}\n\nsystemPromptInjection += `\n\nMANDATORY OUTPUT STRUCTURE:\n- Line 1 of your response MUST be: Meta Title: [title here]\n- Line 2 MUST be: Meta Description: [description here]\n- The main article title MUST use a single # (H1). Never start with ##.\n- Include an FAQ section if the brief specifies one.\n\nFORBIDDEN PHRASES — NEVER USE THESE:\n- \"you're not alone\" / \"you are not alone\"\n- \"you might be surprised\"\n- \"it's worth noting\" / \"it is worth noting\"\n- \"needless to say\"\n- \"as you may know\"\n- \"in today's world\" / \"in today's fast-paced world\"\n- \"our patients report\" / \"we've seen patients\" / \"some of our patients\"\n- Any fabricated clinical anecdote or testimonial unless a direct quote is in the brief\n- \"we've seen [X]% improvement\" or \"we've watched clients achieve\" unless a cited source is provided\n\nCITATION INTEGRITY:\n- Every cited source MUST match its label exactly. Do NOT relabel a paper with a different title.\n- If a statistic cannot be traced to an independent primary source, use qualitative language.\n- Mechanism of action, serum changes, and clinical response rates are DISTINCT medical concepts — keep them separate.\n`;\n\nconst eeatPromptInjection = `\n### E-E-A-T SIGNALS:\nDemonstrate Experience, Expertise, Authoritativeness, and Trustworthiness by:\n- Citing real, named primary sources (government agencies, peer-reviewed studies, professional associations)\n- Using precise, measured language rather than superlatives\n- Acknowledging limitations of evidence where appropriate\n- Attributing claims to specific organizations or studies, not vague \"experts say\"\n`;\n\nconst stylePromptInjection = `\n### TONE & STYLE:\n- Write in a clear, direct, and professional tone\n- Avoid generic AI-sounding openers and closers\n- Do not pad the article with filler sentences\n- Use active voice wherever possible\n`;\n\nconst structurePromptInjection = `\n### STRUCTURAL REQUIREMENTS:\n- Meta Title and Meta Description MUST appear on the first two lines\n- Use # for the article H1 title (only one H1 per article)\n- Use ## for major sections and ### for subsections\n- Conclude with an FAQ section if specified in the brief\n`;\n\nreturn {\n  json: {\n    fact_check_report: factCheckReport,\n    primary_keyword_joined: primary,\n    secondary_keywords_arr: secondary,\n    semantic_themes_arr: semantic,\n    brief_enforcer_injection: briefEnforcerInjection,\n    faq_injection: faqInjection,\n    first_paragraph_client_injection: firstParagraphInjection,\n    secondary_keyword_checklist: secondaryKeywordChecklist,\n    brief_authority_preamble: briefAuthorityPreamble,\n    detected_brief_headings: briefHeadings,\n    detected_faqs: faqArray,\n    system_prompt_injection: systemPromptInjection,\n    eeat_prompt_injection: eeatPromptInjection,\n    style_prompt_injection: stylePromptInjection,\n    structure_prompt_injection: structurePromptInjection\n  }\n};"
+        "jsCode": "// Instruction Strategist v8 — Bulletproof + Custom Rules + Global Enforcement\nconst input = $('Webhook1').first().json.body;\n\n// ─── GLOBAL RULES: Always applied regardless of brief content ────────────────\nconst GLOBAL_RULES = [\n  \"Do NOT use AI-sounding filler phrases. Banned phrases: 'Additionally', 'Moreover', 'Furthermore', 'Let\\'s dive in', 'In conclusion', 'The bottom line', 'It\\'s worth noting', 'Dive into', 'In today\\'s world', 'Transitioning to'.\",\n  \"Write in active voice. Do not use passive voice constructions.\",\n  \"Keep paragraphs to 2–3 sentences maximum. Long paragraphs must be broken up.\",\n  \"Do not invent statistics, research studies, or expert names. If a specific figure is needed but not provided, write [Data Needed] as a placeholder.\",\n  \"Do not use em-dashes (—). Replace with commas, colons, or restructured sentences.\",\n  \"Do not use generic CTAs like 'Click here' or 'Learn more'. CTAs must be specific and action-oriented.\",\n  \"Every H2 section must contain at least 2 substantive paragraphs. No single-sentence sections.\",\n  \"Do not repeat the same phrase or sentence structure in consecutive paragraphs.\",\n  \"Bold text (**bold**) should be used sparingly — only for genuinely critical terms, not for stylistic emphasis.\",\n];\n\nfunction parseKeywords(raw) {\n  if (!raw) return [];\n  if (Array.isArray(raw)) {\n    return raw.flatMap(item => item.split(',').map(k => k.trim())).filter(k => k.length > 0);\n  }\n  if (typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\n\nconst rawPrimary = input.primary_keywords;\nconst primary = (Array.isArray(rawPrimary) ? rawPrimary.join(', ') : rawPrimary) || '';\nconst secondary = parseKeywords(input.secondary_keywords);\nconst semantic = parseKeywords(input.semantic_themes);\n\n// ─── EXTRACT AI PARSED BRIEF DATA ────────────────────────────────────────────\nlet aiOutputRAW = $('Parse Creative Brief (LLM)').first().json.message?.content\n               || $('Parse Creative Brief (LLM)').first().json.text\n               || $('Parse Creative Brief (LLM)').first().json.choices?.[0]?.message?.content\n               || '{}';\n\nlet aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '' };\ntry {\n  if (typeof aiOutputRAW === 'object' && aiOutputRAW !== null) {\n    aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '', ...aiOutputRAW };\n  } else if (typeof aiOutputRAW === 'string') {\n    let cleanedRAW = aiOutputRAW;\n    cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```json\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n    cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n    const match = cleanedRAW.match(/\\{[\\s\\S]*\\}/);\n    if (match) cleanedRAW = match[0];\n    const parsed = JSON.parse(cleanedRAW);\n    aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '', ...parsed };\n  }\n} catch (e) {\n  console.log('Brief parser JSON parse failed:', e.message);\n}\n\nconst briefHeadings     = Array.isArray(aiData.headings)      ? aiData.headings      : [];\nconst faqArray          = Array.isArray(aiData.faqs)          ? aiData.faqs          : [];\nconst briefCustomRules  = Array.isArray(aiData.custom_rules)  ? aiData.custom_rules  : [];\nconst briefTone         = typeof aiData.tone_instructions === 'string' ? aiData.tone_instructions : '';\n\n// ─── FAQ INJECTION ────────────────────────────────────────────────────────────\nlet faqInjection = '';\nif (faqArray.length > 0) {\n  faqInjection = '### MANDATORY FAQS\\n\\nAt the end of the article include an FAQ section with EXACTLY these questions. If an answer is provided, incorporate that information into your answer — do not ignore it.\\n\\n';\n  faqArray.forEach(faq => {\n    faqInjection += `**Q: ${faq.question}**\\n`;\n    if (faq.answer && faq.answer.trim()) {\n      faqInjection += `A: (Use this information in your answer: ${faq.answer})\\n\\n`;\n    } else {\n      faqInjection += `A: [Write a complete, accurate answer]\\n\\n`;\n    }\n  });\n}\n\n// ─── STRUCTURE ENFORCEMENT (headings) ────────────────────────────────────────\nconst creativeBrief = input.creative_brief || '';\nlet briefEnforcerInjection = '';\nif (creativeBrief) {\n  briefEnforcerInjection = `### CREATIVE BRIEF STRUCTURE (MANDATORY)\n\nYou MUST follow the structural outline below. Do not invent your own structure.\n\n- Write the article conforming strictly to the content outline in the brief.\n- Use the exact H2 headings specified — do not add, remove, or reorder them.\n- Do NOT invent your own H2 headings if the outline already specifies them.\n\n`;\n  if (briefHeadings.length > 0) {\n    briefEnforcerInjection += `MANDATORY HEADING ORDER — USE THESE EXACT H2s:\\n`;\n    briefHeadings.forEach((h, i) => {\n      briefEnforcerInjection += `${i + 1}. ${h}\\n`;\n    });\n    briefEnforcerInjection += `\\nDo not add, remove, or reorder these headings.\\n`;\n  }\n}\n\n// ─── GLOBAL RULES INJECTION ───────────────────────────────────────────────────\nconst globalRulesInjection = `### GLOBAL EDITORIAL RULES (NON-NEGOTIABLE)\n\nThese rules apply to every article regardless of the brief. Each violation is unacceptable:\n\n${GLOBAL_RULES.map((r, i) => `${i + 1}. ${r}`).join('\\n')}\n`;\n\n// ─── BRIEF-SPECIFIC CUSTOM RULES INJECTION ───────────────────────────────────\nlet customRulesInjection = '';\nif (briefCustomRules.length > 0) {\n  customRulesInjection = `### BRIEF-SPECIFIC RULES (MANDATORY)\n\nThe following rules were explicitly specified in the creative brief. Every single one must be followed exactly:\n\n${briefCustomRules.map((r, i) => `${i + 1}. ${r}`).join('\\n')}\n`;\n}\n\n// ─── TONE INJECTION ───────────────────────────────────────────────────────────\nconst toneSource = briefTone || input.tone || '';\nlet briefAuthorityPreamble = '';\nif (toneSource) {\n  briefAuthorityPreamble = `Tone & Voice: ${toneSource}. Maintain this voice consistently from the first sentence to the last. Do not shift tone mid-article.`;\n}\n\n// ─── CLIENT FIRST PARAGRAPH ───────────────────────────────────────────────────\nlet firstParagraphInjection = '';\nif (input.client_name) {\n  firstParagraphInjection = `The opening paragraph MUST organically mention the client (${input.client_name}) within the first two sentences. Do NOT use \"the company\", \"the brand\", or \"they\" as a substitute.`;\n}\n\n// ─── SECONDARY / SEMANTIC KEYWORDS ───────────────────────────────────────────\nlet secondaryKeywordChecklist = '';\nif (secondary.length > 0 || semantic.length > 0) {\n  secondaryKeywordChecklist = '### SUPPLEMENTARY KEYWORDS (weave naturally — do not force):\\n';\n  if (secondary.length > 0) {\n    secondaryKeywordChecklist += 'Secondary Keywords:\\n' + secondary.map(k => '- ' + k).join('\\n') + '\\n\\n';\n  }\n  if (semantic.length > 0) {\n    secondaryKeywordChecklist += 'Semantic Themes:\\n' + semantic.map(s => '- ' + s).join('\\n') + '\\n';\n  }\n}\n\nreturn {\n  json: {\n    primary_keyword_joined:         primary,\n    secondary_keywords_arr:         secondary,\n    semantic_themes_arr:            semantic,\n    brief_enforcer_injection:       briefEnforcerInjection,\n    faq_injection:                  faqInjection,\n    global_rules_injection:         globalRulesInjection,\n    custom_rules_injection:         customRulesInjection,\n    first_paragraph_client_injection: firstParagraphInjection,\n    secondary_keyword_checklist:    secondaryKeywordChecklist,\n    brief_authority_preamble:       briefAuthorityPreamble,\n    detected_brief_headings:        briefHeadings,\n    detected_faqs:                  faqArray,\n    detected_custom_rules:          briefCustomRules,\n  }\n};"
       },
       "id": "dea7f115-506a-4cf0-b2e3-016527135f31",
       "name": "Keyword Strategist",
@@ -3348,7 +3348,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are an exact structural extraction component. Your sole job is to extract the intended article H2 headings and any explicit FAQs from the Creative Brief provided. You must return ONLY raw valid JSON conforming to this snippet: {\"headings\": [\"Heading 1\", \"Heading 2\"], \"faqs\": [{\"question\": \"Q1...\", \"answer\": \"A1...\"}]}. If no answer is present for a FAQ, use an empty string. \n\nCRITICAL EXCLUSIONS:\nDo NOT extract administrative or metadata fields as headings. You must IGNORE sections like:\n- Target Audience\n- Audience\n- Search Intent\n- Primary Goal\n- Target Service Area\n- Internal Linking Requirements\n- Keywords\n- Target Keywords\n- Secondary Keywords\n- SEO Specifications\n- URL Slug\n- Title Tag\n- Meta Description\n- References\n- Content Pillar Role\n- Funnel Stage\n- Article Type\n- Tone\n- H1 Recommendation\n- Suggested Lead Paragraph\n- Introduction\n\nOnly extract the actual headings that are intended to be read by the end-user in the final article body.",
+              "content": "You are an exact structural extraction component. Extract four things from the Creative Brief and return them as raw valid JSON with NO markdown wrapping and NO explanation.\n\nReturn ONLY this JSON structure:\n{\n  \"headings\": [\"H2 heading 1\", \"H2 heading 2\"],\n  \"faqs\": [{\"question\": \"Q1?\", \"answer\": \"A1 text\"}],\n  \"custom_rules\": [\"Rule 1\", \"Rule 2\"],\n  \"tone_instructions\": \"Tone description as a single string\"\n}\n\nEXTRACTION RULES:\n\nheadings:\n- Extract ONLY explicit H2 or H3 headings from the structural outline section.\n- Do NOT include the H1 title.\n- Look in sections labelled: \"Content Structure\", \"Outline\", \"H2s:\", \"Sections:\", \"Headings:\", \"Content Outline & Writing Instructions\".\n- Preserve the exact heading text. Strip leading \"H2:\", \"H3:\", \"##\", \"###\", \"-\", \"*\" markers.\n\nfaqs:\n- Extract from the FAQ or \"Frequently Asked Questions\" section only.\n- Include answers if present. Use empty string for missing answers.\n- Each entry: { \"question\": \"...\", \"answer\": \"...\" }\n\ncustom_rules:\n- Extract any explicit writing instructions or constraints that are NOT headings or FAQs.\n- Look in sections labelled: \"Writing Instructions\", \"Style Notes\", \"Editorial Rules\", \"Content Notes\", \"Writing Guidelines\", \"Restrictions\", \"Do / Don't\", \"Important Notes\".\n- Also extract inline constraints anywhere in the brief that use directive language: \"must\", \"do not\", \"always\", \"never\", \"avoid\", \"ensure\", \"should\", \"do NOT\", \"include\", \"exclude\", \"refrain\".\n- Each rule should be a self-contained instruction string.\n- Extract up to 20 rules maximum.\n\ntone_instructions:\n- Extract the tone/voice directive as a single descriptive string.\n- Look for: \"Tone:\", \"Voice:\", \"Writing Style:\", \"Tone & Style:\", \"Tone of Voice:\".\n- If multiple tone descriptors exist, combine them into one string.\n- Return empty string if no tone directive is found.\n\nIf any category yields no results, return an empty array [] or empty string \"\".",
               "role": "system"
             },
             {
@@ -3439,6 +3439,236 @@
           "id": "iuHSBzk6FDLpyJRT",
           "name": "SEOBrand"
         }
+      }
+    },
+    {
+      "id": "qa-001-structure-auditor-p1",
+      "name": "Structure Auditor (Pass 1)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        530858,
+        113824
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "y3tVeuSKwYnV4Cyx",
+          "name": "SEOBrand"
+        }
+      },
+      "notes": "Audits generated article structure vs brief. Returns JSON compliance report.",
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a strict content structure auditor. Compare a generated article against required structure from a content brief. Return ONLY raw valid JSON — no markdown, no commentary.\n\nJSON format:\n{\n  \"headings_match\": true,\n  \"faq_included\": true,\n  \"rules_violated\": [\"specific violation 1\", \"specific violation 2\"],\n  \"overall_pass\": true,\n  \"correction_notes\": \"Precise surgical instructions to fix ONLY the issues found.\"\n}\n\nRules:\n- headings_match: true ONLY if ALL required headings appear in the article. Allow semantic equivalence — exact wording not required if meaning is identical.\n- faq_included: true if required FAQ questions appear in an FAQ section. true if no FAQs were required.\n- rules_violated: list ONLY actual violations of the brief-specific custom rules. Be specific about WHERE the violation occurs (e.g. \"Rule 3 violated: Em-dash used in paragraph 2 of the 'Causes' section\").\n- overall_pass: true ONLY if headings_match=true AND faq_included=true AND rules_violated=[] (empty array).\n- correction_notes: If overall_pass is false, write precise surgical instructions for a rewriter. Reference the exact location of each issue. If overall_pass is true, use empty string \"\".",
+              "role": "system"
+            },
+            {
+              "content": "=REQUIRED HEADINGS:\n{{ $('Keyword Strategist').first().json.detected_brief_headings?.length > 0 ? $('Keyword Strategist').first().json.detected_brief_headings.join('\\n') : 'No specific headings required — accept any structure.' }}\n\nREQUIRED FAQ QUESTIONS:\n{{ $('Keyword Strategist').first().json.detected_faqs?.length > 0 ? $('Keyword Strategist').first().json.detected_faqs.map(f => f.question).join('\\n') : 'No FAQs required.' }}\n\nBRIEF-SPECIFIC CUSTOM RULES:\n{{ $('Keyword Strategist').first().json.detected_custom_rules?.length > 0 ? $('Keyword Strategist').first().json.detected_custom_rules.join('\\n') : 'No brief-specific rules to check.' }}\n\nGENERATED ARTICLE TO AUDIT:\n{{ $json.content || $json.text || $json.message?.content || $json.output || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 1200,
+          "temperature": 0,
+          "responseFormat": "json_object"
+        }
+      }
+    },
+    {
+      "id": "qa-002-audit-gate-p1",
+      "name": "Structure Audit Gate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        531108,
+        113824
+      ],
+      "notes": "PASS → 1st Scoring Agent3 (happy path). FAIL → Surgical Rewriter.",
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "audit-gate-1-cond",
+              "leftValue": "={{ $json.message?.content?.overall_pass ?? $json.overall_pass ?? false }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "qa-004-anthropic-rewriter-model",
+      "name": "Anthropic Rewriter Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        531358,
+        114044
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "IaiIXT5KuipoyTHR",
+          "name": "SEOBrand"
+        }
+      },
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-opus-4-5",
+          "mode": "list",
+          "cachedResultName": "claude-opus-4-5"
+        },
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 8000
+        }
+      }
+    },
+    {
+      "id": "qa-003-surgical-rewriter",
+      "name": "Surgical Rewriter",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        531358,
+        113824
+      ],
+      "notes": "Fixes ONLY the structural violations from the audit. Does not rewrite passing content.",
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a surgical content editor. You have a generated article and a precise list of structural violations. Fix ONLY the listed violations and return the COMPLETE corrected article.\n\nCRITICAL RULES — READ CAREFULLY:\n1. Fix ONLY the violations listed in CORRECTIONS NEEDED below. Touch nothing else.\n2. Preserve ALL existing content, headings, and formatting that are not listed as violations.\n3. Return the COMPLETE article with corrections applied — not just the changed sections.\n4. Do NOT add any commentary, apology, or explanation. Return only the article text.\n5. Do NOT add new sections, change the word count significantly, or restructure the article.\n\nCORRECTIONS NEEDED:\n{{ $('Structure Auditor (Pass 1)').first().json.message?.content?.correction_notes || $('Structure Auditor (Pass 1)').first().json.correction_notes || 'No specific corrections noted.' }}\n\nORIGINAL ARTICLE:\n{{ $('Document Export Sanitization5').first().json.content || $('Document Export Sanitization5').first().json.text || $('Document Export Sanitization5').first().json.message?.content || '' }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "qa-005-structure-auditor-p2",
+      "name": "Structure Auditor (Pass 2)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        531608,
+        113824
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "y3tVeuSKwYnV4Cyx",
+          "name": "SEOBrand"
+        }
+      },
+      "notes": "Second compliance check after surgical rewrite.",
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a strict content structure auditor. Compare a generated article against required structure from a content brief. Return ONLY raw valid JSON — no markdown, no commentary.\n\nJSON format:\n{\n  \"headings_match\": true,\n  \"faq_included\": true,\n  \"rules_violated\": [\"specific violation 1\", \"specific violation 2\"],\n  \"overall_pass\": true,\n  \"correction_notes\": \"Precise surgical instructions to fix ONLY the issues found.\"\n}\n\nRules:\n- headings_match: true ONLY if ALL required headings appear in the article. Allow semantic equivalence — exact wording not required if meaning is identical.\n- faq_included: true if required FAQ questions appear in an FAQ section. true if no FAQs were required.\n- rules_violated: list ONLY actual violations of the brief-specific custom rules. Be specific about WHERE the violation occurs (e.g. \"Rule 3 violated: Em-dash used in paragraph 2 of the 'Causes' section\").\n- overall_pass: true ONLY if headings_match=true AND faq_included=true AND rules_violated=[] (empty array).\n- correction_notes: If overall_pass is false, write precise surgical instructions for a rewriter. Reference the exact location of each issue. If overall_pass is true, use empty string \"\".",
+              "role": "system"
+            },
+            {
+              "content": "=REQUIRED HEADINGS:\n{{ $('Keyword Strategist').first().json.detected_brief_headings?.length > 0 ? $('Keyword Strategist').first().json.detected_brief_headings.join('\\n') : 'No specific headings required.' }}\n\nREQUIRED FAQ QUESTIONS:\n{{ $('Keyword Strategist').first().json.detected_faqs?.length > 0 ? $('Keyword Strategist').first().json.detected_faqs.map(f => f.question).join('\\n') : 'No FAQs required.' }}\n\nBRIEF-SPECIFIC CUSTOM RULES:\n{{ $('Keyword Strategist').first().json.detected_custom_rules?.length > 0 ? $('Keyword Strategist').first().json.detected_custom_rules.join('\\n') : 'No brief-specific rules to check.' }}\n\nCORRECTED ARTICLE TO AUDIT (post-rewrite):\n{{ $('Surgical Rewriter').first().json.text || $('Surgical Rewriter').first().json.output || $('Surgical Rewriter').first().json.message?.content || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 1200,
+          "temperature": 0,
+          "responseFormat": "json_object"
+        }
+      }
+    },
+    {
+      "id": "qa-006-audit-gate-p2",
+      "name": "Structure Audit Gate 2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        531858,
+        113824
+      ],
+      "notes": "PASS → 1st Scoring Agent3. FAIL → Flag For Human Review (still proceeds to scoring).",
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "audit-gate-2-cond",
+              "leftValue": "={{ $json.message?.content?.overall_pass ?? $json.overall_pass ?? false }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "qa-007-flag-for-review",
+      "name": "Flag For Human Review",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        532108,
+        113944
+      ],
+      "notes": "Marks article as needing human review after 2 failed QA passes. Still routes to scoring.",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "flag-a",
+              "name": "rewrite_flagged",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "flag-b",
+              "name": "rewrite_flag_reason",
+              "value": "={{ $('Structure Auditor (Pass 2)').first().json.message?.content?.rules_violated?.join('; ') || 'Structure audit failed after 2 correction passes. Manual review required.' }}",
+              "type": "string"
+            },
+            {
+              "id": "flag-c",
+              "name": "content",
+              "value": "={{ $('Surgical Rewriter').first().json.text || $('Surgical Rewriter').first().json.output || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
       }
     }
   ],
@@ -4188,7 +4418,12 @@
       "main": [
         [
           {
-            "node": "1st Scoring Agent3",
+            "node": "Structure Auditor (Pass 1)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Structure Auditor (Pass 1)",
             "type": "main",
             "index": 0
           }
@@ -4806,6 +5041,97 @@
           {
             "node": "Claude Keyword Check + Semantic Gap1",
             "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Auditor (Pass 1)": {
+      "main": [
+        [
+          {
+            "node": "Structure Audit Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Audit Gate": {
+      "main": [
+        [
+          {
+            "node": "1st Scoring Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Surgical Rewriter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Surgical Rewriter": {
+      "main": [
+        [
+          {
+            "node": "Structure Auditor (Pass 2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Auditor (Pass 2)": {
+      "main": [
+        [
+          {
+            "node": "Structure Audit Gate 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structure Audit Gate 2": {
+      "main": [
+        [
+          {
+            "node": "1st Scoring Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flag For Human Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag For Human Review": {
+      "main": [
+        [
+          {
+            "node": "1st Scoring Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Rewriter Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Surgical Rewriter",
+            "type": "ai_languageModel",
             "index": 0
           }
         ]

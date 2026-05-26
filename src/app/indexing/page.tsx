@@ -15,6 +15,7 @@ import {
     SelectTrigger,
     SelectValue
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Globe,
     CheckCircle2,
@@ -29,7 +30,9 @@ import {
     ChevronDown,
     ChevronUp,
     Filter,
-    RefreshCw
+    RefreshCw,
+    Users,
+    Activity
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -198,6 +201,9 @@ export default function IndexingHistoryPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+
     // ── Query ─────────────────────────────────────────────────────────────────
 
     const { data: runs = [], isLoading, refetch } = useQuery({
@@ -265,6 +271,30 @@ export default function IndexingHistoryPage() {
         return result;
     }, [runs, statusFilter, searchTerm, profilesMap]);
 
+    // ── Client Overview ───────────────────────────────────────────────────────
+    
+    // Group by indexing_client_id to get the latest run for each client
+    const clientOverview = useMemo(() => {
+        const map = new Map<string, IndexingRunRow>();
+        runs.forEach(r => {
+            if (!map.has(r.indexing_client_id)) {
+                map.set(r.indexing_client_id, r);
+            }
+        });
+        
+        let result = Array.from(map.values());
+        
+        // Apply search filter to the overview as well
+        if (searchTerm.trim()) {
+            const q = searchTerm.toLowerCase();
+            result = result.filter(r => 
+                r.indexing_clients?.name?.toLowerCase().includes(q) ||
+                r.indexing_clients?.gsc_property?.toLowerCase().includes(q)
+            );
+        }
+        return result;
+    }, [runs, searchTerm]);
+
     const formatDate = (d: string | null) => {
         if (!d) return '—';
         return new Date(d).toLocaleDateString('en-US', {
@@ -275,9 +305,20 @@ export default function IndexingHistoryPage() {
 
     // ── Stats ─────────────────────────────────────────────────────────────────
 
-    const totalSuccess = runs.filter(r => r.status === 'success').length;
-    const totalErrors = runs.filter(r => r.status === 'error').length;
-    const totalUrlsSubmitted = runs.reduce((sum, r) => sum + (r.google_summary?.submitted ?? 0), 0);
+    // ── Stats (Based on Client Overview) ──────────────────────────────────────
+
+    const totalClients = clientOverview.length;
+    const clientsSuccess = clientOverview.filter(r => r.status === 'success').length;
+    const clientsError = clientOverview.filter(r => r.status === 'error').length;
+
+    // Pagination Derived State
+    const totalCount = clientOverview.length;
+    const totalPages = Math.ceil(totalCount / pageSize) || 1;
+
+    const paginatedClientOverview = useMemo(() => {
+        const start = (currentPage - 1) * pageSize;
+        return clientOverview.slice(start, start + pageSize);
+    }, [clientOverview, currentPage, pageSize]);
 
     // ── Loading ───────────────────────────────────────────────────────────────
 
@@ -329,12 +370,12 @@ export default function IndexingHistoryPage() {
                 <div className="grid grid-cols-3 gap-4 mb-8">
                     <div className="bg-card border border-border/50 rounded-xl p-5">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-green-500/10 rounded-lg">
-                                <TrendingUp className="w-5 h-5 text-green-500" />
+                            <div className="p-2 bg-brand-blue-crayola/10 rounded-lg">
+                                <Users className="w-5 h-5 text-brand-blue-crayola" />
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-foreground">{totalUrlsSubmitted.toLocaleString()}</p>
-                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">URLs Submitted</p>
+                                <p className="text-2xl font-bold text-foreground">{totalClients}</p>
+                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Monitored Clients</p>
                             </div>
                         </div>
                     </div>
@@ -344,8 +385,8 @@ export default function IndexingHistoryPage() {
                                 <CheckCircle2 className="w-5 h-5 text-green-500" />
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-foreground">{totalSuccess}</p>
-                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Successful Runs</p>
+                                <p className="text-2xl font-bold text-foreground">{clientsSuccess}</p>
+                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Healthy Clients</p>
                             </div>
                         </div>
                     </div>
@@ -355,202 +396,217 @@ export default function IndexingHistoryPage() {
                                 <AlertCircle className="w-5 h-5 text-destructive" />
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-foreground">{totalErrors}</p>
-                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Failed Runs</p>
+                                <p className="text-2xl font-bold text-foreground">{clientsError}</p>
+                                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Failing Clients</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* ── Table Card ──────────────────────────────────────────── */}
-                <Card className="border-border/50 shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
-                    <CardHeader className="bg-muted/30 border-b border-border/50 py-5">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            {/* Search */}
-                            <div className="relative max-w-sm w-full">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search by client or user..."
-                                    className="pl-10 bg-background/50 border-border/50 h-10"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                                    <Filter className="w-4 h-4" />
-                                    Filter:
-                                </div>
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-[140px] h-10 bg-background/50 border-border/50">
-                                        <SelectValue placeholder="Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Statuses</SelectItem>
-                                        <SelectItem value="success">Success</SelectItem>
-                                        <SelectItem value="error">Failed</SelectItem>
-                                        <SelectItem value="pending">Pending</SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-10 gap-2 font-bold"
-                                    onClick={() => refetch()}
-                                    disabled={isLoading}
-                                >
-                                    <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-                                    Refresh
-                                </Button>
-                            </div>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="relative w-full md:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search clients..."
+                                className="pl-10 bg-background/50 border-border/50 h-10 w-full"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
-                    </CardHeader>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-10 w-10 shrink-0 border-border/50"
+                            onClick={() => refetch()}
+                            disabled={isLoading}
+                        >
+                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-brand-blue-crayola' : 'text-muted-foreground'}`} />
+                        </Button>
+                    </div>
+                </div>
 
+                <Card className="border-border/50 shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
                     <CardContent className="p-0">
-                        {isLoading ? (
-                            <div className="flex flex-col items-center justify-center h-64 gap-3">
-                                <Loader2 className="w-10 h-10 animate-spin text-brand-blue-crayola/50" />
-                                <p className="text-muted-foreground font-medium">Loading indexing history...</p>
-                            </div>
-                        ) : filteredRuns.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-64 gap-3 opacity-50">
-                                <Search className="w-10 h-10" />
-                                <p className="text-lg font-bold">No runs found</p>
-                                <p className="text-sm text-muted-foreground">
-                                    {runs.length === 0 ? 'Click "Run Indexing" to trigger the first run.' : 'Try adjusting your search or filters.'}
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-[11px] border-collapse">
-                                    <thead>
-                                        <tr className="bg-muted/20 border-b border-border/50">
-                                            <th className="px-6 py-4 font-bold text-foreground text-sm">Client</th>
-                                            <th className="px-4 py-4 font-bold text-foreground text-sm">Triggered By</th>
-                                            <th className="px-4 py-4 font-bold text-foreground text-sm text-center">Status</th>
-                                            <th className="px-4 py-4 font-bold text-foreground text-sm text-center">Google</th>
-                                            <th className="px-4 py-4 font-bold text-foreground text-sm text-center">Bing</th>
-                                            <th className="px-4 py-4 font-bold text-foreground text-sm">Date</th>
-                                            <th className="px-4 py-4 font-bold text-foreground text-sm text-center">Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-border/30">
-                                        {filteredRuns.map((run) => (
-                                            <>
-                                                <tr
-                                                    key={run.id}
-                                                    className="hover:bg-muted/30 transition-colors group"
-                                                >
-                                                    {/* Client */}
-                                                    <td className="px-6 py-5">
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <span className="font-bold text-foreground text-xs group-hover:text-brand-blue-crayola transition-colors">
-                                                                {run.indexing_clients?.name || 'Unknown Client'}
-                                                            </span>
-                                                            <span className="text-[10px] text-muted-foreground font-mono">
-                                                                {run.indexing_clients?.gsc_property}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-
-                                                    {/* Triggered By */}
-                                                    <td className="px-4 py-5">
-                                                        <TriggerCell run={run} profilesMap={profilesMap} />
-                                                    </td>
-
-                                                    {/* Status */}
-                                                    <td className="px-4 py-5 text-center">
-                                                        <StatusBadge status={run.status} />
-                                                    </td>
-
-                                                    {/* Google compact */}
-                                                    <td className="px-4 py-5 text-center">
-                                                        {run.google_summary ? (
-                                                            <GoogleSummaryCompact summary={run.google_summary} />
-                                                        ) : (
-                                                            <span className="text-muted-foreground text-xs">—</span>
-                                                        )}
-                                                    </td>
-
-                                                    {/* Bing compact */}
-                                                    <td className="px-4 py-5 text-center">
-                                                        {run.bing_summary ? (
-                                                            <div className="flex flex-col items-center gap-0.5">
-                                                                <span className="text-blue-500 font-bold text-[13px]">
-                                                                    +{run.bing_summary.new_urls ?? 0} <span className="font-normal text-[10px] text-blue-600/70">new</span>
-                                                                </span>
-                                                                <span className="text-muted-foreground text-[10px]">{run.bing_summary.submitted ?? 0} submitted</span>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-muted-foreground text-[10px] italic">skipped</span>
-                                                        )}
-                                                    </td>
-
-                                                    {/* Date */}
-                                                    <td className="px-4 py-5">
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <span className="font-medium text-foreground text-xs">
-                                                                {new Date(run.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                            </span>
-                                                            <span className="text-[10px] text-muted-foreground">
-                                                                {new Date(run.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-
-                                                    {/* Expand */}
-                                                    <td className="px-4 py-5 text-center">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                                                            onClick={() => setExpandedRunId(expandedRunId === run.id ? null : run.id)}
-                                                        >
-                                                            {expandedRunId === run.id
-                                                                ? <ChevronUp className="w-3.5 h-3.5" />
-                                                                : <ChevronDown className="w-3.5 h-3.5" />
-                                                            }
-                                                        </Button>
-                                                    </td>
+                                {isLoading ? (
+                                    <div className="flex flex-col items-center justify-center h-64 gap-3">
+                                        <Loader2 className="w-10 h-10 animate-spin text-brand-blue-crayola/50" />
+                                        <p className="text-muted-foreground font-medium">Loading client status...</p>
+                                    </div>
+                                ) : clientOverview.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-64 gap-3 opacity-50">
+                                        <Globe className="w-10 h-10" />
+                                        <p className="text-lg font-bold">No clients monitored yet</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Trigger indexing to start monitoring client status.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left text-[11px] border-collapse">
+                                            <thead>
+                                                <tr className="bg-muted/20 border-b border-border/50">
+                                                    <th className="px-6 py-4 font-bold text-foreground text-sm w-[35%]">Client</th>
+                                                    <th className="px-4 py-4 font-bold text-foreground text-sm text-center">Latest Status</th>
+                                                    <th className="px-4 py-4 font-bold text-foreground text-sm">Last Run Date</th>
+                                                    <th className="px-4 py-4 font-bold text-foreground text-sm text-center">Details</th>
                                                 </tr>
-
-                                                {/* Expanded row */}
-                                                {expandedRunId === run.id && (
-                                                    <tr key={`${run.id}-exp`} className="bg-muted/10">
-                                                        <td colSpan={7} className="px-8 py-6">
-                                                            <div className="space-y-4 max-w-3xl">
-                                                                {run.status === 'error' && run.error_message && (
-                                                                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                                                                        <p className="text-xs font-bold text-destructive uppercase tracking-wider mb-1">Error</p>
-                                                                        <p className="text-xs text-foreground/80">{run.error_message}</p>
-                                                                    </div>
-                                                                )}
-                                                                <div className="grid grid-cols-2 gap-4">
-                                                                    {run.google_summary
-                                                                        ? <GoogleSummaryFull summary={run.google_summary} />
-                                                                        : <p className="text-xs text-muted-foreground italic">No Google data</p>
-                                                                    }
-                                                                    <BingSummaryFull summary={run.bing_summary} />
-                                                                </div>
-                                                                {run.completed_at && (
-                                                                    <p className="text-[10px] text-muted-foreground">
-                                                                        Completed: {formatDate(run.completed_at)}
-                                                                    </p>
-                                                                )}
+                                            </thead>
+                                            <tbody className="divide-y divide-border/30">
+                                                {paginatedClientOverview.map((run) => (
+                                                    <>
+                                                    <tr key={run.id} className={`hover:bg-muted/30 transition-colors ${run.status === 'error' ? 'bg-destructive/5' : ''}`}>
+                                                        <td className="px-6 py-5">
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className="font-bold text-foreground text-xs">
+                                                                    {run.indexing_clients?.name || 'Unknown Client'}
+                                                                </span>
+                                                                <span className="text-[10px] text-muted-foreground font-mono">
+                                                                    {run.indexing_clients?.gsc_property}
+                                                                </span>
                                                             </div>
                                                         </td>
+                                                        <td className="px-4 py-5 text-center">
+                                                            <StatusBadge status={run.status} />
+                                                        </td>
+                                                        <td className="px-4 py-5">
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className="font-medium text-foreground text-xs">
+                                                                    {new Date(run.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                </span>
+                                                                <span className="text-[10px] text-muted-foreground">
+                                                                    {new Date(run.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-5 text-center">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground transition-opacity"
+                                                                onClick={() => setExpandedRunId(expandedRunId === run.id ? null : run.id)}
+                                                            >
+                                                                {expandedRunId === run.id
+                                                                    ? <ChevronUp className="w-3.5 h-3.5" />
+                                                                    : <ChevronDown className="w-3.5 h-3.5" />
+                                                                }
+                                                            </Button>
+                                                        </td>
                                                     </tr>
-                                                )}
-                                            </>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+
+                                                    {/* Expanded row */}
+                                                    {expandedRunId === run.id && (
+                                                        <tr key={`${run.id}-exp`} className="bg-muted/10">
+                                                            <td colSpan={4} className="px-8 py-6">
+                                                                <div className="space-y-4 max-w-3xl">
+                                                                    {run.status === 'error' && run.error_message && (
+                                                                        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                                                                            <p className="text-xs font-bold text-destructive uppercase tracking-wider mb-1">Error</p>
+                                                                            <p className="text-xs text-foreground/80">{run.error_message}</p>
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="grid grid-cols-2 gap-4">
+                                                                        {run.google_summary
+                                                                            ? <GoogleSummaryFull summary={run.google_summary} />
+                                                                            : <p className="text-xs text-muted-foreground italic">No Google data</p>
+                                                                        }
+                                                                        <BingSummaryFull summary={run.bing_summary} />
+                                                                    </div>
+                                                                    <div className="pt-2">
+                                                                        <Button
+                                                                            onClick={() => router.push(`/indexing/run?client_id=${run.indexing_client_id}`)}
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            className="h-8 font-bold border-brand-blue-crayola/50 text-brand-blue-crayola hover:bg-brand-blue-crayola/10"
+                                                                        >
+                                                                            <Play className="w-3.5 h-3.5 mr-2" />
+                                                                            Run Indexing Now
+                                                                        </Button>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                    </>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+
+                                {/* Enhanced Pagination Controls */}
+                                {!isLoading && clientOverview.length > 0 && (
+                                    <div className="p-4 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4 bg-muted/20">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground font-medium">Page Size:</span>
+                                            <Select
+                                                value={pageSize.toString()}
+                                                onValueChange={(val: string) => {
+                                                    setPageSize(parseInt(val));
+                                                    setCurrentPage(1);
+                                                }}
+                                            >
+                                                <SelectTrigger className="h-8 w-20 text-xs font-bold bg-background/50 border-border/50">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="10">10</SelectItem>
+                                                    <SelectItem value="20">20</SelectItem>
+                                                    <SelectItem value="50">50</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <span className="text-sm text-muted-foreground ml-2">
+                                                Showing {Math.min(totalCount, (currentPage - 1) * pageSize + 1)} - {Math.min(totalCount, currentPage * pageSize)} of {totalCount}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={currentPage === 1 || isLoading}
+                                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                className="h-8 px-3 font-bold border-border/50"
+                                            >
+                                                Prev
+                                            </Button>
+
+                                            <div className="flex items-center gap-1">
+                                                {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                                                    let pageNum;
+                                                    if (totalPages <= 5) pageNum = i + 1;
+                                                    else if (currentPage <= 3) pageNum = i + 1;
+                                                    else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
+                                                    else pageNum = currentPage - 2 + i;
+
+                                                    return (
+                                                        <Button
+                                                            key={pageNum}
+                                                            variant={currentPage === pageNum ? "default" : "ghost"}
+                                                            size="sm"
+                                                            onClick={() => setCurrentPage(pageNum)}
+                                                            className={`h-8 w-8 p-0 font-bold ${currentPage === pageNum ? 'bg-brand-blue-crayola' : ''}`}
+                                                        >
+                                                            {pageNum}
+                                                        </Button>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={currentPage === totalPages || isLoading}
+                                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                                className="h-8 px-3 font-bold border-border/50"
+                                            >
+                                                Next
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
             </div>
         </div>
     );
