@@ -20,6 +20,7 @@ interface FormData {
     articleTitle: string;
     titleAudience: string;
     clientName: string;
+    clientWebsiteUrl: string;
     creativeBrief: string;
     articleType: string;
     wordCount: string;
@@ -39,6 +40,7 @@ export default function Dashboard() {
         articleTitle: '',
         titleAudience: '',
         clientName: '',
+        clientWebsiteUrl: '',
         creativeBrief: '',
         articleType: '',
         wordCount: '',
@@ -109,6 +111,7 @@ export default function Dashboard() {
                         word_count: parseInt(formData.wordCount) || 0,
                         article_type: formData.articleType,
                         client_name: formData.clientName,
+                        client_website_url: formData.clientWebsiteUrl || null,
                         creative_brief: formData.creativeBrief,
                         page_intent: formData.pageIntent,
                         status: 'pending' // DO NOT set current_run_id yet due to FK constraint
@@ -138,6 +141,7 @@ export default function Dashboard() {
                         title: formData.articleTitle,
                         audience: formData.titleAudience,
                         client_name: formData.clientName,
+                        client_website_url: formData.clientWebsiteUrl || null,
                         creative_brief: formData.creativeBrief,
                         article_type: formData.articleType,
                         word_count: formData.wordCount,
@@ -212,6 +216,7 @@ export default function Dashboard() {
                 articleTitle: '',
                 titleAudience: '',
                 clientName: '',
+                clientWebsiteUrl: '',
                 creativeBrief: '',
                 articleType: '',
                 wordCount: '',
@@ -589,6 +594,21 @@ Integrated treatment supports long-term resilience.`,
                                     {errors.clientName && (
                                         <p className="text-sm text-destructive">{errors.clientName}</p>
                                     )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="clientWebsiteUrl" className="text-foreground">
+                                        Client Website URL
+                                        <span className="ml-1 text-xs text-muted-foreground font-normal">(optional — used for fact-checking)</span>
+                                    </Label>
+                                    <Input
+                                        id="clientWebsiteUrl"
+                                        type="url"
+                                        value={formData.clientWebsiteUrl}
+                                        onChange={(e) => handleInputChange('clientWebsiteUrl', e.target.value)}
+                                        className="bg-background border-input"
+                                        placeholder="https://www.clientwebsite.com"
+                                    />
                                 </div>
 
                                 <div className="space-y-2">

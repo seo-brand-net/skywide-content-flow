@@ -776,6 +776,16 @@ export default function MyRequests() {
                                                     </p>
                                                 </div>
                                                 <div>
+                                                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Client Website URL</label>
+                                                    <p className="text-sm text-foreground mt-1">
+                                                        {selectedRequest.client_website_url ? (
+                                                            <a href={selectedRequest.client_website_url} target="_blank" rel="noopener noreferrer" className="text-brand-blue-crayola hover:underline flex items-center gap-1">
+                                                                {selectedRequest.client_website_url} <ExternalLink className="w-3 h-3" />
+                                                            </a>
+                                                        ) : 'N/A'}
+                                                    </p>
+                                                </div>
+                                                <div>
                                                     <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Target Audience</label>
                                                     <p className="text-sm text-foreground mt-1">{selectedRequest.title_audience || 'N/A'}</p>
                                                 </div>

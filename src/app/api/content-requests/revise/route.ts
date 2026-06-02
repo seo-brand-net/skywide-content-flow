@@ -102,6 +102,7 @@ export async function POST(
         title: contentRequest.article_title,
         audience: contentRequest.title_audience,
         client_name: contentRequest.client_name,
+        client_website_url: contentRequest.client_website_url || null,
         creative_brief: contentRequest.creative_brief,
         article_type: contentRequest.article_type,
         word_count: contentRequest.word_count,

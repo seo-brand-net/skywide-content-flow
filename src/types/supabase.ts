@@ -92,6 +92,7 @@ export type Database = {
           article_title: string
           article_type: string
           client_name: string
+          client_website_url: string | null
           created_at: string
           creative_brief: string
           id: string
@@ -108,6 +109,7 @@ export type Database = {
           article_title: string
           article_type: string
           client_name: string
+          client_website_url?: string | null
           created_at?: string
           creative_brief: string
           id?: string
@@ -124,6 +126,7 @@ export type Database = {
           article_title?: string
           article_type?: string
           client_name?: string
+          client_website_url?: string | null
           created_at?: string
           creative_brief?: string
           id?: string

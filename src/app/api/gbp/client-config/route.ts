@@ -24,6 +24,15 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     }
 
+    // Ensure we only return the ID, even if a full URL was saved in the DB
+    let finalSheetId = client.sheet_id;
+    if (finalSheetId && finalSheetId.includes('/spreadsheets/d/')) {
+        const match = finalSheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+        if (match && match[1]) {
+            finalSheetId = match[1];
+        }
+    }
+
     const { data: locations, error: locError } = await supabaseAdmin
         .from('gbp_locations')
         .select('id, location_name, city, state, sheet_tab_name, is_active')
@@ -35,5 +44,5 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: locError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ ...client, locations: locations || [] });
+    return NextResponse.json({ ...client, sheet_id: finalSheetId, locations: locations || [] });
 }

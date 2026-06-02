@@ -46,7 +46,7 @@ function postJson(url, body) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-const SELECT_FIELDS = 'id, user_id, article_title, client_name, creative_brief, word_count, article_type, primary_keywords, secondary_keywords, tone, created_at';
+const SELECT_FIELDS = 'id, user_id, article_title, client_name, client_website_url, creative_brief, word_count, article_type, primary_keywords, secondary_keywords, tone, created_at';
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
@@ -136,7 +136,8 @@ async function main() {
       request_status:      'test',
       creative_brief:      run.creative_brief,
       title:               run.article_title,
-      client_name:         run.client_name,
+      client_name:        run.client_name,
+      client_website_url: run.client_website_url || null,
       article_type:        run.article_type        || 'Blogs',
       word_count:          run.word_count          || '900',
       primary_keyword:     run.primary_keywords    || '',

@@ -62,6 +62,7 @@ async function main() {
     creative_brief:     data.creative_brief,
     title:              data.article_title || data.title,
     client_name:        data.client_name,
+      client_website_url: data.client_website_url || null,
     article_type:       data.article_type       || 'Blogs',
     word_count:         data.word_count         || '900',
     primary_keyword:    data.primary_keywords   || '',
