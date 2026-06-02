@@ -11,6 +11,7 @@ export interface ContentRequest {
     seo_keywords: string;
     article_type: string;
     client_name: string;
+    client_website_url: string | null;
     creative_brief: string;
     status: string;
     created_at: string;
