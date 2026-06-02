@@ -248,9 +248,10 @@ export default function Dashboard() {
             articleTitle: "Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses",
             titleAudience: "Professional Engineers",
             clientName: "Align PEO",
+            clientWebsiteUrl: "",
             creativeBrief: `Blog Title: Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses Reading Time: ~6 minutes Target Word Count: ~1,000 words
 
-Audience Licensed Professional Engineers in Wisconsin approaching their renewal deadline who need to understand the ethics PDH requirement — what qualifies, how many hours are needed, and where to find approved courses quickly.
+Audience Licensed Professional Engineers in Wisconsin approaching their renewal deadline who need to understand the ethics PDH requirement — what qualifies, how many hours are needed, and where[...]
 Tone Clear, no-nonsense, and helpful. These are busy professionals who want answers fast. Authoritative without being bureaucratic. Slightly more practical/transactional than editorial.
 Brand Positioning PDH Pro as the go-to source for DSPS-compliant ethics courses — convenient, state-specific, and designed to meet Wisconsin's requirements without wasted time.
 
@@ -296,7 +297,7 @@ Ethics PDH must cover professional or business ethics — not general soft skill
 DSPS does not maintain a pre-approved course list; the engineer is responsible for ensuring course content qualifies.
 Re-use secondary keyword: engineers who misunderstand the wisconsin pe ethics renewal requirement risk rejected hours during an audit.
 4. What Topics Count as Ethics for Wisconsin Professional Engineers? (use semantic themes) Purpose: Define qualifying content clearly.
-Topics that qualify: NSPE Code of Ethics, engineering judgment and duty to the public, conflicts of interest, client confidentiality, professional responsibility in design, whistleblowing obligations.
+Topics that qualify: NSPE Code of Ethics, engineering judgment and duty to the public, conflicts of interest, client confidentiality, professional responsibility in design, whistleblowing obligat[...]
 A professional engineer ethics course that addresses one or more of these areas will generally satisfy DSPS requirements.
 Pe continuing education ethics content from NSPE, state boards, or accredited providers like PDH Pro typically qualifies.
 Re-use primary keyword: the clearest way to satisfy the ethics for wisconsin professional engineers requirement is through a course explicitly designed around professional codes of conduct.
@@ -318,8 +319,8 @@ The 2 ethics hours sit within a 30-PDH biennial requirement.
 Remaining 28 hours may come from a wide range of technical and professional development topics.
 Link to the Wisconsin PE continuing education overview page on PDH Pro.
 9. FAQs Q1: How many ethics hours are required for Wisconsin PE renewal? A: Wisconsin requires 2 PDH hours in professional or business ethics as part of the 30-hour biennial renewal requirement.
-Q2: What counts as a professional engineer ethics course in Wisconsin? A: Courses covering the NSPE Code of Ethics, professional responsibility, conflicts of interest, or duties to the public generally qualify. DSPS does not pre-approve courses; the engineer is responsible for content verification.
-Q3: Does Wisconsin require ethics PE continuing education from a specific provider? A: No — Wisconsin does not maintain a pre-approved provider list. Courses must simply meet the content standards outlined in A-E 240.
+Q2: What counts as a professional engineer ethics course in Wisconsin? A: Courses covering the NSPE Code of Ethics, professional responsibility, conflicts of interest, or duties to the public gen[...]
+Q3: Does Wisconsin require ethics PE continuing education from a specific provider? A: No — Wisconsin does not maintain a pre-approved provider list. Courses must simply meet the content standa[...]
 Q4: Can I take more than 2 hours of ethics and count them all? A: Additional ethics hours may be taken but only 2 are required. Extra hours count toward your general 30-PDH total.
 10. Conclusion
 Reiterate the core message: ethics for wisconsin professional engineers is a 2-hour, every-renewal requirement that's easy to satisfy when you know what qualifies.
@@ -351,11 +352,12 @@ NCEES — PE Licensing Resources — https://ncees.org/engineering/pe/`,
             articleTitle: "Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens",
             titleAudience: "Parents and Caregivers",
             clientName: "Paradigm Treatment",
+            clientWebsiteUrl: "",
             creativeBrief: `Blog Brief: Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens
 Reading Time: ~6 minutes
 Target Word Count: 800 words
 Audience
-Parents and caregivers of teens and adolescents experiencing stress, anxiety, or chronic health conditions — especially those seeking to understand how physical health impacts emotional well-being.
+Parents and caregivers of teens and adolescents experiencing stress, anxiety, or chronic health conditions — especially those seeking to understand how physical health impacts emotional well-be[...]
 Tone
 Compassionate, educational, reassuring, clinical yet accessible — validating parental concern without fear-based messaging.
 Brand Positioning
