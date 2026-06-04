@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/indexing-automation",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 3 * * *"
     }
   ],
   "rewrites": [
