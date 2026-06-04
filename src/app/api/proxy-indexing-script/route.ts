@@ -179,9 +179,14 @@ export async function POST(request: Request) {
                 .eq('id', runId);
         }
 
+        const googleRateLimited = mappedGoogleSummary?.rate_limited || 0;
+        const bingRateLimited = mappedBingSummary?.rate_limited || 0;
+        const hasRateLimitedUrls = googleRateLimited > 0 || bingRateLimited > 0;
+
         // Reset the 14-day scheduling clock on the client so manual runs
         // are treated the same as scheduled runs for next-due calculation.
-        if (isSuccess && indexing_client_id) {
+        // DO NOT reset the clock if we hit rate limits, so it can be retried automatically.
+        if (isSuccess && !hasRateLimitedUrls && indexing_client_id) {
             await supabaseAdmin
                 .from('indexing_clients')
                 .update({ last_run_at: new Date().toISOString() })

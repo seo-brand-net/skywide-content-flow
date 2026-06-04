@@ -17,11 +17,10 @@ const N8N_WEBHOOK = 'https://seobrand.app.n8n.cloud/webhook/content-engine-dev';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Verified client URLs from web search
+// Natalie's exact request — ABA therapy article for Helping Hands Family
+// ID pulled directly from Supabase content_requests table
 const TARGET_CLIENTS = [
-  { name: 'Sacred Connection', url: 'https://sacredconnection.co'   },
-  { name: 'PDH Pro',           url: 'https://pdh-pro.com'           },
-  { name: 'The Ridge RTC',     url: 'https://www.theridgertc.com'   },
+  { name: 'Helping Hands Family', url: 'https://hhfamily.com', id: '801367a9-ed65-4e65-a0b9-d4be78278aba' },
 ];
 
 const SELECT = 'id, user_id, article_title, title_audience, client_name, client_website_url, creative_brief, word_count, article_type, primary_keywords, secondary_keywords, semantic_themes, tone, page_intent, created_at';
@@ -49,25 +48,25 @@ function postJson(url, body) {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
-  console.log('=== Claim Issue Test — 3 Clients → DEV webhook ===\n');
+  console.log('=== Natalie ABA Therapy Re-Test — Helping Hands Family → DEV webhook ===\n');
 
   const runs = [];
 
   for (const client of TARGET_CLIENTS) {
+    // Fetch by specific ID so we get the exact same request Natalie ran
     const { data, error } = await supabase
       .from('content_requests')
       .select(SELECT)
-      .ilike('client_name', `%${client.name}%`)
-      .order('created_at', { ascending: false })
-      .limit(1);
+      .eq('id', client.id)
+      .single();
 
-    if (error || !data || data.length === 0) {
+    if (error || !data) {
       console.log(`[${client.name}] Not found or error: ${error?.message}`);
       continue;
     }
 
-    runs.push({ ...data[0], verifiedUrl: client.url });
-    console.log(`✅ [${data[0].client_name}] "${data[0].article_title}"`);
+    runs.push({ ...data, verifiedUrl: client.url });
+    console.log(`✅ [${data.client_name}] "${data.article_title}"`);
     console.log(`   Using URL: ${client.url}`);
   }
 
@@ -76,7 +75,7 @@ async function main() {
     return;
   }
 
-  console.log(`\n── Firing ${runs.length} requests to ${N8N_WEBHOOK} ──\n`);
+  console.log(`\n── Firing ${runs.length} request(s) to ${N8N_WEBHOOK} ──\n`);
 
   for (let i = 0; i < runs.length; i++) {
     const run = runs[i];
@@ -116,6 +115,7 @@ async function main() {
     console.log(`  client_name:        ${payload.client_name}`);
     console.log(`  client_website_url: ${payload.client_website_url}`);
     console.log(`  request_id:         ${requestId}`);
+    console.log(`  run_id:             ${runId}`);
 
     try {
       const res = await postJson(N8N_WEBHOOK, payload);
@@ -130,8 +130,10 @@ async function main() {
     }
   }
 
-  console.log('\n=== All submissions sent ===');
-  console.log('Check the n8n DEV workflow executions and compare output against the Google Doc.');
+  console.log('\n=== Submission sent ===');
+  console.log('Workflow takes ~25-30 mins. When done run:');
+  console.log('  node inspect_execution.js --list');
+  console.log('  node audit_pipeline.js execution_<ID>_full.json');
 }
 
 main().catch(console.error);
