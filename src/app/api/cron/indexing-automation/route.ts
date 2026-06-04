@@ -73,25 +73,31 @@ export async function GET(request: Request) {
 
                 const result = await response.json();
 
-                // Determine if we should update last_run_at to today (which delays the next run by 14 days).
-                // Rule 1: Always delay if it's a success AND no URLs were rate-limited.
-                // Rule 2: For all other errors (including timeouts or if rate_limited > 0), DO NOT update last_run_at so it runs again tomorrow.
+                // Scheduling rules for last_run_at:
+                // SUCCESS + no rate-limited URLs → set to now (14-day cooldown starts)
+                // FAILURE of any kind (timeout, rate limit, error) → explicitly set to NULL
+                //   This guarantees the cron picks it up again next run. Leaving an old date
+                //   would be ambiguous — null is the single source of truth for "needs retry".
                 const isSuccess = response.ok;
-                const errorStr = String(result.error || result.message || '').toLowerCase();
-                
+
                 const googleRateLimited = result.google_summary?.rate_limited || 0;
                 const bingRateLimited = result.bing_summary?.rate_limited || 0;
                 const hasRateLimitedUrls = googleRateLimited > 0 || bingRateLimited > 0;
 
-                const shouldUpdateLastRunAt = (isSuccess && !hasRateLimitedUrls);
-
-                if (shouldUpdateLastRunAt) {
+                if (isSuccess && !hasRateLimitedUrls) {
+                    // Full success — start the 14-day cooldown
                     await supabaseAdmin
                         .from('indexing_clients')
                         .update({ last_run_at: new Date().toISOString() })
                         .eq('id', client.id);
+                    console.log(`[cron/indexing-automation] ✓ ${client.name} — last_run_at updated (14-day cooldown started)`);
                 } else {
-                    console.log(`[cron/indexing-automation] Not updating last_run_at for ${client.name} (Retrying tomorrow). Success: ${isSuccess}, RateLimited: ${hasRateLimitedUrls}, Error: ${result.error || result.message}`);
+                    // Partial success (rate limited) or full failure — NULL out so it retries tomorrow
+                    await supabaseAdmin
+                        .from('indexing_clients')
+                        .update({ last_run_at: null })
+                        .eq('id', client.id);
+                    console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL (will retry tomorrow). Success: ${isSuccess}, RateLimited: ${hasRateLimitedUrls}, Error: ${result.error || result.message}`);
                 }
 
                 if (!response.ok) {
@@ -114,8 +120,13 @@ export async function GET(request: Request) {
 
             } catch (clientError: any) {
                 console.error(`[cron/indexing-automation] Exception for ${client.name}:`, clientError);
-                console.log(`[cron/indexing-automation] Not updating last_run_at for exception on ${client.name} (Retrying tomorrow). Error: ${clientError.message}`);
-
+                // Any uncaught exception → NULL out last_run_at so it retries tomorrow
+                await supabaseAdmin
+                    .from('indexing_clients')
+                    .update({ last_run_at: null })
+                    .eq('id', client.id)
+                    .then(() => {});
+                console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL after exception (will retry tomorrow). Error: ${clientError.message}`);
                 
                 return {
                     client_id: client.id,

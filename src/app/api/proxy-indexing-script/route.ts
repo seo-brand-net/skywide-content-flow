@@ -183,14 +183,22 @@ export async function POST(request: Request) {
         const bingRateLimited = mappedBingSummary?.rate_limited || 0;
         const hasRateLimitedUrls = googleRateLimited > 0 || bingRateLimited > 0;
 
-        // Reset the 14-day scheduling clock on the client so manual runs
-        // are treated the same as scheduled runs for next-due calculation.
-        // DO NOT reset the clock if we hit rate limits, so it can be retried automatically.
-        if (isSuccess && !hasRateLimitedUrls && indexing_client_id) {
-            await supabaseAdmin
-                .from('indexing_clients')
-                .update({ last_run_at: new Date().toISOString() })
-                .eq('id', indexing_client_id);
+        // Scheduling logic — null is the single source of truth for "needs retry":
+        // SUCCESS + no rate-limited URLs → set last_run_at to now (14-day cooldown)
+        // FAILURE or rate-limited → explicitly NULL out last_run_at so the cron picks it up next day
+        if (indexing_client_id) {
+            if (isSuccess && !hasRateLimitedUrls) {
+                await supabaseAdmin
+                    .from('indexing_clients')
+                    .update({ last_run_at: new Date().toISOString() })
+                    .eq('id', indexing_client_id);
+            } else {
+                await supabaseAdmin
+                    .from('indexing_clients')
+                    .update({ last_run_at: null })
+                    .eq('id', indexing_client_id);
+                console.log('[proxy-indexing-script] last_run_at set to NULL — will retry tomorrow. RateLimited:', hasRateLimitedUrls, 'Success:', isSuccess);
+            }
         }
 
         if (!isSuccess) {
