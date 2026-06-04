@@ -74,15 +74,19 @@ export async function GET(request: Request) {
                 const result = await response.json();
 
                 // Scheduling rules for last_run_at:
-                // SUCCESS + no rate-limited URLs → set to now (14-day cooldown starts)
-                // FAILURE of any kind (timeout, rate limit, error) → explicitly set to NULL
-                //   This guarantees the cron picks it up again next run. Leaving an old date
-                //   would be ambiguous — null is the single source of truth for "needs retry".
+                // SUCCESS                                  → set to today (14-day cooldown)
+                // TIMEOUT (Apps Script 290s = rate limit)  → NULL (retry tomorrow)
+                // ANY OTHER ERROR                          → set to today (don't retry, just log)
                 const isSuccess = response.ok;
+                const errorStr = String(result.error || result.message || '').toLowerCase();
+                const isTimeoutRateLimit = errorStr.includes('timed out after 290');
 
                 const googleRateLimited = result.google_summary?.rate_limited || 0;
                 const bingRateLimited = result.bing_summary?.rate_limited || 0;
                 const hasRateLimitedUrls = googleRateLimited > 0 || bingRateLimited > 0;
+
+                // Only NULL out on timeout (rate limit) — everything else stamps today
+                const shouldNullLastRunAt = isTimeoutRateLimit || hasRateLimitedUrls;
 
                 if (isSuccess && !hasRateLimitedUrls) {
                     // Full success — start the 14-day cooldown
@@ -91,13 +95,20 @@ export async function GET(request: Request) {
                         .update({ last_run_at: new Date().toISOString() })
                         .eq('id', client.id);
                     console.log(`[cron/indexing-automation] ✓ ${client.name} — last_run_at updated (14-day cooldown started)`);
-                } else {
-                    // Partial success (rate limited) or full failure — NULL out so it retries tomorrow
+                } else if (shouldNullLastRunAt) {
+                    // Timeout / rate limit — NULL so it retries tomorrow
                     await supabaseAdmin
                         .from('indexing_clients')
                         .update({ last_run_at: null })
                         .eq('id', client.id);
-                    console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL (will retry tomorrow). Success: ${isSuccess}, RateLimited: ${hasRateLimitedUrls}, Error: ${result.error || result.message}`);
+                    console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL (rate limit/timeout, will retry tomorrow)`);
+                } else {
+                    // Other errors — stamp today so it doesn't retry endlessly
+                    await supabaseAdmin
+                        .from('indexing_clients')
+                        .update({ last_run_at: new Date().toISOString() })
+                        .eq('id', client.id);
+                    console.log(`[cron/indexing-automation] ✗ ${client.name} — last_run_at stamped today (non-retryable error: ${result.error || result.message})`);
                 }
 
                 if (!response.ok) {
@@ -120,14 +131,27 @@ export async function GET(request: Request) {
 
             } catch (clientError: any) {
                 console.error(`[cron/indexing-automation] Exception for ${client.name}:`, clientError);
-                // Any uncaught exception → NULL out last_run_at so it retries tomorrow
-                await supabaseAdmin
-                    .from('indexing_clients')
-                    .update({ last_run_at: null })
-                    .eq('id', client.id)
-                    .then(() => {});
-                console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL after exception (will retry tomorrow). Error: ${clientError.message}`);
-                
+                const errMsg = String(clientError.message || '').toLowerCase();
+                const isTimeoutRateLimit = errMsg.includes('timed out after 290');
+
+                if (isTimeoutRateLimit) {
+                    // Timeout = rate limit — NULL so it retries tomorrow
+                    await supabaseAdmin
+                        .from('indexing_clients')
+                        .update({ last_run_at: null })
+                        .eq('id', client.id)
+                        .then(() => {});
+                    console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL after timeout (will retry tomorrow)`);
+                } else {
+                    // Other exception — stamp today so it doesn't retry endlessly
+                    await supabaseAdmin
+                        .from('indexing_clients')
+                        .update({ last_run_at: new Date().toISOString() })
+                        .eq('id', client.id)
+                        .then(() => {});
+                    console.log(`[cron/indexing-automation] ✗ ${client.name} — last_run_at stamped today after exception (non-retryable: ${clientError.message})`);
+                }
+
                 return {
                     client_id: client.id,
                     client_name: client.name,

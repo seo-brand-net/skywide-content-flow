@@ -183,21 +183,34 @@ export async function POST(request: Request) {
         const bingRateLimited = mappedBingSummary?.rate_limited || 0;
         const hasRateLimitedUrls = googleRateLimited > 0 || bingRateLimited > 0;
 
-        // Scheduling logic — null is the single source of truth for "needs retry":
-        // SUCCESS + no rate-limited URLs → set last_run_at to now (14-day cooldown)
-        // FAILURE or rate-limited → explicitly NULL out last_run_at so the cron picks it up next day
+        // Scheduling logic:
+        // SUCCESS                                  → set last_run_at to today (14-day cooldown)
+        // TIMEOUT (Apps Script 290s = rate limit)  → NULL (retry tomorrow)
+        // ANY OTHER ERROR                          → set to today (don't retry endlessly)
         if (indexing_client_id) {
+            const errMsg = String(gasData?.error || gasData?.message || '').toLowerCase();
+            const isTimeoutRateLimit = errMsg.includes('timed out after 290') || hasRateLimitedUrls;
+
             if (isSuccess && !hasRateLimitedUrls) {
+                // Full success — 14-day cooldown
                 await supabaseAdmin
                     .from('indexing_clients')
                     .update({ last_run_at: new Date().toISOString() })
                     .eq('id', indexing_client_id);
-            } else {
+            } else if (isTimeoutRateLimit) {
+                // Timeout / rate limit — NULL so cron retries tomorrow
                 await supabaseAdmin
                     .from('indexing_clients')
                     .update({ last_run_at: null })
                     .eq('id', indexing_client_id);
-                console.log('[proxy-indexing-script] last_run_at set to NULL — will retry tomorrow. RateLimited:', hasRateLimitedUrls, 'Success:', isSuccess);
+                console.log('[proxy-indexing-script] last_run_at set to NULL — rate limit/timeout, will retry tomorrow.');
+            } else {
+                // Other errors — stamp today so it doesn't retry endlessly
+                await supabaseAdmin
+                    .from('indexing_clients')
+                    .update({ last_run_at: new Date().toISOString() })
+                    .eq('id', indexing_client_id);
+                console.log('[proxy-indexing-script] last_run_at stamped today — non-retryable error, will not retry tomorrow.');
             }
         }
 
