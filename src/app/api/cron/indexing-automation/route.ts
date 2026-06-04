@@ -75,19 +75,15 @@ export async function GET(request: Request) {
 
                 // Determine if we should update last_run_at to today (which delays the next run by 14 days).
                 // Rule 1: Always delay if it's a success AND no URLs were rate-limited.
-                // Rule 2: Delay if it's an "execution limit" error, as requested by Mike.
-                // Rule 3: For all other errors (or if rate_limited > 0), DO NOT update last_run_at so it runs again tomorrow.
+                // Rule 2: For all other errors (including timeouts or if rate_limited > 0), DO NOT update last_run_at so it runs again tomorrow.
                 const isSuccess = response.ok;
                 const errorStr = String(result.error || result.message || '').toLowerCase();
-                const isExecutionLimitError = errorStr.includes('execution time') || 
-                                              errorStr.includes('execution limit') || 
-                                              errorStr.includes('timeout');
                 
                 const googleRateLimited = result.google_summary?.rate_limited || 0;
                 const bingRateLimited = result.bing_summary?.rate_limited || 0;
                 const hasRateLimitedUrls = googleRateLimited > 0 || bingRateLimited > 0;
 
-                const shouldUpdateLastRunAt = (isSuccess && !hasRateLimitedUrls) || (!isSuccess && isExecutionLimitError);
+                const shouldUpdateLastRunAt = (isSuccess && !hasRateLimitedUrls);
 
                 if (shouldUpdateLastRunAt) {
                     await supabaseAdmin
@@ -118,19 +114,8 @@ export async function GET(request: Request) {
 
             } catch (clientError: any) {
                 console.error(`[cron/indexing-automation] Exception for ${client.name}:`, clientError);
-                
-                const errStr = String(clientError.message || '').toLowerCase();
-                const isExecLimit = errStr.includes('execution time') || errStr.includes('execution limit') || errStr.includes('timeout');
-                
-                if (isExecLimit) {
-                    await supabaseAdmin
-                        .from('indexing_clients')
-                        .update({ last_run_at: new Date().toISOString() })
-                        .eq('id', client.id)
-                        .then(() => {}); // fire-and-forget
-                } else {
-                    console.log(`[cron/indexing-automation] Not updating last_run_at for exception on ${client.name} (Retrying tomorrow). Error: ${clientError.message}`);
-                }
+                console.log(`[cron/indexing-automation] Not updating last_run_at for exception on ${client.name} (Retrying tomorrow). Error: ${clientError.message}`);
+
                 
                 return {
                     client_id: client.id,
