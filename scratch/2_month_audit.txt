@@ -1,0 +1,56 @@
+Analyzed 13 executions across the 2-month history.
+
+=== 2-MONTH DEEP EXECUTION AUDIT (April to June) ===
+
+
+----------------------------------------
+[June 4] Exec: 2772 | Workflow: t3LNiuZIghvobde3
+Max Length: 2263 words | Truncated: false | Has % Stats: false | Has Practitioner Claims: true
+
+----------------------------------------
+[June 4] Exec: 2774 | Workflow: t3LNiuZIghvobde3
+Max Length: 2263 words | Truncated: false | Has % Stats: false | Has Practitioner Claims: true
+
+----------------------------------------
+[June 4] Exec: 2776 | Workflow: t3LNiuZIghvobde3
+Max Length: 1818 words | Truncated: true | Has % Stats: true | Has Practitioner Claims: true
+
+----------------------------------------
+[June 4] Exec: 2778 | Workflow: t3LNiuZIghvobde3
+Max Length: 2075 words | Truncated: true | Has % Stats: true | Has Practitioner Claims: true
+
+----------------------------------------
+[June 4] Exec: 2779 | Workflow: t3LNiuZIghvobde3
+Max Length: 1861 words | Truncated: true | Has % Stats: true | Has Practitioner Claims: true
+
+----------------------------------------
+[June 4] Exec: 2781 | Workflow: t3LNiuZIghvobde3
+Max Length: 1969 words | Truncated: true | Has % Stats: true | Has Practitioner Claims: true
+
+----------------------------------------
+[June 4] Exec: 2782 | Workflow: t3LNiuZIghvobde3
+Max Length: 2144 words | Truncated: false | Has % Stats: true | Has Practitioner Claims: true
+
+----------------------------------------
+[June 4] Exec: 2783 | Workflow: t3LNiuZIghvobde3
+Max Length: 4190 words | Truncated: true | Has % Stats: true | Has Practitioner Claims: false
+
+----------------------------------------
+[June 5] Exec: 2785 | Workflow: t3LNiuZIghvobde3
+Max Length: 2697 words | Truncated: true | Has % Stats: false | Has Practitioner Claims: false
+
+----------------------------------------
+[June 5] Exec: 2786 | Workflow: t3LNiuZIghvobde3
+Max Length: 2659 words | Truncated: true | Has % Stats: false | Has Practitioner Claims: true
+
+----------------------------------------
+[June 5] Exec: 2787 | Workflow: t3LNiuZIghvobde3
+Max Length: 1565 words | Truncated: false | Has % Stats: false | Has Practitioner Claims: false
+
+----------------------------------------
+[June 5] Exec: 2788 | Workflow: t3LNiuZIghvobde3
+Max Length: 3009 words | Truncated: true | Has % Stats: true | Has Practitioner Claims: true
+
+----------------------------------------
+[June 5] Exec: 2789 | Workflow: t3LNiuZIghvobde3
+Max Length: 2965 words | Truncated: true | Has % Stats: false | Has Practitioner Claims: true

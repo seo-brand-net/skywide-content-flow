@@ -1,0 +1,715 @@
+Analyzed 100 successful content generations from Supabase.
+
+=== SUPABASE HISTORICAL CONTENT AUDIT (Oldest to Newest) ===
+
+[Mar 17] Client: The Perfumery
+  - Word Count: 1839 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 9271 chars
+
+[Mar 17] Client: Croc-Crete
+  - Word Count: 1462 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 6776 chars
+
+[Mar 17] Client: South Beach Detox
+  - Word Count: 1919 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7127 chars
+
+[Mar 17] Client: Bistro Tables & Bases 
+  - Word Count: 1709 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 5323 chars
+
+[Mar 18] Client: Suncoast Skin Solutions
+  - Word Count: 1956 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 6743 chars
+
+[Mar 18] Client: SEO Brand
+  - Word Count: 1369 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 12486 chars
+
+[Mar 19] Client: The Perfumery 
+  - Word Count: 1577 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9115 chars
+
+[Mar 19] Client: SEO Brand
+  - Word Count: 3342 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 11801 chars
+
+[Mar 20] Client: SEO Brand
+  - Word Count: 2754 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 4247 chars
+
+[Mar 20] Client: SEO Brand
+  - Word Count: 2812 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9014 chars
+
+[Mar 20] Client: Florida Seawall Solutions
+  - Word Count: 2106 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 4444 chars
+
+[Mar 20] Client: SEO Brand
+  - Word Count: 1124 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 11938 chars
+
+[Mar 21] Client: SEO Brand
+  - Word Count: 1016 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 12122 chars
+
+[Mar 21] Client: SEO Brand
+  - Word Count: 1158 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 12321 chars
+
+[Mar 21] Client: The Ridge RTC
+  - Word Count: 750 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 6265 chars
+
+[Mar 21] Client: SEO Brand
+  - Word Count: 827 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 11935 chars
+
+[Mar 21] Client: SEO Brand
+  - Word Count: 865 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 11934 chars
+
+[Mar 23] Client: The Ridge RTC
+  - Word Count: 3053 words
+  - Truncated? true
+  - % Hallucinations? false
+  - Practitioner Hallucinations? true
+  - Brief Length: 6283 chars
+  - Snippet (End): "...ttps://www.nimh.nih.gov/) - [Child Mind Institute: School Anxiety & Burnout](https://childmind.org/)"
+
+[Mar 23] Client: The Ridge RTC
+  - Word Count: 782 words
+  - Truncated? true
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 6283 chars
+  - Snippet (End): "... Mental Health (NIMH) - Anxiety Disorders in Teens - Child Mind Institute - School Anxiety & Burnout"
+
+[Mar 23] Client: New Hope Fertility Clinic
+  - Word Count: 1104 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7095 chars
+
+[Mar 23] Client: MOO
+  - Word Count: 1315 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9380 chars
+
+[Mar 23] Client: The Ridge RTC
+  - Word Count: 2636 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 6283 chars
+
+[Mar 23] Client: The Perfumery 
+  - Word Count: 1523 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7639 chars
+
+[Mar 24] Client: Qollateral
+  - Word Count: 1283 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7333 chars
+
+[Mar 24] Client: MOO
+  - Word Count: 965 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9379 chars
+
+[Mar 24] Client: Celsia
+  - Word Count: 980 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7587 chars
+
+[Mar 25] Client: Sound Capital Solutions 
+  - Word Count: 1285 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 6142 chars
+
+[Mar 25] Client: Paradigm Treatment
+  - Word Count: 1766 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 8106 chars
+
+[Mar 25] Client: Florida Seawall Solutions
+  - Word Count: 2267 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 3740 chars
+
+[Mar 26] Client: Ezra Cohen
+  - Word Count: 1088 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 2127 chars
+
+[Mar 26] Client: YAD-Tech
+  - Word Count: 824 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 11649 chars
+
+[Mar 27] Client: The Perfumery 
+  - Word Count: 2633 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9418 chars
+
+[Mar 27] Client: Muddy Mat 
+  - Word Count: 1170 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 3551 chars
+
+[Mar 29] Client: Suncoast Skin Solutions
+  - Word Count: 1651 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 4735 chars
+
+[Mar 29] Client: Paradigm Treatment
+  - Word Count: 2050 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 8106 chars
+
+[Mar 30] Client: Sound Capital Solutions 
+  - Word Count: 1866 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 9632 chars
+
+[Mar 31] Client: SEO Brand
+  - Word Count: 1708 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 5914 chars
+
+[Mar 31] Client: The Social Media Growth
+  - Word Count: 1340 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 8307 chars
+
+[Apr 1] Client: The Perfumery 
+  - Word Count: 1382 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 8946 chars
+
+[Apr 2] Client: SEO Brand
+  - Word Count: 658 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 3243 chars
+
+[Apr 2] Client: Paradigm Treatment 
+  - Word Count: 1168 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? true
+  - Brief Length: 9172 chars
+
+[Apr 2] Client: The Most Wanted Custom Silver
+  - Word Count: 1857 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7741 chars
+
+[Apr 2] Client: Acclarity
+  - Word Count: 1254 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 4312 chars
+
+[Apr 3] Client: The Ridge RTC
+  - Word Count: 1873 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 8536 chars
+
+[Apr 6] Client: The Perfumery 
+  - Word Count: 2379 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 13261 chars
+
+[Apr 6] Client: Croc-Crete
+  - Word Count: 1167 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 1250 chars
+
+[Apr 6] Client: The Perfumery 
+  - Word Count: 1831 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9447 chars
+
+[Apr 6] Client: The Most Wanted Custom Silver 
+  - Word Count: 1590 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 5550 chars
+
+[Apr 6] Client: The Social Media Growth
+  - Word Count: 964 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 6640 chars
+
+[Apr 6] Client: Croc-Crete
+  - Word Count: 1803 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 9172 chars
+
+[Apr 7] Client: Acclarity
+  - Word Count: 1758 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 5086 chars
+
+[Apr 7] Client: The Ridge RTC
+  - Word Count: 1130 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 3248 chars
+
+[Apr 9] Client: Sacred Connection 
+  - Word Count: 794 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 5450 chars
+
+[Apr 9] Client: Sacred Connection
+  - Word Count: 1149 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 11123 chars
+
+[Apr 10] Client: Sacred Connection 
+  - Word Count: 798 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 5225 chars
+
+[Apr 10] Client: Sacred Connection 
+  - Word Count: 913 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 5141 chars
+
+[Apr 10] Client: Sacred Connection
+  - Word Count: 897 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 4596 chars
+
+[Apr 10] Client: Paradigm Treatment
+  - Word Count: 1255 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 9966 chars
+
+[Apr 13] Client: Qollateral
+  - Word Count: 1438 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9399 chars
+
+[Apr 14] Client: The Ridge RTC
+  - Word Count: 1443 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 10633 chars
+
+[Apr 14] Client: Sacred Connection 
+  - Word Count: 674 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 5365 chars
+
+[Apr 15] Client: Crash Proof Retirement
+  - Word Count: 903 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 14779 chars
+
+[Apr 16] Client: Crash Proof Retirement
+  - Word Count: 1499 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 15600 chars
+
+[Apr 16] Client: Boostero
+  - Word Count: 1130 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 12556 chars
+
+[Apr 17] Client: Sacred Connection
+  - Word Count: 1686 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 4645 chars
+
+[Apr 17] Client: The Most Wanted Custom Silver
+  - Word Count: 1245 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7949 chars
+
+[Apr 17] Client: Qollateral
+  - Word Count: 894 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 2869 chars
+
+[Apr 17] Client: PDH Pro
+  - Word Count: 1298 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7692 chars
+
+[Apr 17] Client: SaniTrax
+  - Word Count: 1250 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 1906 chars
+
+[Apr 21] Client: Align PEO
+  - Word Count: 1492 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7856 chars
+
+[Apr 22] Client: Infinity Insurance Agency
+  - Word Count: 1494 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 8729 chars
+
+[Apr 22] Client: Align PEO
+  - Word Count: 992 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7856 chars
+
+[Apr 22] Client: New Hope Fertility Clinic
+  - Word Count: 1736 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 13379 chars
+
+[Apr 22] Client: Align PEO
+  - Word Count: 1078 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7856 chars
+
+[Apr 22] Client: Align PEO
+  - Word Count: 1170 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7856 chars
+
+[Apr 22] Client: Align PEO
+  - Word Count: 1511 words
+  - Truncated? true
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7856 chars
+  - Snippet (End): "...n Administrative Code Chapter A-E 240 - Continuing Education Requirements for Professional Engineers"
+
+[Apr 23] Client: Align PEO
+  - Word Count: 1812 words
+  - Truncated? true
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7856 chars
+  - Snippet (End): "...gineer Renewal Guidelines - National Society of Professional Engineers: Code of Ethics for Engineers"
+
+[Apr 23] Client: Paradigm Treatment
+  - Word Count: 1426 words
+  - Truncated? true
+  - % Hallucinations? true
+  - Practitioner Hallucinations? true
+  - Brief Length: 6000 chars
+  - Snippet (End): "...rated care addressing both physical and mental health** yields the best long-term outcomes for teens"
+
+[Apr 23] Client: PDH-Pro 
+  - Word Count: 1831 words
+  - Truncated? true
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 8922 chars
+  - Snippet (End): "...nutes and Policies 6. National Council of Examiners for Engineering and Surveying (NCEES) Guidelines"
+
+[Apr 23] Client: Align PEO
+  - Word Count: 1169 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7856 chars
+
+[Apr 23] Client: New Hope Fertility Clinic
+  - Word Count: 1511 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 13381 chars
+
+[Apr 24] Client: PDH-Pro 
+  - Word Count: 1194 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 1451 chars
+
+[Apr 24] Client: PDH Pro
+  - Word Count: 1479 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 8617 chars
+
+[Apr 24] Client: Florida Seawall Solutions
+  - Word Count: 967 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 10798 chars
+
+[Apr 28] Client: South Beach Detox
+  - Word Count: 1042 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7840 chars
+
+[Apr 29] Client: The Ridge RTC
+  - Word Count: 2023 words
+  - Truncated? true
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 9868 chars
+  - Snippet (End): "...es/) - Contact The Ridge RTC -- [https://theridgertc.com/contact/](https://theridgertc.com/contact/)"
+
+[Apr 29] Client: Paradigm Treatment 
+  - Word Count: 2002 words
+  - Truncated? true
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 11672 chars
+  - Snippet (End): "...rogram/) 6. Paradigm Treatment. [Contact Paradigm Treatment](https://paradigmtreatment.com/contact/)"
+
+[Apr 29] Client: Florida Seawall Solutions
+  - Word Count: 1177 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 12481 chars
+
+[Apr 29] Client: Qollateral
+  - Word Count: 2687 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7271 chars
+
+[Apr 30] Client: Paradigm Treatment 
+  - Word Count: 2158 words
+  - Truncated? true
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 11322 chars
+  - Snippet (End): "...SM-5. Retrieved from [link] 5. Longitudinal Studies on Untreated ODD Outcomes. Retrieved from [link]"
+
+[Apr 30] Client: Florida Seawall Solutions
+  - Word Count: 1003 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 10798 chars
+
+[Apr 30] Client: Boostero
+  - Word Count: 827 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 6355 chars
+
+[Apr 30] Client: Align PEO
+  - Word Count: 672 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 2561 chars
+
+[Apr 30] Client: Infinity Insurance Agency (IIA)
+  - Word Count: 1858 words
+  - Truncated? true
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 11497 chars
+  - Snippet (End): "...s](https://www.tdi.texas.gov/) 3. [FMCSA commercial vehicle definitions](https://www.fmcsa.dot.gov/)"
+
+[May 4] Client: New Hope Fertility 
+  - Word Count: 1729 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 16902 chars
+
+[May 7] Client: Paradigm Treatment 
+  - Word Count: 1551 words
+  - Truncated? true
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 10540 chars
+  - Snippet (End): "... Overview - Substance Abuse and Mental Health Services Administration: Crisis Intervention Resources"
+
+[May 7] Client: Bistro Tables & Bases 
+  - Word Count: 885 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 5258 chars
+
+[May 7] Client: The Ridge RTC
+  - Word Count: 1471 words
+  - Truncated? false
+  - % Hallucinations? false
+  - Practitioner Hallucinations? false
+  - Brief Length: 7775 chars
+
+[May 7] Client: New Hope Fertility Clinic
+  - Word Count: 2883 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 13421 chars
+
+[May 8] Client: Qollateral
+  - Word Count: 1072 words
+  - Truncated? false
+  - % Hallucinations? true
+  - Practitioner Hallucinations? false
+  - Brief Length: 7701 chars
+

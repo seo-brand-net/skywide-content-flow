@@ -20,7 +20,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // Natalie's exact request — ABA therapy article for Helping Hands Family
 // ID pulled directly from Supabase content_requests table
 const TARGET_CLIENTS = [
-  { name: 'Helping Hands Family', url: 'https://hhfamily.com', id: '801367a9-ed65-4e65-a0b9-d4be78278aba' },
+  { name: 'Paradigm Treatment', url: 'https://paradigmtreatment.com', id: '26f67f72-a533-471d-b77e-df000fc24ce9' },
+  { name: 'Paradigm Treatment', url: 'https://paradigmtreatment.com', id: '51614746-a76f-41e3-a7f0-a71341b43288' }
 ];
 
 const SELECT = 'id, user_id, article_title, title_audience, client_name, client_website_url, creative_brief, word_count, article_type, primary_keywords, secondary_keywords, semantic_themes, tone, page_intent, created_at';
@@ -48,7 +49,7 @@ function postJson(url, body) {
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
-  console.log('=== Natalie ABA Therapy Re-Test — Helping Hands Family → DEV webhook ===\n');
+  console.log('=== Billy Claims Engine Re-Test — Paradigm Treatment → DEV webhook ===\n');
 
   const runs = [];
 

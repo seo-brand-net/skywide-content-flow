@@ -1,0 +1,37 @@
+=== SKYWIDE CONTENT ENGINE: MASTER QA CHECKLIST ===
+Use this checklist to programmatically and manually evaluate all AI-generated content outputs against the historical bugs and requirements gathered since March 2026.
+
+[ ] 1. TRUNCATION & COMPLETENESS CHECK
+- Does the article end with a complete sentence and proper punctuation?
+- Are the FAQs and Conclusion sections fully present?
+- Did the article hit an artificial token ceiling and cut off abruptly?
+
+[ ] 2. STRUCTURAL COMPLIANCE (THE BRIEF)
+- Are all exact H2s requested in the brief present?
+- Did the AI follow negative constraints specified in the brief (e.g., "Do not use em-dashes", "Always mention the city")?
+
+[ ] 3. REDUNDANCY & REPETITION CHECK
+- Structural Redundancy: Does any H2 directly duplicate the phrasing of the H1/Title?
+- Verbal Redundancy: Does the AI repeat the same transitional phrases (e.g., "Additionally", "Moreover") excessively?
+
+[ ] 4. PERCENTAGE & STATISTICAL HALLUCINATION
+- Does the article contain unverified percentage statistics (e.g., "78% of patients report...", "Over 60% of cases...")?
+- If statistics are present, are they strictly traced back to the Client Website or the Creative Brief?
+
+[ ] 5. AUTHORITY & PRACTITIONER HALLUCINATION
+- Does the article cite vague, unnamed practitioners (e.g., "Clinical experience shows", "Practitioners consistently see")?
+- Does the article invent guidelines or endorsements from real organizations (e.g., "The American Psychological Association recommends") unless explicitly provided in the brief?
+
+[ ] 6. CLIENT GROUND-TRUTH & SERVICE DRIFT
+- Does the article claim the client offers a specific service, product, or treatment that is NOT present on the client's actual website?
+- Is the client name mentioned naturally, especially within the first paragraph?
+
+[ ] 7. CONTEXT CONTAMINATION
+- Does the core subject matter align 100% with the brief? (Verify that the AI did not hallucinate a completely different topic, e.g., writing about "Teen Anxiety" when the brief asked for "PE Ethics").
+
+[ ] 8. FORMATTING & READABILITY
+- Is the passive voice minimized?
+- Are paragraphs kept concise (under 4-5 sentences) for readability?
+- Does the introduction have a compelling hook without sounding overly AI-generated?
+
+=== END OF CHECKLIST ===

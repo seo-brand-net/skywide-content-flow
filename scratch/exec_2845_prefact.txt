@@ -1,0 +1,39 @@
+# Verified Claims Audit
+
+## ✅ VERIFIED claims
+
+- **Paradigm Treatment is a residential program for teens (12 to 17) and young adults (18 to 26) with complex mental health needs, including trauma and attachment-related difficulties.** Verified that Paradigm offers teen residential treatment for ages 12–17 and young adult treatment for ages 18–26, and that its programs address mental, emotional, and behavioral health challenges, including PTSD/trauma and related issues.[1][3]
+
+- **Average length of stay: 30–90 days.** Paradigm states that the average length of stay is 30–90 days.[1]
+
+- **Four individual therapy sessions per week.** Paradigm states that its programs include four individual therapy sessions per week.[1][4]
+
+- **Multiple daily group sessions.** Paradigm states that its programs include multiple daily group sessions.[1]
+
+- **Academic work frequency: five days per week.** Paradigm states that academic support is integral to the program, but the provided sources do **not** explicitly verify “five days per week.” This claim is **not verified** and should be removed unless a primary source specifically states it.
+
+## ❌ REMOVE claims
+
+- **Home to the nation’s top mental health treatment centers for teens and young adults.** Paradigm uses similar marketing language on its own site, but this is subjective and not independently verifiable as a factual claim.[1]
+
+- **Among the most clinically intensive in the country.** Paradigm states this about its programs, but “among the most” is an unsupported comparative ranking and should be removed as unverifiable marketing language.[1]
+
+- **Small staff-to-client ratio.** Paradigm states it has a “small number of clients” and an “industry-leading staff-to-client ratio,” but the exact “small staff-to-client ratio” claim is not quantified and should be removed unless a specific ratio is provided.[2]
+
+- **Unique focus on daily intensive individual therapy.** Paradigm says it provides daily individual therapy, but “unique focus” is promotional wording and not independently verifiable.[2]
+
+- **Not a traditional teen rehab.** Paradigm says, “While Paradigm is not a traditional teen rehab,” but this is a self-described positioning statement rather than an objective, verifiable fact.[1]
+
+## ❌ REMOVE forbidden patterns
+
+- **practitioners consistently see** — Remove. Not supported by any authoritative source in the provided results.
+
+- **American Psychological Association** — Remove. No source shows the APA making any of the claims in the manifest.
+
+- **clinical experience shows** — Remove. Not supported by any authoritative source in the provided results.
+
+## Verification notes
+
+- The strongest support comes from Paradigm’s own official site for program ages, length of stay, therapy frequency, and treatment structure.[1][2][3][4]
+- Claims that are subjective, comparative, or superlative should be treated as marketing language and removed unless backed by independent evidence.
+- The academic-work-frequency claim remains unverified from the provided sources and should not be used.

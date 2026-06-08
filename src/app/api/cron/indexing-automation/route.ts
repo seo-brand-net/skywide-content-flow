@@ -132,7 +132,7 @@ export async function GET(request: Request) {
             } catch (clientError: any) {
                 console.error(`[cron/indexing-automation] Exception for ${client.name}:`, clientError);
                 const errMsg = String(clientError.message || '').toLowerCase();
-                const isTimeoutRateLimit = errMsg.includes('timed out after 290');
+                const isTimeoutRateLimit = errMsg.includes('timed out after 290') || errMsg.includes('unexpected token') || errMsg.includes('504');
 
                 if (isTimeoutRateLimit) {
                     // Timeout = rate limit — NULL so it retries tomorrow

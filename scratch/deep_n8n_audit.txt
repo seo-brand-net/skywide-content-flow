@@ -1,0 +1,4 @@
+Analyzed 0 deep executions.
+
+=== N8N DEEP EXECUTION AUDIT (Oldest to Newest) ===
+

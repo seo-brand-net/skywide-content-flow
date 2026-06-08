@@ -1,0 +1,23 @@
+{
+  "output": {
+    "approved_claims": [
+      "Paradigm Treatment is a residential program for teens (12 to 17) and young adults (18 to 26) with complex mental health needs, including trauma and attachment-related difficulties.",
+      "Home to the nation’s top mental health treatment centers for teens and young adults.",
+      "Among the most clinically intensive in the country.",
+      "Small staff-to-client ratio.",
+      "Unique focus on daily intensive individual therapy.",
+      "Not a traditional teen rehab."
+    ],
+    "approved_statistics": [
+      "Average length of stay: 30–90 days.",
+      "Four individual therapy sessions per week.",
+      "Multiple daily group sessions.",
+      "Academic work frequency: five days per week."
+    ],
+    "forbidden_patterns": [
+      "practitioners consistently see",
+      "American Psychological Association",
+      "clinical experience shows"
+    ]
+  }
+}

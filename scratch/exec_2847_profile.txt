@@ -1,0 +1,11 @@
+{
+  "index": 0,
+  "message": {
+    "role": "assistant",
+    "content": "{\n  \"verified\": true,\n  \"client_name\": \"Paradigm Treatment\",\n  \"services\": [\n    \"Residential Treatment Programs\",\n    \"Individual therapy\",\n    \"Group therapy\",\n    \"Family therapy\",\n    \"Psychiatric care/assessments and medication management\",\n    \"Academic support\",\n    \"Nutrition services\",\n    \"Recreational therapies\",\n    \"Psychoeducation\"\n  ],\n  \"products\": [],\n  \"service_areas\": [\n    \"Malibu, California\",\n    \"San Rafael, California\",\n    \"Austin, Texas\",\n    \"Coeur d’Alene, Idaho\",\n    \"National\"\n  ],\n  \"credentials\": [],\n  \"team\": [],\n  \"unique_claims\": [\n    \"Home to the nation’s top mental health treatment centers for teens and young adults\",\n    \"Among the most clinically intensive in the country\",\n    \"Small staff-to-client ratio\",\n    \"Unique focus on daily intensive individual therapy\",\n    \"Not a traditional teen rehab\"\n  ],\n  \"published_stats\": [\n    \"Average length of stay: 30–90 days\",\n    \"Four individual therapy sessions per week\",\n    \"Multiple daily group sessions\",\n    \"Academic work frequency: five days per week\"\n  ],\n  \"confidence\": \"high\"\n}",
+    "refusal": null,
+    "annotations": []
+  },
+  "logprobs": null,
+  "finish_reason": "stop"
+}
