@@ -1,0 +1,64 @@
+{
+  "global_rules": [
+    "Tone should be parent-facing, warm but direct, credible and specific.",
+    "Be confident, not boastful.",
+    "Frame all superlatives around the recognition, using phrases like 'recognized as' or 'named', never as unverified self-claims.",
+    "Avoid targeting 'online school' terms; stay strictly within the 'cyber school' keyword lane.",
+    "Do not over-stuff the primary keyword; 3-5 natural placements are sufficient."
+  ],
+  "target_audience": "Parents comparing cyber schools in Pennsylvania.",
+  "sections": [
+    {
+      "heading": "Intro",
+      "instructions": "Lead with the award: PA Distance named Education Insider’s 2026 K–12 Charter School of the Year. Incorporate the primary keyword naturally ('among the best cyber schools in PA'). State the founding principle that no student should fail and set the stage for the rest of the piece.",
+      "required_claims": []
+    },
+    {
+      "heading": "What the K–12 Charter School of the Year recognition means",
+      "instructions": "Explain the award credibly, detailing the editorial process of Education Insider, which includes independent research, student and parent nominations, and academic input. Highlight the criteria of academic quality, student experience, career readiness, and community trust. Mention that the award was given in May 2026.",
+      "required_claims": [
+        "Cite the Education Outcome and Institutional Value Assessment Model."
+      ]
+    },
+    {
+      "heading": "What makes PA Distance one of the best cyber schools in PA",
+      "instructions": "Discuss the 'multiple pathways' model that includes personalized, tiered instruction and scaffolding aligned to Pennsylvania academic standards. Emphasize that flexibility does not lower rigor, and that struggling students receive more support without lowering standards.",
+      "required_claims": []
+    },
+    {
+      "heading": "Real-time engagement tracking",
+      "instructions": "Describe the use of LinkIt! and engagement-tracking platforms, including AI that synthesizes teacher observations, student feedback, and family input. Explain how real-time dashboards flag disengagement early.",
+      "required_claims": []
+    },
+    {
+      "heading": "Technology that adds value",
+      "instructions": "Highlight the use of AR simulations and adaptive platforms, such as virtual labs for exploring anatomy or mechanical systems. Ensure that the evaluation of these technologies is based on real educational value, not novelty.",
+      "required_claims": []
+    },
+    {
+      "heading": "Connection and community",
+      "instructions": "Counter the misconception that online schools are isolating or low-rigor by discussing small-group instruction, advisory systems, after-school clubs, field trips, and in-person events.",
+      "required_claims": []
+    },
+    {
+      "heading": "Preparing students for college and careers",
+      "instructions": "Detail the dual enrollment and college-in-high-school programs, trade school and apprenticeship partnerships, and career shadowing opportunities. Connect these elements to the theme of real-world readiness and the career-readiness criterion of the award.",
+      "required_claims": []
+    },
+    {
+      "heading": "How families know their child is supported",
+      "instructions": "Explain the parent dashboards and consistent communication methods that keep families informed without overwhelming them. Emphasize that teachers retain primary responsibility for instruction.",
+      "required_claims": []
+    },
+    {
+      "heading": "FAQ",
+      "instructions": "Address common questions about cyber schools in PA, including the best options, the best-rated school, tuition costs, and how cyber school works. Position PA Distance’s recognition and model as a standout while being fair and factual.",
+      "required_claims": []
+    },
+    {
+      "heading": "Closing + CTA",
+      "instructions": "Reinforce the idea that PA Distance is 'more than a cyber school' and direct readers to the enrollment or application page.",
+      "required_claims": []
+    }
+  ]
+}

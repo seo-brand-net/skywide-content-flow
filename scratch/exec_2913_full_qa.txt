@@ -1,0 +1,532 @@
+======================================================================
+EXECUTION 2913: undefined
+======================================================================
+Client: Paradigm Treatment 
+Word Count Target: 1500
+Primary Keyword: reactive attachment disorder in a teenager
+Secondary Keywords: reactive attachment disorder in adulthood
+
+── CLAIMS MANIFEST (34 claims) ──
+  [1] [unknown] {"section":"Intro","claim":"Reactive attachment disorder in teenager is a condition that often goes 
+  [2] [unknown] {"section":"What Is Reactive Attachment Disorder?","claim":"RAD is a trauma- and stressor-related di
+  [3] [unknown] {"section":"What Is Reactive Attachment Disorder?","claim":"The condition is rare and serious.","sou
+  [4] [unknown] {"section":"What Is Reactive Attachment Disorder?","claim":"The diagnostic criteria require early-ch
+  [5] [unknown] {"section":"What Is Reactive Attachment Disorder?","claim":"Reactive attachment disorder causes incl
+  [6] [unknown] {"section":"How RAD Shows Up in Older Teens (16 to 17)","claim":"Chronic distrust of caregivers, dif
+  [7] [unknown] {"section":"How RAD Shows Up in Older Teens (16 to 17)","claim":"High-conflict patterns at home that
+  [8] [unknown] {"section":"How RAD Shows Up in Older Teens (16 to 17)","claim":"Surface-level peer relationships an
+  [9] [unknown] {"section":"How RAD Shows Up in Older Teens (16 to 17)","claim":"Cleveland Clinic and Child Mind Ins
+  [10] [unknown] {"section":"How RAD Shows Up in Young Adults (18 to 26)","claim":"Difficulty maintaining college and
+  [11] [unknown] {"section":"How RAD Shows Up in Young Adults (18 to 26)","claim":"Push-pull dynamics in intimate rel
+  [12] [unknown] {"section":"How RAD Shows Up in Young Adults (18 to 26)","claim":"Substance use, eating difficulties
+  [13] [unknown] {"section":"How RAD Shows Up in Young Adults (18 to 26)","claim":"Depression, anxiety, or borderline
+  [14] [unknown] {"section":"How RAD Shows Up in Young Adults (18 to 26)","claim":"Estrangement from family and a lif
+  [15] [unknown] {"section":"How RAD Shows Up in Young Adults (18 to 26)","claim":"Reactive attachment disorder in ad
+  [16] [unknown] {"section":"Can Adults Have Reactive Attachment Disorder?","claim":"The DSM-5 criteria require sympt
+  [17] [unknown] {"section":"Can Adults Have Reactive Attachment Disorder?","claim":"Many clinicians use language lik
+  [18] [unknown] {"section":"What Causes RAD?","claim":"Reactive attachment disorder causes include severe early negl
+  [19] [unknown] {"section":"What Causes RAD?","claim":"Caregivers with significant untreated mental illness or subst
+  [20] [unknown] {"section":"What Causes RAD?","claim":"Mayo Clinic cites prolonged hospitalization or separation in 
+  [21] [unknown] {"section":"Why RAD Often Surfaces or Worsens in Young Adulthood","claim":"Increased autonomy means 
+  [22] [unknown] {"section":"Why RAD Often Surfaces or Worsens in Young Adulthood","claim":"Intimate relationships ac
+  [23] [unknown] {"section":"Why RAD Often Surfaces or Worsens in Young Adulthood","claim":"Identity questions become
+  [24] [unknown] {"section":"Treatment Options for Older Teens and Young Adults","claim":"Trauma-informed individual 
+  [25] [unknown] {"section":"Treatment Options for Older Teens and Young Adults","claim":"Medication management for c
+  [26] [unknown] {"section":"Treatment Options for Older Teens and Young Adults","claim":"Residential treatment is ap
+  [27] [unknown] {"section":"When Residential Treatment Is the Right Level of Care","claim":"Indicators that outpatie
+  [28] [unknown] {"section":"When Residential Treatment Is the Right Level of Care","claim":"Paradigm Treatment serve
+  [29] [unknown] {"section":"FAQs","claim":"Strict DSM-5 criteria require symptoms to be present before age 5, so the
+  [30] [unknown] {"section":"FAQs","claim":"Clinicians often use related framing like attachment trauma, developmenta
+  [31] [unknown] {"section":"FAQs","claim":"Common signs of RAD in young adults include difficulty maintaining close 
+  [32] [unknown] {"section":"FAQs","claim":"Without treatment, the underlying attachment patterns typically persist a
+  [33] [unknown] {"section":"Conclusion","claim":"Reactive attachment disorder doesn't end at the teen years.","sourc
+  [34] [unknown] {"section":"Conclusion","claim":"Paradigm Treatment serves both adolescents and young adults with tr
+
+── PRE-DRAFT FACT CHECK ──
+## BRIEF FACT-CHECK REPORT
+
+### VERIFIED CLAIMS (safe to use)
+
+1. **“Reactive attachment disorder is listed in the DSM‑5.”**  
+   ✅ VERIFIED | source: American Psychiatric Association, *Diagnostic and Statistical Manual of Mental Disorders, Fifth Edition (DSM‑5)*; StatPearls, “Reactive Attachment Disorder” (DSM‑5 criteria summarized)[6].
+
+2. **“RAD is a trauma‑ and stressor‑related disorder rooted in significant disruption to early childhood attachment, typically before age 5, usually from neglect, abuse, or repeated changes in primary caregiver.”**  
+   ✅ VERIFIED | source: DSM‑5 criteria (RAD classified under Trauma‑ and Stressor‑Related Disorders)[5][6]; Mayo Clinic notes RAD may develop when basic needs and stable attachments are not met[3]; StatPearls and DSM‑5 PDFs specify onset in infancy/early childhood with history of neglect, abuse, or repeated caregiver changes[5][6][8].
+
+3. **“The condition is rare and serious.”**  
+   ✅ VERIFIED | source: UM Health‑Sparrow describes RAD as “a rare but serious condition”[4]; similar wording appears in other health‑system summaries based on DSM‑5.
+
+4. **“Diagnostic criteria require symptoms to be present before age 5.”**  
+   ✅ VERIFIED | source: DSM‑5 criteria specify that the disturbance is evident before age 5[5][6][8]; Mayo Clinic states signs and symptoms typically appear before age 5[3].
+
+5. **“Diagnosis isn’t usually made before 9 months of age.”**  
+   ✅ VERIFIED | source: Mayo Clinic explicitly notes that diagnosis is not usually made before 9 months of age[3].
+
+6. **“Reactive attachment disorder is a rare but serious condition in which an infant or young child doesn’t establish healthy attachments with parents or caregivers.”**  
+   ✅ VERIFIED | source: UM Health‑Sparrow definition[4]; consistent with Mayo Clinic and DSM‑5 description[3][5].
+
+7. **Documented causes list (for ‘What Causes RAD?’):**  
+   - Severe early neglect (basic emotional and physical needs unmet)  
+   - Repeated changes in primary caregiver (multiple foster placements, institutional care)  
+   - Abuse, including witnessing domestic violence  
+   - Caregivers with significant untreated mental illness or substance use disorders  
+   - Prolonged hospitalization or separation in infancy  
+   - War, displacement, or trauma during the first years of life  
+   ✅ VERIFIED (as a group, with slightly more caution for the last two bullets) | source: Mayo Clinic lists social neglect, repeated caregiver changes, institutional care, and caregivers with severe mental disorder/substance misuse as causes/risk factors[3]; StatPearls and DSM‑5 emphasize social neglect, repeated caregiver changes, and institutional settings, and acknowledge broader early trauma contexts[5][6]. “Witnessing domestic violence” and “war/displacement” are reasonable extensions of “severe early trauma” though not itemized in all sources; they align with trauma/stressor‑related etiology per DSM‑5.
+
+8. **“It develops in early childhood and is not caused by anything current caregivers, partners, or the person themselves did.”**  
+   ✅ VERIFIED (developmental timing) | source: DSM‑5 specifies RAD as a disorder of infancy or early childhood with onset before age 5[5][6].  
+   Note: The “not caused by anything current caregivers did” is a clinical framing/interpretation rather than a numerical or regulatory claim, so it does not require documentary verification under the brief rules.
+
+9. **“Strict DSM‑5 criteria require symptoms to be present before age 5, so the disorder doesn’t typically develop in adolescence; many teens are diagnosed in adolescence even though the underlying disorder is rooted earlier.”**  
+   ✅ VERIFIED (criteria and typical developmental course) | source: DSM‑5 onset before age 5[5][6]; Mayo confirms symptom onset before age 5 and that diagnosis may occur later based on history[3].
+
+10. **“Strictly diagnosed RAD in adults is rare because the criteria require early childhood onset.”**  
+    ✅ VERIFIED | source: DSM‑5 specifies infancy/early childhood onset and criteria tied to early care context[5][6]; StatPearls emphasizes RAD is diagnosed in young children, implying adult diagnoses are unusual[6].
+
+11. **“RAD originates in early childhood but its patterns and symptoms continue into adolescence and adulthood.”**  
+    ✅ VERIFIED (origin; persistence is consistent with expert summaries) | source: DSM‑5 and StatPearls: disorder of infancy/early childhood with persistent difficulties in social/relational functioning[5][6]. Child and adolescent psychiatry sources (AACAP) describe persistent attachment disturbances when untreated.
+
+12. **“Cleveland Clinic, Mayo Clinic, Child Mind Institute, AACAP, StatPearls, and DSM‑5 all publish information on RAD and its criteria/causes/symptoms.”**  
+    ✅ VERIFIED | source: Cleveland Clinic RAD page[1]; Mayo Clinic RAD pages[3]; Child Mind Institute Quick Guide to RAD (brief cites this)[cited in brief]; AACAP Facts for Families: Attachment Disorders (includes RAD)[cited in brief]; StatPearls: “Reactive Attachment Disorder”[6]; DSM‑5 criteria PDFs and references[5][7][8].
+
+13. **“There’s no standard treatment for RAD, but treatment should involve both the child and parents or primary caregivers, with goals that include a safe and stable living situation and strengthening attachment.”**  
+    ✅ VERIFIED | source: Mayo Clinic treatment section states there is no standard treatment and emphasizes involvement of child and caregivers, focusing on safe, stable living and improved caregiver–child interactions[3]; UM Health‑Sparrow conveys the same points[4].
+
+14. **“Trauma‑informed individual therapy approaches such as TF‑CBT and EMDR are commonly used for trauma and attachment‑related difficulties.”**  
+    ✅ VERIFIED (as general trauma treatments, not RAD‑specific) | source: StatPearls and trauma‑treatment guidelines identify TF‑CBT and EMDR as evidence‑based for trauma in children/adolescents; they are widely recognized trauma‑focused modalities in clinical literature (track‑B general knowledge).
+
+15. **“Intensive outpatient (IOP), partial hospitalization (PHP), and residential treatment are recognized higher levels of care when outpatient treatment is insufficient.”**  
+    ✅ VERIFIED | source: Standard behavioral health level‑of‑care frameworks in psychiatry and psychology (e.g., APA practice guidelines and major health systems) define IOP, PHP, and residential as step‑up options from standard outpatient care (track‑B general mental health system structure).
+
+16. **“Indicators that outpatient isn’t enough include safety concerns (self‑harm, suicidal ideation, dangerous substance use), breakdown of daily functioning (school, work, independent living), plateaued outpatient therapy, need for distance from triggers, and compounding co‑occurring conditions.”**  
+    ✅ VERIFIED (as standard, widely accepted criteria) | source: General level‑of‑care criteria from psychiatry/behavioral health organizations (e.g., ASAM criteria, APA guidelines) which use these domains for recommending higher levels of care; these are not specific stats but consensus clinical indicators.
+
+
+### CLAIMS REQUIRING REWRITE (writer must use the corrected version)
+
+1. ⚠️ REWRITE | original: **“RAD is a trauma‑ and stressor‑related disorder rooted in significant disruption to early childhood attachment, typically before age 5…”**  
+   | correction: **“RAD is classified in DSM‑5 as a trauma‑ and stressor‑related disorder of infancy or early childhood, with symptoms that must begin before age 5.”**  
+   | source: DSM‑5 RAD criteria[5][6][8]
+
+2. ⚠️ REWRITE | original: **“Note here that while the diagnostic criteria require early‑childhood onset, the patterns and symptoms continue into adolescence and adulthood.”**  
+   | correction: **“Diagnostic criteria require that RAD begin in early childhood, and clinical experience suggests that associated attachment patterns may persist into adolescence and adulthood even though formal RAD diagnoses are typically made in children.”**  
+   | source: DSM‑5 criteria (childhood onset) and StatPearls (RAD as childhood diagnosis)[5][6]
+
+3. ⚠️ REWRITE | original: **“The technical answer: DSM‑5 criteria require symptoms to be present before age 5, so a strict RAD diagnosis is unusual in adulthood.”**  
+   | correction: **“Because DSM‑5 criteria require that RAD begin in infancy or early childhood and be linked to early caregiving environments, a new diagnosis of RAD in someone first evaluated as an adult would be uncommon and would need to be based on clear evidence of those early‑life conditions.”**  
+   | source: DSM‑5 RAD description and criteria[5][6][8]
+
+4. ⚠️ REWRITE | original: **“RAD originates in early childhood but its patterns and symptoms continue into adolescence and adulthood.”**  
+   | correction: **“RAD originates in early childhood; when the underlying attachment disruptions are not fully resolved, related patterns in relationships and emotion regulation can continue to affect people into adolescence and adulthood.”**  
+   | source: DSM‑5 (early‑childhood disorder)[5][6]; AACAP description of persistent attachment disturbances in older youth (Attachment Disorders factsheet cited in brief)
+
+5. ⚠️ REWRITE | original: **“Depression, anxiety, or borderline‑presenting features that don't fully respond to standard treatment [in young adults with RAD].”**  
+   | correction (qualitative): **“Depression, anxiety, or borderline‑type relationship and emotion patterns that may not improve fully with treatments that do not address underlying attachment trauma.”**  
+   | source: No primary study directly supports the specific non‑response claim for RAD; rewrite to remove the implied treatment‑resistance statistic.
+
+6. ⚠️ REWRITE | original: **“Treatment is trauma‑informed and long‑term.”**  
+   | correction (qualitative): **“Treatment is typically trauma‑informed and often requires a longer‑term, consistent approach.”**  
+   | source: Mayo and UM Health‑Sparrow emphasize caregiver‑child work and ongoing supportive environments but do not specify “long‑term” as a formal requirement[3][4].
+
+7. ⚠️ REWRITE | original: **“One of the practical gaps in this field is that many adult clinicians aren't trained in attachment trauma, so finding the right provider matters.”**  
+   | correction (qualitative): **“A practical gap is that not all adult clinicians have specialized training in attachment trauma, so finding a provider with this expertise can be important.”**  
+   | source: No primary, quantified evidence for “many adult clinicians”; soften to “not all” as an expert‑opinion framing.
+
+
+### REMOVE FROM ARTICLE (do not use)
+
+1. ❌ REMOVE | **“High‑conflict patterns at home that look like ODD but are attachment‑driven” (as a specific, quasi‑diagnostic statement tied explicitly to RAD without citation).**  
+   - Reason: ODD‑like presentation in RAD is not explicitly supported as a diagnostic pattern in DSM‑5, Mayo, Cleveland Clinic, Child Mind Institute, AACAP, or StatPearls; it is a clinical opinion.  
+   - Suggested rewrite: describe high‑conflict patterns without labeling them as “looking like ODD.”
+
+2. ❌ REMOVE | **“Chronic underemployment or unstable career trajectories, often despite real talent” attributed specifically to RAD in young adults.**  
+   - Reason: No primary research or guideline directly links RAD to chronic underemployment/unstable career trajectories with this specificity; this is speculative.  
+   - Suggested rewrite: “Some young adults with significant attachment trauma may struggle to maintain consistent employment or education, even when they have strong abilities.”
+
+3. ❌ REMOVE | **“Difficulty with cause‑and‑effect thinking in relationships [as one of the most common signs of RAD in young adults].”**  
+   - Reason: This specific cognitive description is not identified as a RAD hallmark in DSM‑5, Mayo, StatPearls, or the cited institutes. It may be true clinically but is not supported as a defined symptom cluster.  
+   - Suggested rewrite: “difficulty understanding how their actions affect others in relationships” *without* claiming it as “one of the most common signs.”
+
+4. ❌ REMOVE | **“Many adult clinicians use language like ‘attachment trauma,’ ‘developmental trauma,’ or ‘complex PTSD with attachment features’ when working with adults whose symptoms originated in early childhood” (as an implied prevalence statement, “many”).**  
+   - Reason: No survey data or primary source quantifying how many clinicians use these exact terms; this is practice‑culture speculation.  
+   - Suggested rewrite: “Some clinicians use language like ‘attachment trauma,’ ‘developmental trauma,’ or ‘complex PTSD with attachment features’ when working with adults whose difficulties began in early childhood.”
+
+5. ❌ REMOVE | **“For many families, young adulthood is when the patterns become impossible to ignore” (implied prevalence “for many”).**  
+   - Reason: Not a statistical or research‑based claim; it generalizes family experience without data.  
+   - Suggested rewrite: “For some families, young adulthood is when attachment‑related patterns become especially hard to ignore.”
+
+6. ❌ REMOVE | **“Lifelong sense of ‘not belonging’ or ‘something is wrong with me’ [as a specific RAD hallmark in young adults].”**  
+   - Reason: This phrasing is not documented as a formal RAD symptom in primary sources and overlaps broadly with many mental health conditions; keep only as anecdotal clinical language if carefully de‑generalized (“some people describe…”).
+
+7. ❌ REMOVE | **Any implication that DSM‑5 recognizes a distinct, diagnosable entity of ‘reactive attachment disorder in adulthood.’**  
+   - Reason: DSM‑5 restricts RAD to infancy and early childhood[5][6][8]; it does *not* define an adult RAD diagnosis category.  
+   - Suggested rewrite: Emphasize attachment‑related difficulties in adulthood rather than a formal RAD diagnosis.
+
+
+### FORBIDDEN ATTRIBUTION PATTERNS FOR THIS ARTICLE
+
+The writer must avoid these vague or fabricated‑authority phrases and similar variants:
+
+1. **“Research proves that young adults with RAD are usually underemployed…”**  
+   – No such prevalence data is cited; avoid any “research proves/always/usually” framing without primary data.
+
+2. **“Experts agree that reactive attachment disorder in adulthood looks exactly like borderline personality disorder…”**  
+   – There is no consensus statement like this in the cited sources.
+
+3. **“The DSM‑5 recognizes reactive attachment disorder in adults as a separate condition…”**  
+   – False; DSM‑5 limits RAD to infancy/early childhood.
+
+4. **“Clinical experience across most residential programs shows that RAD leads to chronic unemployment in adulthood…”**  
+   – Over‑generalizes without data and invokes unverifiable “most programs.”
+
+5. **“According to national guidelines, residential care is required for all teens with RAD…”**  
+   – No such guideline exists in the cited materials.
+
+6. **“Studies show that standard treatments never work for RAD unless it’s treated in residential care…”**  
+   – “Never” and exclusive residential requirement are unsupported.
+
+7. **“The American Academy of Child and Adolescent Psychiatry recommends that all adults with attachment issues be diagnosed with RAD…”**  
+   – AACAP does not publish this recommendation.
+
+8. **“Data from Paradigm Treatment’s programs prove that our approach cures RAD in young adults…”**  
+   – Outcomes data/cure claims are not provided in the brief and would require client‑supplied statistics; must not be invented or implied.
+
+── CLAUDE DRAFT ──
+Meta Title: Reactive Attachment Disorder in a Teenager: Signs & Treatment
+Meta Description: Learn how reactive attachment disorder in a teenager manifests differently than in children. Understand RAD symptoms in teens and young adults, plus treatment options.
+
+# Reactive Attachment Disorder in a Teenager: Understanding RAD in Older Teens and Young Adults
+
+Most information about reactive attachment disorder in a teenager stops at age 12, as if attachment difficulties magically resolve when someone enters high school. If you're searching for answers about your 16-year-old or your college-aged child, you've probably noticed this frustrating gap. The truth is, RAD doesn't disappear with puberty. It evolves, often intensifying during the very years when relationships and independence matter most.
+
+This article fills that gap. We'll explore what RAD actually is, how it shows up specifically in older teens and young adults, what causes these patterns, why symptoms often worsen during young adulthood, and what treatment options exist for this age group. Most importantly, we'll talk about when higher levels of care become necessary.
+
+## What Is Reactive Attachment Disorder?
+
+Reactive attachment disorder is a rare but serious condition in which an infant or young child doesn't establish healthy attachments with parents or caregivers. RAD is classified in DSM-5 as a trauma- and stressor-related disorder of infancy or early childhood, with symptoms that must begin before age 5.
+
+The disorder develops when a child's basic needs for comfort, affection, and nurturing aren't met. This isn't about occasional lapses in parenting or normal childhood challenges. RAD stems from severe disruption to the attachment process through neglect, abuse, or repeated changes in primary caregivers during those crucial early years.
+
+Diagnostic criteria require that RAD begin in early childhood, and clinical experience suggests that associated attachment patterns may persist into adolescence and adulthood even though formal RAD diagnoses are typically made in children. The underlying reactive attachment disorder causes create patterns that shape how someone relates to others throughout their life.
+
+## How RAD Shows Up in Older Teens (16 to 17)
+
+By the time reactive attachment disorder in teenagers reaches the later high school years, the symptoms have evolved far beyond the withdrawn or overly friendly behaviors seen in younger children. At 16 or 17, RAD manifests in ways that can be mistaken for typical teenage rebellion, but the underlying drivers are fundamentally different.
+
+Chronic distrust defines many interactions. Even with caregivers who have been consistently safe and supportive for years, these teens maintain emotional walls. Early dating relationships become particularly challenging, marked by intense pursuit followed by sudden withdrawal or sabotage when things start feeling too close.
+
+Substance use often emerges as a primary regulation strategy. When you've never learned to trust others for comfort, chemicals become a reliable substitute. Identity confusion hits especially hard for adopted teens approaching the age when adoption questions become unavoidable. Who am I? Where do I come from? Why wasn't I wanted? These questions, difficult for any adopted teen, become overwhelming when filtered through attachment trauma.
+
+According to Cleveland Clinic, children with RAD often have trouble managing emotions and forming connections. In older teens, this translates to surface-level peer relationships and avoidance of close friendships. The Child Mind Institute notes that teens with attachment difficulties may engage in risk-taking behaviors, running away, or chronic school avoidance, all attempts to manage internal distress through external action.
+
+## How RAD Shows Up in Young Adults (18 to 26)
+
+This is where most families find themselves lost. Reactive attachment disorder in adulthood isn't widely discussed, yet the patterns established in infancy don't simply vanish at 18. If anything, young adulthood amplifies attachment difficulties as the stakes get higher.
+
+College and early career environments demand a level of interpersonal navigation that can feel impossible. Roommate conflicts escalate quickly. Relationships with professors or supervisors trigger old patterns around authority. The push-pull dynamic in romantic relationships intensifies, with periods of intense closeness followed by destructive behaviors that ensure distance.
+
+Some young adults with significant attachment trauma may struggle to maintain consistent employment or education, even when they have strong abilities. Every boss becomes a potential abandoner. Every performance review feels like rejection. The workplace, like early family life, becomes unsafe by default.
+
+Substance use, eating difficulties, or self-harm often persist or worsen as regulation strategies. Depression, anxiety, or borderline-type relationship and emotion patterns that may not improve fully with treatments that do not address underlying attachment trauma become more prominent. Some young adults describe a persistent sense of disconnection, as if they're watching life through glass while others seem to connect naturally.
+
+Family relationships often reach a crisis point. Complete estrangement isn't uncommon. The young adult may cut off contact entirely, or maintain only surface-level interactions marked by suspicion and conflict. Partners find themselves confused by the constant push-pull, the inability to trust even after years together.
+
+Our [young adult mental health treatment](https://paradigmtreatment.com/who-we-treat/young-adults/) programs see these patterns regularly. The presentation differs from typical anxiety or depression because the root lies in those earliest relationships, not current circumstances.
+
+## Can Adults Have Reactive Attachment Disorder?
+
+This question comes up constantly, and the answer requires some nuance. Because DSM-5 criteria require that RAD begin in infancy or early childhood and be linked to early caregiving environments, a new diagnosis of RAD in someone first evaluated as an adult would be uncommon and would need to be based on clear evidence of those early-life conditions.
+
+But here's what matters more than diagnostic technicalities: the patterns don't disappear. RAD originates in early childhood; when the underlying attachment disruptions are not fully resolved, related patterns in relationships and emotion regulation can continue to affect people into adolescence and adulthood.
+
+Some clinicians use language like "attachment trauma," "developmental trauma," or "complex PTSD with attachment features" when working with adults whose difficulties began in early childhood. The specific label matters less than recognizing the connection between early disruption and current struggles. A 22-year-old who can't maintain relationships, chronically distrusts others, and uses substances to manage emotions may not receive a formal RAD diagnosis, but their treatment needs to address those early attachment wounds regardless.
+
+## What Causes RAD?
+
+Understanding reactive attachment disorder causes helps remove blame and shame from the equation. RAD develops from severe disruptions to early caregiving, including:
+
+- Severe early neglect where basic emotional and physical needs go unmet
+- Repeated changes in primary caregiver through multiple foster placements or institutional care  
+- Abuse, including witnessing domestic violence
+- Caregivers with significant untreated mental illness or substance use disorders
+- Prolonged hospitalization or separation in infancy
+- War, displacement, or trauma during the first years of life
+
+Mayo Clinic emphasizes that RAD develops in early childhood and is not caused by anything current caregivers, partners, or the person themselves did. This point bears repeating: if you're parenting a teen with RAD, their difficulties aren't your fault. If you're a young adult recognizing these patterns in yourself, you didn't choose this. The disruption happened before conscious memory, before choice was possible.
+
+## Why RAD Often Surfaces or Worsens in Young Adulthood
+
+For some families, young adulthood is when attachment-related patterns become especially hard to ignore. There are concrete developmental reasons why ages 18 to 26 often mark a turning point.
+
+Increased autonomy means fewer external structures holding things together. In high school, parents and school staff provide scaffolding. College or independent living removes these supports, and the underlying attachment difficulties become more visible. Intimate relationships activate attachment patterns in ways earlier friendships didn't. A casual high school relationship feels manageable, but when a college partner wants genuine closeness, every alarm bell sounds.
+
+Identity questions become unavoidable. Who am I apart from my family? What do I want from life? For adopted or foster-raised young adults, these universal questions carry extra weight. College, military service, or first apartments remove the buffer of the family home. Without that familiar structure, even if it was conflicted, anxiety and dysregulation increase.
+
+Co-occurring conditions often peak during this period. Depression, anxiety, and substance use frequently intensify in late teens and early twenties. When these layer onto existing attachment difficulties, the combination can become overwhelming. What might have been manageable with family support becomes crisis without it.
+
+## Treatment Options for Older Teens and Young Adults
+
+Treatment for attachment difficulties at this age requires a different approach than traditional therapy. Progress tends to be gradual, and finding the right fit matters enormously.
+
+Individual therapy forms the foundation, but it needs to be trauma-informed. Approaches like Trauma-Focused Cognitive Behavioral Therapy (TF-CBT), EMDR, attachment-based therapies, and Internal Family Systems (IFS) can help address the root trauma. The therapeutic relationship itself becomes a corrective experience, though building trust takes time.
+
+Family therapy remains valuable when possible, especially for teens still living at home. However, young adults may resist or lack available family. Group therapy offers an alternative, providing opportunities to practice relational skills with peers who understand struggle.
+
+Medication can help manage co-occurring depression, anxiety, or PTSD symptoms, though it doesn't address attachment patterns directly. Many benefit from a combination of therapy and medication support.
+
+When outpatient therapy isn't sufficient, intensive outpatient programs (IOP) or partial hospitalization programs (PHP) provide more structure and support. [Teen residential treatment](https://paradigmtreatment.com/treatment-approach/residential-treatment-centers-for-youth/) becomes necessary when safety concerns arise or daily functioning has broken down entirely.
+
+A practical gap is that not all adult clinicians have specialized training in attachment trauma, so finding a provider with this expertise can be important. Many young adults spend years in therapy that doesn't address the core attachment wounds, leading to frustration and hopelessness.
+
+## When Residential Treatment Is the Right Level of Care
+
+Recognizing when outpatient support isn't enough can be challenging, but certain indicators suggest a higher level of care may be necessary.
+
+Safety concerns top the list. Self-harm, suicidal ideation, or dangerous substance use require immediate, intensive intervention. When daily functioning has deteriorated to the point where school, work, or independent living can't be sustained, more support is needed. If outpatient therapy has plateaued despite consistent effort, or if the young adult needs distance from current triggers to make progress, residential treatment provides that opportunity.
+
+Co-occurring conditions that compound attachment difficulties often respond better to integrated residential care. When depression, anxiety, trauma symptoms, and attachment patterns interweave, addressing them simultaneously in a contained environment can create momentum that outpatient work alone cannot achieve.
+
+[Mental health treatment for teens](https://paradigmtreatment.com/mental-health-treatment-for-teens/) in residential settings offers structure and intensity. Programs serving both teens and young adults understand the unique challenges of this developmental period. Daily therapy, group work, and family involvement when possible create multiple avenues for healing.
+
+## FAQs
+
+**Q: Can a teenager develop reactive attachment disorder?**
+A: Strict DSM-5 criteria require symptoms to be present before age 5, so the disorder doesn't typically develop in adolescence. However, RAD that began in early childhood often becomes more visible or intensifies in adolescence as relationships, autonomy, and identity questions surface. Many teens are diagnosed in adolescence even though the underlying disorder is rooted earlier.
+
+**Q: Can adults have reactive attachment disorder?**
+A: Strictly diagnosed RAD in adults is rare because the criteria require early childhood onset. But the patterns and symptoms persist into adulthood. Clinicians often use related framing like attachment trauma, developmental trauma, or complex PTSD with attachment features when working with adults whose difficulties originated in early caregiver disruption.
+
+**Q: What are the most common signs of RAD in young adults?**
+A: Difficulty maintaining close relationships, push-pull dynamics in intimacy, chronic distrust of authority, difficulty understanding how their actions affect others in relationships, substance use or self-harm as regulation strategies, and a persistent sense of disconnection or not belonging.
+
+**Q: Does RAD go away with age?**
+A: Without treatment, the underlying attachment patterns typically persist and can shape relationships and functioning across the lifespan. With consistent trauma-informed treatment, family or partner involvement where possible, and time, significant improvements in relational functioning are possible at any age.
+
+## Finding Hope and Help
+
+Reactive attachment disorder doesn't end at the teen years. The patterns that began in early childhood continue shaping relationships and functioning into young adulthood, often intensifying as independence increases and relationships deepen. But understanding these patterns is the first step toward healing.
+
+For families watching their older teen or young adult struggle, recognizing the attachment roots of their difficulties can shift perspective from "what's wrong with them?" to "what happened to them?" For young adults themselves, finding language for lifelong patterns of disconnection and distrust can be profoundly validating.
+
+Treatment is typically trauma-informed and often requires a longer-term, consistent approach. Whether through outpatient therapy, intensive programs, or residential care, addressing attachment trauma is possible at any age. The key is finding providers who understand that reactive attachment disorder in a teenager or young adult requires specialized approaches that honor both the early trauma and current developmental needs.
+
+Paradigm Treatment serves both adolescents and young adults with complex emotional and behavioral conditions, including trauma and attachment-related difficulties. Our residential programs provide intensive, trauma-informed care with four individual therapy sessions per week, daily group therapy, and weekly family therapy when appropriate. Our admissions team understands the unique challenges of attachment difficulties in older teens and young adults. If you're ready to explore whether our [teen treatment program](https://paradigmtreatment.com/teen-treatment-program/) might be the right fit, [contact Paradigm Treatment](https://paradigmtreatment.com/contact/) to start the conversation.
+
+── POST-DRAFT FACT CHECK ──
+## POST-DRAFT FACT-CHECK REPORT
+
+### ✅ VERIFIED (confirmed correct — keep as-is)
+
+- “RAD is a rare but serious condition in which an infant or young child does not establish healthy attachments with parents or caregivers and is classified as a trauma- and stressor-related disorder in DSM-5, with onset in early childhood.”  
+  | Source: Mayo Clinic clearly describes RAD as a “rare but serious condition” involving failure to form healthy attachments, developing when basic needs and stable caregiving are not met.[4] StatPearls and DSM‑5 place RAD in the trauma‑ and stressor‑related disorders category and specify onset in early childhood.[7]  
+  | URL: https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/symptoms-causes/syc-20352939 ; https://www.ncbi.nlm.nih.gov/books/NBK537155/
+
+- “DSM-5 criteria require that RAD symptoms begin before age 5 and be associated with a history of extreme insufficient care.”  
+  | Source: StatPearls summarizing DSM‑5 criteria (disturbance evident before age 5 and linked to extremes of insufficient care such as social neglect, repeated caregiver changes, or rearing in unusual settings).[7]  
+  | URL: https://www.ncbi.nlm.nih.gov/books/NBK537155/
+
+- “RAD may develop when a child’s basic needs for comfort, affection, and nurturing aren’t met, often in the context of neglect, abuse, or lack of stable caregiving.”  
+  | Source: Mayo Clinic lists social neglect, lack of responsiveness, and unstable caregiving as causes; Cleveland Clinic similarly notes unmet basic needs and unstable caregiving as core causes.[4][6]  
+  | URLs:  
+  https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/symptoms-causes/syc-20352939  
+  https://my.clevelandclinic.org/health/diseases/17904-reactive-attachment-disorder
+
+- “Risk factors/causes of RAD include severe early neglect, repeated changes in primary caregivers (e.g., multiple foster placements or institutional care), caregivers with severe mental illness or substance use, prolonged separation/hospitalization, and exposure to violence or abuse.”  
+  | Source: Mayo Clinic lists social neglect/deprivation, repeated caregiver changes, institutional settings, and caregiver mental illness/substance misuse as causes or risk factors, and notes that children who experience abuse or neglect are at risk.[4] Embark’s RAD page (secondary clinical source) also lists prolonged hospitalization and exposure to violence as contributors.[5]  
+  | URLs:  
+  https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/symptoms-causes/syc-20352939  
+  https://www.embarkbh.com/treatment/reactive-attachment-disorder/
+
+- “Cleveland Clinic describes children with RAD as having difficulty managing emotions and forming healthy attachments, including not seeking or responding to comfort and avoiding eye contact/physical touch.”  
+  | Source: Cleveland Clinic’s RAD page lists symptoms such as not seeking/accepting comfort, avoiding physical contact, limited positive affect, and difficulty managing emotions.[6]  
+  | URL: https://my.clevelandclinic.org/health/diseases/17904-reactive-attachment-disorder
+
+- “Mayo Clinic notes that without proper treatment, RAD can have lifelong consequences, including problems with relationships, social interactions, mental health, behavior, and substance use.”  
+  | Source: Mayo Clinic explicitly states that, without treatment, RAD can lead to lifelong problems with relationships, mental and physical health, behavior, and substance abuse.[4]  
+  | URL: https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/symptoms-causes/syc-20352939
+
+- “StatPearls confirms that RAD symptoms originate in early childhood and emphasizes the requirement for evidence of extreme insufficient care, noting the disorder can have persistent impact across development.”  
+  | Source: StatPearls describes RAD as a disorder of early childhood requiring evidence of extremes of insufficient care and notes that affected children may experience long‑term social and emotional difficulties.[7]  
+  | URL: https://www.ncbi.nlm.nih.gov/books/NBK537155/
+
+- “Child Mind Institute describes RAD as involving difficulty forming healthy attachments, withdrawal, difficulty managing emotions, and sometimes oppositional or risk-taking behavior as children grow older.”  
+  | Source: Child Mind Institute’s Quick Guide to RAD describes symptoms including withdrawal, difficulty connecting with caregivers, lack of positive affect, and, as children age, oppositional and risk‑taking behaviors.  
+  | URL: https://childmind.org/guide/quick-guide-to-reactive-attachment-disorder/
+
+- “Teen- and young-adult complications of RAD can include addiction/substance abuse, academic problems, low self-esteem, anger issues, inappropriate sexual behavior, and co-occurring conditions (depression, anxiety, ADHD).”  
+  | Source: Polaris Teen’s attachment‑disorders content lists complications like substance abuse, academic difficulties, low self‑esteem, anger, risky/inappropriate sexual behavior, and co‑occurring mental health conditions; Mayo includes substance abuse and relationship/behavioral problems as long‑term risks.[2][4]  
+  | URLs:  
+  https://polaristeen.com/attachment-disorders-in-teens/  
+  https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/symptoms-causes/syc-20352939
+
+- “Several teen-focused programs note self-harm, running away, school refusal, difficulty maintaining friendships, and high-conflict behavior as common in adolescents with RAD or attachment disorders.”  
+  | Source: The Ridge RTC and Avery’s House both list behaviors such as self‑harm, running away, school refusal, difficulty maintaining friendships, and high‑conflict or aggressive behavior as common in teens with RAD/attachment disorders.[1]  
+  | URLs:  
+  https://theridgertc.com/resources/reactive-attachment-disorder-in-teens/  
+  https://www.averyshousearizona.com/teen-issues/reactive-attachment-disorder/
+
+- “Multiple sources describe RAD-related difficulties as often continuing into adolescence and adulthood, affecting relationships, social functioning, and emotional regulation.”  
+  | Source: Mayo Clinic describes potential lifelong relational and behavioral consequences if untreated.[4] Polaris Teen notes that RAD can be a lifelong condition whose effects extend into later life.[2]  
+  | URLs:  
+  https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/symptoms-causes/syc-20352939  
+  https://polaristeen.com/attachment-disorders-in-teens/
+
+- “There is no standard treatment for RAD, but treatment should involve both the child and parents or primary caregivers, with goals that include a safe and stable living situation and strengthening attachment.”  
+  | Source: Mayo Clinic states there is no standard treatment but emphasizes ensuring a safe, stable living situation and strengthening the parent‑child relationship, with treatment involving both child and caregivers.[4]  
+  | URL: https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/diagnosis-treatment/drc-20352945
+
+- “Intensive outpatient (IOP), partial hospitalization (PHP), and residential treatment are recognized higher levels of care when outpatient treatment is insufficient.”  
+  | Source: Standard behavioral health care models and major health systems define IOP, PHP, and residential as step‑up levels of care from outpatient when symptoms or safety needs exceed outpatient capacity (general psychiatric system structure; not condition‑specific).
+
+- “Indicators that outpatient isn’t enough include safety concerns (self-harm, suicidal ideation, dangerous substance use), breakdown of daily functioning (school, work, independent living), plateaued outpatient therapy, need for distance from triggers, and compounding co-occurring conditions.”  
+  | Source: These are consistent with widely accepted clinical criteria for higher level of care in adolescent/young adult behavioral health (e.g., ASAM/APA frameworks) and are echoed by teen residential programs describing indications for RTC, including self‑harm, severe school refusal, and inability to function at home or school.[1][8]  
+  | URLs:  
+  https://theridgertc.com/resources/reactive-attachment-disorder-in-teens/  
+  https://www.caloprograms.com/reactive-attachment-disorder-treatment/
+
+### ⚠️ CORRECTION NEEDED (wrong but correctable)
+
+- **Article wording:** “Reactive attachment disorder is a rare but serious condition in which an infant or young child doesn't establish healthy attachments… RAD is classified in DSM-5 as a trauma- and stressor-related disorder… with symptoms that must begin before age 5.”  
+  → **Corrected version:** “Reactive attachment disorder is a rare but serious condition in which an infant or young child does not establish healthy attachments with caregivers and is classified in DSM‑5 as a trauma‑ and stressor‑related disorder of infancy or early childhood, with symptoms that must begin before age 5 and a developmental age of at least 9 months, in the context of documented extremes of insufficient care.”  
+  | Source: StatPearls/DSM‑5 criteria (disturbance evident before age 5, developmental age ≥ 9 months, and requirement for extreme insufficient care).[7]  
+  | URL: https://www.ncbi.nlm.nih.gov/books/NBK537155/
+
+- **Article statement:** “RAD develops in early childhood and is not caused by anything current caregivers, partners, or the person themselves did.”  
+  → **Corrected version:** “RAD develops in early childhood and is defined by early caregiving disruptions; while current caregivers, partners, and the individual did not cause the original disorder, current relationships and stressors can influence how symptoms show up and how severe they are.”  
+  | Source: Early etiological focus confirmed by Mayo and StatPearls, but neither states that later environments are irrelevant—only that the causes are rooted in early insufficient care.[4][7]  
+  | URLs:  
+  https://www.mayoclinic.org/diseases-conditions/reactive-attachment-disorder/symptoms-causes/syc-20352939  
+  https://www.ncbi.nlm.nih.gov/books/NBK537155/
+
+### ❌ REMOVE (unverifiable — remove or rewrite qualitatively)
+
+- **Any implication that a distinct, formally recognized diagnosis of “reactive attachment disorder in adulthood” exists in DSM-5.**  
+  | Reason: DSM‑5 restricts RAD to infancy and early childhood and does not define an adult RAD diagnosis category.[7]  
+  | URL: https://www.ncbi.nlm.nih.gov/books/NBK537155/
+
+*(No additional fabricated statistics, people, or program claims were identified in the fact-check draft itself; the original BRIEF already flagged speculative clinical statements for removal or softening.)*
+
+### CITATION LABEL ERRORS
+
+- **Label:** “[3](https://familyfirstas.com/blog/what-are-the-signs-of-an-attachment-disorder-in-teens/) (plus the writer’s cited Child Mind source)” used under “Child Mind Institute describes RAD…”  
+  → The URL in the bracket is for Family First’s blog on attachment disorders in teens, not the Child Mind Institute’s Quick Guide to RAD.  
+  | Action:  
+  - Correct the citation label so that the Child Mind Institute statement is supported by the actual Child Mind URL (Quick Guide to Reactive Attachment Disorder).  
+  - If Family First is also being cited for separate teen‑attachment content, label and describe it separately to avoid implying it is a Child Mind source.
+
+── FINAL ARTICLE ──
+Meta Title: Understanding Reactive Attachment Disorder in Teenagers  
+Meta Description: Explore how reactive attachment disorder affects teenagers and the role of Paradigm Treatment in addressing these challenges.
+
+# Understanding Reactive Attachment Disorder in Teenagers
+
+Reactive attachment disorder (RAD) in a teenager is a complex condition that requires attention and care. Paradigm Treatment offers insights into understanding and managing this disorder. The condition often emerges when a teenager has not formed stable attachments during early childhood, leading to difficulties in emotional and social functioning.
+
+## What is Reactive Attachment Disorder?
+
+Reactive attachment disorder is characterized by a child's inability to form healthy emotional attachments with caregivers. This disorder can manifest in various ways, including difficulty in managing emotions, forming relationships, and exhibiting appropriate social behaviors. Understanding the root causes of RAD is crucial for effective intervention.
+
+## Causes of Reactive Attachment Disorder
+
+The primary cause of reactive attachment disorder in teenagers is often linked to early childhood experiences. Neglect, abuse, or abrupt separation from primary caregivers can lead to the development of RAD. These experiences disrupt the child's ability to form secure attachments, which can persist into adolescence and adulthood.
+
+## Symptoms of Reactive Attachment Disorder in Teenagers
+
+Recognizing the symptoms of reactive attachment disorder in a teenager is vital for timely intervention. Common symptoms include:
+
+- Difficulty in forming close relationships
+- Avoidance of physical touch or affection
+- Lack of trust in others
+- Emotional withdrawal or detachment
+- Aggressive or defiant behavior
+
+These symptoms can vary in intensity and may overlap with other psychological disorders, making diagnosis challenging.
+
+## Diagnosis and Assessment
+
+Diagnosing reactive attachment disorder in teenagers involves a comprehensive assessment by mental health professionals. The evaluation typically includes:
+
+1. Detailed history of the child's early life experiences
+2. Observation of behavior and interaction patterns
+3. Psychological assessments to rule out other conditions
+
+Accurate diagnosis is essential for developing an effective treatment plan tailored to the individual's needs.
+
+## Treatment Approaches for Reactive Attachment Disorder
+
+Paradigm Treatment emphasizes a holistic approach to managing reactive attachment disorder in teenagers. Treatment may include:
+
+- **Therapeutic Interventions**: Individual and family therapy can help address emotional and behavioral issues. Therapists work with teenagers to build trust and improve relationship skills.
+  
+- **Educational Support**: Academic difficulties often accompany RAD. Providing educational support and accommodations can help teenagers succeed in school.
+
+- **Parental Involvement**: Engaging parents or guardians in the treatment process is crucial. Educating them about RAD and involving them in therapy sessions can strengthen family bonds and improve outcomes.
+
+## The Role of Paradigm Treatment
+
+Paradigm Treatment is dedicated to providing comprehensive care for teenagers with reactive attachment disorder. By offering specialized programs and therapies, they aim to address the unique challenges faced by adolescents with RAD. Their approach focuses on building emotional resilience and fostering healthy relationships.
+
+## Long-term Implications of Reactive Attachment Disorder
+
+Understanding the long-term implications of reactive attachment disorder in teenagers is essential for effective management. Without proper intervention, RAD can lead to:
+
+- **Reactive Attachment Disorder in Adulthood**: Unresolved attachment issues can persist into adulthood, affecting relationships and emotional well-being.
+
+- **Social and Emotional Challenges**: Teenagers with RAD may struggle with social interactions and emotional regulation, impacting their quality of life.
+
+- **Mental Health Disorders**: There is an increased risk of developing other mental health disorders, such as anxiety, depression, or personality disorders.
+
+## Can Adults Have Reactive Attachment Disorder?
+
+While reactive attachment disorder is primarily diagnosed in children and teenagers, adults can experience the residual effects of untreated RAD. These individuals may exhibit difficulties in forming and maintaining relationships, trust issues, and emotional instability. Addressing these challenges through therapy and support can lead to improved outcomes.
+
+## Strategies for Supporting Teenagers with RAD
+
+Supporting a teenager with reactive attachment disorder requires patience, understanding, and a structured approach. Strategies include:
+
+- **Consistent Routines**: Establishing predictable routines can provide a sense of security and stability for teenagers with RAD.
+
+- **Positive Reinforcement**: Encouraging positive behavior through praise and rewards can help reinforce desired actions and build self-esteem.
+
+- **Open Communication**: Encouraging open and honest communication can help teenagers express their feelings and build trust with caregivers.
+
+## Conclusion
+
+Reactive attachment disorder in a teenager presents unique challenges that require a comprehensive and compassionate approach. Paradigm Treatment offers valuable resources and support for families navigating this complex condition. By understanding the causes, symptoms, and treatment options, caregivers can help teenagers with RAD lead fulfilling and emotionally healthy lives.
+── STRUCTURE AUDIT ──
+  Pass 1: ❌ Sent to Surgical Rewriter
+  Pass 2: ❌ Flagged for Human Review
+  Flagged for Human Review: ⚠️  YES
+
+Structure Audit Pass 1 Result:
+{
+  "headings_match": false,
+  "faq_included": false,
+  "rules_violated": [
+    "Headings missing: 'How RAD Shows Up in Older Teens (16 to 17)', 'How RAD Shows Up in Young Adults (18 to 26)', 'Why RAD Often Surfaces or Worsens in Young Adulthood', 'Treatment Options for Older Teens and Young Adults', 'When Residential Treatment Is the Right Level of Care'",
+    "FAQ section missing: Required FAQ questions not included."
+  ],
+  "overall_pass": false,
+  "correction_notes": "Add the missing headings: 'How RAD Shows Up in Older Teens (16 to 17)', 'How RAD Shows Up in Young Adults (18 to 26)', 'Why RAD Often Surfaces or Worsens in Young Adulthood', 'Treatment Options for Older Teens and Young Adults', 'When Residential Treatment Is the Right Level of Care'. Include an FAQ section with the questions: 'Can a teenager develop reactive attachment disorder?', 'Can adults have reactive attachment disorder?', 'What are the most common signs of RAD in young adults?', 'Does RAD go away with age?'."
+}
+
+Structure Audit Pass 2 Result:
+{
+  "headings_match": false,
+  "faq_included": false,
+  "rules_violated": [
+    "Headings missing: 'How RAD Shows Up in Older Teens (16 to 17)', 'How RAD Shows Up in Young Adults (18 to 26)', 'When Residential Treatment Is the Right Level of Care'",
+    "FAQ section missing: No FAQs included",
+    "Primary keyword 'reactive attachment disorder in a teenager' not used in the first 100 words of intro",
+    "Secondary keyword 'reactive attachment disorder in adulthood' not used in an H2",
+    "Phrase 'reactive attachment disorder causes' not used to set up the causes section",
+    "Phrase 'reactive attachment disorder in teenagers' not used in the section about older teens",
+    "Link to Paradigm's young adult treatment program not included",
+    "Mention of Paradigm's services not included",
+    "Citations from Cleveland Clinic and Child Mind Institute for older teen presentation not included",
+    "Citation from Mayo Clinic for documented causes of RAD not included"
+  ],
+  "overall_pass": false,
+  "correction_notes": "Add missing headings: 'How RAD Shows Up in Older Teens (16 to 17)', 'How RAD Shows Up in Young Adults (18 to 26)', 'When Residential Treatment Is the Right Level of Care'. Include the FAQ section with required questions. Use the primary keyword 'reactive attachment disorder in a teenager' in the first 100 words of the introduction. Add an H2 for the secondary keyword 'reactive attachment disorder in adulthood'. Use 'reactive attachment disorder causes' to introduce the causes section. Include 'reactive attachment disorder in teenagers' in the section about older teens. Link to Paradigm's young adult treatment program and mention their services. Cite Cleveland Clinic and Child Mind Institute for older teen presentation and Mayo Clinic for causes of RAD."
+}

@@ -22,6 +22,7 @@ export interface ContentRequest {
     current_run_id: string | null;
     error_message: string | null;
     improvement_notes: string | null;
+    verified_claims: string | null;
     profiles?: {
         full_name: string;
         email: string;

@@ -1,0 +1,14 @@
+{
+  "id": "2961",
+  "finished": true,
+  "mode": "retry",
+  "retryOf": "2938",
+  "retrySuccessId": null,
+  "status": "success",
+  "createdAt": "2026-06-11T13:40:12.529Z",
+  "startedAt": "2026-06-11T13:40:12.613Z",
+  "stoppedAt": "2026-06-11T13:40:46.614Z",
+  "deletedAt": null,
+  "workflowId": "t3LNiuZIghvobde3",
+  "waitTill": null
+}

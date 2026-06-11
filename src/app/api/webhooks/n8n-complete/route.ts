@@ -9,7 +9,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { request_id, run_id, webhook_response, raw_content } = body;
+        const { request_id, run_id, webhook_response, raw_content, verified_claims } = body;
 
         console.log(`[n8n Complete Webhook] Received:`, { request_id, run_id, webhook_response, hasRawContent: !!raw_content });
 
@@ -29,6 +29,7 @@ export async function POST(request: Request) {
                 status: 'complete',
                 webhook_response: webhook_response || null,
                 raw_content: raw_content || null,
+                verified_claims: verified_claims || null,
                 webhook_sent: true,
                 error_message: null,
                 updated_at: new Date().toISOString()

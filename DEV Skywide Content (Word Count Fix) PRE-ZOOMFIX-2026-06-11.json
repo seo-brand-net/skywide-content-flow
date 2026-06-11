@@ -9,8 +9,8 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        776,
-        200
+        524208,
+        111536
       ],
       "typeVersion": 1,
       "id": "91c04445-efaa-4b20-a08e-8c82744b7724",
@@ -22,8 +22,8 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        1384,
-        648
+        524816,
+        111984
       ],
       "typeVersion": 1,
       "id": "a244c957-b740-49cd-bc15-bd1f553125a3",
@@ -100,8 +100,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2920,
-        1992
+        526352,
+        113328
       ],
       "id": "c4c7eb9c-0283-4d8a-b8fa-c4d2b89a8616",
       "name": "Clean1"
@@ -116,7 +116,7 @@
       "typeVersion": 2,
       "position": [
         200,
-        2088
+        0
       ],
       "id": "fff10ece-82ba-4695-b1df-35c3759a6b59",
       "name": "Webhook1",
@@ -143,8 +143,8 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        2696,
-        2088
+        11900,
+        680
       ],
       "id": "b723af07-4ef2-4370-8951-e02ed2a14485",
       "name": "Create folder1",
@@ -179,8 +179,8 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        3720,
-        1916
+        5900,
+        0
       ],
       "id": "fe1b1bea-c4b0-48c2-aef6-46b890f8971c",
       "name": "Data Check & Research Gaps1",
@@ -202,8 +202,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3496,
-        1772
+        526928,
+        113108
       ],
       "id": "06e079c5-88fc-4d25-b15e-50c0ab5a60dd",
       "name": "Merge3"
@@ -235,8 +235,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        4168,
-        1768
+        527600,
+        113104
       ],
       "id": "d66d826f-6c26-4126-8537-04ebf7b91415",
       "name": "OpenAI Keyword Check + Semantic Gap1",
@@ -266,8 +266,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        4168,
-        2064
+        6800,
+        0
       ],
       "id": "3cf3ad0a-f0e0-4899-b96f-927d37e7fa63",
       "name": "Claude Keyword Check + Semantic Gap1",
@@ -291,8 +291,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        4240,
-        2288
+        527672,
+        113624
       ],
       "id": "c9be4a5f-bae1-4a6a-abab-77947e5419d9",
       "name": "Anthropic Chat Model5",
@@ -312,8 +312,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        4520,
-        1916
+        527952,
+        113252
       ],
       "id": "347e24ea-14aa-4663-9c24-803af931561f",
       "name": "Merge5"
@@ -334,8 +334,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        4968,
-        1916
+        7250,
+        0
       ],
       "id": "f0346655-ca4a-4665-a51e-2762a3258c8e",
       "name": "Claude Apply Recommendations1",
@@ -358,8 +358,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        5040,
-        2140
+        528472,
+        113476
       ],
       "id": "7d05f55f-b046-4bfd-9445-bcad2baca86f",
       "name": "Anthropic Chat Model6",
@@ -396,8 +396,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        5320,
-        1768
+        528752,
+        113104
       ],
       "id": "85e30920-34d3-458b-ab5d-ea502f015023",
       "name": "OpenAI EEAT Injection1",
@@ -427,8 +427,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        5320,
-        2064
+        7700,
+        0
       ],
       "id": "137f43a2-6f74-412c-8377-7ddd160e7d26",
       "name": "Claude EEAT Injection1",
@@ -444,8 +444,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        5672,
-        1916
+        529104,
+        113252
       ],
       "id": "deb2b348-168a-4881-a230-c1d4a7d86b65",
       "name": "Merge6"
@@ -466,8 +466,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        5392,
-        2288
+        528824,
+        113624
       ],
       "id": "2cd4bdfd-d19c-456e-b42d-d21c2706bf2e",
       "name": "Anthropic Chat Model7",
@@ -504,8 +504,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        6120,
-        1916
+        9500,
+        0
       ],
       "id": "6e9dd228-1d94-43ea-80e5-df9b4d903244",
       "name": "OpenAI SEO Optimization1",
@@ -544,8 +544,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        6696,
-        1768
+        530128,
+        113104
       ],
       "id": "3af9ecbb-4262-4a1c-b5a6-89c43a27e685",
       "name": "OpenAI NLP & PR Optimization",
@@ -575,8 +575,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        6696,
-        2064
+        8200,
+        0
       ],
       "id": "ed9f3bb1-6f84-4a2e-acbe-8940d29c2538",
       "name": "Claude NLP & PR Optimization",
@@ -599,8 +599,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        6768,
-        2288
+        530200,
+        113624
       ],
       "id": "f190380e-f833-4ab5-8764-4c227b675b2f",
       "name": "Anthropic Chat Model11",
@@ -620,8 +620,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        7048,
-        1916
+        530480,
+        113252
       ],
       "id": "4e530bc9-d293-4c11-ab05-007431546fc3",
       "name": "Merge7"
@@ -642,8 +642,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        7568,
-        2648
+        531000,
+        113984
       ],
       "id": "f2125d6b-6754-42f5-82cf-34a7d05cd1c9",
       "name": "Anthropic Chat Model12",
@@ -669,8 +669,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        8144,
-        2648
+        531576,
+        113984
       ],
       "id": "e950cc1f-1720-42c8-8eb5-d44e78292e08",
       "name": "Anthropic Chat Model13",
@@ -697,8 +697,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        8072,
-        2424
+        9100,
+        0
       ],
       "id": "3e9315b4-e47a-4c68-b718-8a3d620820bf",
       "name": "Claude Final SEO Snippet Optimization",
@@ -731,8 +731,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        7496,
-        1236
+        530928,
+        112572
       ],
       "id": "562679db-1d75-4ebf-bd25-4661fd39bb46",
       "name": "OpenAI Humanised Readability Rewrite",
@@ -772,8 +772,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8424,
-        1236
+        531856,
+        112572
       ],
       "id": "08d39dd9-27b0-46b0-bc4d-a28339c0bd8b",
       "name": "Document Export Sanitization",
@@ -792,8 +792,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        7272,
-        1236
+        530704,
+        112572
       ],
       "id": "d029ad83-b413-42d8-860d-ef72211aa68c",
       "name": "Wait6",
@@ -805,8 +805,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        7272,
-        2424
+        530704,
+        113760
       ],
       "id": "c4c9c0d7-2b19-43ed-848c-7ea24453d531",
       "name": "Wait7",
@@ -817,8 +817,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        7848,
-        1236
+        531280,
+        112572
       ],
       "id": "16188d4b-9621-41bd-8411-334d24df9cb5",
       "name": "Wait8",
@@ -830,8 +830,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        7848,
-        2424
+        531280,
+        113760
       ],
       "id": "306208e0-52c3-49f3-876a-d5c6e158c3e3",
       "name": "Wait10",
@@ -842,8 +842,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        5896,
-        1916
+        529328,
+        113252
       ],
       "id": "5f8b1d39-aaf5-46f8-9318-c8b25f773269",
       "name": "Wait14",
@@ -854,8 +854,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        6472,
-        1768
+        529904,
+        113104
       ],
       "id": "3c038b4a-59e5-4d01-8b4c-34b4a88c4c55",
       "name": "Wait17",
@@ -866,8 +866,8 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        4744,
-        1916
+        528176,
+        113252
       ],
       "id": "3bad7b1b-5560-4219-b253-aacbe08b57d6",
       "name": "Wait18",
@@ -888,8 +888,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2920,
-        2184
+        12300,
+        680
       ],
       "id": "ca1dfb4d-aa63-494f-9ef6-8fa41f228211",
       "name": "Google Drive Notification1",
@@ -912,8 +912,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        9352,
-        1576
+        532784,
+        112912
       ],
       "id": "9db3de05-a3be-4e66-8295-17e0d457af41",
       "name": "1st Improvement LLM2",
@@ -948,8 +948,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        9704,
-        1576
+        533136,
+        112912
       ],
       "id": "726eaabb-644c-4fd0-bd71-c3f71689ff4c",
       "name": "2nd Scoring Agent2",
@@ -978,8 +978,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        9128,
-        1236
+        532560,
+        112572
       ],
       "id": "5f43bd61-fd55-4279-9ed2-1f1888afb09a",
       "name": "80+ ?2",
@@ -1001,8 +1001,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        10120,
-        1576
+        533552,
+        112912
       ],
       "id": "66f220e2-121b-49ad-9a22-1c5af47031ba",
       "name": "80 +?4",
@@ -1046,8 +1046,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        10696,
-        1548
+        534128,
+        112884
       ],
       "id": "7df81c1d-aba8-405c-9a08-688bfe093471",
       "name": "Check Max Iterations2",
@@ -1072,8 +1072,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        10408,
-        1672
+        533840,
+        113008
       ],
       "id": "15f6baf8-8a68-434f-a971-74fbdb92e1fb",
       "name": "Max Iterations2",
@@ -1095,8 +1095,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        10984,
-        1548
+        534416,
+        112884
       ],
       "id": "9b61cdec-a239-414a-b0d3-4622680f2e99",
       "name": "Improvement LLM2",
@@ -1120,8 +1120,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        11056,
-        1772
+        534488,
+        113108
       ],
       "id": "a02cd895-7210-4a79-85de-e7f5d057dcc3",
       "name": "Anthropic Chat Model18",
@@ -1160,8 +1160,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        11336,
-        1548
+        534768,
+        112884
       ],
       "id": "1eb41389-1e4e-4f11-8ba3-e4047c7dbc6e",
       "name": "Scoring7",
@@ -1183,8 +1183,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        13672,
-        1452
+        537104,
+        112788
       ],
       "id": "463e08ae-27bf-4bb0-88c1-99e182018538",
       "name": "Create a document15",
@@ -1212,8 +1212,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        13896,
-        1452
+        537328,
+        112788
       ],
       "id": "0da2236d-96c0-45e3-8e00-eae7a045ee0f",
       "name": "Update a document15",
@@ -1241,8 +1241,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        9424,
-        1800
+        532856,
+        113136
       ],
       "id": "8a182a6b-159f-4bc4-8ca3-6f7ae8f25226",
       "name": "Anthropic Chat Model19",
@@ -1281,8 +1281,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8776,
-        1236
+        532208,
+        112572
       ],
       "id": "a7b0fcde-2fe8-47d5-9e03-f3e5e2db0d51",
       "name": "1st Scoring Agent2",
@@ -1313,8 +1313,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        11752,
-        1672
+        535184,
+        113008
       ],
       "id": "c600d73e-7691-4452-908c-edbf368078ce",
       "name": "80 +?5",
@@ -1337,8 +1337,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        11336,
-        2760
+        534768,
+        114096
       ],
       "id": "87618b91-0f18-409f-b08f-640710569f59",
       "name": "1st Improvement LLM3",
@@ -1372,8 +1372,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        11688,
-        2760
+        535120,
+        114096
       ],
       "id": "daded1c4-abe3-4b65-9691-822005e3f414",
       "name": "2nd Scoring Agent3",
@@ -1401,8 +1401,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        11048,
-        2476
+        534480,
+        113812
       ],
       "id": "0aa87fc2-ed07-4049-8dc5-b33604cb11f8",
       "name": "80+ ?3",
@@ -1423,8 +1423,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        12104,
-        2760
+        535536,
+        114096
       ],
       "id": "68d9b84a-8b59-4131-bdc7-d13279fb3410",
       "name": "80 +?6",
@@ -1467,8 +1467,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        12680,
-        2732
+        536112,
+        114068
       ],
       "id": "a253e746-e921-4376-9052-c7d14229c74c",
       "name": "Check Max Iterations3",
@@ -1492,8 +1492,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        12392,
-        2856
+        535824,
+        114192
       ],
       "id": "16ac9ff4-e9ce-4685-acbf-832a3e812aaa",
       "name": "Max Iterations3"
@@ -1514,8 +1514,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        12968,
-        2732
+        536400,
+        114068
       ],
       "id": "8ec886f7-e006-46a0-8217-6d9f0b0661cd",
       "name": "Improvement LLM3",
@@ -1538,8 +1538,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        13040,
-        2956
+        536472,
+        114292
       ],
       "id": "12ae9374-390c-49d2-ae49-0492817e2910",
       "name": "Anthropic Chat Model20",
@@ -1577,8 +1577,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        13320,
-        2732
+        536752,
+        114068
       ],
       "id": "d73a7416-af14-43f0-92c8-8f1ae54f1ad0",
       "name": "Scoring1",
@@ -1599,8 +1599,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        12392,
-        2540
+        535824,
+        113876
       ],
       "id": "5f554534-bf81-4179-9419-4cb07afc5dba",
       "name": "Create a document6",
@@ -1619,8 +1619,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        15272,
-        2636
+        538704,
+        113972
       ],
       "id": "e0846fcb-a311-40a4-9233-3b4a31b1b14f",
       "name": "Create a document16",
@@ -1647,8 +1647,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        15496,
-        2636
+        538928,
+        113972
       ],
       "id": "5d377322-addc-4914-b6d8-c93c8c05b7d9",
       "name": "Update a document16",
@@ -1675,8 +1675,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        11408,
-        2984
+        534840,
+        114320
       ],
       "id": "e76a7b63-6f01-4ca8-910c-45831324e2f6",
       "name": "Anthropic Chat Model21",
@@ -1714,8 +1714,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        10632,
-        2476
+        534064,
+        113812
       ],
       "id": "777d95aa-5baf-42ec-bdce-85abe7e8a490",
       "name": "1st Scoring Agent3",
@@ -1746,8 +1746,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        12680,
-        2540
+        536112,
+        113876
       ],
       "id": "2961845d-bffb-4748-859e-fd057a9ed600",
       "name": "Update a document7",
@@ -1773,8 +1773,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        13672,
-        2856
+        537104,
+        114192
       ],
       "id": "0200cada-7b78-4271-bfda-eaa909a45fed",
       "name": "80 +?7",
@@ -1788,8 +1788,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        10408,
-        1356
+        533840,
+        112692
       ],
       "id": "f194f8e9-9bc5-4702-a92a-a1e1b8a0485a",
       "name": "Create a document7",
@@ -1827,8 +1827,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8072,
-        1236
+        531504,
+        112572
       ],
       "id": "783bde44-024b-41b5-a194-22c7e598f69b",
       "name": "Final SEO Snippet Optimization",
@@ -1868,8 +1868,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8424,
-        2424
+        11400,
+        0
       ],
       "id": "f868a5ee-063a-4d5f-bfc0-42eecdf63e7b",
       "name": "Document Export Sanitization5",
@@ -1909,8 +1909,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        3144,
-        1844
+        526576,
+        113180
       ],
       "id": "5da6d23f-c906-43d3-a8db-e379d3189cd4",
       "name": "OpenAI Draft (GPT-4O)1",
@@ -1940,8 +1940,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        7496,
-        2424
+        8600,
+        0
       ],
       "id": "198e4d75-8193-46c7-9951-a061daf1f989",
       "name": "Claude Humanised Readability Rewrite",
@@ -1966,8 +1966,8 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        2248,
-        2088
+        525680,
+        113424
       ],
       "id": "22fcdde0-b3ec-4711-820a-10117b91bde7",
       "name": "Execution Data1"
@@ -1988,8 +1988,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        10696,
-        1356
+        534128,
+        112692
       ],
       "id": "2a9db746-3d07-4a13-a217-4218226c972b",
       "name": "Update a document6",
@@ -2021,8 +2021,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        10984,
-        1016
+        534416,
+        112352
       ],
       "id": "321f30df-c4ed-487c-807a-450efcd57ee8",
       "name": "QA Rewriter Agent",
@@ -2054,8 +2054,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        11400,
-        1140
+        534832,
+        112476
       ],
       "id": "9f50b3ee-cf57-4345-94e3-9c03b94746e7",
       "disabled": true
@@ -2086,8 +2086,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        10984,
-        824
+        534416,
+        112160
       ],
       "id": "86b77615-f33b-4b71-9952-83c2e9115301",
       "name": "Document Export Sanitization3",
@@ -2111,8 +2111,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        10056,
-        920
+        533488,
+        112256
       ],
       "id": "43427adc-37b1-4d3b-ae65-b8ad221dbcd5",
       "name": "AI Agent",
@@ -2127,8 +2127,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        10192,
-        1144
+        3100,
+        880
       ],
       "id": "9d9be9cc-0797-4a0d-85c7-6fefe0fe84d2",
       "name": "Structured Output Parser",
@@ -2149,8 +2149,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        10064,
-        1144
+        533496,
+        112480
       ],
       "id": "3c52d29d-1b8b-4f43-b3be-f023381c6d20",
       "name": "OpenAI Chat Model",
@@ -2181,8 +2181,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        9416,
-        1044
+        532848,
+        112380
       ],
       "id": "0af6b471-a097-4598-af4a-a61b1832fdf0",
       "name": "Edit Fields",
@@ -2205,8 +2205,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        9768,
-        920
+        533200,
+        112256
       ],
       "id": "ec993056-4087-479f-b8dd-cda003a18792",
       "name": "Edit Fields1",
@@ -2257,8 +2257,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        10696,
-        920
+        534128,
+        112256
       ],
       "id": "8370021d-5550-4934-b2e9-5ee6b8934c23",
       "name": "If",
@@ -2284,8 +2284,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        12968,
-        2200
+        536400,
+        113536
       ],
       "id": "3a3e4e21-b231-4206-9b3f-d5739437b6cc",
       "name": "QA Rewriter Agent1",
@@ -2322,8 +2322,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        13384,
-        2324
+        536816,
+        113660
       ],
       "id": "ded265e9-2046-483e-93d2-96f9845809f2"
     },
@@ -2353,8 +2353,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        12968,
-        2008
+        536400,
+        113344
       ],
       "id": "67be5da3-3f5b-4404-9e11-e8a5cab3e47d",
       "name": "Document Export Sanitization4",
@@ -2377,8 +2377,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        12040,
-        2104
+        535472,
+        113440
       ],
       "id": "bafba250-1086-4c83-80ad-3bcdfecad626",
       "name": "AI Agent1",
@@ -2393,8 +2393,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        12176,
-        2328
+        3700,
+        880
       ],
       "id": "c5938277-81f5-4221-844a-9050c86e3cf9",
       "name": "Structured Output Parser1"
@@ -2414,8 +2414,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        12048,
-        2328
+        535480,
+        113664
       ],
       "id": "7f40029f-6059-42fa-91d6-13995369e034",
       "name": "OpenAI Chat Model1",
@@ -2445,8 +2445,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        11400,
-        2228
+        534832,
+        113564
       ],
       "id": "6a7762e0-d24a-47b1-b11a-091d5f8d40ba",
       "name": "Edit Fields2"
@@ -2468,8 +2468,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        11752,
-        2104
+        535184,
+        113440
       ],
       "id": "5f0d367d-d2a8-4625-8092-002edcd448b4",
       "name": "Edit Fields3"
@@ -2519,8 +2519,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        12680,
-        2104
+        536112,
+        113440
       ],
       "id": "f5f4d318-9858-434f-acb1-65641e4e7e22",
       "name": "If1"
@@ -2545,8 +2545,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        14920,
-        2828
+        538352,
+        114164
       ],
       "id": "b634dffe-59de-40fd-aeed-090a9b288fd4",
       "name": "QA Rewriter Agent2",
@@ -2583,8 +2583,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        15272,
-        2952
+        538704,
+        114288
       ],
       "id": "b78b1a76-addf-43bc-8131-03fbe2156206"
     },
@@ -2614,8 +2614,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        14920,
-        2636
+        538352,
+        113972
       ],
       "id": "64680e6f-b0b8-4bc5-8f26-5466f033d40b",
       "name": "Document Export Sanitization6",
@@ -2638,8 +2638,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        14344,
-        2732
+        537776,
+        114068
       ],
       "id": "1df9977b-d4c7-47c8-b59f-e816f3b3582d",
       "name": "AI Agent2",
@@ -2653,8 +2653,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        14480,
-        2956
+        10850,
+        380
       ],
       "id": "3816c215-c5e8-4433-b284-11c1ef2d8045",
       "name": "Structured Output Parser2"
@@ -2672,8 +2672,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        14352,
-        2956
+        537784,
+        114292
       ],
       "id": "bc9fad88-cb45-4010-9064-6e09860845aa",
       "name": "OpenAI Chat Model2",
@@ -2703,8 +2703,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        13896,
-        2856
+        537328,
+        114192
       ],
       "id": "025545e1-6906-4e7a-8c55-3d60419d63e0",
       "name": "Edit Fields4"
@@ -2726,8 +2726,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        14120,
-        2732
+        537552,
+        114068
       ],
       "id": "091e4477-416f-4985-ac15-69a1d14cee2d",
       "name": "Edit Fields5"
@@ -2768,8 +2768,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        14696,
-        2732
+        538128,
+        114068
       ],
       "id": "5197c377-599a-4839-997c-9b079e8ebea3",
       "name": "If2"
@@ -2794,8 +2794,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        13320,
-        1644
+        536752,
+        112980
       ],
       "id": "e7c88458-b9b3-482d-a315-00242ed541a7",
       "name": "QA Rewriter Agent3",
@@ -2833,8 +2833,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        13672,
-        1768
+        537104,
+        113104
       ],
       "id": "a9993e93-69e4-4315-96cf-d19d9f86859a",
       "disabled": true
@@ -2865,8 +2865,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        13320,
-        1452
+        536752,
+        112788
       ],
       "id": "70097bfd-7548-4b67-a512-36b2424ac40d",
       "name": "Document Export Sanitization7",
@@ -2890,8 +2890,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        12616,
-        1548
+        536048,
+        112884
       ],
       "id": "7b8261ed-4a7a-49ee-9b9a-2f0330119d54",
       "name": "AI Agent3",
@@ -2906,8 +2906,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        12752,
-        1772
+        11750,
+        380
       ],
       "id": "43ca1bf6-b4c3-4c51-9577-26529703521f",
       "name": "Structured Output Parser3",
@@ -2926,8 +2926,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        12624,
-        1772
+        536056,
+        113108
       ],
       "id": "5c081267-9a85-4be7-befe-3fd0ad5afecc",
       "name": "OpenAI Chat Model3",
@@ -2964,8 +2964,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        12104,
-        1672
+        535536,
+        113008
       ],
       "id": "11b0997e-c331-497c-9bac-95145432639a",
       "name": "Edit Fields6",
@@ -2988,8 +2988,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        12392,
-        1548
+        535824,
+        112884
       ],
       "id": "800f4c46-b58c-4d52-a450-ca1e277cf2d4",
       "name": "Edit Fields7",
@@ -3031,8 +3031,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        13032,
-        1548
+        536464,
+        112884
       ],
       "id": "610e3785-48c3-4bdf-803e-86c57aa3e5d9",
       "name": "If3",
@@ -3054,8 +3054,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        3144,
-        2140
+        4100,
+        0
       ],
       "id": "10d56811-c22b-414c-97f4-bca7fa16d63a",
       "name": "Claude Draft (Claude Opus 3)1",
@@ -3079,8 +3079,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        3216,
-        2364
+        526648,
+        113700
       ],
       "id": "f6ff84e7-477f-42ec-8528-ca928eba7ddf",
       "name": "Anthropic Chat Model4",
@@ -3108,8 +3108,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        10408,
-        920
+        533840,
+        112256
       ],
       "id": "f197b6b0-9917-4b41-9388-39913eb11741",
       "name": "Max Iterations",
@@ -3132,8 +3132,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        12392,
-        2104
+        535824,
+        113440
       ],
       "id": "c1990912-f9be-47fd-b92e-c6bc5579a5c6",
       "name": "Max Iterations1"
@@ -3147,8 +3147,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2024,
-        2088
+        1100,
+        680
       ]
     },
     {
@@ -3160,8 +3160,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2472,
-        2088
+        1500,
+        680
       ]
     },
     {
@@ -3172,8 +3172,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        11400,
-        824
+        534832,
+        112160
       ],
       "id": "e3a79422-88db-400b-b81d-2446ce8af0c5",
       "name": "Create a document",
@@ -3201,8 +3201,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        11752,
-        824
+        535184,
+        112160
       ],
       "id": "f6b42b47-d507-4fb3-b3f0-d5cc1dc54c2e",
       "name": "Update a document",
@@ -3222,8 +3222,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        13384,
-        2008
+        11900,
+        0
       ],
       "id": "bd494509-f675-490e-b0c6-7280494a9763",
       "name": "Create a document17",
@@ -3250,8 +3250,8 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        13672,
-        2008
+        12300,
+        0
       ],
       "id": "3d0e51e1-94d5-4867-a74b-40b9bfdf320d",
       "name": "Update a document17",
@@ -3268,7 +3268,7 @@
       "typeVersion": 1,
       "position": [
         200,
-        3176
+        1300
       ],
       "id": "3f95ade9-e820-44d8-bd31-2e6ab64dbbbe",
       "name": "Error Trigger"
@@ -3285,8 +3285,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        424,
-        3176
+        700,
+        1300
       ],
       "id": "67a08828-005a-4fc3-8447-118634580f42",
       "name": "Send Error to Dashboard"
@@ -3303,8 +3303,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        424,
-        2088
+        200,
+        680
       ],
       "id": "5d10d7f0-91cf-4720-9dca-43258a2cb1bb",
       "name": "Startup Update"
@@ -3332,8 +3332,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        13896,
-        2008
+        12300,
+        0
       ]
     },
     {
@@ -3364,8 +3364,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        648,
-        2088
+        1100,
+        0
       ],
       "id": "a3104167-ba87-4389-8611-e8e9f6bed391",
       "name": "Parse Creative Brief (LLM)",
@@ -3397,8 +3397,8 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        1568,
-        2088
+        2100,
+        0
       ],
       "id": "e37024a2-5246-4576-bc68-9690ed06c244",
       "name": "Pre-Draft Fact Checker",
@@ -3429,8 +3429,8 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        3944,
-        1916
+        5900,
+        680
       ],
       "id": "77408ebb-8353-4801-8746-d63644916afb",
       "name": "Post-Draft Fact Checker",
@@ -3470,8 +3470,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        8776,
-        2424
+        10400,
+        0
       ],
       "retryOnFail": true,
       "credentials": {
@@ -3510,8 +3510,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        9128,
-        2424
+        10850,
+        0
       ],
       "notes": "PASS → 1st Scoring Agent3 (happy path). FAIL → Surgical Rewriter."
     },
@@ -3532,8 +3532,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        9424,
-        2772
+        532856,
+        114108
       ],
       "credentials": {
         "anthropicApi": {
@@ -3553,8 +3553,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        9352,
-        2548
+        9100,
+        680
       ],
       "notes": "Fixes ONLY the structural violations from the audit. Does not rewrite passing content."
     },
@@ -3587,8 +3587,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        9704,
-        2548
+        11300,
+        0
       ],
       "retryOnFail": true,
       "credentials": {
@@ -3627,8 +3627,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        10120,
-        2548
+        11750,
+        0
       ],
       "notes": "PASS → 1st Scoring Agent3. FAIL → Flag For Human Review (still proceeds to scoring)."
     },
@@ -3663,8 +3663,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        10408,
-        2628
+        12000,
+        680
       ],
       "notes": "Marks article as needing human review after 2 failed QA passes. Still routes to scoring."
     },
@@ -3690,8 +3690,8 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        1224,
-        1944
+        2100,
+        680
       ],
       "id": "4f35c7d9-e340-46eb-985d-8e132c4a9143",
       "name": "Client Site Researcher",
@@ -3730,8 +3730,8 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        1448,
-        1944
+        2600,
+        680
       ],
       "id": "b67b27ca-6089-4ad5-bc7b-8f271495bb71",
       "name": "Client Profile Extractor",
@@ -3770,8 +3770,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1000,
-        2016
+        550,
+        0
       ]
     },
     {
@@ -3785,8 +3785,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.4,
       "position": [
-        1768,
-        2088
+        3700,
+        0
       ]
     },
     {
@@ -3803,8 +3803,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1,
       "position": [
-        1768,
-        2314
+        4000,
+        380
       ],
       "credentials": {
         "openAiApi": {
@@ -3822,8 +3822,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1918,
-        2314
+        3700,
+        380
       ]
     },
     {
@@ -3839,8 +3839,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.4,
       "position": [
-        3368,
-        2064
+        5000,
+        0
       ]
     },
     {
@@ -3854,8 +3854,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1,
       "position": [
-        3368,
-        2264
+        5000,
+        380
       ],
       "credentials": {
         "openAiApi": {
@@ -3873,8 +3873,8 @@
       "type": "n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1,
       "position": [
-        648,
-        2314
+        1100,
+        200
       ]
     }
   ],

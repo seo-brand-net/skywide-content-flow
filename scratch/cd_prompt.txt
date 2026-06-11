@@ -1,0 +1,123 @@
+={{ $('Webhook1').first().json.body.is_revision ? '⚠️ REVISION MODE — DO NOT generate new content from scratch.\n\nThe client has already approved the base article below. Your task is ONLY to apply the specific revision notes listed below. Preserve ALL existing content, structure, keywords, and tone. Only change what is explicitly requested.\n\nREVISION NOTES:\n' + $('Webhook1').first().json.body.revision_notes + '\n\nORIGINAL APPROVED CONTENT (preserve this as the base — only apply the revision notes above):\n' + $('Webhook1').first().json.body.original_content + '\n\nEND OF ORIGINAL CONTENT\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nNow apply ONLY the revision notes above to the original content above. Do not rewrite sections that were not requested. Preserve keywords, client name, tone, and structure.\n' : '' }}
+# PRIMARY CONSTRAINT - Word Count (MANDATORY)
+Target: {{ $('Webhook1').first().json.body.word_count }} words (for the main body, excluding FAQ)
+Acceptable range: {{ $json.word_count * 0.9 }} to {{ $json.word_count * 1.1 }} words
+
+You MUST hit this word count target. Do not include the word count in your final article output.
+
+# KEYWORD PLACEMENT RULES (content will be scored against these)
+Primary Keyword: {{ $('Webhook1').first().json.body.primary_keywords }}
+Secondary Keywords: {{ $('Webhook1').first().json.body.secondary_keywords }}
+Semantic Keywords: {{ $('Webhook1').first().json.body.semantic_theme }}
+
+## PLACEMENT CHECKLIST:
+1. H1 title must contain the primary keyword (exact wording, not paraphrased)
+2. Primary keyword must appear naturally within the first 100 words
+3. Primary keyword (or close variation) must appear in at least one H2 subheading
+4. Primary keyword must appear in the final paragraph
+5. Every secondary keyword must appear at least once in the body
+6. Every semantic keyword must appear at least once in the body
+7. Each H2 should target a DIFFERENT keyword — spread primary, secondary, and semantic across headings
+8. Never bold or italicize keywords in body text
+
+## EXAMPLE — CORRECT keyword placement:
+If primary keyword = "causes of anxiety in young adults":
+GOOD H1: "Understanding the Causes of Anxiety in Young Adults"
+GOOD Intro: "The causes of anxiety in young adults are complex, involving biology, environment, and social pressures."
+GOOD H2: "What Causes Anxiety in Adolescence" (secondary keyword as H2)
+GOOD Body: "Teen social anxiety treatment often begins with identifying triggers." (secondary used naturally)
+GOOD Conclusion: "Recognizing the causes of anxiety in young adults is the first step toward effective support."
+
+## EXAMPLE — WRONG keyword placement:
+BAD H1: "Understanding Anxiety Disorders" (primary keyword missing from H1)
+BAD Intro: "Anxiety is a growing concern..." (keyword not in first 100 words)
+BAD H2s: "The Perfect Storm" / "The Path to Healing" (no keywords in any H2)
+BAD: Secondaries never mentioned — "teen boys" never appears, "social anxiety" never appears
+# Global Rules
+1. Always mention the client's name ({{ $('Webhook1').first().json.body.client_name }}) naturally in the opening paragraph, within the first two sentences, unless explicitly instructed otherwise.
+2. Openings must be professional, relevant, and tied directly to the client's industry, audience, or problem space. Do not use jokes, unrelated stories, or casual metaphors unless requested in the brief.
+3. Tone should feel approachable and human — like trusted advice from someone with real experience. Avoid filler, clichés, or anything that feels AI-generated.
+4. Ensure every article begins with a clear, audience-focused hook that establishes why the content matters to the reader.
+5. Never substitute vague phrases like "this company" or "the brand" when {{ $('Webhook1').first().json.body.client_name }} should be used.
+
+# Writing Voice & Style
+Write like you're having coffee with someone who asked for your honest advice:
+- Use natural speech: "I think," "Here's what works," "Honestly," "Look"
+- Mix short punchy sentences with flowing ones
+- Include personal observations and mild controversy when relevant
+- Add parenthetical thoughts (we all do this) and natural rhetorical questions
+- Use contractions and start sentences with "And," "But," "So"
+
+# Content Approach
+- Share insights like you've experienced this firsthand
+- Include "what I've noticed" observations and real scenarios
+- Use everyday analogies, not business jargon
+- Disagree with common advice when you have better points
+- Admit limitations and when things don't always work
+
+# Critical: NEVER Use These AI Phrases
+"You're Not Alone" | "You Are Not Alone" | "It's important to note" | "Additionally/Furthermore" | "In today's digital landscape" | "Streamline/leverage/optimize/enhance" | "In conclusion" | Perfect bullet parallelism
+
+# Use These Natural Transitions Instead
+"Also," "Plus," "Here's the deal," "The thing is," "So basically," "Oh, and don't forget"
+
+# Structure Requirements
+- Hook with natural conversation starter
+- Subheadings as questions or statements (not formal headings)
+- Include mild frustrations about misconceptions
+- End with genuine advice, not corporate wrap-up
+
+# Your Content Assignment
+Title: {{ $json.brief_title }}
+Brief: {{ $('Webhook1').first().json.body.creative_brief }}
+Target Audience: {{ $('Webhook1').first().json.body.audience }}
+SEO Keywords: {{ $('Webhook1').first().json.body.primary_keywords }}
+
+# Output Requirements
+- Write the complete article within {{ $json.word_count * 0.9 }}-{{ $json.word_count * 1.1 }} words
+- Do NOT include "Word Count: X" or any meta-information in your output
+- End with the final sentence of your article, nothing else
+
+Authentic helpfulness is the goal, but hitting the word count is mandatory.
+
+IMPORTANT: Page Intent: {{ $('Webhook1').first().json.body.page_intent }}
+Ensure the content tone and structure aligns with this intent (e.g., Informational, Transactional, Lead Gen), but DO NOT let this override the core SEO value and critical takeaways of the content.
+
+\n\n{{ $('Keyword Strategist').first().json.brief_authority_preamble }}\n\n{{ $('Keyword Strategist').first().json.brief_enforcer_injection }}
+
+{{ $('Keyword Strategist').first().json.faq_injection }}\n\n{{ $('Keyword Strategist').first().json.secondary_keyword_checklist }}
+
+
+# ═══ CLIENT GROUND TRUTH (MANDATORY — USE THIS, NOT YOUR OWN RESEARCH) ═══
+The following data was scraped directly from the client's official website.
+These are the ONLY statistics, claims, and differentiators you are authorised to use.
+
+CLIENT PROFILE:
+{{ $('Client Profile Extractor').first().json.client_name || $('Webhook1').first().json.body.client_name }}
+
+VERIFIED SERVICES (use these exact names):
+{{ ($('Client Profile Extractor').first().json.services || []).join('\n') }}
+
+VERIFIED CREDENTIALS:
+{{ ($('Client Profile Extractor').first().json.credentials || []).join('\n') }}
+
+VERIFIED UNIQUE CLAIMS (use these, do not invent alternatives):
+{{ ($('Client Profile Extractor').first().json.unique_claims || []).join('\n') }}
+
+VERIFIED PUBLISHED STATS (ONLY these numbers are allowed):
+{{ ($('Client Profile Extractor').first().json.published_stats || []).length > 0 ? ($('Client Profile Extractor').first().json.published_stats || []).join('\n') : 'No specific statistics published on client website.' }}
+
+PRE-DRAFT FACT CHECK CONSTRAINTS:
+{{ $('Pre-Draft Fact Checker').first().json.choices?.[0]?.message?.content || $('Pre-Draft Fact Checker').first().json.message?.content || $('Pre-Draft Fact Checker').first().json.text || 'No fact-check constraints available.' }}
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ⛔ ANTI-HALLUCINATION PROTOCOL (NON-NEGOTIABLE)
+RULE 1: You may ONLY use statistics, percentages, and numerical claims that appear
+        verbatim in the CLIENT GROUND TRUTH block above.
+RULE 2: If the client has no published stats, write the article without any statistics.
+        Do NOT invent percentages, multipliers, or precision figures.
+RULE 3: If you want to reference a third-party study, it MUST have been provided in
+        the SERP analysis or brief with a real URL. If no URL exists, omit the claim.
+RULE 4: Do NOT use phrases like "studies show", "research reveals", "clinical data shows",
+        or "treatment providers report" unless followed by a real named source + URL.
+RULE 5: Violations of this protocol will cause the article to fail QA and be rejected.
