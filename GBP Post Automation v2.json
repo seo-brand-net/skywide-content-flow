@@ -108,7 +108,7 @@
     },
     {
       "parameters": {
-        "url": "https://www.seobrand.com/page-sitemap.xml",
+        "url": "={{ $('Get Client Config').item.json.sitemap_url || 'https://www.seobrand.com/page-sitemap.xml' }}",
         "options": {
           "response": {
             "response": {}

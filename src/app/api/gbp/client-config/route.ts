@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
     const { data: client, error: clientError } = await supabaseAdmin
         .from('gbp_clients')
-        .select('id, name, industry, key_selling_point, sheet_id, topics_tab_name, is_active')
+        .select('id, name, industry, key_selling_point, sitemap_url, sheet_id, topics_tab_name, is_active')
         .eq('id', clientId)
         .single();
 

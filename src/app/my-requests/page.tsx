@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Link from 'next/link';
-import { Eye, Clock, User, ExternalLink, Search, Loader2, AlertCircle, RefreshCw, PenLine, CheckCircle2 } from 'lucide-react';
+import { Eye, Clock, User, ExternalLink, Search, Loader2, AlertCircle, RefreshCw, PenLine } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -824,16 +824,6 @@ export default function MyRequests() {
                                                 {selectedRequest.creative_brief || <span className="text-muted-foreground italic">No brief provided.</span>}
                                             </div>
                                         </div>
-
-                                        {/* Verified Claims */}
-                                        {selectedRequest.verified_claims && (
-                                            <div>
-                                                <label className="text-xs font-bold text-brand-blue-crayola uppercase tracking-wider mb-2 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Verified Claims & Fact Check</label>
-                                                <div className="bg-muted/30 border border-border/50 rounded-lg p-4 text-sm text-foreground/90 whitespace-pre-wrap max-h-60 overflow-y-auto font-mono leading-relaxed shadow-inner">
-                                                    {selectedRequest.verified_claims}
-                                                </div>
-                                            </div>
-                                        )}
 
                                         {/* Google Drive Documents Section */}
                                         <div className="pt-4 border-t border-border/50">

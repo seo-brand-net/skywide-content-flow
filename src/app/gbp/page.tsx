@@ -87,6 +87,33 @@ function exportPostsToPdf(posts: GbpPost[], clientName: string) {
     win.document.close();
 }
 
+function exportPostsToCsv(posts: GbpPost[], clientName: string) {
+    if (posts.length === 0) return;
+    const header = ["Topic", "Client", "Location", "Date", "Post Body", "Image Prompt", "Target Link"];
+    const rows = posts.map(p => [
+        p.post_topic,
+        p.gbp_clients?.name || '',
+        p.gbp_locations ? `${p.gbp_locations.location_name}, ${p.gbp_locations.state}` : '',
+        new Date(p.generated_at || p.created_at).toLocaleDateString(),
+        p.post_body || '',
+        p.image_prompt || '',
+        p.link_url || ''
+    ]);
+    
+    const csvContent = [header, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${clientName.replace(/\s+/g, '_')}_GBP_Posts.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function GbpPage() {
     const { user } = useAuth();
@@ -223,9 +250,14 @@ export default function GbpPage() {
                                 </Select>
 
                                 {clientFilter !== 'all' && exportable.length > 0 && (
-                                    <Button variant="outline" size="sm" className="h-10 gap-2 font-bold" onClick={() => exportPostsToPdf(exportable, exportClientName)}>
-                                        <Download className="w-3.5 h-3.5" /> Export PDF ({exportable.length})
-                                    </Button>
+                                    <>
+                                        <Button variant="outline" size="sm" className="h-10 gap-2 font-bold text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={() => exportPostsToCsv(exportable, exportClientName)}>
+                                            <Download className="w-3.5 h-3.5" /> Export CSV ({exportable.length})
+                                        </Button>
+                                        <Button variant="outline" size="sm" className="h-10 gap-2 font-bold" onClick={() => exportPostsToPdf(exportable, exportClientName)}>
+                                            <FileText className="w-3.5 h-3.5" /> Export PDF ({exportable.length})
+                                        </Button>
+                                    </>
                                 )}
                                 <Button variant="outline" size="sm" className="h-10 gap-2 font-bold" onClick={() => refetch()} disabled={isLoading}>
                                     <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
@@ -349,6 +381,9 @@ export default function GbpPage() {
                                                                     <div className="pt-5 border-t border-border/50">
                                                                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5"><Download className="w-3.5 h-3.5" />Export Options</p>
                                                                         <div className="flex gap-3">
+                                                                            <Button size="sm" variant="outline" className="h-10 px-5 font-bold gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200 shadow-sm" onClick={() => exportPostsToCsv([post], post.gbp_clients?.name || 'Post')}>
+                                                                                <Download className="w-4 h-4" /> Export as CSV
+                                                                            </Button>
                                                                             <Button size="sm" variant="outline" className="h-10 px-5 font-bold gap-2 bg-background shadow-sm hover:bg-muted/50" onClick={() => exportPostsToPdf([post], post.gbp_clients?.name || 'Post')}>
                                                                                 <FileText className="w-4 h-4" /> Export as PDF
                                                                             </Button>

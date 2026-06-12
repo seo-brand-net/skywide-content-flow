@@ -1,0 +1,82 @@
+{
+  "global_rules": [
+    "Tone should be clear, no-nonsense, and helpful.",
+    "Content must be authoritative without being bureaucratic.",
+    "The writing should be slightly more practical/transactional than editorial.",
+    "Use primary keyword 'ethics for wisconsin professional engineers' in the H1, first paragraph, and at least two additional times naturally throughout.",
+    "Use secondary keyword 'wisconsin pe ethics renewal requirement' in at least one H2 heading and at least two additional times naturally in the body."
+  ],
+  "target_audience": "Licensed Professional Engineers in Wisconsin approaching their renewal deadline who need to understand the ethics PDH requirement.",
+  "sections": [
+    {
+      "heading": "Introduction",
+      "instructions": "Establish relevance immediately by noting that the ethics requirement for Wisconsin professional engineers is small in credit hours but non-negotiable for renewal. State that many engineers are unclear on what topics qualify and risk submitting courses that don't meet DSPS standards. Preview that the article will break down what counts, what doesn't, and where to find approved courses fast.",
+      "required_claims": []
+    },
+    {
+      "heading": "Wisconsin PE Ethics: The Basics",
+      "instructions": "Clearly establish that Wisconsin requires 2 PDH hours in professional or business ethics as part of the 30-hour renewal requirement. Mention that the renewal cycle is biennial, with deadlines tied to the license expiration date. Note that the ethics component is a minimum, and additional ethics hours may be taken but only 2 are mandated.",
+      "required_claims": []
+    },
+    {
+      "heading": "Understanding the Wisconsin PE Ethics Renewal Requirement",
+      "instructions": "Expand on what the DSPS specifies regarding the Wisconsin PE ethics renewal requirement, governed by Wisconsin Administrative Code Ch. A-E 240. Clarify that ethics PDH must cover professional or business ethics, not general soft skills or compliance. Emphasize that DSPS does not maintain a pre-approved course list, and the engineer is responsible for ensuring course content qualifies. Mention that misunderstanding the requirement can lead to rejected hours during an audit.",
+      "required_claims": ["Wisconsin Administrative Code Ch. A-E 240"]
+    },
+    {
+      "heading": "What Topics Count as Ethics for Wisconsin Professional Engineers?",
+      "instructions": "Define qualifying content clearly, listing topics that qualify such as NSPE Code of Ethics, engineering judgment and duty to the public, conflicts of interest, client confidentiality, and professional responsibility in design. State that a professional engineer ethics course addressing these areas will generally satisfy DSPS requirements. Mention that content from NSPE, state boards, or accredited providers like PDH Pro typically qualifies.",
+      "required_claims": ["NSPE Code of Ethics"]
+    },
+    {
+      "heading": "What Does NOT Count Toward the Ethics Requirement?",
+      "instructions": "Prevent common mistakes by clarifying that general compliance training (e.g., workplace harassment, OSHA) does not qualify as engineering ethics. State that business ethics courses not specific to professional engineering practice are typically insufficient, and self-study without structured content or a certificate of completion may not meet documentation requirements.",
+      "required_claims": []
+    },
+    {
+      "heading": "Where to Find Approved Ethics Courses",
+      "instructions": "Direct readers toward solutions, including PDH Pro, which offers Wisconsin-compliant ethics courses designed specifically for Professional Engineers. Mention that courses are available online, self-paced, and include a certificate of completion for records. Include a link to PDH Pro's ethics course page and mention NSPE as a secondary resource.",
+      "required_claims": [
+        "Link to PDH Pro's ethics course page: https://pdh-pro.com/courses/ethics/",
+        "NSPE website: nspe.org"
+      ]
+    },
+    {
+      "heading": "How to Document Ethics PDH Hours",
+      "instructions": "Remove ambiguity around recordkeeping by stating that DSPS does not require upfront submission of PDH records but may audit at any time. Advise retaining documentation for a minimum of four years, including course certificate, provider name, topic, date completed, and hours. Mention that PDH Pro certificates include all required information for audit compliance.",
+      "required_claims": []
+    },
+    {
+      "heading": "Ethics and the Broader Renewal Picture",
+      "instructions": "Zoom out to frame the full 30-hour requirement, noting that the 2 ethics hours sit within a 30-PDH biennial requirement. State that the remaining 28 hours may come from a wide range of technical and professional development topics. Include a link to the Wisconsin PE continuing education overview page on PDH Pro.",
+      "required_claims": [
+        "Link to Wisconsin PE continuing education overview page on PDH Pro"
+      ]
+    },
+    {
+      "heading": "FAQs",
+      "instructions": "Provide clear answers to common questions regarding the ethics hours required for Wisconsin PE renewal, what counts as a professional engineer ethics course, whether a specific provider is required, and if more than 2 hours of ethics can be counted.",
+      "required_claims": []
+    },
+    {
+      "heading": "Conclusion",
+      "instructions": "Reiterate the core message that ethics for Wisconsin professional engineers is a 2-hour, every-renewal requirement that's easy to satisfy when you know what qualifies. Encourage engineers not to treat it as an afterthought and emphasize that completing it through a structured, purpose-built course protects their license and simplifies documentation. Close with a clear path to PDH Pro's ethics courses.",
+      "required_claims": []
+    },
+    {
+      "heading": "Key Takeaways",
+      "instructions": "Summarize the key points: Wisconsin PEs must complete 2 PDH hours of professional or business ethics per renewal cycle, the requirement is governed by Administrative Code Ch. A-E 240, qualifying content must address professional engineering ethics specifically, DSPS does not pre-approve courses, and retaining certificates for at least four years protects against audit risk.",
+      "required_claims": []
+    },
+    {
+      "heading": "Cited Sources",
+      "instructions": "List the sources cited in the article, including links to the Wisconsin DSPS, Wisconsin Administrative Code Ch. A-E 240, NSPE Code of Ethics, and NCEES PE Licensing Resources.",
+      "required_claims": [
+        "Wisconsin DSPS: https://dsps.wi.gov/Pages/Professions/ProfessionalEngineer/Default.aspx",
+        "Wisconsin Administrative Code Ch. A-E 240: https://docs.legis.wisconsin.gov/code/admin_code/a-e/240",
+        "NSPE Code of Ethics: https://www.nspe.org/resources/ethics/code-ethics",
+        "NCEES PE Licensing Resources: https://ncees.org/engineering/pe/"
+      ]
+    }
+  ]
+}

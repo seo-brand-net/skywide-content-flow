@@ -36,6 +36,7 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
         name: '',
         industry: '',
         key_selling_point: '',
+        sitemap_url: '',
         sheet_id: '',
         topics_tab_name: 'Topics',
     });
@@ -57,7 +58,7 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
     const removeLocation = (id: string) => setLocations(prev => prev.filter(l => l.id !== id));
 
     const reset = () => {
-        setFormData({ name: '', industry: '', key_selling_point: '', sheet_id: '', topics_tab_name: 'Topics' });
+        setFormData({ name: '', industry: '', key_selling_point: '', sitemap_url: '', sheet_id: '', topics_tab_name: 'Topics' });
         setLocations([]);
         setLocInput({ location_name: '', city: '', state: '', sheet_tab_name: '' });
         setIsMultiLocation(false);
@@ -81,6 +82,7 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
                     name: formData.name,
                     industry: formData.industry,
                     key_selling_point: formData.key_selling_point || null,
+                    sitemap_url: formData.sitemap_url || null,
                     sheet_id: formData.sheet_id || null,
                     topics_tab_name: formData.topics_tab_name || 'Topics',
                 }])
@@ -162,6 +164,14 @@ export function AddGbpClientModal({ onClientAdded }: AddGbpClientModalProps) {
                         <Textarea id="gbp-ksp" value={formData.key_selling_point} onChange={e => setFormData({ ...formData, key_selling_point: e.target.value })}
                             placeholder="e.g. Award-winning dermatology clinic with 10 locations across Florida"
                             className="bg-background border-input resize-none h-20" />
+                    </div>
+
+                    {/* Sitemap URL */}
+                    <div className="space-y-2">
+                        <Label htmlFor="gbp-sitemap" className="text-sm font-semibold">Sitemap URL <span className="text-muted-foreground font-normal text-xs">(optional)</span></Label>
+                        <Input id="gbp-sitemap" value={formData.sitemap_url} onChange={e => setFormData({ ...formData, sitemap_url: e.target.value })}
+                            placeholder="https://www.client.com/sitemap_index.xml" className="bg-background border-input" />
+                        <p className="text-xs text-muted-foreground">The XML sitemap URL used by n8n to pick internal target links for posts.</p>
                     </div>
 
                     {/* Sheet ID */}
