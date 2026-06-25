@@ -1,0 +1,214 @@
+EXEC 3038 — Claims & Fact-Check Pipeline Audit
+Status: success | Duration: 1175s
+
+════════════════════════════════════════════════════════════
+  NODE 1 — WEBHOOK INPUT (Creative Brief snippet)
+════════════════════════════════════════════════════════════
+Title: Stump Grinding vs. Stump Removal (TEST RUN 2)
+Client: Merkel's Tree Service 
+Website: https://merkelstreeservice.com/
+Brief (first 1000):
+Stump Grinding vs. Stump Removal: Comparison Guide for Berks County, PA
+
+════════════════════════════════════════════════════════════
+Keyword Usage Instructions
+Primary Keyword: "stump grinding vs. stump removal"
+Use in H1 exactly as written
+Include in first 20 words of the opening paragraph
+Use once in conclusion paragraph
+
+Secondary Keyword: "difference between stump grinding and stump removal"
+must be used as part of an H2 heading
+should appear 2 times total in the content
+
+Longtail/Semantic Keywords:
+stump grinding or stump removal
+stump removal vs. grinding
+stump grinder vs. stump removal
+
+Longtail/Semantic Keywords Requirements:
+Use each keyword at least once naturally in the content
+Preferred: Incorporate into H2/H3 subheadings where it fits naturally
+Alternative: Weave into body copy within relevant sections
+
+
+Content Outline
+Target Word Count: 1500-1800 words
+Page Type: blog page
+Intent: Commercial Investigation or Commercial / Comparison 
+
+Note: FAQ section included — 2 of 4 
+
+════════════════════════════════════════════════════════════
+  NODE 2 — PARSE CREATIVE BRIEF OUTPUT
+════════════════════════════════════════════════════════════
+Sections extracted: 7
+Global rules: 4
+FAQs: 5
+
+  [1] "Stump Grinding vs Stump Removal: Which One Do You Actually Need?"
+       required_claims: ["Cost difference: grinding $75-400, removal higher","Time difference: grinding 30 min-2 hours, removal 3-8 hours","Invasiveness: grinding less disruptive","Reference Merkel's Tree Service expertise in Berks County"]
+
+  [2] "What is Stump Grinding and How Does It Work?"
+       required_claims: ["80-90% of root system remains underground","Safety considerations per TCIA standards"]
+
+  [3] "Understanding the Difference Between Stump Grinding and Stump Removal"
+       required_claims: []
+
+  [4] "Complete Stump Removal: Process and Considerations"
+       required_claims: ["Time investment: 3-8 hours typical"]
+
+  [5] "Cost Comparison: Grinding vs Removal in Berks County"
+       required_claims: ["Grinding costs $75-400, removal typically 2-3x higher","DIY rental costs $100-250/day Home Depot"]
+
+  [6] "Decision Guide: When to Choose Grinding vs Removal"
+       required_claims: []
+
+  [7] "Frequently Asked Questions"
+       required_claims: []
+
+FAQs:
+  1. Which is better, stump grinding or stump removal?
+  2. Does stump grinding completely remove the stump?
+  3. Is stump grinding cheaper than removal?
+  4. How long does it take to grind a 3-foot stump?
+  5. Do I need permits for stump work in Berks County?
+
+════════════════════════════════════════════════════════════
+  NODE 3 — CLIENT SITE RESEARCHER OUTPUT
+════════════════════════════════════════════════════════════
+Output length: 2534
+Credential signals found:
+  ✅ "ISA" — context: ... cannot see if they reference ISA certification, specific license numbers, insurance status, awards, or member...
+  — "TCIA" not mentioned
+  — "BBB" not mentioned
+  — "licensed" not mentioned
+  — "insured" not mentioned
+  — "certified" not mentioned
+  — "arborist" not mentioned
+
+Services found:
+  ✅ stump grinding
+  ✅ stump removal
+  — tree removal
+  — tree trimming
+
+════════════════════════════════════════════════════════════
+  NODE 4 — CLIENT PROFILE EXTRACTOR OUTPUT
+════════════════════════════════════════════════════════════
+Name: undefined
+Location: undefined
+Credentials: []
+Services: []
+USPs: undefined
+Founded/Origin: "not present"
+
+════════════════════════════════════════════════════════════
+  NODE 5 — CLAIMS EXTRACTOR & MANIFEST GENERATOR
+════════════════════════════════════════════════════════════
+Claims (8 total):
+  [1] [Brief] "Stump grinding costs $75-400."
+  [2] [Brief] "Stump removal typically costs 2-3x more than grinding."
+  [3] [Brief] "Stump grinding takes 30 minutes to 2 hours."
+  [4] [Brief] "Stump removal takes 3-8 hours."
+  [5] [Brief] "Stump grinding removes the visible stump 6-12 inches below grade."
+  [6] [Brief] "80-90% of the root system remains underground after stump grinding."
+  [7] [Brief] "DIY rental costs for stump grinding are $100-250/day at Home Depot."
+  [8] [Brief] "Most residential stump work on private property doesn't require permits in Berks County."
+
+Statistics (0):
+
+credential_warnings (1):
+  ⚠️  claim: "ISA-certified arborists"
+      reason: Not listed in verified client credentials.
+      replacement: ""
+
+forbidden_patterns: ["practitioners consistently see","American Psychological Association","clinical experience shows"]
+
+════════════════════════════════════════════════════════════
+  NODE 6 — PRE-DRAFT FACT CHECKER OUTPUT
+════════════════════════════════════════════════════════════
+Output length: 33263
+{"choices":[{"delta":{"content":"","role":"assistant"},"finish_reason":"stop","index":0,"message":{"content":"Stump Grinding vs. Stump Removal — Fact-Check Report for Draft Brief  \nTarget location: **Berks County, PA**\n\nBelow is a structured review of the factual claims in your brief, with verification against authoritative or high‑relevance sources (industry cost guides, professional tree services, and municipal/permit information where available).\n\n---\n\n## 1. Process & Technical Claims\n\n### 1.1 Stump grinding depth (6–12 inches below grade)\n\n**Brief claim:** Stump grinding grinds stumps **6–12 inches below ground level**.\n\n- Multiple reputable Pennsylvania-area stump grinding services describe grinding to **about 6–12 inches below grade**.\n- Oscar’s Tree Removal (Bucks County, PA) notes grinders “cutting **6 to 12 inches below grade** depending on your planned use of the area.”[4]\n\n**Verdict:** ✅ VERIFIED — safe to use.\n\n---\n\n### 1.2 Proportion of root system remaining after grinding (80–90%)\n\n**Brief claim:** “**80–90% of root system remains underground**.”\n\n- Industry descriptions consistently state that stump grinding removes the stump and immediate root flare while *most* roots remain to decompose naturally.[8]\n- However, no authoritative source quantifies this as “80–90%” of the root system.\n- This percentage appears to be an estimation from non‑authoritative content, not a measured value.\n\n**Verdict:** ⚠️ REWRITE — use qualitative language only (e.g., “most of the root system remains and decomposes naturally”).  \nDo **not** use specific percentages unless you find a formal source giving those exact values.\n\n---\n\n### 1.3 Stump grinding vs stump removal – conceptual difference\n\n**Brief claim:**  \n- Grinding removes **only the visible stump** and some near‑surface roots.  \n- Removal involves **excavation of entire stump and root system** (root ball).\n\n**Verification:**\n\n- Arborist Enterprises (Lancaster, PA) explains tha
+
+════════════════════════════════════════════════════════════
+  NODE 7 — AI AGENT VALIDATION
+════════════════════════════════════════════════════════════
+Passed: false
+Issues:
+Structure Check failures:
+- Missing required heading: "Stump Grinding vs Stump Removal: Which One Do You Actually Need?" Add this exact heading at the top and provide the immediate comparison per the brief.
+- Missing required heading: "What is Stump Grinding and How Does It Work?" Rename or add this exact section (current heading is "What is Stump Grinding?") and expand it to meet instructions.
+- Missing required heading: "Complete Stump Removal: Process and Considerations" Add this exact section (current content is split under "What is Stump Removal?" and pros/cons) and consolidate/expand details as required.
+- Missing required heading: "Cost Comparison: Grinding vs Removal in Berks County" Add this exact section with the detailed cost analysis.
+- Missing required heading: "Decision Guide: When to Choose Grinding vs Removal" Replace "How to Choose Between Stump Grinding or Stump Removal for Your Berks County Property" with the exact required heading and include the bulleted decision framework.
+- Missing required heading: "Frequently Asked Questions" Rename "FAQs" to the exact required heading.
+
+Instruction Check failures by section:
+- Stump Grinding vs Stump Removal: Which One Do You Actually Need?
+  - The primary keyword phrase "stump grinding vs stump removal" is not included within the first 20 words. Revise the opening sentence to include it immediately.
+  - Missing explicit cost difference: grinding $75-400, removal higher. Add these figures.
+  - Missing explicit time difference: grinding 30 min–2 hours, removal 3–8 hours. Add these timeframes.
+  - Invasiveness (grinding less disruptive) and Merkel's Tree Service local expertise are covered; retain these.
+- What is Stump Grinding and How Does It Work?
+  - Missing specific grind depth: clearly state grinding typically goes 6–12 inches below ground level.
+  - Missing quantified root retention: state that 80–90% of the root system remains underground after grinding.
+  - Missing safety considerations per TCIA standards: add a safety note referencing TCIA guidelines and best practices.
+  - Timeframe is vague; specify typical timeframe for a single stump (e.g., 30–120 minutes depending on size and wood hardness).
+  - Expand on equipment types (e.g., handlebar vs tracked grinders) and add local applications/examples.
+- Understanding the Difference Between Stump Grinding and Stump Removal
+  - Largely satisfied; ensure scope of work, equipment needs, and site impact differences are explicitly contrasted with clear visual descriptions (textual) of what the site looks like after each method.
+- Complete Stump Removal: Process and Considerations
+  - Add the exact section heading.
+  - Include explicit time investment: 3–8 hours typical.
+  - Expand details on excavation footprint, equipment, soil backfill requirements, compaction, and lawn/landscape restoration.
+  - Include considerations for French Creek State Park vicinity and similar areas with sensitive soil conditions.
+- Cost Comparison: Grinding vs Removal in Berks County
+  - Add the entire section.
+  - Include required cost ranges: grinding $75–400; removal typically 2–3x higher.
+  - Include DIY rental costs: $100–250/day at Home Depot.
+  - Add Merkel's Tree Service value proposition (e.g., comprehensive insurance coverage). Avoid unverified credential claims.
+- Decision Guide: When to Choose Grinding vs Removal
+  - Add the exact section heading.
+  - Provide a clear bulleted framework:
+    - Choose grinding for: lawn restoration, quick turnaround, budget constraints, multiple stumps, limited access areas.
+    - Choose removal for: immediate replanting, construction projects, aggressive root species, utility installation.
+  - Include local considerations for Wyomissing neighborhoods and commercial properties near Kutztown University.
+- Frequently Asked Questions
+  - Use the exact heading: "Frequently Asked Questions".
+  - Add missing FAQs and answers:
+    - "Is stump grinding cheaper than removal?" (Yes—typical ranges and why.)
+    - "How long does it take to grind a 3-foot stump?" (Provide a realistic timeframe within the 30–120 minute guidance depending on conditions.)
+    - "Do I need permits for stump work in Berks County?" (Offer local guidance and when to check with municipalities/utility marking.)
+
+Claims Check failures (required_claims):
+- Section 1 missing required claims: "Cost difference: grinding $75–400, removal higher" and "Time difference: grinding 30 min–2 hours, removal 3–8 hours".
+- Section 2 missing required claims: "80–90% of root system remains underground" and "Safety considerations per TCIA standards".
+- Section 4 missing required claim: "Time investment: 3–8 hours typical".
+- Section 5 missing required claims: "Grinding costs $75–400, removal typically 2–3x higher" and "DIY rental costs $100–250/day Home Depot".
+
+Global Rules Check failures:
+- Missing inclusion of cost ranges and specific timeframes across relevant sections.
+- Safety and professional expertise are discussed generally but do not reference industry standards (e.g., TCIA); add this to strengthen authority.
+- Increase the use of bulleted/numbered lists in decision and comparison sections to align with the "extensive use" requirement.
+
+════════════════════════════════════════════════════════════
+  NODE 8 — SURGICAL REWRITER OUTPUT
+════════════════════════════════════════════════════════════
+Output length: 4311
+Credential context:
+  >> 3. While the main trunk and visible root flare disappear, the deeper roots stay to decompose.
+  >> pes include handlebar and tracked grinders. Safety considerations, as guided by TCIA standards, ensure minimal risks. This approach eliminates visible stumps, enabl
+
+════════════════════════════════════════════════════════════
+  CLAIM CROSS-REFERENCE AUDIT — Brief vs Final Article
+════════════════════════════════════════════════════════════
+Checking each manifest claim against final article:
+  [1] [Brief] ✅ "Stump grinding costs $75-400."
+  [2] [Brief] ⚠️ NOT FOUND "Stump removal typically costs 2-3x more than grinding."
+  [3] [Brief] ✅ "Stump grinding takes 30 minutes to 2 hours."
+  [4] [Brief] ✅ "Stump removal takes 3-8 hours."
+  [5] [Brief] ⚠️ NOT FOUND "Stump grinding removes the visible stump 6-12 inches below grade."
+  [6] [Brief] ✅ "80-90% of the root system remains underground after stump grinding."
+  [7] [Brief] ✅ "DIY rental costs for stump grinding are $100-250/day at Home Depot."
+  [8] [Brief] ⚠️ NOT FOUND "Most residential stump work on private property doesn't require permits in Berks"

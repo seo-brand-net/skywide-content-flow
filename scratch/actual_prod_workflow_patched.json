@@ -1,4 +1,11 @@
 {
+  "updatedAt": "2026-06-24T11:21:12.953Z",
+  "createdAt": "2025-11-14T19:13:36.577Z",
+  "id": "t3LNiuZIghvobde3",
+  "name": "DEV Skywide Content",
+  "description": "",
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -9,11 +16,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        22448,
-        7072
+        51952,
+        10288
       ],
       "typeVersion": 1,
-      "id": "c8852d50-9808-4710-bcca-efd966aaf4d4",
+      "id": "68d33751-29a6-4f79-b5fd-40b5fd37614c",
       "name": "Sticky Note"
     },
     {
@@ -22,11 +29,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        23056,
-        7520
+        52560,
+        10736
       ],
       "typeVersion": 1,
-      "id": "e5bdecb8-1628-4d85-9226-521d8c901c1e",
+      "id": "d417db00-61cb-4a37-9d98-ee3fea141f2d",
       "name": "Sticky Note5"
     },
     {
@@ -100,10 +107,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        24944,
-        8832
+        54448,
+        12048
       ],
-      "id": "b1b7c309-22d3-44db-9854-1f0ec201e639",
+      "id": "62ee3841-bd03-48af-bbc3-2e19920fbf94",
       "name": "Clean1"
     },
     {
@@ -115,10 +122,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        21872,
-        8880
+        51376,
+        12096
       ],
-      "id": "50476716-34b0-4f64-a867-e8b9a3f5c63b",
+      "id": "09d750d6-e4d9-4bc5-b811-a071601f8c10",
       "name": "Webhook1",
       "webhookId": "c9d7ab2c-298f-4b57-be8e-235a1c25f1ef"
     },
@@ -143,10 +150,10 @@
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
       "position": [
-        24720,
-        8928
+        54224,
+        12144
       ],
-      "id": "0f850a0d-d3c3-4af4-b788-55b7bc589435",
+      "id": "6f935abf-e2dc-4357-9c65-17aa521912f0",
       "name": "Create folder1",
       "notesInFlow": true,
       "credentials": {
@@ -179,10 +186,10 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        25520,
-        8832
+        55024,
+        12048
       ],
-      "id": "9962815c-867c-4f2a-aac3-81cfe40d6872",
+      "id": "32b1c70a-d9db-4901-89fd-63a7d134e050",
       "name": "Data Check & Research Gaps1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -209,10 +216,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        25968,
-        8832
+        55472,
+        12048
       ],
-      "id": "65a0de23-2645-4143-a6f3-12d16c9ce547",
+      "id": "1f90b2fb-9ac6-4094-a7fc-001f2062ab41",
       "name": "Claude Keyword Check + Semantic Gap1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -234,10 +241,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        26048,
-        9056
+        55552,
+        12272
       ],
-      "id": "5c6839aa-191e-4b6a-8c6e-d3685e4d7346",
+      "id": "54352e31-9792-432c-83d4-7995eb567410",
       "name": "Anthropic Chat Model5",
       "credentials": {
         "anthropicApi": {
@@ -262,10 +269,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        26544,
-        8832
+        56048,
+        12048
       ],
-      "id": "41d5db71-92af-4db8-b4a3-aa43337d8c6b",
+      "id": "f99b09aa-fc23-448a-b3ee-39d489d58eeb",
       "name": "Claude Apply Recommendations1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -286,10 +293,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        26624,
-        9056
+        56128,
+        12272
       ],
-      "id": "cf26c408-3151-4fa7-9883-e7489dd96386",
+      "id": "5aa6f590-341c-4d17-b565-543842d67354",
       "name": "Anthropic Chat Model6",
       "credentials": {
         "anthropicApi": {
@@ -314,10 +321,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        26896,
-        8832
+        56400,
+        12048
       ],
-      "id": "276d6314-46d6-41ce-b871-593519ca8605",
+      "id": "e227c2b9-2a4a-4ce8-9d58-e3e9941f4a45",
       "name": "Claude EEAT Injection1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -338,10 +345,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        26976,
-        9056
+        56480,
+        12272
       ],
-      "id": "cb069566-fa09-428c-96f4-384a81415750",
+      "id": "5aefbcda-6e3f-4e20-a52b-68f351ddfc6c",
       "name": "Anthropic Chat Model7",
       "credentials": {
         "anthropicApi": {
@@ -376,10 +383,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        27472,
-        8832
+        56976,
+        12048
       ],
-      "id": "3c55360c-1022-47ec-a043-f5c7c50a0813",
+      "id": "056c67bd-57ae-469b-b8bf-dd70df56adcd",
       "name": "OpenAI SEO Optimization1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -406,10 +413,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        27824,
-        8928
+        57328,
+        12144
       ],
-      "id": "4573e26c-a05f-418e-9604-60911f45ec4d",
+      "id": "71ed0d8a-f874-4550-9f9c-cd8bea5db7ca",
       "name": "Claude NLP & PR Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -430,10 +437,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        27904,
-        9152
+        57408,
+        12368
       ],
-      "id": "0c6c0f4b-8fce-4b21-995d-7f618931ed80",
+      "id": "da33fb27-eb0d-44d7-8193-8111ea3a61ce",
       "name": "Anthropic Chat Model11",
       "credentials": {
         "anthropicApi": {
@@ -458,10 +465,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        28480,
-        9152
+        57984,
+        12368
       ],
-      "id": "be425b8a-c92c-44dd-b257-4c81d7b5214f",
+      "id": "2e727c8d-d4b3-4432-8023-3092273336f1",
       "name": "Anthropic Chat Model12",
       "credentials": {
         "anthropicApi": {
@@ -485,10 +492,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        29056,
-        9152
+        58560,
+        12368
       ],
-      "id": "041dab99-9aa0-4762-a9cc-bb52173a6861",
+      "id": "978ef8b1-f537-45f4-9a23-b4657c695cdc",
       "name": "Anthropic Chat Model13",
       "credentials": {
         "anthropicApi": {
@@ -513,10 +520,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        28976,
-        8928
+        58480,
+        12144
       ],
-      "id": "000885a8-ef06-4d64-9e7c-0c869a000bc1",
+      "id": "ace9e97c-0ac7-4aa8-9522-1871323dc82d",
       "name": "Claude Final SEO Snippet Optimization",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -526,10 +533,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        28176,
-        8928
+        57680,
+        12144
       ],
-      "id": "abfd7d49-c0a4-4f65-8e9e-3ad75cf46a1b",
+      "id": "2a8cefe7-c4bd-4381-9ab6-4ae4eedde716",
       "name": "Wait7",
       "webhookId": "7a372933-6525-4c44-92e4-7743d0a44c8b"
     },
@@ -538,10 +545,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        28752,
-        8928
+        58256,
+        12144
       ],
-      "id": "d0c15966-3409-4940-921c-cb89755e2b48",
+      "id": "55698cb6-e241-4f13-940a-0156c9bfba15",
       "name": "Wait10",
       "webhookId": "49d694d9-d5d4-4509-867a-89cc50a2f04b"
     },
@@ -550,10 +557,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        27248,
-        8832
+        56752,
+        12048
       ],
-      "id": "5d89b61b-5709-4ba2-9e0a-e2cf34260dd7",
+      "id": "91a77900-9c32-4252-b2fe-2508438ac35d",
       "name": "Wait14",
       "webhookId": "2db62569-3f26-4159-85e0-9a8b47a13344"
     },
@@ -562,10 +569,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        27888,
-        8640
+        57392,
+        11856
       ],
-      "id": "53d39128-b17c-4917-8eff-37d13f790646",
+      "id": "952f1236-bb9e-4846-89a8-ecaf68552b59",
       "name": "Wait17",
       "webhookId": "e0466a06-d809-467b-b0d1-3171ddae30a6"
     },
@@ -574,10 +581,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        26320,
-        8832
+        55824,
+        12048
       ],
-      "id": "8575960e-cd53-4ff7-a6a4-b9fe974b21dc",
+      "id": "7f11ae02-ff2a-4a7b-aff7-84fafabdf3f0",
       "name": "Wait18",
       "webhookId": "be177216-d87e-494c-b058-1d021b29a470"
     },
@@ -596,10 +603,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        24944,
-        9024
+        54448,
+        12240
       ],
-      "id": "2cda7ec5-9d13-400e-8b5c-82fcdfe9f44e",
+      "id": "3654672c-3982-41d2-a94a-7edc3db38665",
       "name": "Google Drive Notification1",
       "notesInFlow": true,
       "notes": "Add G-Drive Link to Skywide Dashboard"
@@ -630,10 +637,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        29328,
-        8928
+        58832,
+        12144
       ],
-      "id": "396c7141-9e54-4276-9c31-88db4c8194b9",
+      "id": "8f4d5100-036b-44ac-a925-e413731dca80",
       "name": "Document Export Sanitization5",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -660,10 +667,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        28400,
-        8928
+        57904,
+        12144
       ],
-      "id": "4df4a365-6b73-49d3-8b80-709ca7abd5e3",
+      "id": "35d7fa3c-bbb7-45f5-945d-5cf5753ac1ce",
       "name": "Claude Humanised Readability Rewrite",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -686,10 +693,10 @@
       "type": "n8n-nodes-base.executionData",
       "typeVersion": 1.1,
       "position": [
-        24272,
-        8928
+        53776,
+        12144
       ],
-      "id": "399ddbce-6ff4-49c0-ad14-cbe732c65531",
+      "id": "fd9d84bb-aca8-4c6d-a971-e9bd3693edcb",
       "name": "Execution Data1"
     },
     {
@@ -712,10 +719,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        30928,
-        8912
+        60432,
+        12128
       ],
-      "id": "9bc9d70f-3f1e-4850-ad12-5f3181542da1",
+      "id": "f8f250cc-c555-4568-82a7-b74c483f7079",
       "name": "Surgical Rewriter",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -750,10 +757,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        31280,
-        9024
+        60784,
+        12240
       ],
-      "id": "54e50ea0-4dc6-42fe-b387-bd14dda3e0ff"
+      "id": "cdbd4432-2d52-4ab7-997c-05664f9ce857"
     },
     {
       "parameters": {
@@ -781,10 +788,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        30928,
-        8720
+        60432,
+        11936
       ],
-      "id": "37f997ee-e5d4-4e2c-b4b4-b5d2b135334d",
+      "id": "04dfe4f1-cc5d-46ef-8729-4f717108c337",
       "name": "Document Export Sanitization4",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -805,10 +812,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        30128,
-        8816
+        59632,
+        12032
       ],
-      "id": "e2e80394-abdd-446e-ac6a-c28495e3d15a",
+      "id": "c800c47c-a0f3-4158-ba42-fe913a76e5e3",
       "name": "AI Agent1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -821,10 +828,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        30272,
-        9040
+        59776,
+        12256
       ],
-      "id": "d5174f52-9c99-4dfd-a039-67ccc77132a7",
+      "id": "e519cc89-e9ee-439d-b5af-3abb845a844a",
       "name": "Structured Output Parser1"
     },
     {
@@ -842,10 +849,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        30144,
-        9040
+        59648,
+        12256
       ],
-      "id": "ab4b7150-19eb-4b3b-bdc9-6a7c6f347689",
+      "id": "7d5021d6-8f01-4c40-a6c9-db97db7206da",
       "name": "OpenAI Chat Model1",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -878,10 +885,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        29680,
-        8928
+        59184,
+        12144
       ],
-      "id": "c1d850be-6815-4e2a-ace6-5721383ad006",
+      "id": "7f70a52c-6e63-4ac4-a6bd-3c7b391279b9",
       "name": "Edit Fields2"
     },
     {
@@ -901,10 +908,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        29904,
-        8816
+        59408,
+        12032
       ],
-      "id": "fa70340f-224d-4736-bbf9-35e458ee80eb",
+      "id": "b9527694-1645-49db-97f4-ca1046430d0a",
       "name": "Edit Fields3"
     },
     {
@@ -943,10 +950,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        30704,
-        8816
+        60208,
+        12032
       ],
-      "id": "d288ef02-b628-44ad-b2e8-bc7698d3d822",
+      "id": "2b27aa8d-ede1-4fa9-a8e6-f56b5b554611",
       "name": "If1"
     },
     {
@@ -965,10 +972,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
       "position": [
-        25168,
-        8832
+        54672,
+        12048
       ],
-      "id": "e05810fa-7d68-4b11-9595-e087071661ac",
+      "id": "12a06b55-ee8c-49d0-8c6e-a8ac4c246c55",
       "name": "Claude Draft (Claude Opus 3)1",
       "retryOnFail": true,
       "waitBetweenTries": 5000
@@ -990,10 +997,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        25248,
-        9056
+        54752,
+        12272
       ],
-      "id": "bc6bb40f-d049-4aa2-9bd0-ac2c562fd197",
+      "id": "534af786-92c2-46a1-9777-22ff97d38afd",
       "name": "Anthropic Chat Model4",
       "credentials": {
         "anthropicApi": {
@@ -1019,36 +1026,36 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        30480,
-        8816
+        59984,
+        12032
       ],
-      "id": "2082a0b6-141a-4ef1-b8ed-5e42eebb7a66",
+      "id": "d16b6baf-5f1f-40ed-9d05-539274a0b536",
       "name": "Max Iterations1"
     },
     {
       "parameters": {
-        "jsCode": "// Instruction Strategist v8 — Bulletproof + Custom Rules + Global Enforcement\nconst input = $('Webhook1').first().json.body;\n\n// ─── GLOBAL RULES: Always applied regardless of brief content ────────────────\nconst GLOBAL_RULES = [\n  \"Ensure smooth, natural transitions between sections. The article must flow cohesively as a single, unified narrative rather than a disjointed list of separate sections.\",\n  \"Do NOT use AI-sounding filler phrases. Banned phrases: 'Additionally', 'Moreover', 'Furthermore', 'Let\\'s dive in', 'In conclusion', 'The bottom line', 'It\\'s worth noting', 'Dive into', 'In today\\'s world', 'Transitioning to'.\",\n  \"Write in active voice. Do not use passive voice constructions.\",\n  \"ANTI-HALLUCINATION PROTOCOL: The client's website is the primary source of truth. If specific information is missing, fall back to general web research. However, if a specific claim, statistic, or percentage cannot be explicitly verified on the client website or reliable internet sources, YOU MUST OMIT IT SMOOTHLY. Do NOT invent or estimate statistics, research studies, percentages, or expert names. Do not use placeholders like [Data Needed] — just write around it naturally without tempering the overall content.\",\n  \"Do not use em-dashes (—). Replace with commas, colons, or restructured sentences.\",\n  \"Do not use generic CTAs like 'Click here' or 'Learn more'. CTAs must be specific and action-oriented.\",\n  \"Every H2 section must contain at least 2 substantive paragraphs. No single-sentence sections.\",\n  \"Do not repeat the same phrase or sentence structure in consecutive paragraphs.\",\n  \"Bold text (**bold**) should be used sparingly — only for genuinely critical terms, not for stylistic emphasis.\",\n];\n\nfunction parseKeywords(raw) {\n  if (!raw) return [];\n  if (Array.isArray(raw)) {\n    return raw.flatMap(item => item.split(',').map(k => k.trim())).filter(k => k.length > 0);\n  }\n  if (typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\n\nconst rawPrimary = input.primary_keywords;\nconst primary = (Array.isArray(rawPrimary) ? rawPrimary.join(', ') : rawPrimary) || '';\nconst secondary = parseKeywords(input.secondary_keywords);\nconst semantic = parseKeywords(input.semantic_themes);\n\n// ─── EXTRACT AI PARSED BRIEF DATA ────────────────────────────────────────────\nlet aiOutputRAW = $('Parse Creative Brief (LLM)').first().json.message?.content\n               || $('Parse Creative Brief (LLM)').first().json.text\n               || $('Parse Creative Brief (LLM)').first().json.choices?.[0]?.message?.content\n               || '{}';\n\nlet aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '' };\ntry {\n  if (typeof aiOutputRAW === 'object' && aiOutputRAW !== null) {\n    aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '', ...aiOutputRAW };\n  } else if (typeof aiOutputRAW === 'string') {\n    let cleanedRAW = aiOutputRAW;\n    cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```json\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n    cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n    const match = cleanedRAW.match(/\\{[\\s\\S]*\\}/);\n    if (match) cleanedRAW = match[0];\n    const parsed = JSON.parse(cleanedRAW);\n    aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '', ...parsed };\n  }\n} catch (e) {\n  console.log('Brief parser JSON parse failed:', e.message);\n}\n\nconst briefHeadings     = Array.isArray(aiData.headings)      ? aiData.headings      : [];\nconst faqArray          = Array.isArray(aiData.faqs)          ? aiData.faqs          : [];\nconst briefCustomRules  = Array.isArray(aiData.custom_rules)  ? aiData.custom_rules  : [];\nconst briefTone         = typeof aiData.tone_instructions === 'string' ? aiData.tone_instructions : '';\n\n// ─── FAQ INJECTION ────────────────────────────────────────────────────────────\nlet faqInjection = '';\nif (faqArray.length > 0) {\n  faqInjection = '### MANDATORY FAQS\\n\\nAt the end of the article include an FAQ section with EXACTLY these questions. If an answer is provided, incorporate that information into your answer — do not ignore it.\\n\\n';\n  faqArray.forEach(faq => {\n    faqInjection += `**Q: ${faq.question}**\\n`;\n    if (faq.answer && faq.answer.trim()) {\n      faqInjection += `A: (Use this information in your answer: ${faq.answer})\\n\\n`;\n    } else {\n      faqInjection += `A: [Write a complete, accurate answer]\\n\\n`;\n    }\n  });\n}\n\n// ─── STRUCTURE ENFORCEMENT (headings) ────────────────────────────────────────\nconst creativeBrief = input.creative_brief || '';\nlet briefEnforcerInjection = '';\nif (creativeBrief) {\n  briefEnforcerInjection = `### CREATIVE BRIEF STRUCTURE (MANDATORY)\n\nYou MUST follow the structural outline below. Do not invent your own structure.\n\n- Write the article conforming strictly to the content outline in the brief.\n- Use the exact H2 headings specified — do not add, remove, or reorder them.\n- Do NOT invent your own H2 headings if the outline already specifies them.\n\n`;\n  if (briefHeadings.length > 0) {\n    briefEnforcerInjection += `MANDATORY HEADING ORDER — USE THESE EXACT H2s:\\n`;\n    briefHeadings.forEach((h, i) => {\n      briefEnforcerInjection += `${i + 1}. ${h}\\n`;\n    });\n    briefEnforcerInjection += `\\nDo not add, remove, or reorder these headings.\\n`;\n  }\n}\n\n// ─── GLOBAL RULES INJECTION ───────────────────────────────────────────────────\nconst globalRulesInjection = `### GLOBAL EDITORIAL RULES (NON-NEGOTIABLE)\n\nThese rules apply to every article regardless of the brief. Each violation is unacceptable:\n\n${GLOBAL_RULES.map((r, i) => `${i + 1}. ${r}`).join('\\n')}\n`;\n\n// ─── BRIEF-SPECIFIC CUSTOM RULES INJECTION ───────────────────────────────────\nlet customRulesInjection = '';\nif (briefCustomRules.length > 0) {\n  customRulesInjection = `### BRIEF-SPECIFIC RULES (MANDATORY)\n\nThe following rules were explicitly specified in the creative brief. Every single one must be followed exactly:\n\n${briefCustomRules.map((r, i) => `${i + 1}. ${r}`).join('\\n')}\n`;\n}\n\n// ─── TONE INJECTION ───────────────────────────────────────────────────────────\nconst toneSource = briefTone || input.tone || '';\nlet briefAuthorityPreamble = '';\nif (toneSource) {\n  briefAuthorityPreamble = `Tone & Voice: ${toneSource}. Maintain this voice consistently from the first sentence to the last. Do not shift tone mid-article.`;\n}\n\n// ─── CLIENT FIRST PARAGRAPH ───────────────────────────────────────────────────\nlet firstParagraphInjection = '';\nif (input.client_name) {\n  firstParagraphInjection = `The opening paragraph MUST organically mention the client (${input.client_name}) within the first two sentences. Do NOT use \"the company\", \"the brand\", or \"they\" as a substitute.`;\n}\n\n// ─── SECONDARY / SEMANTIC KEYWORDS ───────────────────────────────────────────\nlet secondaryKeywordChecklist = '';\nif (secondary.length > 0 || semantic.length > 0) {\n  secondaryKeywordChecklist = '### SUPPLEMENTARY KEYWORDS (weave naturally — do not force):\\n';\n  if (secondary.length > 0) {\n    secondaryKeywordChecklist += 'Secondary Keywords:\\n' + secondary.map(k => '- ' + k).join('\\n') + '\\n\\n';\n  }\n  if (semantic.length > 0) {\n    secondaryKeywordChecklist += 'Semantic Themes:\\n' + semantic.map(s => '- ' + s).join('\\n') + '\\n';\n  }\n}\n\nreturn {\n  json: {\n    primary_keyword_joined:         primary,\n    secondary_keywords_arr:         secondary,\n    semantic_themes_arr:            semantic,\n    brief_enforcer_injection:       briefEnforcerInjection,\n    faq_injection:                  faqInjection,\n    global_rules_injection:         globalRulesInjection,\n    custom_rules_injection:         customRulesInjection,\n    first_paragraph_client_injection: firstParagraphInjection,\n    secondary_keyword_checklist:    secondaryKeywordChecklist,\n    brief_authority_preamble:       briefAuthorityPreamble,\n    detected_brief_headings:        briefHeadings,\n    detected_faqs:                  faqArray,\n    detected_custom_rules:          briefCustomRules,\n  }\n};"
+        "jsCode": "// Instruction Strategist v8 — Bulletproof + Custom Rules + Global Enforcement\nconst input = $('Webhook1').first().json.body;\n\n// ─── GLOBAL RULES: Always applied regardless of brief content ────────────────\nconst GLOBAL_RULES = [\n  \"Ensure smooth, natural transitions between sections. The article must flow cohesively as a single, unified narrative rather than a disjointed list of separate sections.\",\n  \"Do NOT use AI-sounding filler phrases. Banned phrases: 'Additionally', 'Moreover', 'Furthermore', 'Let\\'s dive in', 'In conclusion', 'The bottom line', 'It\\'s worth noting', 'Dive into', 'In today\\'s world', 'Transitioning to'.\",\n  \"Write in active voice. Do not use passive voice constructions.\",\n  \"ANTI-HALLUCINATION PROTOCOL: The client's website is the primary source of truth. If specific information is missing, fall back to general web research. However, if a specific claim, statistic, or percentage cannot be explicitly verified on the client website or reliable internet sources, YOU MUST OMIT IT SMOOTHLY. Do NOT invent or estimate statistics, research studies, percentages, or expert names. Do not use placeholders like [Data Needed] — just write around it naturally without tempering the overall content.\",\n  \"Do not use em-dashes (—). Replace with commas, colons, or restructured sentences.\",\n  \"Do not use generic CTAs like 'Click here' or 'Learn more'. CTAs must be specific and action-oriented.\",\n  \"Every H2 section must contain at least 2 substantive paragraphs. No single-sentence sections.\",\n  \"Do not repeat the same phrase or sentence structure in consecutive paragraphs.\",\n  \"Bold text (**bold**) should be used sparingly — only for genuinely critical terms, not for stylistic emphasis.\",\n];\n\nfunction parseKeywords(raw) {\n  if (!raw) return [];\n  if (Array.isArray(raw)) {\n    return raw.flatMap(item => item.split(',').map(k => k.trim())).filter(k => k.length > 0);\n  }\n  if (typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\n\nconst rawPrimary = input.primary_keywords;\nconst primary = (Array.isArray(rawPrimary) ? rawPrimary.join(', ') : rawPrimary) || '';\nconst secondary = parseKeywords(input.secondary_keywords);\nconst semantic = parseKeywords(input.semantic_themes);\n\n// ─── EXTRACT AI PARSED BRIEF DATA ────────────────────────────────────────────\nlet aiOutputRAW = $('Parse Creative Brief (LLM)').first().json.message?.content\n               || $('Parse Creative Brief (LLM)').first().json.text\n               || $('Parse Creative Brief (LLM)').first().json.choices?.[0]?.message?.content\n               || '{}';\n\nlet aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '' };\ntry {\n  if (typeof aiOutputRAW === 'object' && aiOutputRAW !== null) {\n    aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '', ...aiOutputRAW };\n  } else if (typeof aiOutputRAW === 'string') {\n    let cleanedRAW = aiOutputRAW;\n    cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```json\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n    cleanedRAW = cleanedRAW.replace(/^[\\s\\S]*?```\\s*/, '').replace(/```[\\s\\S]*$/, '').trim();\n    const match = cleanedRAW.match(/\\{[\\s\\S]*\\}/);\n    if (match) cleanedRAW = match[0];\n    const parsed = JSON.parse(cleanedRAW);\n    aiData = { headings: [], faqs: [], custom_rules: [], tone_instructions: '', ...parsed };\n  }\n} catch (e) {\n  console.log('Brief parser JSON parse failed:', e.message);\n}\n\nconst briefHeadings     = Array.isArray(aiData.headings)      ? aiData.headings      : [];\nconst faqArray          = Array.isArray(aiData.faqs)          ? aiData.faqs          : [];\nconst briefCustomRules  = Array.isArray(aiData.custom_rules)  ? aiData.custom_rules  : [];\nconst briefTone         = typeof aiData.tone_instructions === 'string' ? aiData.tone_instructions : '';\n\n// ─── FAQ INJECTION ────────────────────────────────────────────────────────────\nlet faqInjection = '';\nif (faqArray.length > 0) {\n  faqInjection = '### MANDATORY FAQS\\n\\nAt the end of the article include an FAQ section with EXACTLY these questions. If an answer is provided, incorporate that information into your answer — do not ignore it.\\n\\n';\n  faqArray.forEach(faq => {\n    faqInjection += `**Q: ${faq.question}**\\n`;\n    if (faq.answer && faq.answer.trim()) {\n      faqInjection += `A: (Use this information in your answer: ${faq.answer})\\n\\n`;\n    } else {\n      faqInjection += `A: [Write a complete, accurate answer]\\n\\n`;\n    }\n  });\n}\n\n// ─── STRUCTURE ENFORCEMENT (headings) ────────────────────────────────────────\nconst creativeBrief = input.creative_brief || '';\nlet briefEnforcerInjection = '';\nif (creativeBrief) {\n  briefEnforcerInjection = `### CREATIVE BRIEF STRUCTURE (MANDATORY)\n\nYou MUST follow the structural outline below. Do not invent your own structure.\n\n- Write the article conforming strictly to the content outline in the brief.\n- Use the exact H2 headings specified — do not add, remove, or reorder them.\n- Do NOT invent your own H2 headings if the outline already specifies them.\n\n`;\n  if (briefHeadings.length > 0) {\n    briefEnforcerInjection += `MANDATORY HEADING ORDER — USE THESE EXACT H2s:\\n`;\n    briefHeadings.forEach((h, i) => {\n      briefEnforcerInjection += `${i + 1}. ${h}\\n`;\n    });\n    briefEnforcerInjection += `\\nDo not add, remove, or reorder these headings.\\n`;\n  }\n}\n\n// ─── GLOBAL RULES INJECTION ───────────────────────────────────────────────────\nconst globalRulesInjection = `### GLOBAL EDITORIAL RULES (NON-NEGOTIABLE)\n\nThese rules apply to every article regardless of the brief. Each violation is unacceptable:\n\n${GLOBAL_RULES.map((r, i) => `${i + 1}. ${r}`).join('\\n')}\n`;\n\n// ─── BRIEF-SPECIFIC CUSTOM RULES INJECTION ───────────────────────────────────\nlet customRulesInjection = '';\nif (briefCustomRules.length > 0) {\n  customRulesInjection = `### BRIEF-SPECIFIC RULES (MANDATORY)\n\nThe following rules were explicitly specified in the creative brief. Every single one must be followed exactly:\n\n${briefCustomRules.map((r, i) => `${i + 1}. ${r}`).join('\\n')}\n`;\n}\n\n// ─── TONE INJECTION ─────────��─────────────────────────────────────────────────\nconst toneSource = briefTone || input.tone || '';\nlet briefAuthorityPreamble = '';\nif (toneSource) {\n  briefAuthorityPreamble = `Tone & Voice: ${toneSource}. Maintain this voice consistently from the first sentence to the last. Do not shift tone mid-article.`;\n}\n\n// ─── CLIENT FIRST PARAGRAPH ───────────────────────────────────────────────────\nlet firstParagraphInjection = '';\nif (input.client_name) {\n  firstParagraphInjection = `The opening paragraph MUST organically mention the client (${input.client_name}) within the first two sentences. Do NOT use \"the company\", \"the brand\", or \"they\" as a substitute.`;\n}\n\n// ─── SECONDARY / SEMANTIC KEYWORDS ───────────────────────────────────────────\nlet secondaryKeywordChecklist = '';\nif (secondary.length > 0 || semantic.length > 0) {\n  secondaryKeywordChecklist = '### SUPPLEMENTARY KEYWORDS (weave naturally — do not force):\\n';\n  if (secondary.length > 0) {\n    secondaryKeywordChecklist += 'Secondary Keywords:\\n' + secondary.map(k => '- ' + k).join('\\n') + '\\n\\n';\n  }\n  if (semantic.length > 0) {\n    secondaryKeywordChecklist += 'Semantic Themes:\\n' + semantic.map(s => '- ' + s).join('\\n') + '\\n';\n  }\n}\n\nreturn {\n  json: {\n    primary_keyword_joined:         primary,\n    secondary_keywords_arr:         secondary,\n    semantic_themes_arr:            semantic,\n    brief_enforcer_injection:       briefEnforcerInjection,\n    faq_injection:                  faqInjection,\n    global_rules_injection:         globalRulesInjection,\n    custom_rules_injection:         customRulesInjection,\n    first_paragraph_client_injection: firstParagraphInjection,\n    secondary_keyword_checklist:    secondaryKeywordChecklist,\n    brief_authority_preamble:       briefAuthorityPreamble,\n    detected_brief_headings:        briefHeadings,\n    detected_faqs:                  faqArray,\n    detected_custom_rules:          briefCustomRules,\n  }\n};"
       },
-      "id": "60f0c50c-cfc7-45b5-815a-c5eee3e599b0",
+      "id": "455888dd-429e-4f98-92bc-79a0c66db908",
       "name": "Keyword Strategist",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        24048,
-        8928
+        53552,
+        12144
       ]
     },
     {
       "parameters": {
         "jsCode": "// Keyword Validator v3 — Expert-weighted scoring\nconst content = $input.first().json.content || $input.first().json.text || '';\nconst input = $('Webhook1').first().json.body;\n\nconst primary = (input.primary_keywords || '').trim();\nfunction parseKeywords(raw) {\n  if (!raw || typeof raw !== 'string') return [];\n  return raw.split(',').map(k => k.trim()).filter(k => k.length > 0);\n}\nfunction escapeRegex(str) {\n  return str.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n}\n\nif (!primary) {\n  return [{ json: { score: 0, passed: false, issues: ['No primary keyword provided'] } }];\n}\n\nconst allSecondary = [...parseKeywords(input.secondary_keywords), ...parseKeywords(input.semantic_theme)]\n  .filter((v, i, a) => a.indexOf(v) === i);\n\nconst lower = content.toLowerCase();\nconst primaryLower = primary.toLowerCase();\nconst plainText = content.replace(/<[^>]*>/g, '').replace(/[#*_]/g, '');\nconst words = plainText.split(/\\s+/);\n\nlet score = 0;\nconst issues = [];\n\n// 1. H1 contains primary keyword (20 pts — highest SEO value per Backlinko/Google)\nconst h1Match = content.match(/<h1[^>]*>(.*?)<\\/h1>/i) || content.match(/^#\\s+(.+)$/m);\nconst h1Text = h1Match ? h1Match[1].toLowerCase() : '';\nif (!h1Match) {\n  issues.push('MISSING H1 TAG');\n} else if (h1Text.includes(primaryLower)) {\n  score += 20;\n} else {\n  issues.push('Primary keyword NOT in H1. Found: \"' + (h1Match[1] || '').substring(0, 60) + '\"');\n}\n\n// 2. Primary in first 100 words (15 pts — Backlinko: \"still makes a difference\")\nconst first100 = words.slice(0, 100).join(' ').toLowerCase();\nif (first100.includes(primaryLower)) {\n  score += 15;\n} else {\n  issues.push('Primary keyword NOT in first 100 words');\n}\n\n// 3. Primary (or close variation) in at least one H2 (15 pts)\nconst h2Matches = content.match(/<h2[^>]*>(.*?)<\\/h2>/gi) || content.match(/^##\\s+(.+)$/gm) || [];\nconst h2Texts = h2Matches.map(h => h.replace(/<[^>]*>/g, '').replace(/^##\\s+/, '').toLowerCase());\nconst primaryWords = primaryLower.split(/\\s+/);\nconst minMatchWords = Math.ceil(primaryWords.length * 0.6);\nconst primaryInH2 = h2Texts.some(h => {\n  if (h.includes(primaryLower)) return true;\n  const matchedWords = primaryWords.filter(w => h.includes(w));\n  return matchedWords.length >= minMatchWords;\n});\nif (primaryInH2) {\n  score += 15;\n} else {\n  issues.push('Primary keyword (or variation) NOT in any H2');\n}\n\n// 4. Primary in conclusion (10 pts)\nconst paragraphs = plainText.split(/\\n\\n+/).filter(p => p.trim().length > 30);\nconst lastPara = paragraphs.length > 0 ? paragraphs[paragraphs.length - 1].toLowerCase() : '';\nif (lastPara.includes(primaryLower)) {\n  score += 10;\n} else {\n  issues.push('Primary keyword NOT in conclusion');\n}\n\n// 5. Keyword frequency check (10 pts — Backlinko: ~8 per 3200 words)\nconst primaryRegex = new RegExp(escapeRegex(primaryLower), 'gi');\nconst primaryCount = (lower.match(primaryRegex) || []).length;\nconst wordCount = words.length;\nconst expectedFreq = Math.max(3, Math.round((wordCount / 3200) * 8));\nif (primaryCount >= expectedFreq - 1 && primaryCount <= expectedFreq * 2) {\n  score += 10;\n} else if (primaryCount >= 2) {\n  score += 5;\n  issues.push('Keyword frequency: ' + primaryCount + 'x (target: ~' + expectedFreq + 'x)');\n} else {\n  issues.push('Keyword used only ' + primaryCount + 'x (target: ~' + expectedFreq + 'x)');\n}\n\n// 6. All secondary/semantic keywords present (25 pts)\nconst secondaryResults = allSecondary.map(kw => ({\n  keyword: kw,\n  found: lower.includes(kw.toLowerCase())\n}));\nconst secondaryFound = secondaryResults.filter(s => s.found).length;\nconst secondaryTotal = allSecondary.length || 1;\nscore += Math.round((secondaryFound / secondaryTotal) * 25);\nconst missing = secondaryResults.filter(s => !s.found).map(s => s.keyword);\nif (missing.length > 0) {\n  issues.push('MISSING secondary/semantic: ' + missing.join(' | '));\n}\n\n// 7. H2 keyword distribution (5 pts bonus — Surfer SEO best practice)\nconst keywordsInH2 = allSecondary.filter(kw =>\n  h2Texts.some(h => h.includes(kw.toLowerCase()))\n);\nif (keywordsInH2.length >= 1) {\n  score += 5;\n}\n\n// 8. Keyword bolding penalty (informational)\nconst boldedKeyword = content.match(new RegExp('\\\\*\\\\*[^*]*' + escapeRegex(primaryLower) + '[^*]*\\\\*\\\\*', 'i'));\nif (boldedKeyword) {\n  issues.push('WARNING: Primary keyword is bolded in body text');\n}\n\nconst finalScore = Math.min(100, score);\nconst passed = finalScore >= 60 && h1Text.includes(primaryLower) && first100.includes(primaryLower);\n\nreturn [{ json: {\n  score: finalScore,\n  passed,\n  issues,\n  checks: {\n    primaryInH1: h1Text.includes(primaryLower),\n    primaryInFirst100: first100.includes(primaryLower),\n    primaryInH2: primaryInH2,\n    primaryInConclusion: lastPara.includes(primaryLower),\n    frequency: primaryCount + 'x (target: ~' + expectedFreq + 'x)',\n    secondaryCoverage: secondaryFound + '/' + allSecondary.length,\n    missingKeywords: missing,\n    secondaryInH2s: keywordsInH2\n  }\n}}];"
       },
-      "id": "755b8413-7ba5-4e21-9f6e-36e1a3ca7723",
+      "id": "d0a14e0b-b71e-4e5a-a208-655df903fdc3",
       "name": "Keyword Validator",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        24496,
-        8928
+        54000,
+        12144
       ]
     },
     {
@@ -1059,10 +1066,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        31280,
-        8720
+        60784,
+        11936
       ],
-      "id": "1c0467e1-990f-48c6-9c9d-513ecad23858",
+      "id": "e4e8cebd-9da3-4ae9-a640-1785a4973ca7",
       "name": "Create a document17",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1087,10 +1094,10 @@
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
       "position": [
-        31504,
-        8720
+        61008,
+        11936
       ],
-      "id": "8476c671-d93a-4767-ba37-42edc71a56f1",
+      "id": "84dc4908-9176-4fa9-acfd-74b9b363ef7f",
       "name": "Update a document17",
       "credentials": {
         "googleDocsOAuth2Api": {
@@ -1104,10 +1111,10 @@
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
       "position": [
-        21872,
-        10656
+        51376,
+        13872
       ],
-      "id": "670a5498-4c85-4c6d-84b4-e6714a080bab",
+      "id": "8b33ccc9-5e05-477b-8848-d32eb60bf6a4",
       "name": "Error Trigger"
     },
     {
@@ -1122,10 +1129,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        22096,
-        10656
+        51600,
+        13872
       ],
-      "id": "24610dfa-64bc-447b-bddc-86ff531bd20e",
+      "id": "8e3809b4-aba8-4b33-8a1f-a82ca4dba824",
       "name": "Send Error to Dashboard"
     },
     {
@@ -1140,10 +1147,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
       "position": [
-        22096,
-        8880
+        51600,
+        12096
       ],
-      "id": "e7cfe1f7-2e82-4082-a15f-6d120bf1935a",
+      "id": "0757463d-ee0f-4ba9-bf1d-f898b190a4c7",
       "name": "Startup Update"
     },
     {
@@ -1164,13 +1171,13 @@
         "jsonBody": "={{ {\n  \"request_id\": $('Webhook1').first()?.json?.body?.request_id,\n  \"run_id\": $('Webhook1').first()?.json?.body?.run_id,\n  \"webhook_response\": $('Create folder1').isExecuted ? \"https://drive.google.com/drive/u/0/folders/\" + $('Create folder1').first()?.json?.id : '',\n  \"raw_content\": $('Document Export Sanitization4').first()?.json?.message?.content || '',\n  \"verified_claims\": \"--- PRE-DRAFT FACT CHECK ---\\n\" + ($('Pre-Draft Fact Checker').first()?.json?.choices[0]?.message?.content || '') + \"\\n\\n--- POST-DRAFT FACT CHECK ---\\n\" + ($('Post-Draft Fact Checker').first()?.json?.choices[0]?.message?.content || '')\n} }}",
         "options": {}
       },
-      "id": "0f96a7a2-860b-476f-8822-b4bb22b32c6c",
+      "id": "7f45ad65-6016-4f3b-b320-e84bc4772401",
       "name": "Signal Completion (Update a document17)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        31728,
-        8720
+        61232,
+        11936
       ]
     },
     {
@@ -1200,10 +1207,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        22320,
-        8880
+        51824,
+        12096
       ],
-      "id": "15c00484-8884-4377-8b20-fe2e37c24260",
+      "id": "4ea3dc20-6811-4d4b-8909-d77c20aa84b9",
       "name": "Parse Creative Brief (LLM)",
       "retryOnFail": true,
       "credentials": {
@@ -1233,10 +1240,10 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        23824,
-        8928
+        53328,
+        12144
       ],
-      "id": "10c40e32-1e59-47d9-a97c-e1f1480b8fa4",
+      "id": "aea1ebaa-95c2-4152-9370-b7dcceb94668",
       "name": "Pre-Draft Fact Checker",
       "credentials": {
         "perplexityApi": {
@@ -1265,10 +1272,10 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        25744,
-        8832
+        55248,
+        12048
       ],
-      "id": "31374ee2-d5b4-47d1-87d3-7ec2f2a63a2b",
+      "id": "62bf9e22-88f6-4a56-8666-964728cc1df5",
       "name": "Post-Draft Fact Checker",
       "credentials": {
         "perplexityApi": {
@@ -1299,10 +1306,10 @@
       "type": "n8n-nodes-base.perplexity",
       "typeVersion": 1,
       "position": [
-        22896,
-        8688
+        52400,
+        11904
       ],
-      "id": "1fb62c66-94fa-4d0e-a6e2-42e2ed30d5d3",
+      "id": "b8cf29bd-e064-4c65-a1bb-decc239db0d6",
       "name": "Client Site Researcher",
       "retryOnFail": true,
       "waitBetweenTries": 5000,
@@ -1339,10 +1346,10 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        23120,
-        8688
+        52624,
+        11904
       ],
-      "id": "e2acd325-fe29-402a-bb8d-2f90eefb3fee",
+      "id": "4346f004-67f7-4a98-8bf6-7d5b16de212e",
       "name": "Client Profile Extractor",
       "credentials": {
         "openAiApi": {
@@ -1374,34 +1381,29 @@
         },
         "options": {}
       },
-      "id": "ea501e38-a5e5-433d-a674-41509b3293e8",
+      "id": "242dbefe-5c4f-44d2-8037-77a9e3509138",
       "name": "If Revision",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        22672,
-        8816
+        52176,
+        12032
       ]
     },
     {
       "parameters": {
+        "model": "gpt-4o",
         "options": {
           "temperature": 0
-        },
-        "model": {
-          "__rl": true,
-          "value": "gpt-4o",
-          "mode": "list",
-          "cachedResultName": "gpt-4o"
         }
       },
-      "id": "7fdf3d6e-84e2-43c9-b25d-4319728aaee1",
+      "id": "602c0409-80ec-44c4-ae38-811f4bb42176",
       "name": "Claims Extractor Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1,
       "position": [
-        23552,
-        8912
+        53056,
+        12128
       ],
       "credentials": {
         "openAiApi": {
@@ -1413,16 +1415,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=# The Claims Bouncer\n\nYou are a strict Claims Extractor for a content generation pipeline. Your job is to read the Creative Brief and the Client Website Data, and extract a strict allowlist of claims, statistics, and rules into a JSON Manifest.\n\n## Inputs\n**Creative Brief:**\n{{ $json.brief }}\n\n**Client Website Data:**\n{{ $json.website_text }}\n\n## Rules\n1. Extract every specific service offering, product feature, and factual claim requested in the Brief.\n2. Verify each claim against the Client Website Data. If the website does not support the claim, omit it or mark its source strictly as 'Brief'.\n3. Extract all statistics (e.g., '73% of people...').\n4. Generate a `forbidden_patterns` list containing typical AI hallucinated authority phrases you want the downstream nodes to avoid (e.g., 'practitioners consistently see', 'American Psychological Association', 'clinical experience shows').\n\nOutput STRICTLY in the provided JSON schema.",
+        "text": "=# The Claims Bouncer\n\nYou are a strict Claims Extractor for a content generation pipeline. Your job is to read the Creative Brief and the Client Website Data, and extract a strict allowlist of claims, statistics, and rules into a JSON Manifest.\n\n## Inputs\n**Creative Brief:**\n{{ $('Webhook1').first().json.body.creative_brief }}\n\n**Verified Client Profile (from website research):**\n{{ $('Client Profile Extractor').first().json.message.content }}\n\n## Rules\n1. Extract every specific service offering, product feature, and factual claim requested in the Brief.\n2. Verify each claim against the Verified Client Profile. If the client website does not support the claim, omit it or mark its source strictly as 'Brief'.\n3. Extract all statistics (e.g., '73% of people...').\n4. Generate a `forbidden_patterns` list containing typical AI hallucinated authority phrases you want the downstream nodes to avoid (e.g., 'practitioners consistently see', 'American Psychological Association', 'clinical experience shows').\n\nOutput STRICTLY in the provided JSON schema.",
         "hasOutputParser": true
       },
-      "id": "de908d4d-6bff-431c-aa9e-128f13232ce6",
+      "id": "18db47db-426f-47f6-96ab-057c5d8747ac",
       "name": "Claims Extractor & Manifest Generator",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.4,
       "position": [
-        23472,
-        8688
+        52976,
+        11904
       ]
     }
   ],
@@ -1991,9 +1993,26 @@
       ]
     }
   },
-  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "a09af904c89d8bd1ffb34a0a4a29385c214bff1ce25df6d68c440d7ac472b65f"
-  }
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9373bae7-621c-42f5-b627-6534974e0112",
+  "activeVersionId": "9373bae7-621c-42f5-b627-6534974e0112",
+  "versionCounter": 513,
+  "triggerCount": 1,
+  "tags": [
+    {
+      "updatedAt": "2025-07-03T19:19:08.912Z",
+      "createdAt": "2025-07-03T19:19:08.912Z",
+      "id": "MVboqPl4w8lxSrR1",
+      "name": "SEOBrand"
+    }
+  ]
 }

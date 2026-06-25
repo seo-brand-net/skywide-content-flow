@@ -1,0 +1,605 @@
+﻿=== Claims Extractor & Manifest Generator ===
+{
+  "parameters": {
+    "promptType": "define",
+    "text": "=# The Claims Bouncer\n\nYou are a strict Claims Extractor for a content generation pipeline. Your job is to read the Creative Brief and the Client Website Data, and extract a strict allowlist of claims, statistics, and rules into a JSON Manifest.\n\n## Inputs\n**Creative Brief:**\n{{ $json.brief }}\n\n**Client Website Data:**\n{{ $json.website_text }}\n\n## Rules\n1. Extract every specific service offering, product feature, and factual claim requested in the Brief.\n2. Verify each claim against the Client Website Data. If the website does not support the claim, omit it or mark its source strictly as 'Brief'.\n3. Extract all statistics (e.g., '73% of people...').\n4. Generate a `forbidden_patterns` list containing typical AI hallucinated authority phrases you want the downstream nodes to avoid (e.g., 'practitioners consistently see', 'American Psychological Association', 'clinical experience shows').\n\nOutput STRICTLY in the provided JSON schema.",
+    "hasOutputParser": true
+  },
+  "id": "18db47db-426f-47f6-96ab-057c5d8747ac",
+  "name": "Claims Extractor & Manifest Generator",
+  "type": "@n8n/n8n-nodes-langchain.chainLlm",
+  "typeVersion": 1.4,
+  "position": [
+    52976,
+    11904
+  ]
+}
+\n=== Claims Extractor Model (LLM) ===
+{
+  "parameters": {
+    "model": "gpt-4o",
+    "options": {
+      "temperature": 0
+    }
+  },
+  "id": "602c0409-80ec-44c4-ae38-811f4bb42176",
+  "name": "Claims Extractor Model",
+  "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+  "typeVersion": 1,
+  "position": [
+    53056,
+    12128
+  ],
+  "credentials": {
+    "openAiApi": {
+      "id": "y3tVeuSKwYnV4Cyx",
+      "name": "SEOBrand"
+    }
+  }
+}
+\n=== All CONNECTIONS ===
+{
+  "Clean1": {
+    "main": [
+      [
+        {
+          "node": "Claude Draft (Claude Opus 3)1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Webhook1": {
+    "main": [
+      [
+        {
+          "node": "Startup Update",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Create folder1": {
+    "main": [
+      [
+        {
+          "node": "Clean1",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Google Drive Notification1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Data Check & Research Gaps1": {
+    "main": [
+      [
+        {
+          "node": "Post-Draft Fact Checker",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claude Keyword Check + Semantic Gap1": {
+    "main": [
+      [
+        {
+          "node": "Wait18",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Anthropic Chat Model5": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claude Keyword Check + Semantic Gap1",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claude Apply Recommendations1": {
+    "main": [
+      [
+        {
+          "node": "Claude EEAT Injection1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Anthropic Chat Model6": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claude Apply Recommendations1",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claude EEAT Injection1": {
+    "main": [
+      [
+        {
+          "node": "Wait14",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Anthropic Chat Model7": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claude EEAT Injection1",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "OpenAI SEO Optimization1": {
+    "main": [
+      [
+        {
+          "node": "Claude NLP & PR Optimization",
+          "type": "main",
+          "index": 0
+        },
+        {
+          "node": "Wait17",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claude NLP & PR Optimization": {
+    "main": [
+      [
+        {
+          "node": "Wait7",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Anthropic Chat Model11": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claude NLP & PR Optimization",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Anthropic Chat Model12": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claude Humanised Readability Rewrite",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Anthropic Chat Model13": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claude Final SEO Snippet Optimization",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claude Final SEO Snippet Optimization": {
+    "main": [
+      [
+        {
+          "node": "Document Export Sanitization5",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Wait7": {
+    "main": [
+      [
+        {
+          "node": "Claude Humanised Readability Rewrite",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Wait10": {
+    "main": [
+      [
+        {
+          "node": "Claude Final SEO Snippet Optimization",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Wait14": {
+    "main": [
+      [
+        {
+          "node": "OpenAI SEO Optimization1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Wait18": {
+    "main": [
+      [
+        {
+          "node": "Claude Apply Recommendations1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Document Export Sanitization5": {
+    "main": [
+      [
+        {
+          "node": "Edit Fields2",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claude Humanised Readability Rewrite": {
+    "main": [
+      [
+        {
+          "node": "Wait10",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Execution Data1": {
+    "main": [
+      [
+        {
+          "node": "Keyword Validator",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Surgical Rewriter": {
+    "main": [
+      [
+        {
+          "node": "Restore Retry Count1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Restore Retry Count1": {
+    "main": [
+      [
+        {
+          "node": "Edit Fields2",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Document Export Sanitization4": {
+    "main": [
+      [
+        {
+          "node": "Create a document17",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "AI Agent1": {
+    "main": [
+      [
+        {
+          "node": "Max Iterations1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Structured Output Parser1": {
+    "ai_outputParser": [
+      [
+        {
+          "node": "AI Agent1",
+          "type": "ai_outputParser",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "OpenAI Chat Model1": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "AI Agent1",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Edit Fields2": {
+    "main": [
+      [
+        {
+          "node": "Edit Fields3",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Edit Fields3": {
+    "main": [
+      [
+        {
+          "node": "AI Agent1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "If1": {
+    "main": [
+      [
+        {
+          "node": "Document Export Sanitization4",
+          "type": "main",
+          "index": 0
+        }
+      ],
+      [
+        {
+          "node": "Surgical Rewriter",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claude Draft (Claude Opus 3)1": {
+    "main": [
+      [
+        {
+          "node": "Data Check & Research Gaps1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Anthropic Chat Model4": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claude Draft (Claude Opus 3)1",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Max Iterations1": {
+    "main": [
+      [
+        {
+          "node": "If1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Keyword Strategist": {
+    "main": [
+      [
+        {
+          "node": "Execution Data1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Keyword Validator": {
+    "main": [
+      [
+        {
+          "node": "Create folder1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Create a document17": {
+    "main": [
+      [
+        {
+          "node": "Update a document17",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Update a document17": {
+    "main": [
+      [
+        {
+          "node": "Signal Completion (Update a document17)",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Error Trigger": {
+    "main": [
+      [
+        {
+          "node": "Send Error to Dashboard",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Startup Update": {
+    "main": [
+      [
+        {
+          "node": "Parse Creative Brief (LLM)",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Parse Creative Brief (LLM)": {
+    "main": [
+      [
+        {
+          "node": "If Revision",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Pre-Draft Fact Checker": {
+    "main": [
+      [
+        {
+          "node": "Keyword Strategist",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Post-Draft Fact Checker": {
+    "main": [
+      [
+        {
+          "node": "Claude Keyword Check + Semantic Gap1",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Client Site Researcher": {
+    "main": [
+      [
+        {
+          "node": "Client Profile Extractor",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Client Profile Extractor": {
+    "main": [
+      [
+        {
+          "node": "Claims Extractor & Manifest Generator",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "If Revision": {
+    "main": [
+      [
+        {
+          "node": "Pre-Draft Fact Checker",
+          "type": "main",
+          "index": 0
+        }
+      ],
+      [
+        {
+          "node": "Client Site Researcher",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claims Extractor Model": {
+    "ai_languageModel": [
+      [
+        {
+          "node": "Claims Extractor & Manifest Generator",
+          "type": "ai_languageModel",
+          "index": 0
+        }
+      ]
+    ]
+  },
+  "Claims Extractor & Manifest Generator": {
+    "main": [
+      [
+        {
+          "node": "Pre-Draft Fact Checker",
+          "type": "main",
+          "index": 0
+        }
+      ]
+    ]
+  }
+}

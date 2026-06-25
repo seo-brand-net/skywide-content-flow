@@ -1,0 +1,5 @@
+EXEC 3034 | success | 1130s
+credential_warnings: [{"claim":"ISA-certified arborists","source":"Brief","reason":"Not listed in verified client credentials.","action":"REMOVE or REPLACE","replacement":""}]
+ISA-certified in final: true
+Fully Licensed in final: false
+Chris Merkel in final: false

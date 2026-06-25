@@ -1,0 +1,57 @@
+
+=== EXEC 3033 — STUMP ARTICLE (POST CREDENTIAL PATCH) ===
+Status:   success
+Duration: 1109s
+Nodes run: 51
+
+── 1. CLAIMS EXTRACTOR ──
+Output length: 1649
+✅ credential_warnings POPULATED (1 warning(s)):
+  FLAGGED: "undefined"
+  Reason:  undefined
+  Replace: "None"
+
+── 2. AI AGENT VALIDATION ──
+Passed: false
+ISA still flagged as missing: ⚠️  YES
+TCIA still flagged as missing: ⚠️  YES
+Issues (first 600):
+Structure Check Failures:
+- Missing required heading: "Stump Grinding vs Stump Removal: Which One Do You Actually Need?" Fix: Add this exact H1 (or rename the current H1) and include the required comparison content in this opening section.
+- Missing required heading: "What is Stump Grinding and How Does It Work?" Fix: Add this exact H2 (or rename "What Stump Grinding Actually Does").
+- Missing required heading: "Understanding the Difference Between Stump Grinding and Stump Removal" Fix: Add this exact H2 to clearly compare both methods.
+- Missing required heading: "Complete Stump Removal: Proc
+
+── 3. SURGICAL REWRITER ──
+Output length: 5129
+  ⚠️  FOUND | ISA-certified
+  ✅ CLEAR | ISA/TCIA
+  ✅ CLEAR | TCIA credentials
+  ✅ CLEAR | TCIA membership
+  ✅ CLEAR | Chris Merkel
+  ✅ CLEAR | founded in 2021
+
+  ISA/TCIA context in Surgical output:
+    >> Safety considerations per TCIA standards include using PPE, maintaining safe operating distances, and observing slope limits. Alwa
+    >> Merkel's Tree Service offers the value of ISA-certified arborists and comprehensive insurance, providing peace of mind for professional services.
+
+── 4. FINAL ARTICLE ──
+Final text length: 9087
+  ⚠️  FOUND | ISA-certified
+  ✅ CLEAR | ISA/TCIA
+  ✅ CLEAR | TCIA credentials
+  ✅ CLEAR | TCIA membership
+  ✅ CLEAR | Chris Merkel
+  ✅ CLEAR | founded in 2021
+  ✅ CLEAR | Fully Licensed And Insured
+  ✅ CLEAR | Fully Licensed
+
+  Credential context in final article:
+    >> Safety considerations per TCIA standards include using PPE, maintaining safe operating distances, and observing slope limits. Alwa
+    >> Merkel's Tree Service offers the value of ISA-certified arborists and comprehensive insurance, providing peace of mind for professional services.
+
+── 5. PASS/FAIL SUMMARY ──
+credential_warnings in Claims output: ✅
+ISA-certified in final article:        ❌ STILL PRESENT
+Licensed & Insured in final article:   ⚠️  NOT FOUND
+Exec status:                           ✅ SUCCESS

@@ -1,0 +1,12 @@
+{
+  "verified": false,
+  "client_name": "Merkel's Tree Service",
+  "services": [],
+  "products": [],
+  "service_areas": [],
+  "credentials": [],
+  "team": [],
+  "unique_claims": [],
+  "published_stats": [],
+  "confidence": "low"
+}

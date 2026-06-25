@@ -1,0 +1,15 @@
+```json
+{
+  "claims": {
+    "service_offerings": [],
+    "product_features": [],
+    "factual_claims": []
+  },
+  "statistics": [],
+  "forbidden_patterns": [
+    "practitioners consistently see",
+    "American Psychological Association",
+    "clinical experience shows"
+  ]
+}
+```

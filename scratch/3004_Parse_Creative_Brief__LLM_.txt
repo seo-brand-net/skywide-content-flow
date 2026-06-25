@@ -1,0 +1,59 @@
+{
+  "global_rules": [
+    "Use a professional, authoritative, and helpful tone.",
+    "Maintain a reading level of 9th-10th grade for accessibility while ensuring technical accuracy.",
+    "Use a mix of short direct statements and longer explanatory sentences, predominantly in active voice.",
+    "Incorporate extensive use of bulleted and numbered lists.",
+    "Include clear section headers, cost ranges, and timeframes.",
+    "Emphasize safety and professional expertise throughout."
+  ],
+  "target_audience": "Homeowners in Berks County, PA considering stump grinding or stump removal services.",
+  "sections": [
+    {
+      "heading": "Stump Grinding vs Stump Removal: Which One Do You Actually Need?",
+      "instructions": "Provide an immediate answer comparing stump grinding and stump removal, including the primary keyword 'stump grinding vs stump removal' in the first 20 words. Cover the key differences: cost (grinding $75-400, removal higher), time (grinding 30 min-2 hours, removal 3-8 hours), and invasiveness (grinding is less disruptive). Reference Merkel's Tree Service expertise in Berks County for both methods.",
+      "required_claims": [
+        "Cost difference: grinding $75-400, removal higher",
+        "Time difference: grinding 30 min-2 hours, removal 3-8 hours",
+        "Invasiveness: grinding less disruptive",
+        "Reference Merkel's Tree Service expertise in Berks County"
+      ]
+    },
+    {
+      "heading": "What is Stump Grinding and How Does It Work?",
+      "instructions": "Define the stump grinding process, explaining the use of specialized equipment to grind stumps 6-12 inches below ground level. Mention that 80-90% of the root system remains underground. Discuss equipment types, safety considerations per TCIA standards, and typical timeframes. Highlight benefits like minimal site disruption and wood chip byproduct for mulch, with references to local applications.",
+      "required_claims": [
+        "80-90% of root system remains underground",
+        "Safety considerations per TCIA standards"
+      ]
+    },
+    {
+      "heading": "Understanding the Difference Between Stump Grinding and Stump Removal",
+      "instructions": "Provide a clear explanation of the fundamental differences between stump grinding and stump removal methods. Explain how grinding addresses only the visible stump while removal extracts the entire root system. Detail the scope of work, equipment requirements, and site impact differences, including visual descriptions to aid homeowner understanding.",
+      "required_claims": []
+    },
+    {
+      "heading": "Complete Stump Removal: Process and Considerations",
+      "instructions": "Explain the full stump removal process, detailing the excavation of the entire stump and root system. Discuss equipment requirements, time investment (3-8 hours typical), and site impact. Cover when complete removal is necessary for replanting or construction, including soil backfill requirements and restoration processes, particularly in sensitive areas like French Creek State Park.",
+      "required_claims": []
+    },
+    {
+      "heading": "Cost Comparison: Grinding vs Removal in Berks County",
+      "instructions": "Provide a detailed cost analysis with specific ranges: grinding $75-400, removal typically 2-3x higher. Break down factors affecting price, including stump size, location accessibility, and equipment requirements. Compare DIY rental costs ($100-250/day Home Depot) versus professional services, highlighting Merkel's Tree Service value proposition with ISA-certified arborists and comprehensive insurance coverage.",
+      "required_claims": [
+        "Grinding costs $75-400, removal typically 2-3x higher",
+        "DIY rental costs $100-250/day at Home Depot"
+      ]
+    },
+    {
+      "heading": "Decision Guide: When to Choose Grinding vs Removal",
+      "instructions": "Provide a clear decision framework using bulleted lists. Recommend grinding for lawn restoration, quick turnaround, budget constraints, multiple stumps, and limited access areas. Recommend removal for immediate replanting needs, construction projects, aggressive root species, and utility installation. Include local considerations for Wyomissing neighborhoods and commercial properties near Kutztown University.",
+      "required_claims": []
+    },
+    {
+      "heading": "Frequently Asked Questions",
+      "instructions": "Address common questions about stump grinding versus removal with direct, helpful answers targeting PAA queries and long-tail keywords. Include questions about which method is better, whether grinding completely removes the stump, cost comparisons, timeframes, and permit requirements in Berks County.",
+      "required_claims": []
+    }
+  ]
+}

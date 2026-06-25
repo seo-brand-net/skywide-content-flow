@@ -1,0 +1,97 @@
+
+=== EXEC 3032 — STUMP ARTICLE TEST RUN ===
+Status: success
+Duration: 1591s
+Total nodes run: 51
+
+── 1. CLAIMS EXTRACTOR OUTPUT ──
+Output length: 1362
+```json
+{
+  "claims": [
+    {
+      "claim": "Stump grinding costs $75-400.",
+      "source": "Brief"
+    },
+    {
+      "claim": "Stump removal typically costs 2-3 times more than stump grinding.",
+      "source": "Brief"
+    },
+    {
+      "claim": "Stump grinding takes 30 minutes to 2 hours.",
+      "source": "Brief"
+    },
+    {
+      "claim": "Stump removal takes 3-8 hours.",
+      "source": "Brief"
+    },
+    {
+      "claim": "Stump grinding is less disruptive than stump removal.",
+      "source": "Brief"
+    },
+    {
+      "claim": "Stump grinding involves grinding stumps 6-12 inches below ground level.",
+      "source": "Brief"
+    },
+    {
+      "claim": "80-90% of the root system remains underground after stump grinding.",
+      "source": "Brief"
+    },
+    {
+      "claim": "DIY rental costs for stump grinding are $100-250 per day at Home Depot.",
+      "source": "Brief"
+    },
+    {
+      "claim": "Merkel's Tree Service offers ISA-certified arborists and comprehensive insurance coverage.",
+      "source": "Brief"
+    },
+    {
+      "claim": "Most residential stump work on private property in Berks County doesn't require permits.",
+      "source": "Brief"
+    }
+  ],
+  "st
+Has verified_claims: false
+Has credential_warnings: false
+Has ISA: true
+Has TCIA: false
+Has claims array: true
+
+── 2. CLAUDE DRAFT — Hallucination Check ──
+Draft length: 14309
+  ✅ CLEAR | Chris Merkel
+  ✅ CLEAR | founded in 2021
+  ✅ CLEAR | ISA-certified
+  ✅ CLEAR | ISA/TCIA
+  ✅ CLEAR | TCIA credentials
+  ✅ CLEAR | TCIA membership
+  ✅ CLEAR | testimonial
+  ✅ CLEAR | founded by
+
+── 3. FINAL ARTICLE — Hallucination Check ──
+Final text length: 11413
+  ✅ CLEAR | Chris Merkel
+  ✅ CLEAR | founded in 2021
+  ⚠️  FOUND | ISA-certified
+  ✅ CLEAR | ISA/TCIA
+  ✅ CLEAR | TCIA credentials
+  ✅ CLEAR | TCIA membership
+  ✅ CLEAR | founded by
+
+  ISA/TCIA context in final:
+    >> - **Safety Practices:** Professional operators adhere to TCIA standards, ensuring the safety of structures and utility lines.
+    >> t costs may be higher, professionals offer faster completion, insured service, and the expertise of ISA-certified arborists, often making this option preferable when many stumps need removal or for preci
+    >> se work in challenging areas. Merkel's Tree Service employs ISA-certified arborists and provides comprehensive insurance coverage, ensuring safety, liability prote
+    >> For replanting, grinding to at least 12 inches depth is advisable to clear space for new root systems.
+
+── 4. AI AGENT VALIDATION ISSUES ──
+Passed: false
+ISA in validation issues: ⚠️  YES
+TCIA in validation issues: ⚠️  YES
+Issues (first 600): Structure Check failures:
+- Missing required heading: "Stump Grinding vs Stump Removal: Which One Do You Actually Need?" Fix: Add this exact heading as the opening section and provide the required immediate comparison content.
+- Heading mismatch: "What Is Stump Grinding?" must be titled exactly "What is Stump Grinding and How Does It Work?" Fix: Rename the heading and ensure the section includes all specified details.
+- Heading mismatch: "What Is Stump Removal?" must be titled exactly "Complete Stump Removal: Process and Considerations." Fix: Rename and expand to include all required elements.
+
+── 5. NODE FLOW SUMMARY ──
+Nodes executed: Webhook1 → Startup Update → Parse Creative Brief (LLM) → If Revision → Client Site Researcher → Client Profile Extractor → Claims Extractor Model → Claims Extractor & Manifest Generator → Pre-Draft Fact Checker → Keyword Strategist → Execution Data1 → Keyword Validator → Create folder1 → Clean1 → An

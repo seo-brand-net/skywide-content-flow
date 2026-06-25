@@ -1,0 +1,75 @@
+=== ISA/TCIA CREDENTIAL — FULL PIPELINE TRACE (EXEC 3004) ===
+
+── 1. CREATIVE BRIEF — ISA/TCIA mentions:
+  BRIEF: ot system remains underground. Cover equipment types, safety considerations per TCIA standards, and typical timeframe. Include benefits like minimal site disruption
+  BRIEF: Keywords to include: stump grinding, stump grinder, wood chips, root system, TCIA standards, stump grinding or stump removal
+  BRIEF: vs professional services. Include Merkel's Tree Service value proposition with ISA-certified arborists and comprehensive insurance coverage.
+  BRIEF: Keywords to include: cost comparison, Home Depot rental, ISA-certified arborists, professional services, Berks County, difference between stump grinding and st
+
+── 2. CLIENT SITE RESEARCHER — ISA/TCIA mentions:
+  WEB: 6-06-15","snippet":"Founded by Chris Merkel, the company offers a full range of arborist-led services, including tree removal, tree trimming, stump grinding, crane- ...
+  WEB: ints are all explicit marketing claims published on their site.\n\n---\n\n## 4. Credentials, Licenses, Insurance, and Safety\n\nFrom the Merkel’s Tree Service homepage:\n
+  WEB: ate: “**Fully Licensed And Insured**.”[1]  \n  - No license numbers or specific certifications (e.g., ISA) are listed on the pages I can see, only this high-level cre
+  WEB: inforces a safety- and expertise-focused brand, but on their own site, the main credential claim is being **fully licensed and insured**.[1]\n\nNo additional formal certi
+  WEB: fications, awards, or accreditations (e.g., ISA Certified Arborist, TCIA membership) are explicitly listed on the client’s website pages I can access.\n
+
+── 3. CLAIMS EXTRACTOR OUTPUT (was it null or populated?):
+  Length: 278
+  Has ISA: false
+  Has TCIA: false
+  Has verified_claims key: false
+  First 600 chars:
+  ```json
+{
+  "claims": {
+    "service_offerings": [],
+    "product_features": [],
+    "factual_claims": []
+  },
+  "statistics": [],
+  "forbidden_patterns": [
+    "practitioners consistently see",
+    "American Psychological Association",
+    "clinical experience shows"
+  ]
+}
+```
+
+── 4. PRE-DRAFT FACT CHECKER — ISA/TCIA:
+  PRE-FACT: nd stump grinding in the area. We partner with local tree service companies and certified arborists.","source":"web"},{"title":"How Long Does Tree Removal or Stump Gr
+  PRE-FACT: 3","last_updated":"2025-10-31","snippet":"In this informative video, we talk to ISA Certified Arborist Corey, a professional in the field of tree services, to addr
+  PRE-FACT: to decompose.[2][3][5]  \n  - No primary source (extension service, university, ISA, etc.) providing a quantified “80–90%” figure.  \n- Assessment: ❌ **REMOVE FROM
+  PRE-FACT: o a couple of hours” with citations.\n\n**Claim A7 – “Safety considerations per TCIA standards.”**  \n- Evidence:  \n  - TCIA (Tree Care Industry Association) publi
+  PRE-FACT: he brief does not cite a specific standard (e.g., ANSI Z133).  \n  - No single “TCIA stump grinding standard” found as a named regulation; TCIA provides general saf
+
+── 5. CLAUDE DRAFT — ISA/TCIA injection point:
+  DRAFT: Professional tree services follow industry safety best practices and ANSI/TCIA guidance for stump grinding operations. This includes proper personal protective equipment like eye and ear protection,
+
+── 6. SURGICAL REWRITER — did it catch ISA/TCIA?
+  Surgical output length: 4770
+  SURGICAL: Different types of stump grinding equipment include handheld, tow-behind, and tracked machines. According to TCIA standards, operators should use PPE, ensure secure machine operation, and establish site controls for safety. Typical g
+  SURGICAL: ration is required. DIY grinding rentals range from $100-250/day at Home Depot. Merkel’s Tree Service offers value with ISA-certified arborists and comprehensive insurance coverage.
+
+── 7. FINAL ARTICLE (raw_content) — ISA/TCIA:
+  FINAL: - **Safety Steps (per TCIA standards)**:
+  FINAL: DIY grinding rentals range from $100-250/day at Home Depot. Merkel’s Tree Service offers value with ISA-certified arborists and comprehensive insurance coverage.
+  FINAL: Leftover wood chips can attract termites if left near structures. It's advisable to remove them if in close proximity to buildings.
+  FINAL: Ensuring safety with utility locating (811) is crucial. Choosing a service like Merkel's Tree Service with ISA/TCIA credentials and insurance is highly recommended for safe and efficient stump removal.
+
+── 8. AI AGENT VALIDATION — ISA/TCIA flagged?
+  AGENT: t types (e.g., handheld, tow-behind, tracked). Fix: Describe equipment variations.\n- Missing safety considerations per TCIA standards. Fix: Cite TCIA-aligned PPE, machine operation, and site controls.\n- Missing typical timeframes for grinding
+  AGENT: DIY rental costs $100-250/day at Home Depot, plus PPE, transport, disposal, and time.\n  • Merkel's value proposition: ISA-certified arborists and comprehensive insurance coverage.\n\n6) Decision Guide: When to Choose Grinding vs Removal\n- R
+  AGENT: on.\n- Section 2 required claims missing: \"80-90% of root system remains underground\" and \"Safety considerations per TCIA standards\".\n- Section 5 required claims missing: \"Grinding costs $75-400, removal typically 2-3x higher\" and \"DIY
+
+
+=== CURRENT WORKFLOW — DO OUR FIXES COVER ISA/TCIA? ===
+Draft prompt has BRAND ORIGIN guard: true
+Draft prompt has "credential" guard: true
+Draft prompt has ISA guard: false
+Surgical Rewriter checks credentials: false
+Surgical Rewriter uses verified_claims: false
+
+KEY QUESTION — Claims Extractor: does it cross-ref brief claims vs website?
+Claims prompt mentions ISA: false
+Claims prompt mentions credential: false
+Claims prompt cross-references site: true

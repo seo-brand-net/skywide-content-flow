@@ -1,0 +1,59 @@
+=== EXEC 3035 — FULL CLAIMS AUDIT ===
+
+── 1. QUANTITATIVE CLAIMS IN FINAL ARTICLE ──
+  [Grinding cost range] "$75-400 / $75 to $400"
+    ✅  In article + brief
+  [Removal costs vs grinding] "2-3 times"
+    ⚠️  In article — source unverified
+  [Grinding time low end] "30 minutes"
+    🔍  In article + pre-fact check
+  [Grinding time high end] "2 hours"
+    ✅  In article + brief
+  [Removal timeframe] "3-8 hours"
+    ✅  In article + brief
+  [Depth of grinding below ground] "6-12 inches"
+    ✅  In article + brief
+  [Root system remaining after grinding] "80-90%"
+    ✅  In article + brief
+  [DIY rental cost at Home Depot] "$100-250"
+    —   NOT IN ARTICLE
+  [Replanting depth] "12 inches"
+    ✅  In article + brief
+
+── 2. CLIENT-SPECIFIC CLAIMS ──
+  [Client name used] ✅ PRESENT
+  [Service area] ✅ PRESENT
+  [Verified credential (replacement)] ✅ PRESENT
+  [Unverified credential (should be absent)] ✅ ABSENT (correctly removed)
+  [Combined cred claim (should be absent)] ✅ ABSENT (correctly removed)
+  [Founder name (should be absent)] ✅ ABSENT (correctly removed)
+  [Origin story (should be absent)] ✅ ABSENT (correctly removed)
+  [Verified service] ✅ PRESENT
+  [Verified service] ✅ PRESENT
+
+── 3. PRE-DRAFT FACT CHECKER — what did it flag? ──
+  No explicit REMOVE flags found
+
+── 4. UNVERIFIED SPECIFICS SCAN ──
+  Numeric claims found in article:
+    "30 minutes" → brief: — | research: —
+    "2 hours" → brief: ✅ | research: —
+    "8 hours" → brief: ✅ | research: —
+    "2 hours" → brief: ✅ | research: —
+    "8 hours" → brief: ✅ | research: —
+    "80-90%" → brief: ✅ | research: —
+    "30 minutes" → brief: — | research: —
+    "2 hours" → brief: ✅ | research: —
+    "8 hours" → brief: ✅ | research: —
+    "$75-150" → brief: — | research: —
+    "$225-450" → brief: — | research: —
+    "$250-400" → brief: — | research: —
+    "$750-1200" → brief: — | research: —
+    "3 days" → brief: — | research: —
+
+── 5. FAQ COMPLIANCE ──
+  "Which is better": ❌ MISSING
+  "Does stump grinding completely remove": ❌ MISSING
+  "Is stump grinding cheaper": ❌ MISSING
+  "How long does it take": ❌ MISSING
+  "Do I need permits": ❌ MISSING

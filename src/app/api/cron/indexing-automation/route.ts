@@ -27,8 +27,23 @@ export async function GET(request: Request) {
     try {
         console.log('[cron/indexing-automation] Starting daily indexing check...');
 
-        // Find all active clients that are due for indexing (never run OR >= 14 days ago)
-        const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+        // Find all active clients that are due for indexing (never run OR >= 14 days ago).
+        //
+        // IMPORTANT: Floor to midnight UTC — NOT millisecond precision.
+        // The cron stamps last_run_at *after* the Apps Script completes, so it's always
+        // a few seconds/minutes later than the cron start time. If we used Date.now() - 14d,
+        // a client run at 03:00:58 would have its cutoff at 03:00:00 fourteen days later —
+        // making it permanently invisible to the filter (03:00:58 is NOT < 03:00:00).
+        // Flooring to midnight ensures any client that ran on "day N" is correctly picked
+        // up on "day N+14", regardless of the exact second it was stamped.
+        const now = new Date();
+        const cutoff = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate() - 14,  // 14 full calendar days ago, midnight UTC
+            0, 0, 0, 0
+        ));
+        const fourteenDaysAgo = cutoff.toISOString();
 
         const { data: dueClients, error: fetchError } = await supabaseAdmin
             .from('indexing_clients')

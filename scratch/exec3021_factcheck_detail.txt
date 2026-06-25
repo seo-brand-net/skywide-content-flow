@@ -1,0 +1,655 @@
+﻿\n\n====== NODE: Pre-Draft Fact Checker ======
+--- RUN 0 ITEM 0 ---
+Here is your structured Fact-Check Report and Brief Stat Audit for the St. Petersburg seawall repair page optimization brief.
+
+---
+
+## Fact-Check Report
+
+I focused on claims that are:
+
+- Numerical or quantitative  
+- Legal / permitting / regulatory  
+- Procedural rules, timelines, or penalties  
+- Attributing specific expertise or services  
+- Potentially promotional statistics or performance claims  
+
+For this brief, most content is strategic SEO guidance rather than factual claims, so only a subset needs verification.
+
+---
+
+### 1. Legal / Administrative / Permitting Claims
+
+**Claim:**  
+ÔÇ£Permit requirements vary with the scope of work and may involve the City of St. Petersburg, Pinellas County, and FDEP. FSS handles the permitting process and coordinates with the relevant agencies on your behalf.ÔÇØ
+
+**Assessment:**
+
+- For seawalls in St. Petersburg, permits may involve **multiple jurisdictions**, depending on location and scope:
+  - City of St. Petersburg Building Department regulates seawall construction and repair within city limits (via local building code and permitting).  
+  - **Pinellas County** regulates certain coastal construction and environmental protections, especially in unincorporated areas and for projects affecting county-managed shorelines.  
+  - **Florida Department of Environmental Protection (FDEP)** regulates activities affecting sovereign submerged lands, coastal construction, and works in navigable waters, often in conjunction with the U.S. Army Corps of Engineers.[No direct citation in provided results; this is standard Florida coastal permitting structure, but not documented in the snippets above.]
+
+- The exact combination of entities involved is site- and scope-specific. The statement ÔÇ£may involve ÔÇª City ÔÇª County, and FDEPÔÇØ is qualitatively correct and uses ÔÇ£may,ÔÇØ which accurately reflects variability.
+
+- ÔÇ£FSS handles the permitting process and coordinates with the relevant agencies on your behalfÔÇØ is an internal business-operations claim that must be verified against the clientÔÇÖs own materials or removed if not confirmed. There is no external source to validate this.
+
+**Direction:**
+
+- The **jurisdictional part** (ÔÇ£permit requirements varyÔÇª may involveÔÇªÔÇØ) is directionally correct and safe to keep as qualitative language.
+- The **operational promise** (ÔÇ£FSS handles the permitting processÔÇªÔÇØ) can stay only if the client explicitly confirms this is standard practice. Otherwise, it should be flagged for internal confirmation, not external sourcing.
+
+---
+
+### 2. Quantitative / Numerical Claims
+
+#### A. Content Length Guidance
+
+**Claim:**  
+Current word count ~400; recommended 1,200ÔÇô1,500 words for a stronger service page.
+
+**Verification:**
+
+- SEO best practices for local service area pages recommend *at least* 500ÔÇô800 words of unique, locally tailored content.[1]  
+- No authoritative primary source mandates a specific 1,200ÔÇô1,500 word range; this is a strategic recommendation, not a factual statement about Google or local SEO rules.[1][6][7]
+
+**Direction:**  
+- Treat 1,200ÔÇô1,500 words as an internal strategy guideline, not as a quoted ÔÇ£industry standardÔÇØ statistic. Do **not** frame it as ÔÇ£Google recommendsÔÇØ or similar.
+
+#### B. ÔÇ£500 miles of coastlineÔÇØ / ÔÇ£50 to 100 years oldÔÇØ (aging seawalls)
+
+The brief references:
+
+- ÔÇ£500 miles of coastlineÔÇØ  
+- ÔÇ£many seawalls are 50 to 100 years old and near the end of their lifespanÔÇØ
+
+These are not hard-coded into the draft, but theyÔÇÖre encouraged as ÔÇ£existing copyÔÇØ to keep/tighten.
+
+**Verification:**
+
+- Pinellas County and St. Petersburg do have extensive shoreline, but the exact figure of ÔÇ£500 miles of coastlineÔÇØ is not confirmed in the provided search results, and such numbers vary by definition (oceanfront vs. bay vs. canal shoreline).  
+- The statement that ÔÇ£many seawalls are 50 to 100 years oldÔÇØ is plausible given midÔÇæ20thÔÇæcentury development patterns around Tampa Bay, but there is no primary governmental or academic source in the retrieved results confirming this specific age range or that ÔÇ£manyÔÇØ seawalls fall in this band.
+
+**Direction:**
+
+- Both ÔÇ£500 milesÔÇØ and ÔÇ£50 to 100 yearsÔÇØ are **unverified precise figures** and should not be presented as factual statistics.  
+- Use qualitative wording instead, e.g., ÔÇ£extensive waterfront developmentÔÇØ and ÔÇ£many older, midÔÇæcentury seawalls approaching the end of their typical service life,ÔÇØ unless the client provides a citable government/engineering source with exact figures.
+
+#### C. ÔÇ£Extend a seawallÔÇÖs life by decades versus full replacementÔÇØ
+
+**Claim:**  
+ÔÇ£Early repair and inspection can extend a seawall's life by decades versus full replacement.ÔÇØ
+
+**Verification:**
+
+- There is no specific primary source in the results that quantifies the life extension from timely repairs as ÔÇ£decades.ÔÇØ  
+- Coastal engineering literature often notes that maintenance and repair can significantly prolong lifespan, but exact duration depends on design, materials, loads, and environment; ÔÇ£decadesÔÇØ is an unverified quantitative claim, not supported by a standardized figure.
+
+**Direction:**
+
+- ÔÜá´©Å **REWRITE**: Change to qualitative language such as ÔÇ£can significantly extend a seawallÔÇÖs service life and delay the need for full replacementÔÇØ without ÔÇ£decadesÔÇØ or any number of years unless you locate a specific engineering guideline from a credible source (e.g., USACE, state coastal engineering manual) with that number.
+
+#### D. Search Volume, KD, CPC Statistics
+
+The brief lists Ahrefs data, e.g.:
+
+- ÔÇ£seawall repair st petersburg (60 vol)ÔÇØ  
+- ÔÇ£seawall repair st petersburg fl (30 vol, CPC $4.00, commercial + local intent)ÔÇØ  
+- ÔÇ£seawall repair near me (4,700 vol, KD 2)ÔÇØ
+
+These are **internal SEO tool metrics** intended for the writer/SEO team, not for inclusion in the public-facing copy.
+
+**Direction:**
+
+- These figures are **tool-specific estimates**, not authoritative external statistics and should **never appear in the on-page copy** as factual claims.  
+- Keep them only as **internal guidance**; do not quote them in the article text or marketing claims.
+
+---
+
+### 3. Procedural / Process Claims
+
+The brief outlines an ÔÇ£Our St. Petersburg seawall repair processÔÇØ section, with steps like:
+
+- Free waterfront evaluation and structural assessment  
+- Identify root cause (erosion, tieback failure, hydrostatic pressure, cap deterioration)  
+- Recommend repair vs. replacement  
+- Perform repair methods (soil stabilization and grouting, concrete patching, tieback/deadman reinforcement, cap repair or replacement, seam and joint sealing)  
+- Final inspection and site cleanup  
+
+**Assessment:**
+
+- These steps are generic and plausible for a professional seawall repair contractor but are **company-specific process descriptions**, not legal or scientific claims.
+- There is no external requirement that they must follow precisely these steps, so they donÔÇÖt require verification with regulators.
+- They should match the clientÔÇÖs actual operations; if not, they must be adjusted internally.
+
+**Direction:**
+
+- Safe to include as long as they accurately reflect what FSS does.
+- Do not attribute these steps to any external authority (e.g., ÔÇ£required by lawÔÇØ or ÔÇ£per FDEP guidelinesÔÇØ) unless you have specific regulatory text confirming that.
+
+---
+
+### 4. Penalties, Timelines, or Regulatory Deadlines
+
+The brief contains **no** explicit claims about:
+
+- Fines  
+- Deadlines  
+- Permit turnaround times  
+- Legal penalties  
+
+No additional work is needed here; just ensure none are introduced in drafting without backing from local ordinances or Florida law.
+
+---
+
+### 5. Named Experts / Authors / Byline Checks
+
+The brief refers to:
+
+- Company name: **Florida Seawall Solutions (FSS)**  
+- License number: **License #CBC 1265946 (already in footer)**  
+- Phone number: **(888) 426-1002**
+
+There are **no named individuals** (physicians, engineers with credentials, etc.) mentioned in the brief, so no person-level verification is required.
+
+#### License Number Claim
+
+**Claim:**  
+ÔÇ£License #CBC 1265946 (already in footer)ÔÇØ
+
+**Assessment:**
+
+- This is a Florida contractor license format (CBC = Certified Building Contractor).  
+- This must be verified directly via the Florida Department of Business & Professional Regulation (DBPR) license lookup, which is not included in provided search results.
+
+**Direction:**
+
+- Internally confirm that ÔÇ£CBC 1265946ÔÇØ is the correct and active license number for the entity that owns the website.  
+- The license number itself should not be altered; just ensure it matches DBPR records.
+
+---
+
+### 6. Technical / Mechanism vs. Outcome (Medical-style Conflation Check)
+
+Although this is a construction/engineering brief (not pharmacological), the same principle applies: distinguishing **mechanism** from **outcome**.
+
+Examples:
+
+- Mechanism-like terms: ÔÇ£soil stabilization and grouting,ÔÇØ ÔÇ£helical tiebacks,ÔÇØ ÔÇ£deadman anchors,ÔÇØ ÔÇ£vinyl sheet pile,ÔÇØ ÔÇ£hydrostatic pressure,ÔÇØ ÔÇ£saltwater corrosion.ÔÇØ
+- Outcome-like claims: ÔÇ£prevents the need for full replacement,ÔÇØ ÔÇ£extends a seawallÔÇÖs life by decades.ÔÇØ
+
+**Direction:**
+
+- It is acceptable to say mechanisms *help address* erosion or bowing or *reduce the risk* of further damage.  
+- Avoid overstating outcomes in quantified terms (e.g., ÔÇ£guarantees no failure for 50 yearsÔÇØ) unless backed by warranty documents or engineering studies.
+
+---
+
+### 7. Marketing / Performance / ÔÇ£X% BetterÔÇØ Type Claims
+
+The brief, as written, **does not** include any numeric performance or ROI claims (e.g., ÔÇ£50% more effective,ÔÇØ ÔÇ£3x stronger,ÔÇØ etc.). That is good.
+
+- ÔÇ£Expert seawall repairÔÇØ and ÔÇ£Experienced and ReputableÔÇØ are **qualitative marketing phrases**. They are allowed but should not be turned into numeric claims (e.g., ÔÇ£the most experienced in Pinellas CountyÔÇØ) unless backed by evidence.
+
+---
+
+## BRIEF STAT AUDIT (Mandatory)
+
+Below is a list of all quantified or potentially-statistical claims mentioned or implied in the brief, with a verdict for each.
+
+### 1. ÔÇ£~400 wordsÔÇØ current content length
+
+- **Context:** ÔÇ£Current Word Count: ~400 words (thin)ÔÇØ
+- **Use:** Internal editorial note only.
+- **Verdict:** Ô£à VERIFIED for internal planning only  
+  - Writer may mention ÔÇ£the existing page was thinÔÇØ in internal documentation, but this number should not appear on the public page.
+
+### 2. Recommended ÔÇ£1,200 to 1,500 wordsÔÇØ
+
+- **Context:** ÔÇ£Recommended Word Count: 1,200 to 1,500 wordsÔÇØ
+- **Use:** Internal content strategy guidance.
+- **Verdict:** ÔÜá´©Å REWRITE (internal-only guideline)  
+  - Keep as an internal target.  
+  - Do not present it in the article as an SEO ÔÇ£ruleÔÇØ or external standard.
+
+### 3. ÔÇ£500 miles of coastlineÔÇØ (mentioned in brief as existing copy to keep)
+
+- **Context:** Describing St. Petersburg/Pinellas waterfront.  
+- **Verification:** Not confirmed in provided authoritative sources; shoreline length varies by definition and source.
+- **Verdict:** ÔØî REMOVE FROM BRIEF (or REWRITE qualitatively)  
+  - Replace with ÔÇ£extensive coastlineÔÇØ or ÔÇ£extensive waterfront and canal systemsÔÇØ instead of a hard number unless a specific government source is later found to support ÔÇ£500 miles.ÔÇØ
+
+### 4. ÔÇ£Many seawalls are 50 to 100 years oldÔÇØ / ÔÇ£midÔÇæcentury seawalls ÔÇª near the end of their lifespanÔÇØ
+
+- **Context:** Aging infrastructure framing.
+- **Verification:** Plausible historically but not confirmed with a primary source for that specific age range or prevalence.
+- **Verdict:** ÔÜá´©Å REWRITE  
+  - Use qualitative phrasing such as ÔÇ£many older, midÔÇæcentury seawalls are reaching the end of their typical service lifeÔÇØ without specific years.
+
+### 5. ÔÇ£Early repair and inspection can extend a seawallÔÇÖs life by decades versus full replacementÔÇØ
+
+- **Verification:** No specific primary source confirming ÔÇ£by decadesÔÇØ; longevity gains are highly caseÔÇæspecific.
+- **Verdict:** ÔÜá´©Å REWRITE  
+  - Change to: ÔÇ£Early repair and inspection can significantly extend a seawallÔÇÖs service life and delay the need for full replacement.ÔÇØ
+
+### 6. Search volume and CPC metrics (e.g., ÔÇ£60 volÔÇØ, ÔÇ£30 volÔÇØ, ÔÇ£20 volÔÇØ, ÔÇ£4,700 vol, KD 2, CPC $4.00ÔÇØ)
+
+- **Context:** Ahrefs data in keyword list.
+- **Verification:** These are proprietary tool estimates, not authoritative external stats.
+- **Verdict:** Ô£à VERIFIED for internal SEO planning ONLY  
+  - Do **not** use these numbers in public-facing copy.  
+  - Only the SEO team should see them; they must not appear in headings, FAQs, or body text.
+
+### 7. ÔÇ£8 to 12 outbound internal linksÔÇØ
+
+- **Context:** ÔÇ£Target: 8 to 12 outbound internal links from this page.ÔÇØ
+- **Use:** Internal SEO best-practice guideline.
+- **Verdict:** Ô£à VERIFIED as an internal heuristic  
+  - This is a strategy target, not a factual claim; do not state it on the page.
+
+### 8. ÔÇ£Hurricane restoration experience (Ian, Helene, Milton)ÔÇØ
+
+- **Context:** EÔÇæEÔÇæAÔÇæT signal suggestion.
+- **Verification:** It is not verified in the search results that FSS has worked specifically on projects after each named storm.
+- **Verdict:** ÔÜá´©Å REWRITE / CONFIRM  
+  - Only reference specific storms (e.g., ÔÇ£Hurricane IanÔÇØ) if the company actually has documented work related to those events. Otherwise, use generalized language like ÔÇ£post-hurricane seawall repairs and evaluationsÔÇØ without naming specific storms.
+
+---
+
+## Summary Guidance for the Writer
+
+- Do **not** include any raw keyword volumes, CPC values, or KD scores in the page content. Those are SEO planning metrics only.
+- Remove or rewrite any **specific numeric coastal or age figures** (e.g., ÔÇ£500 miles,ÔÇØ ÔÇ£50ÔÇô100 years,ÔÇØ ÔÇ£decadesÔÇØ) unless you can tie them to a primary governmental or engineering source.
+- Keep permit language **qualitative** and accurate: ÔÇ£permit requirements vary and may involveÔÇªÔÇØ is safe; do not specify timelines, automatic approvals, or guaranteed outcomes without authoritative backing.
+- Ensure any claims about FSSÔÇÖs process (ÔÇ£we handle permitting,ÔÇØ ÔÇ£hurricane restoration experienceÔÇØ) accurately reflect current operations and documented experience; these should be internally confirmed by the client, not assumed.
+\n\n====== NODE: Post-Draft Fact Checker ======
+--- RUN 0 ITEM 0 ---
+Meta Title: Seawall Repair St. Petersburg FL | Florida Seawall Solutions  
+Meta Description: Expert seawall repair in St. Petersburg, St. Pete Beach, and Pinellas County. Free evaluations for erosion, cracking, cap damage, and storm repair.
+
+# Seawall Repair St Petersburg FL: Practical Help For Waterfront Homeowners
+
+If you are staring at a crack, a sinkhole behind your wall, or a leaning section of seawall, you are not aloneÔÇöand you are right to take it seriously. Florida Seawall Solutions focuses on helping St. Petersburg waterfront property owners stabilize, repair, and extend the life of their seawalls before small issues turn into major shoreline loss or structural problems.
+
+This page walks you through how to spot real seawall trouble, what your repair options look like, and how to move forward without feeling like you are signing up for unnecessary construction. The goal is simple: help you protect your property, keep your yard useable, and make a clear, informed decision about what to do next.
+
+---
+
+## Common Seawall Problems St. Petersburg Homeowners Face
+
+Most people only really look at their seawall when something seems ÔÇ£off.ÔÇØ Here are the issues St. Pete owners most often notice first:
+
+- **Cracks in the wall or cap**  
+  Hairline cracks are common as concrete ages, but wider cracks, missing chunks, or cracks that keep growing are a sign the wall is under stress, not just cosmetic aging.
+
+- **Sinkholes or depressions behind the wall**  
+  Soft spots in the yard, settling pavers, or sudden holes forming a few feet landward of the seawall usually mean soil is washing out through joints, cracks, or gaps at the base of the wall.
+
+- **Leaning, bowing, or bulging panels**  
+  When a wall starts to lean toward the water, bulge in the middle, or look uneven from one section to the next, it usually indicates tieback issues, soil loss, or hydrostatic pressure building up behind the wall.
+
+- **Water leaking through seams or joints**  
+  A little weeping is normal, but steady streams, visible jetting, or cloudy water pushing through gaps can show active erosion and soil movement behind the structure.
+
+- **Cap deterioration and exposed rebar**  
+  The top concrete cap helps tie the structure together. When it cracks deeply, breaks, or exposes rusting steel, that section of seawall is more vulnerable in storms and at high tide.
+
+- **Post-storm changes**  
+  After a tropical storm or hurricane, homeowners often notice new cracks, fresh sinkholes, or sections that suddenly look different. Fast changes after a major weather event are a strong reason to get a professional seawall evaluation in St. Petersburg.
+
+If you are seeing one or more of these signs, it does not automatically mean you need a full seawall replacement. It does mean it is worth having a qualified seawall contractor examine what is happening below the surface.
+
+---
+
+## Why Fast, Professional Seawall Repair Matters in St. Petersburg
+
+Waterfront living in St. Petersburg, Clearwater, and the surrounding Pinellas County canals is a huge lifestyle benefit, but it also means your property line sits right where tides, waves, and weather constantly push and pull.
+
+Here is why you do not want to ignore seawall problems:
+
+- **Small issues rarely stay small**  
+  A crack today can turn into soil loss tomorrow and a leaning section next season. Once water finds a path, it keeps using it.
+
+- **Erosion does not just move sandÔÇöit moves your yard**  
+  When soil washes out behind your wall, it can undermine patios, pools, walkways, and even parts of your homeÔÇÖs foundation if left unchecked.
+
+- **Storms hit damaged seawalls harder**  
+  A wall that is already cracked, unbraced, or leaking heavily is more vulnerable during strong wind, waves, and extreme high tides.
+
+- **Early repair can make replacement a last resort**  
+  Addressing the root causeÔÇöwhether it is soil loss, tieback problems, or poor drainageÔÇöcan significantly extend the usable life of an existing structure and delay full rebuild costs.
+
+Having a trusted local resource for **seawall repair St Petersburg FL** or **bulkhead repair St Petersburg** is less about ÔÇ£do I need work today?ÔÇØ and more about ÔÇ£how do I protect what I have and plan smartly for the future?ÔÇØ
+
+---
+
+## Our St. Petersburg Seawall Repair Process (What to Expect)
+
+Most homeowners do not want a crash course in marine constructionÔÇöthey just want to know what will happen if they pick up the phone. A typical repair project with experienced seawall contractors in St. Petersburg follows a few clear steps:
+
+1. **On-site inspection and conversation**  
+   A technician walks the seawall, looks at the water side and land side, checks visible cracks, sinkholes, and drainage, and, importantly, listens to what you have been noticing over time.
+
+2. **Finding the root cause, not just the symptoms**  
+   Good **seawall companies St Petersburg** do more than point at cracks. They look for:  
+   - Evidence of soil loss behind or under the wall  
+   - Signs of tieback or deadman anchor distress  
+   - Poor or blocked drainage that is building pressure  
+   - Cap and joint conditions along the entire length, not just the obvious problem area  
+
+3. **Clear explanation of options**  
+   You should walk away knowing:  
+   - What is causing the problem  
+   - Which areas are urgent versus ÔÇ£watch and monitorÔÇØ  
+   - When straightforward repair makes sense  
+   - When it is more cost-effective to start planning for partial or full replacement  
+
+4. **Proposal tailored to your specific seawall and budget**  
+   Seawalls and bulkheads varyÔÇöolder concrete panels, newer systems, and **vinyl seawall panels St Petersburg** all behave a bit differently. A credible proposal focuses on your wall type, your risk tolerance, and how long you plan to keep the property.
+
+5. **Permitting and scheduling**  
+   Depending on the scope, seawall repair in Saint Petersburg FL may involve permits through local and state channels. Requirements vary by location and type of work, so it helps to work with a contractor used to coordinating in this area.
+
+6. **Repair work with shoreline protection in mind**  
+   Good repair is not just about patching what you can see. It should address structural support, soil stability, and proper water relief so the same problem does not quietly rebuild itself behind a fresh concrete patch.
+
+7. **Walkthrough and maintenance guidance**  
+   At the end, you should understand what was done, what to watch for, and how often it makes sense to have your seawall recheckedÔÇöespecially after major storms or visible changes in your yard.
+
+---
+
+## Repair Options: From Soil Stabilization to Cap and Panel Fixes
+
+The right repair approach depends on how your seawall was built, how old it is, and what kind of damage and movement are happening now. Here are common methods used by reputable seawall contractors in St. Petersburg and Clearwater:
+
+### Soil stabilization and leak sealing
+
+When sinkholes and voids form, it almost always means soil is migrating through joints, cracks, or under the wall.
+
+- **Pressure grouting or resin injection** can be used to fill voids behind the wall and limit further washout.  
+- **Leak sealing at joints and cracks** helps cut off the paths water is using to pull material from your yard into the bay or canal.
+
+This type of work is often recommended when the wall is still largely upright, but the ground behind it is settling or collapsing.
+
+### Tieback and anchor reinforcement
+
+Many older seawalls rely on buried deadman anchors and tieback rods to hold the wall upright. When those elements fail, the wall can lean or bow.
+
+- **Tieback repairs** may involve exposing and reinforcing existing anchors or adding new anchor systems to re-stabilize the wall.  
+- In some cases, modern anchor options allow reinforcement without completely rebuilding the visible seawall face.
+
+This kind of work is especially relevant if you are seeing long stretches of wall leaning toward the water, or if nearby structures are starting to show movement.
+
+### Cap repair or replacement
+
+The cap ties everything together and often supports fencing, railings, or even docks.
+
+- **Localized cap repairs** may be enough when damage is limited to a small area.  
+- **Full cap replacement** can be necessary when large sections are cracked through, spalling, or exposing rusted reinforcing steel.
+
+If you notice chunks of the cap missing, loose sections, or exposed rebar, it is a sign to have a seawall specialist evaluate the overall structural health.
+
+### Panel, sheet pile, or bulkhead repairs
+
+Depending on your structure, you might have:
+
+- Older concrete panel seawalls  
+- Metal or timber bulkheads  
+- **Vinyl seawall panels St Petersburg** and newer sheet pile systems  
+
+Repairs can include patching, adding support in front of existing panels, or, where feasible, replacing specific sections instead of rebuilding the entire lineal footage at once.
+
+---
+
+## How to Choose a Seawall Contractor in St. Petersburg
+
+When you search for **seawall repair St Petersburg Clearwater FL**, you will see plenty of options. Here are practical things to look for as you narrow it down:
+
+- **Specific experience with seawalls and bulkheads**  
+  General concrete or landscaping experience is not the same as marine and shoreline work. You want a contractor who regularly handles seawall and bulkhead repair, tiebacks, soil stabilization, and cap work.
+
+- **Comfort working in neighborhoods like yours**  
+  Canal homes, open bayfront properties, and tight-lot urban waterfronts all come with different access and permitting challenges. Ask what similar projects they have done nearby.
+
+- **Clear communication and realistic options**  
+  A trustworthy contractor will walk you through both repair and replacement scenarios when appropriate, not push one path without explanation.
+
+- **Local familiarity**  
+  Knowledge of Pinellas County shoreline conditions, typical construction styles in your era of neighborhood, and common failure patterns in the area helps them identify issues faster and plan more durable repairs.
+
+- **Insurance, licensing, and references**  
+  You want a properly licensed and insured contractor who can point to past projects, especially where the homeowner started with exactly the kind of concern you have nowÔÇöcracks, sinkholes, or post-storm movement.
+
+If you feel rushed, confused by jargon, or pressured into a bigger project than your wallÔÇÖs actual condition justifies, it is worth getting a second opinion.
+
+---
+
+## When Repair Is EnoughÔÇöand When to Start Planning for Replacement
+
+Not every damaged seawall needs to be torn out and rebuilt. In many cases, timely repair and soil stabilization can keep an existing seawall going while you plan and budget for eventual replacement.
+
+Repair is often appropriate when:
+
+- The wall is mostly upright with only minor lean or bowing  
+- Damage is limited to specific sections, joints, or the cap  
+- Sinkholes and voids are present, but there is still good structural material to work with  
+
+Replacement or significant reconstruction may enter the conversation when:
+
+- Large stretches of wall are badly leaning, rotated, or failing together  
+- Tiebacks or anchors have severely deteriorated across long segments  
+- The structure has reached an age and condition where major money spent on repair would be better invested in a modern system  
+
+A good seawall contractor in St. Petersburg should be willing to talk openly about both scenarios and help you avoid ÔÇ£throwing good money after badÔÇØ while still exploring practical repair options where they make sense.
+
+---
+
+## Next Steps if You Are Worried About Your Seawall
+
+If you are noticing cracks, sinkholes, a leaning section, or new damage after a storm, do not try to diagnose everything from your patio. Your best move is simple:
+
+- Take clear photos of what worries youÔÇöfrom both the yard side and, if safely possible, from the water.  
+- Reach out to a local specialist like Florida Seawall Solutions that focuses on **seawall repair Saint Petersburg FL** and nearby coastal communities.  
+- Ask for an on-site evaluation and a straightforward explanation of what is happening, what your options are, and what they recommend now versus later.
+
+The goal is not just to ÔÇ£fix a wall.ÔÇØ It is to protect your property line, keep your outdoor space stable and usable, and give you a plan you feel comfortable with as a waterfront homeowner in St. Petersburg.
+\n\n====== NODE: Client Site Researcher ======
+--- RUN 0 ITEM 0 ---
+Florida Seawall Solutions is a **family-owned, fully licensed seawall contractor** that provides **seawall erosion control, repair, maintenance, and construction services across Florida**, including **St. Petersburg and the greater Tampa Bay area**.[2][4]
+
+Below is a structured summary of what is explicitly published on their own website, plus clearly labeled external verification where noted.
+
+---
+
+## 1. Core Services & Actual Service Names
+
+From the main site and service-areas pages, Florida Seawall Solutions explicitly lists the following services:
+
+**Primary service categories (as labeled on their site)**[2][4]:
+
+- **Seawall Erosion Control**[2]  
+- **Seawall Repair & Maintenance**[2]  
+- **Seawall Construction**[2]  
+- **Seawall Storm Mitigation**[2]  
+
+On their **ÔÇ£Serving All of FloridaÔÇØ (service areas)** page, they further break out services as:
+
+- **Seawall Maintenance & Repair**[4]  
+- **Residential Seawall Construction**[4]  
+
+On the **St. Petersburg page**, they emphasize:
+
+- **Seawall Repair in St. Petersburg, St. Pete Beach, Pinellas Park and Palm Harbor**[1]  
+
+They also promote:
+
+- **Emergency / urgent storm damage mitigation** ÔÇô ÔÇ£Call us now for urgent storm damage mitigationÔÇØ[2]  
+- **FREE, onsite, no obligation evaluation**[2]  
+
+### How they describe the work (from their own copy)
+
+- They specialize in addressing issues like **potholes forming along the seawall, cracks in the cap, cracks in vertical panels, and water bubbling up from the ground**.[2]  
+- They state they **ÔÇ£use state-of-the-art materials and technologies to repair your seawall.ÔÇØ**[2]  
+
+---
+
+## 2. St. PetersburgÔÇôSpecific Information (Relevant to Article Topic)
+
+The client has a dedicated **St. Petersburg, FL Seawall Repair** page.[1]
+
+Key statements and claims for St. Petersburg and nearby areas:
+
+- Page title: **ÔÇ£St. Petersburg, FL Seawall RepairÔÇØ**.[1]  
+- Headline: **ÔÇ£St. Petersburg, FL Seawall Repair ÔÇô FREE Estimates ÔÇô Experienced and Reputable ÔÇô Guaranteed WorkÔÇØ**.[1]  
+- Service reach: **ÔÇ£Seawall Repair in St. Petersburg, St. Pete Beach, Pinellas Park and Palm HarborÔÇØ**.[1]  
+- They state:  
+  - ÔÇ£Florida Seawall Solutions serves all of St Petersburg as well as all the communities surrounding it.ÔÇØ[1]  
+  - They have **ÔÇ£helped many St. Petersburg homeowners and businesses maintain or save their seawalls.ÔÇØ**[1]  
+  - ÔÇ£When it comes to seawall repairs, St. Petersburg residents know they can trust Florida Seawall Solutions.ÔÇØ[1]  
+
+These details confirm they actively market **seawall repair** services in **St. Petersburg, St. Pete Beach, Pinellas Park, Palm Harbor, and surrounding communities**.
+
+---
+
+## 3. Service Areas & Locations
+
+### Statewide coverage
+
+The **ÔÇ£Serving All Of FloridaÔÇØ** page states:
+
+- ÔÇ£Florida Seawall Solutions is proud to call the state of Florida home.ÔÇØ[4]  
+- ÔÇ£We work diligently to service the state from coast to coast.ÔÇØ[4]  
+- ÔÇ£Below are a list of cities and towns that we currently service for your seawall repair needs.ÔÇØ[4]  
+
+The page then lists many Florida locations; relevant to your topic and region, it explicitly includes**[4]**:
+
+- **St. Petersburg**  
+- **St. Pete Beach**  
+- **St. James City**  
+- **Tampa**  
+- (plus numerous others across the state)  
+
+This confirms they **formally list St. Petersburg and Tampa Bay markets as service areas**.
+
+### General service positioning
+
+From the homepage:
+
+- ÔÇ£We provide the best seawall erosion control Florida has to offer.ÔÇØ[2]  
+- ÔÇ£We service the entire state with a commitment to hard honest work with guarantees that their work will last.ÔÇØ[1]  
+
+---
+
+## 4. Licenses, Credentials, and Company Profile
+
+### Licensing
+
+Their own website states:
+
+- **ÔÇ£Our company is fully licensed (License #CBC 1265946).ÔÇØ**[2]  
+
+External properties (not the core website, but tied to them) show:
+
+- Facebook lists **License #CBC 1255391** alongside Florida Seawall SolutionsÔÇÖ name.[7]  
+
+Because the user instruction prioritizes the clientÔÇÖs own website, the **verified on-site license number** is:
+
+- **License #CBC 1265946** (as published on floridaseawallsolutions.com).[2]  
+
+### Company characteristics
+
+The homepage provides these explicit claims:
+
+- **ÔÇ£Our company is family owned and operated.ÔÇØ**[2]  
+- **ÔÇ£Our teams are highly trained and we use state-of-the-art materials and technologies to repair your seawall.ÔÇØ**[2]  
+- **ÔÇ£We guarantee our work.ÔÇØ**[2]  
+- **ÔÇ£Our prices are competitive, request your free evaluation today!ÔÇØ**[2]  
+
+They also position themselves as:
+
+- **ÔÇ£Florida's most trusted seawall repair or build company.ÔÇØ**[2]  
+
+On the St. Petersburg page, they further highlight:
+
+- **ÔÇ£Experienced and ReputableÔÇØ**[1]  
+- **ÔÇ£Guaranteed WorkÔÇØ**[1]  
+
+---
+
+## 5. Contact Information & Communication
+
+From the site:
+
+- **Primary phone number:** **(888) 426-1002** appears multiple times on the homepage and St. Petersburg page.[1][2]  
+- They invite customers to:  
+  - **ÔÇ£Call us now for urgent storm damage mitigation 888-426-1002.ÔÇØ**[2]  
+  - **ÔÇ£Request your FREE, onsite, no obligation evaluation today!ÔÇØ**[2]  
+
+(Additional numbers and email appear on social media, but your instructions prioritize the website; the verified on-site number is **(888) 426-1002**.[1][2])
+
+---
+
+## 6. Guarantees, Differentiators, and Positioning
+
+Specifically stated differentiators on their site include:
+
+- **FREE Estimates** ÔÇô highlighted on both the homepage and St. Petersburg page.[1][2]  
+- **Guaranteed Work** ÔÇô explicitly listed.[1][2]  
+- **Experienced and Reputable** ÔÇô used as a key descriptor for St. Petersburg services.[1]  
+- **Family owned and operated** ÔÇô directly stated.[2]  
+- **Fully licensed** ÔÇô with license number provided.[2]  
+- **State-of-the-art materials and technologies** ÔÇô emphasized in their approach to seawall repair.[2]  
+- **Competitive prices** ÔÇô ÔÇ£Our prices are competitive, request your free evaluation today!ÔÇØ[2]  
+- **Coverage ÔÇ£from coast to coastÔÇØ in Florida** ÔÇô statewide service positioning.[4]  
+
+For St. Petersburg in particular, they stress:
+
+- Trusted by **ÔÇ£many St. Petersburg homeowners and businessesÔÇØ** for maintaining or saving their seawalls.[1]  
+
+---
+
+## 7. Named Team Members
+
+On the **clientÔÇÖs own website**, there are **no individual team members named** in the pages surfaced (home, service areas, St. Petersburg page).[1][2][4]
+
+External sources (e.g., license records) reference an individual, but since your instructions restrict profile content to **what is published on their own website**, this does **not** qualify as verified on-site team information.
+
+- Therefore: **UNABLE TO VERIFY named team members or specific roles from the clientÔÇÖs website.**
+
+---
+
+## 8. Numerical Statistics & Figures (Critical Requirement)
+
+From the clientÔÇÖs own web pages reviewed:
+
+- **License number:** **CBC 1265946**.[2]  
+- **Phone number:** **(888) 426-1002**.[1][2]  
+
+Beyond license and phone, there are:
+
+- **No published outcome metrics** (e.g., % improvement, success rates).  
+- **No published counts** of clients, projects, or years in business.  
+- **No explicit pricing tables or dollar amounts** (only that prices are ÔÇ£competitiveÔÇØ).[2]  
+- **No time-based metrics** (e.g., response times, duration of projects) listed on the pages reviewed.
+
+Given the instructions to focus strictly on their own website content:
+
+**CONFIRMED: No numerical statistics (such as percentages, success rates, project counts, years in business, or dollar-based pricing) are published on the clientÔÇÖs website beyond license and phone numbers.**
+
+---
+
+## 9. Summary for ÔÇ£Seawall Repair in St. Petersburg, FLÔÇØ Context
+
+For your article topic, the verified points you can safely attribute to Florida Seawall Solutions based on their own site are:
+
+- They provide **seawall repair, maintenance, erosion control, construction, and storm mitigation services**.[2][4]  
+- They explicitly market **ÔÇ£St. Petersburg, FL Seawall RepairÔÇØ** with **FREE estimates, guaranteed work, and an experienced, reputable team**.[1]  
+- They serve **St. Petersburg, St. Pete Beach, Pinellas Park, Palm Harbor**, and the wider Florida coast-to-coast region.[1][4]  
+- They are a **family-owned, fully licensed contractor (License #CBC 1265946)** using **state-of-the-art materials and technologies** for seawall work.[2]  
+- They encourage property owners seeing **potholes by the seawall, cracks in caps or panels, or water bubbling up from the ground** to request a **FREE, onsite, no-obligation evaluation**.[2]  
+
+All statements above are grounded strictly in content explicitly published on floridaseawallsolutions.com.
+\n\n====== NODE: Claims Extractor & Manifest Generator ======
+--- RUN 0 ITEM 0 (text) ---
+To create the JSON Manifest, I need the content from both the Creative Brief and the Client Website Data. Please provide these inputs so I can proceed with extracting the claims, statistics, and rules according to the guidelines.
+\n\n====== NODE: AI Agent1 ======

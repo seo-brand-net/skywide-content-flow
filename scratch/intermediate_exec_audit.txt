@@ -1,0 +1,48 @@
+=== INTERMEDIATE EXECUTION AUDIT (2996→3004) ===
+
+── EXEC 2999 | canceled | 9s | article: "Stump Grinding vs. Stump Removal: Comparison Guide" | client: Merkel's Tree Service 
+   Nodes run: 16 | Create Doc: false | Update Doc: false | Surgical Rewriter: false
+   Last 5 nodes: Keyword Validator, Create folder1, Clean1, Anthropic Chat Model4, Claude Draft (Claude Opus 3)1
+   !! HALLUCINATION FLAGS (3):
+  [Client Site Researcher] contains "Chris Merkel"
+  [Client Site Researcher] contains "founded in 2021"
+  [Client Profile Extractor] contains "Chris Merkel"
+
+── EXEC 3000 | error | 155s | article: "Stump Grinding vs. Stump Removal: Comparison Guide" | client: Merkel's Tree Service 
+   Nodes run: 20 | Create Doc: false | Update Doc: false | Surgical Rewriter: false
+   Last 5 nodes: Claude Draft (Claude Opus 3)1, Data Check & Research Gaps1, Post-Draft Fact Checker, Anthropic Chat Model5, Claude Keyword Check + Semantic Gap1
+   !! HALLUCINATION FLAGS (5):
+  [Client Site Researcher] contains "Chris Merkel"
+  [Client Site Researcher] contains "founded in 2021"
+  [Client Profile Extractor] contains "Chris Merkel"
+  [Claude Draft (Claude Opus 3)1] contains "Chris Merkel"
+  [Claude Draft (Claude Opus 3)1] contains "founded in 2021"
+
+── EXEC 3001 | error | 158s | article: "Anxiety VA Rating and Benefits" | client: InjuredVeterans.com
+   Nodes run: 20 | Create Doc: false | Update Doc: false | Surgical Rewriter: false
+   Last 5 nodes: Claude Draft (Claude Opus 3)1, Data Check & Research Gaps1, Post-Draft Fact Checker, Anthropic Chat Model5, Claude Keyword Check + Semantic Gap1
+   !! HALLUCINATION FLAGS (1):
+  [Post-Draft Fact Checker] contains "years of"
+
+── EXEC 3002 | error | 1s | article: "—" | client: —
+   Nodes run: 2 | Create Doc: false | Update Doc: false | Surgical Rewriter: false
+   Last 5 nodes: Error Trigger, Send Error to Dashboard
+   ✓ No hallucination flags found
+
+── EXEC 3003 | error | 0s | article: "—" | client: —
+   Nodes run: 2 | Create Doc: false | Update Doc: false | Surgical Rewriter: false
+   Last 5 nodes: Error Trigger, Send Error to Dashboard
+   ✓ No hallucination flags found
+
+── EXEC 3004 | success | 823s | article: "Stump Grinding vs. Stump Removal: Comparison Guide" | client: Merkel's Tree Service 
+   Nodes run: 51 | Create Doc: true | Update Doc: true | Surgical Rewriter: true
+   Last 5 nodes: Document Export Sanitization4, Create a document17, Update a document17, Signal Completion (Update a document17), Google Drive Notification1
+   !! HALLUCINATION FLAGS (5):
+  [Client Site Researcher] contains "Chris Merkel"
+  [Client Site Researcher] contains "founded in 2021"
+  [Client Profile Extractor] contains "Chris Merkel"
+  [Claude Draft (Claude Opus 3)1] contains "Chris Merkel"
+  [Claude Draft (Claude Opus 3)1] contains "founded in 2021"
+
+
+=== DEEP DIVE: Runs that wrote to Drive WITHOUT Surgical Rewriter ===

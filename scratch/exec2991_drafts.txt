@@ -1,0 +1,42 @@
+[
+  {
+    "node": "Claude EEAT Injection1",
+    "flag": "established",
+    "excerpt": "proven medical effects. The distinction matters—traditional practitioners work with mapacho through established protocols passed down through generations, creating a framework of respect and intentionality aroun"
+  },
+  {
+    "node": "Claude Humanised Readability Rewrite",
+    "flag": "established",
+    "excerpt": "oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocity, and inte"
+  },
+  {
+    "node": "Claude NLP & PR Optimization",
+    "flag": "established",
+    "excerpt": "oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocity, and inte"
+  },
+  {
+    "node": "Claude Final SEO Snippet Optimization",
+    "flag": "established",
+    "excerpt": "oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocity, and inte"
+  },
+  {
+    "node": "Surgical Rewriter",
+    "flag": "origin",
+    "excerpt": "sourcing mapacho, choose organic, pesticide-free, and ethically sourced products with clear tribal origin. For available options, visit our [product collection page](#). Store in cool, dark, and dry condit"
+  },
+  {
+    "node": "Document Export Sanitization5",
+    "flag": "established",
+    "excerpt": "oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocity, and inte"
+  },
+  {
+    "node": "Document Export Sanitization4",
+    "flag": "origin",
+    "excerpt": "sourcing mapacho, choose organic, pesticide-free, and ethically sourced products with clear tribal origin transparency. Look for sourcing indicators that reflect fair trade practices and authentic indigeno"
+  },
+  {
+    "node": "Document Export Sanitization4",
+    "flag": "origin",
+    "excerpt": "le in healing and spiritual tradition. Sourcing quality mapacho involves understanding its cultural origins and maintaining proper storage to preserve its qualities. For more information, explore our [Rapé"
+  }
+]

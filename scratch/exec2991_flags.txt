@@ -1,0 +1,25 @@
+﻿Exec 2991 status: success | nodes: Webhook1, Startup Update, Parse Creative Brief (LLM), If Revision, Client Site Researcher, Client Profile Extractor, Claims Extractor Model, Claims Extractor & Manifest Generator, Pre-Draft Fact Checker, Keyword Strategist, Execution Data1, Keyword Validator, Create folder1, Clean1, Anthropic Chat Model4, Claude Draft (Claude Opus 3)1, Data Check & Research Gaps1, Post-Draft Fact Checker, Anthropic Chat Model5, Claude Keyword Check + Semantic Gap1, Wait18, Anthropic Chat Model6, Claude Apply Recommendations1, Anthropic Chat Model7, Claude EEAT Injection1, Wait14, OpenAI SEO Optimization1, Wait17, Anthropic Chat Model11, Claude NLP & PR Optimization, Wait7, Anthropic Chat Model12, Claude Humanised Readability Rewrite, Wait10, Anthropic Chat Model13, Claude Final SEO Snippet Optimization, Document Export Sanitization5, Edit Fields2, Edit Fields3, OpenAI Chat Model1, Structured Output Parser1, AI Agent1, Max Iterations1, If1, Surgical Rewriter, Restore Retry Count1, Document Export Sanitization4, Create a document17, Update a document17, Signal Completion (Update a document17), Google Drive Notification1
+
+[Claude EEAT Injection1] FLAG: established
+  >> proven medical effects. The distinction mattersÔÇötraditional practitioners work with mapacho through established protocols passed down through generations, creating a framework of respect and intention
+
+[Claude Humanised Readability Rewrite] FLAG: established
+  >> oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocit
+
+[Claude NLP & PR Optimization] FLAG: established
+  >> oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocit
+
+[Claude Final SEO Snippet Optimization] FLAG: established
+  >> oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocit
+
+[Surgical Rewriter] FLAG: origin
+  >> sourcing mapacho, choose organic, pesticide-free, and ethically sourced products with clear tribal origin. For available options, visit our [product collection page](#). Store in cool, dark, and dry c
+
+[Document Export Sanitization5] FLAG: established
+  >> oven medical treatments. Traditional practitioners, known as curanderos or tobacco maestros, follow established protocols passed down through generations, maintaining frameworks of respect, reciprocit
+
+[Document Export Sanitization4] FLAG: origin
+  >> sourcing mapacho, choose organic, pesticide-free, and ethically sourced products with clear tribal origin transparency. Look for sourcing indicators that reflect fair trade practices and authentic ind
+
+[Document Export Sanitization4] FLAG: origin
+  >> le in healing and spiritual tradition. Sourcing quality mapacho involves understanding its cultural origins and maintaining proper storage to preserve its qualities. For more information, explore our 

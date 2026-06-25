@@ -1,0 +1,78 @@
+﻿ALL NODES EXECUTED (51):
+ - Webhook1
+ - Startup Update
+ - Parse Creative Brief (LLM)
+ - If Revision
+ - Client Site Researcher
+ - Client Profile Extractor
+ - Claims Extractor Model
+ - Claims Extractor & Manifest Generator
+ - Pre-Draft Fact Checker
+ - Keyword Strategist
+ - Execution Data1
+ - Keyword Validator
+ - Create folder1
+ - Clean1
+ - Anthropic Chat Model4
+ - Claude Draft (Claude Opus 3)1
+ - Data Check & Research Gaps1
+ - Post-Draft Fact Checker
+ - Anthropic Chat Model5
+ - Claude Keyword Check + Semantic Gap1
+ - Wait18
+ - Anthropic Chat Model6
+ - Claude Apply Recommendations1
+ - Anthropic Chat Model7
+ - Claude EEAT Injection1
+ - Wait14
+ - OpenAI SEO Optimization1
+ - Wait17
+ - Anthropic Chat Model11
+ - Claude NLP & PR Optimization
+ - Wait7
+ - Anthropic Chat Model12
+ - Claude Humanised Readability Rewrite
+ - Wait10
+ - Anthropic Chat Model13
+ - Claude Final SEO Snippet Optimization
+ - Document Export Sanitization5
+ - Edit Fields2
+ - Edit Fields3
+ - OpenAI Chat Model1
+ - Structured Output Parser1
+ - AI Agent1
+ - Max Iterations1
+ - If1
+ - Surgical Rewriter
+ - Restore Retry Count1
+ - Document Export Sanitization4
+ - Create a document17
+ - Update a document17
+ - Signal Completion (Update a document17)
+ - Google Drive Notification1
+\n=== LOOKING FOR FACT CHECK / CLAIM NODES ===
+Fact-related nodes: [
+  'Client Site Researcher',
+  'Claims Extractor Model',
+  'Claims Extractor & Manifest Generator',
+  'Pre-Draft Fact Checker',
+  'Data Check & Research Gaps1',
+  'Post-Draft Fact Checker',
+  'Claude Keyword Check + Semantic Gap1'
+]
+\n--- Client Site Researcher ---
+{"main":[[{"json":{"id":"1b83c7a2-3171-4ed6-8f16-fe426061bd7a","model":"sonar-pro","created":1781882570,"usage":{"prompt_tokens":491,"completion_tokens":2068,"total_tokens":2559,"search_context_size":"low","cost":{"input_tokens_cost":0.00147,"output_tokens_cost":0.03102,"request_cost":0.006,"total_cost":0.03849}},"citations":["https://www.floridaseawallsolutions.com/st-petersburg","https://www.floridaseawallsolutions.com","https://gulfandbaymarine.com/article-seawall-repair-and-maintenance","htt
+\n--- Claims Extractor Model ---
+{"ai_languageModel":[[{"json":{"response":{"generations":[[{"text":"To create the JSON Manifest, I need the content from both the Creative Brief and the Client Website Data. Please provide these inputs so I can proceed with extracting the claims, statistics, and rules according to the guidelines.","generationInfo":{"finish_reason":"stop"}}]]},"tokenUsage":{"completionTokens":43,"promptTokens":197,"totalTokens":240}}}]]}
+\n--- Claims Extractor & Manifest Generator ---
+{"main":[[{"json":{"text":"To create the JSON Manifest, I need the content from both the Creative Brief and the Client Website Data. Please provide these inputs so I can proceed with extracting the claims, statistics, and rules according to the guidelines."},"pairedItem":{"item":0}}]]}
+\n--- Pre-Draft Fact Checker ---
+{"main":[[{"json":{"id":"74f8afd8-cb2b-45e4-a624-2b36618df939","model":"sonar-pro","created":1781882605,"usage":{"prompt_tokens":4777,"completion_tokens":3087,"total_tokens":7864,"search_context_size":"low","cost":{"input_tokens_cost":0.01433,"output_tokens_cost":0.0463,"request_cost":0.006,"total_cost":0.06664}},"citations":["https://redbrickweb.com/blog/seo-for-service-area-business","https://outpaceseo.com/article/service-area-seo-strategy/","https://www.youtube.com/watch?v=HaE09nfF7f4","http
+\n--- Data Check & Research Gaps1 ---
+{"main":[[{"json":{"id":"61ec333e-0160-45bf-a1d4-4171c2745589","model":"sonar-pro","created":1781882704,"usage":{"prompt_tokens":5055,"completion_tokens":2526,"total_tokens":7581,"search_context_size":"low","cost":{"input_tokens_cost":0.01516,"output_tokens_cost":0.03789,"request_cost":0.006,"total_cost":0.05905}},"citations":["https://libguides.niagaracc.suny.edu/c.php?g=600825&p=4158986","https://credibility.stanford.edu/guidelines/index.html","https://www.youtube.com/watch?v=g7F8hr_CAz8","htt
+\n--- Post-Draft Fact Checker ---
+{"main":[[{"json":{"id":"4def07dc-346e-4a95-96f4-fe60de323bec","model":"sonar-pro","created":1781882716,"usage":{"prompt_tokens":7862,"completion_tokens":2580,"total_tokens":10442,"search_context_size":"low","cost":{"input_tokens_cost":0.02359,"output_tokens_cost":0.0387,"request_cost":0.006,"total_cost":0.06829}},"citations":["https://redbrickweb.com/blog/seo-for-service-area-business","https://www.youtube.com/watch?v=HaE09nfF7f4","https://howlecreative.com/what-are-geo-targeted-ppp-articles-bo
+\n--- Claude Keyword Check + Semantic Gap1 ---
+{"main":[[{"json":{"text":"# SEO Keyword Gap Analysis: Seawall Repair St. Petersburg FL\n\n## Executive Summary\n\nThe article is well-written with strong conversational tone and solid keyword placement. However, several critical gaps need addressing to meet the keyword placement checklist requirements. The primary keyword \"seawall repair in st petersburg\" appears only once in the introÔÇöit's missing from the H1, any H2, and the final paragraph. Additionally, multiple semantic keywords are abse
+\n=== SCORING / QA NODES ===
+Score nodes: []

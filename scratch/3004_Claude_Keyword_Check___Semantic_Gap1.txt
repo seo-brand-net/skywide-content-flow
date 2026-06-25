@@ -1,0 +1,112 @@
+# SEO Keyword Gap Analysis: Stump Grinding vs. Stump Removal
+
+## Current State Assessment
+
+**Word Count Status**: The article is well within the 1440-1760 word target range. All recommendations below are designed to maintain this range through replacements rather than additions.
+
+**Keyword Placement Audit**:
+- ✅ H1 contains primary keyword ("Stump Grinding vs. Stump Removal")
+- ✅ Primary keyword appears in first 100 words (present in opening paragraph)
+- ⚠️ No H2 currently contains the primary keyword or close variation
+- ✅ Secondary keyword "difference between stump grinding and stump removal" appears in body
+- ❌ Semantic keywords need verification and integration
+
+---
+
+## HIGH PRIORITY (Word Count Neutral - Implement First)
+
+### 1. Add Primary Keyword Variation to an H2 Heading
+**Current**: "Key Differences Between Stump Grinding and Stump Removal"
+**Recommended**: "Stump Grinding vs. Stump Removal: Key Differences to Consider"
+
+*Rationale*: This places the exact primary keyword in an H2 while maintaining natural readability. Zero word count impact.
+
+### 2. Integrate Semantic Keyword "stump grinding or stump removal" 
+**Location**: Section "How to Decide What's Right for Your Property"
+**Current sentence**: "When choosing between stump grinding and stump removal, think through the following questions:"
+**Replace with**: "When deciding between stump grinding or stump removal, think through the following questions:"
+
+*Rationale*: Natural swap that captures the semantic variation without changing word count.
+
+### 3. Add Semantic Keyword "stump removal vs. grinding" to Body
+**Location**: Final section "Practical Advice Before You Decide"
+**Current**: "As you weigh the difference between stump grinding and stump removal..."
+**Replace with**: "As you weigh stump removal vs. grinding for your property..."
+
+*Rationale*: Captures semantic variation while reducing word count by 2 words—helpful for balance.
+
+### 4. Integrate "stump grinder vs. stump removal" Naturally
+**Location**: "Understanding Stump Grinding" section
+**Current**: "A stump grinder is a specialized machine with a rotating cutting wheel..."
+**Add to preceding sentence**: "When comparing a stump grinder vs. stump removal equipment, the grinding approach is typically less invasive. A stump grinder is a specialized machine..."
+
+*Rationale*: Adds semantic keyword with minimal word addition (+8 words). Can be offset by trimming elsewhere.
+
+**Offset suggestion**: In the same section, trim "In practice, the machine is positioned over the stump and moved back and forth as the cutting wheel shaves the wood down" to "The machine is positioned over the stump and moved back and forth, shaving the wood down." (-6 words)
+
+---
+
+## CONTENT ADDITIONS (Paired with Equal Cuts)
+
+### 5. Add Primary Keyword to Final Paragraph
+**Current final paragraph**: "Taking the time to choose the right method now will help your yard stay safe, functional, and attractive for years to come."
+
+**Replace with**: "Understanding stump grinding vs. stump removal now will help your yard stay safe, functional, and attractive for years to come."
+
+*Rationale*: Ensures primary keyword appears in the final paragraph per placement rules. Word count neutral.
+
+### 6. Strengthen FAQ Opportunity (If FAQ Section Exists or Can Be Added)
+**Suggested Question**: "What is the difference between stump grinding and stump removal?"
+
+*Note*: If no FAQ section exists, this could be added as a brief subsection under "Practical Advice" with a 2-3 sentence answer. However, this would add approximately 40-50 words.
+
+**Offset**: Trim the "Local Considerations" permits paragraph from:
+"In many Berks County municipalities, stump grinding or stump removal on typical residential property is treated as routine yard maintenance. However, rules are not identical across townships and boroughs."
+
+To: "In many Berks County municipalities, stump grinding or stump removal is treated as routine yard maintenance, though rules vary across townships and boroughs." (-12 words)
+
+---
+
+## STRUCTURE IMPROVEMENTS (Minimal Word Count Impact)
+
+### 7. Optimize H2 for "Understanding Complete Stump Removal"
+**Current**: "Understanding Complete Stump Removal"
+**Consider**: "Complete Stump Removal: When Extraction Makes Sense"
+
+*Rationale*: More action-oriented heading that signals user intent. Maintains professional tone without keyword stuffing.
+
+### 8. Add Question-Based Subheading for Featured Snippet Potential
+**Location**: Under "How to Decide What's Right for Your Property"
+**Current H3**: "1. What are your future plans for the area?"
+
+This is already well-structured for featured snippets. No change needed—just confirmation that the numbered list format supports snippet capture.
+
+---
+
+## TONE PROTECTION WARNINGS
+
+### Avoid These Pitfalls:
+1. **Do not force keywords into the CTA sentences**. The current "If you are in Berks County and still on the fence, consider having Merkel's Tree Service walk the property with you" reads naturally. Adding keywords here would sound promotional and forced.
+
+2. **Do not add keyword variations to bullet points**. The existing bullet lists (wood chip uses, grinding benefits, removal situations) are clean and scannable. Inserting keywords would disrupt the professional, informational flow.
+
+3. **Preserve the conversational "you" voice**. Phrases like "If you are staring at an old tree stump" and "you are not alone" establish trust. Do not replace these with keyword-heavy alternatives.
+
+4. **Maintain the balanced comparison tone**. The article currently presents both options fairly without pushing one service over another. This informational neutrality aligns with user intent and should not be compromised for keyword density.
+
+---
+
+## Summary Checklist
+
+| Requirement | Current Status | Action Needed |
+|-------------|----------------|---------------|
+| Primary keyword in H1 | ✅ Present | None |
+| Primary keyword in first 100 words | ✅ Present | None |
+| Primary keyword in at least one H2 | ❌ Missing | Implement Recommendation #1 |
+| Primary keyword in final paragraph | ❌ Missing | Implement Recommendation #5 |
+| Secondary keyword appears in body | ✅ Present | None |
+| Semantic: "stump grinding or stump removal" | ❌ Missing | Implement Recommendation #2 |
+| Semantic: "stump removal vs. grinding" | ❌ Missing | Implement Recommendation #3 |
+| Semantic: "stump grinder vs. stump removal" | ❌ Missing | Implement Recommendation #4 |
+
+**Estimated Net Word Count Change**: +2 to -4 words (well within acceptable range)

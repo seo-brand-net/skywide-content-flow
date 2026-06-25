@@ -1,0 +1,12 @@
+{
+  "verified": true,
+  "client_name": "Merkel's Tree Service",
+  "services": ["Tree Removal", "Tree Trimming", "Stump Grinding", "Land Clearing", "Residential & Commercial Tree Care"],
+  "products": [],
+  "service_areas": ["Berks County, PA"],
+  "credentials": ["Fully Licensed And Insured"],
+  "team": ["Chris Merkel - Founder"],
+  "unique_claims": ["Local tree care experts specializing in high-quality work", "Premier tree service in Berks County"],
+  "published_stats": ["Founded in 2021"],
+  "confidence": "high"
+}
