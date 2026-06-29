@@ -80,7 +80,7 @@ export function AddIndexingClientModal({ onClientAdded }: AddIndexingClientModal
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button variant="outline" className="flex items-center gap-2 bg-background border-border/50 text-foreground hover:bg-muted/50 font-bold px-6 h-12">
                     <PlusCircle className="w-4 h-4" />
                     Add Client
                 </Button>
