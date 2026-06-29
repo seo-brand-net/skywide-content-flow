@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { AddClientModal } from '@/components/clients/AddClientModal';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -357,13 +358,16 @@ export default function IndexingHistoryPage() {
                         </p>
                     </div>
 
-                    <Button
-                        onClick={() => router.push('/indexing/run')}
-                        className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
-                    >
-                        <Zap className="w-4 h-4 mr-2" />
-                        Run Indexing
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <AddClientModal onClientAdded={() => refetch()} />
+                        <Button
+                            onClick={() => router.push('/indexing/run')}
+                            className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
+                        >
+                            <Zap className="w-4 h-4 mr-2" />
+                            Run Indexing
+                        </Button>
+                    </div>
                 </div>
 
                 {/* ── Stats Row ───────────────────────────────────────────── */}
