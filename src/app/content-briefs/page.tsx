@@ -27,6 +27,17 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -34,6 +45,12 @@ import { usePusherGlobalBriefUpdates } from '@/hooks/usePusherGlobalBriefUpdates
 import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
 
+
+// GAS hard-kills executions around the 6-minute mark; past that, an IN_PROGRESS
+// row with no update is almost certainly a silently-crashed run, not an active one.
+const STUCK_THRESHOLD_MS = 6 * 60 * 1000;
+const isRowStuck = (row: WorkbookRow) =>
+    row.status === 'IN_PROGRESS' && Date.now() - new Date(row.updated_at).getTime() > STUCK_THRESHOLD_MS;
 
 export default function ContentBriefActivityLog() {
     const { user } = useAuth();
@@ -408,6 +425,36 @@ export default function ContentBriefActivityLog() {
                                                             <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${restartingRowId === row.id ? 'animate-spin' : ''}`} />
                                                             {restartingRowId === row.id ? 'Restarting...' : 'Restart'}
                                                         </Button>
+                                                    )}
+                                                    {isRowStuck(row) && (
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 text-xs font-bold text-amber-600 hover:text-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30"
+                                                                    onClick={(e) => e.stopPropagation()}
+                                                                    disabled={restartingRowId === row.id}
+                                                                >
+                                                                    <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${restartingRowId === row.id ? 'animate-spin' : ''}`} />
+                                                                    {restartingRowId === row.id ? 'Restarting...' : 'Cancel & Restart'}
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Cancel stuck generation?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        "{row.primary_keyword}" has been In Progress for over 6 minutes with no update — the generation engine likely crashed silently. Cancelling will reset this row and start a fresh attempt.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Keep Waiting</AlertDialogCancel>
+                                                                    <AlertDialogAction onClick={() => handleRestartRow(row)}>
+                                                                        Cancel &amp; Restart
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
                                                     )}
                                                     <Button
                                                         variant="ghost"

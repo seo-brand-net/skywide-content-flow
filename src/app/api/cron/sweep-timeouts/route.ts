@@ -11,11 +11,14 @@ const pusher = new Pusher({
 });
 
 export async function GET(request: Request) {
-    const url = new URL(request.url);
-    const secret = url.searchParams.get('secret');
-
-    // Secure the cron endpoint using the existing GAS_CALLBACK_SECRET
-    if (process.env.GAS_CALLBACK_SECRET && secret !== process.env.GAS_CALLBACK_SECRET) {
+    // Validate via Authorization header (Vercel's recommended cron auth pattern).
+    // Vercel automatically sends `Authorization: Bearer $CRON_SECRET` when invoking
+    // cron routes -- the previous `?secret=` query-param check never matched because
+    // vercel.json's cron `path` carries no query string, so this route 401'd on every
+    // single scheduled invocation and never actually swept anything.
+    const authHeader = request.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
