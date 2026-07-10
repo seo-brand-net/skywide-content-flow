@@ -479,7 +479,7 @@
           "cachedResultName": "claude-sonnet-4-5"
         },
         "options": {
-          "thinking": true
+          "thinking": false
         }
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
