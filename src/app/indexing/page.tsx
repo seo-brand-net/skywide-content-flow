@@ -36,7 +36,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { AddIndexingClientModal } from '@/components/indexing/AddIndexingClientModal';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -70,9 +69,9 @@ interface IndexingRunRow {
     completed_at: string | null;
     user_id: string | null;
     // Joined fields
-    indexing_clients: {
+    clients: {
         name: string;
-        gsc_property: string;
+        indexing_gsc_property: string;
     } | null;
 }
 
@@ -214,7 +213,7 @@ export default function IndexingHistoryPage() {
                 .from('indexing_runs')
                 .select(`
                     *,
-                    indexing_clients ( name, gsc_property )
+                    clients ( name, indexing_gsc_property )
                 `)
                 .order('created_at', { ascending: false })
                 .limit(500);
@@ -263,7 +262,7 @@ export default function IndexingHistoryPage() {
             result = result.filter(r => {
                 const profile = r.user_id ? profilesMap[r.user_id] : null;
                 return (
-                    r.indexing_clients?.name?.toLowerCase().includes(q) ||
+                    r.clients?.name?.toLowerCase().includes(q) ||
                     profile?.full_name?.toLowerCase().includes(q) ||
                     profile?.email?.toLowerCase().includes(q)
                 );
@@ -288,9 +287,9 @@ export default function IndexingHistoryPage() {
         // Apply search filter to the overview as well
         if (searchTerm.trim()) {
             const q = searchTerm.toLowerCase();
-            result = result.filter(r => 
-                r.indexing_clients?.name?.toLowerCase().includes(q) ||
-                r.indexing_clients?.gsc_property?.toLowerCase().includes(q)
+            result = result.filter(r =>
+                r.clients?.name?.toLowerCase().includes(q) ||
+                r.clients?.indexing_gsc_property?.toLowerCase().includes(q)
             );
         }
         return result;
@@ -359,7 +358,9 @@ export default function IndexingHistoryPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <AddIndexingClientModal onClientAdded={() => refetch()} />
+                        <Button variant="outline" className="gap-2" onClick={() => router.push('/settings/clients')}>
+                            Manage Clients
+                        </Button>
                         <Button
                             onClick={() => router.push('/indexing/run')}
                             className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
@@ -463,10 +464,10 @@ export default function IndexingHistoryPage() {
                                                         <td className="px-6 py-5">
                                                             <div className="flex flex-col gap-0.5">
                                                                 <span className="font-bold text-foreground text-xs">
-                                                                    {run.indexing_clients?.name || 'Unknown Client'}
+                                                                    {run.clients?.name || 'Unknown Client'}
                                                                 </span>
                                                                 <span className="text-[10px] text-muted-foreground font-mono">
-                                                                    {run.indexing_clients?.gsc_property}
+                                                                    {run.clients?.indexing_gsc_property}
                                                                 </span>
                                                             </div>
                                                         </td>

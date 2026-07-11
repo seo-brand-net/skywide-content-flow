@@ -10,6 +10,7 @@ export interface ContentRequest {
     title_audience: string;
     seo_keywords: string;
     article_type: string;
+    client_id: string | null;
     client_name: string;
     client_website_url: string | null;
     creative_brief: string;

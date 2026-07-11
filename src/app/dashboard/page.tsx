@@ -3,6 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 interface FormData {
     articleTitle: string;
     titleAudience: string;
+    clientId: string;
     clientName: string;
     clientWebsiteUrl: string;
     creativeBrief: string;
@@ -36,9 +38,25 @@ export default function Dashboard() {
     const { isAdmin } = useUserRole(user?.id);
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const { data: clients = [] } = useQuery({
+        queryKey: ['clients_content_enabled'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('clients')
+                .select('id, name')
+                .eq('content_enabled', true)
+                .order('name');
+            if (error) throw error;
+            return data as { id: string; name: string }[];
+        },
+        enabled: !!user?.id,
+    });
+
     const [formData, setFormData] = useState<FormData>({
         articleTitle: '',
         titleAudience: '',
+        clientId: '',
         clientName: '',
         clientWebsiteUrl: '',
         creativeBrief: '',
@@ -57,7 +75,7 @@ export default function Dashboard() {
 
         if (!formData.articleTitle.trim()) newErrors.articleTitle = 'Article Title is required';
         if (!formData.titleAudience.trim()) newErrors.titleAudience = 'Title Audience is required';
-        if (!formData.clientName.trim()) newErrors.clientName = 'Client Name is required';
+        if (!formData.clientId.trim()) newErrors.clientName = 'Client is required';
         if (!formData.creativeBrief.trim()) newErrors.creativeBrief = 'Creative Brief is required';
         if (!formData.articleType) newErrors.articleType = 'Article Type is required';
         if (!formData.wordCount.trim()) newErrors.wordCount = 'Word Count is required';
@@ -110,6 +128,7 @@ export default function Dashboard() {
                         tone: formData.tone,
                         word_count: parseInt(formData.wordCount) || 0,
                         article_type: formData.articleType,
+                        client_id: formData.clientId || null,
                         client_name: formData.clientName,
                         client_website_url: formData.clientWebsiteUrl || null,
                         creative_brief: formData.creativeBrief,
@@ -215,6 +234,7 @@ export default function Dashboard() {
             setFormData({
                 articleTitle: '',
                 titleAudience: '',
+                clientId: '',
                 clientName: '',
                 clientWebsiteUrl: '',
                 creativeBrief: '',
@@ -247,6 +267,7 @@ export default function Dashboard() {
         setFormData({
             articleTitle: "Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses",
             titleAudience: "Professional Engineers",
+            clientId: clients.find(c => c.name === "Align PEO")?.id || '',
             clientName: "Align PEO",
             clientWebsiteUrl: "",
             creativeBrief: `Blog Title: Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses Reading Time: ~6 minutes Target Word Count: ~1,000 words
@@ -351,6 +372,7 @@ NCEES — PE Licensing Resources — https://ncees.org/engineering/pe/`,
         setFormData({
             articleTitle: "Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens",
             titleAudience: "Parents and Caregivers",
+            clientId: clients.find(c => c.name === "Paradigm Treatment")?.id || '',
             clientName: "Paradigm Treatment",
             clientWebsiteUrl: "",
             creativeBrief: `Blog Brief: Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens
@@ -584,15 +606,25 @@ Integrated treatment supports long-term resilience.`,
 
                                 <div className="space-y-2">
                                     <Label htmlFor="clientName" className="text-foreground">
-                                        Client Name *
+                                        Client *
                                     </Label>
-                                    <Input
-                                        id="clientName"
-                                        value={formData.clientName}
-                                        onChange={(e) => handleInputChange('clientName', e.target.value)}
-                                        className={`bg-background border-input ${errors.clientName ? 'border-destructive' : ''}`}
-                                        placeholder="Enter client name"
-                                    />
+                                    <Select
+                                        value={formData.clientId}
+                                        onValueChange={(id) => {
+                                            const client = clients.find(c => c.id === id);
+                                            setFormData(prev => ({ ...prev, clientId: id, clientName: client?.name || '' }));
+                                            if (errors.clientName) setErrors(prev => ({ ...prev, clientName: undefined }));
+                                        }}
+                                    >
+                                        <SelectTrigger id="clientName" className={`bg-background border-input ${errors.clientName ? 'border-destructive' : ''}`}>
+                                            <SelectValue placeholder="Select a client" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {clients.map((c) => (
+                                                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     {errors.clientName && (
                                         <p className="text-sm text-destructive">{errors.clientName}</p>
                                     )}

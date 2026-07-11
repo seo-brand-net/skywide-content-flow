@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -18,25 +18,82 @@ import { PlusCircle, Loader2, Info } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
-interface AddClientModalProps {
-    onClientAdded: () => void;
+export interface EditableClient {
+    id: string;
+    name: string;
+    workbook_url: string | null;
+    folder_url: string | null;
+    sitemap_url: string | null;
+    industry: string | null;
+    key_selling_point: string | null;
+    content_enabled: boolean;
+    gbp_enabled: boolean;
+    indexing_enabled: boolean;
+    gbp_sheet_id: string | null;
+    gbp_topics_tab_name: string | null;
+    indexing_workbook_url: string | null;
+    indexing_tab_name: string | null;
+    indexing_gsc_property: string | null;
+    indexing_bing_site_url: string | null;
 }
 
-export function AddClientModal({ onClientAdded }: AddClientModalProps) {
+interface AddClientModalProps {
+    onClientAdded: () => void;
+    client?: EditableClient;
+    trigger?: React.ReactNode;
+}
+
+const emptyFormData = {
+    name: '',
+    workbook_url: '',
+    folder_url: '',
+    sitemap_url: '',
+    industry: '',
+    key_selling_point: '',
+    content_enabled: true,
+    gbp_enabled: false,
+    indexing_enabled: false,
+    gbp_sheet_id: '',
+    gbp_topics_tab_name: 'Topics',
+    indexing_workbook_url: '',
+    indexing_tab_name: 'Indexing Automation',
+    indexing_gsc_property: '',
+    indexing_bing_site_url: '',
+};
+
+function toFormData(client: EditableClient): typeof emptyFormData {
+    return {
+        name: client.name,
+        workbook_url: client.workbook_url || '',
+        folder_url: client.folder_url || '',
+        sitemap_url: client.sitemap_url || '',
+        industry: client.industry || '',
+        key_selling_point: client.key_selling_point || '',
+        content_enabled: client.content_enabled,
+        gbp_enabled: client.gbp_enabled,
+        indexing_enabled: client.indexing_enabled,
+        gbp_sheet_id: client.gbp_sheet_id || '',
+        gbp_topics_tab_name: client.gbp_topics_tab_name || 'Topics',
+        indexing_workbook_url: client.indexing_workbook_url || '',
+        indexing_tab_name: client.indexing_tab_name || 'Indexing Automation',
+        indexing_gsc_property: client.indexing_gsc_property || '',
+        indexing_bing_site_url: client.indexing_bing_site_url || '',
+    };
+}
+
+export function AddClientModal({ onClientAdded, client, trigger }: AddClientModalProps) {
+    const isEditMode = !!client;
     const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
-    const [formData, setFormData] = useState({
-        name: '',
-        workbook_url: '',
-        folder_url: '',
-        sitemap_url: '',
-        industry: '',
-        key_selling_point: '',
-        content_enabled: true,
-        gbp_enabled: false,
-        indexing_enabled: false,
-    });
+    const [formData, setFormData] = useState(client ? toFormData(client) : emptyFormData);
+
+    // Re-sync form state if a different client is opened for editing, or the dialog re-opens.
+    useEffect(() => {
+        if (isOpen) {
+            setFormData(client ? toFormData(client) : emptyFormData);
+        }
+    }, [isOpen, client]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,46 +106,43 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                 folderId = formData.folder_url.split('/folders/')[1].split('?')[0];
             }
 
-            const { error } = await supabase
-                .from('clients')
-                .insert([{
-                    name: formData.name,
-                    workbook_url: formData.workbook_url || null,
-                    folder_url: formData.folder_url || null,
-                    folder_id: folderId || null,
-                    sitemap_url: formData.sitemap_url || null,
-                    industry: formData.industry || null,
-                    key_selling_point: formData.key_selling_point || null,
-                    content_enabled: formData.content_enabled,
-                    gbp_enabled: formData.gbp_enabled,
-                    indexing_enabled: formData.indexing_enabled,
-                }]);
+            const payload = {
+                name: formData.name,
+                workbook_url: formData.workbook_url || null,
+                folder_url: formData.folder_url || null,
+                folder_id: folderId || null,
+                sitemap_url: formData.sitemap_url || null,
+                industry: formData.industry || null,
+                key_selling_point: formData.key_selling_point || null,
+                content_enabled: formData.content_enabled,
+                gbp_enabled: formData.gbp_enabled,
+                indexing_enabled: formData.indexing_enabled,
+                gbp_sheet_id: formData.gbp_enabled ? (formData.gbp_sheet_id || null) : null,
+                gbp_topics_tab_name: formData.gbp_enabled ? (formData.gbp_topics_tab_name || 'Topics') : null,
+                indexing_workbook_url: formData.indexing_enabled ? (formData.indexing_workbook_url || null) : null,
+                indexing_tab_name: formData.indexing_enabled ? (formData.indexing_tab_name || 'Indexing Automation') : null,
+                indexing_gsc_property: formData.indexing_enabled ? (formData.indexing_gsc_property || null) : null,
+                indexing_bing_site_url: formData.indexing_enabled ? (formData.indexing_bing_site_url || null) : null,
+            };
+
+            const { error } = isEditMode
+                ? await supabase.from('clients').update(payload).eq('id', client.id)
+                : await supabase.from('clients').insert([payload]);
 
             if (error) throw error;
 
             toast({
-                title: "Client added",
-                description: `${formData.name} has been added successfully.`,
+                title: isEditMode ? "Client updated" : "Client added",
+                description: `${formData.name} has been ${isEditMode ? 'updated' : 'added'} successfully.`,
             });
 
-            setFormData({
-                name: '',
-                workbook_url: '',
-                folder_url: '',
-                sitemap_url: '',
-                industry: '',
-                key_selling_point: '',
-                content_enabled: true,
-                gbp_enabled: false,
-                indexing_enabled: false,
-            });
             setIsOpen(false);
             onClientAdded();
         } catch (error: any) {
-            console.error('Error adding client:', error);
+            console.error('Error saving client:', error);
             toast({
                 title: "Error",
-                description: error.message || "Failed to add client.",
+                description: error.message || "Failed to save client.",
                 variant: "destructive",
             });
         } finally {
@@ -99,16 +153,18 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105">
-                    <PlusCircle className="w-4 h-4" />
-                    Add Client
-                </Button>
+                {trigger ?? (
+                    <Button className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105">
+                        <PlusCircle className="w-4 h-4" />
+                        Add Client
+                    </Button>
+                )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[540px] bg-card border-border">
+            <DialogContent className="sm:max-w-[560px] bg-card border-border max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-bold">Add New Client</DialogTitle>
+                    <DialogTitle className="text-xl font-bold">{isEditMode ? `Edit ${client!.name}` : 'Add New Client'}</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
-                        Configure a new client and choose which automations to enable.
+                        Configure this client and choose which automations to enable.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -184,6 +240,7 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                             placeholder="https://docs.google.com/spreadsheets/d/..."
                             className="bg-background border-input"
                         />
+                        <p className="text-xs text-muted-foreground">Content Briefs workbook — separate from the Indexing workbook below.</p>
                     </div>
 
                     {/* Drive Folder URL */}
@@ -231,6 +288,87 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                         </div>
                     </div>
 
+                    {/* GBP config (shown when GBP is enabled) */}
+                    {formData.gbp_enabled && (
+                        <div className="space-y-3 p-4 bg-green-500/5 rounded-xl border border-green-500/20 animate-in fade-in duration-200">
+                            <Label className="text-sm font-semibold text-green-600">GBP Config</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="client-gbp-sheet" className="text-xs font-semibold">Google Sheet ID <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                                <Input
+                                    id="client-gbp-sheet"
+                                    value={formData.gbp_sheet_id}
+                                    onChange={(e) => setFormData({ ...formData, gbp_sheet_id: e.target.value })}
+                                    placeholder="1xh0As6rrHv9WqCDqfgUyvJm8WCPvLf1Hks5RFf-Sf0A"
+                                    className="bg-background border-input h-9 text-sm"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="client-gbp-tab" className="text-xs font-semibold">Topics Tab Name</Label>
+                                <Input
+                                    id="client-gbp-tab"
+                                    value={formData.gbp_topics_tab_name}
+                                    onChange={(e) => setFormData({ ...formData, gbp_topics_tab_name: e.target.value })}
+                                    placeholder="Topics"
+                                    className="bg-background border-input h-9 text-sm"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Indexing config (shown when Indexing is enabled) */}
+                    {formData.indexing_enabled && (
+                        <div className="space-y-3 p-4 bg-purple-500/5 rounded-xl border border-purple-500/20 animate-in fade-in duration-200">
+                            <Label className="text-sm font-semibold text-purple-600">Indexing Config</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="client-idx-workbook" className="text-xs font-semibold">
+                                    Indexing Workbook URL <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="client-idx-workbook"
+                                    value={formData.indexing_workbook_url}
+                                    onChange={(e) => setFormData({ ...formData, indexing_workbook_url: e.target.value })}
+                                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                                    required={formData.indexing_enabled}
+                                    className="bg-background border-input h-9 text-sm"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="client-idx-tab" className="text-xs font-semibold">Tab Name</Label>
+                                <Input
+                                    id="client-idx-tab"
+                                    value={formData.indexing_tab_name}
+                                    onChange={(e) => setFormData({ ...formData, indexing_tab_name: e.target.value })}
+                                    placeholder="Indexing Automation"
+                                    className="bg-background border-input h-9 text-sm"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="client-idx-gsc" className="text-xs font-semibold">
+                                    GSC Property <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="client-idx-gsc"
+                                    value={formData.indexing_gsc_property}
+                                    onChange={(e) => setFormData({ ...formData, indexing_gsc_property: e.target.value })}
+                                    placeholder="https://example.com/ or sc-domain:example.com"
+                                    required={formData.indexing_enabled}
+                                    className="bg-background border-input h-9 text-sm"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="client-idx-bing" className="text-xs font-semibold">Bing Site URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                                <Input
+                                    id="client-idx-bing"
+                                    value={formData.indexing_bing_site_url}
+                                    onChange={(e) => setFormData({ ...formData, indexing_bing_site_url: e.target.value })}
+                                    placeholder="https://example.com"
+                                    className="bg-background border-input h-9 text-sm"
+                                />
+                                <p className="text-xs text-muted-foreground">Leave blank to skip Bing indexing for this client.</p>
+                            </div>
+                        </div>
+                    )}
+
                     <DialogFooter className="pt-2">
                         <Button
                             type="button"
@@ -242,16 +380,20 @@ export function AddClientModal({ onClientAdded }: AddClientModalProps) {
                         </Button>
                         <Button
                             type="submit"
-                            disabled={isSubmitting || !formData.name}
+                            disabled={
+                                isSubmitting ||
+                                !formData.name ||
+                                (formData.indexing_enabled && (!formData.indexing_workbook_url || !formData.indexing_gsc_property))
+                            }
                             className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90"
                         >
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Adding...
+                                    {isEditMode ? 'Saving...' : 'Adding...'}
                                 </>
                             ) : (
-                                'Add Client'
+                                isEditMode ? 'Save Changes' : 'Add Client'
                             )}
                         </Button>
                     </DialogFooter>

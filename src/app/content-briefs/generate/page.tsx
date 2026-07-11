@@ -94,6 +94,7 @@ export default function ContentBriefsPage() {
             const { data, error } = await supabase
                 .from('clients')
                 .select('*')
+                .eq('content_enabled', true)
             if (error) throw error;
             return data as Client[];
         },

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
@@ -55,7 +56,7 @@ function PostCard({ post }: { post: any }) {
             {/* Card Body */}
             <div className="p-4 flex flex-col flex-1">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                    {post.gbp_locations?.location_name || post.gbp_clients?.name || '—'}
+                    {post.client_locations?.location_name || post.clients?.name || '—'}
                 </p>
                 <h3 className="font-semibold text-foreground text-sm leading-snug mb-3 line-clamp-2">
                     {post.post_topic}
@@ -94,6 +95,7 @@ function PostCard({ post }: { post: any }) {
 // ─── Main Generate Page ───────────────────────────────────────────────────────
 export default function GbpGeneratePage() {
     const { user } = useAuth();
+    const { userRole, isInitialLoading } = useUserRole(user?.id);
     const { toast } = useToast();
     const router = useRouter();
     const queryClient = useQueryClient();
@@ -107,7 +109,7 @@ export default function GbpGeneratePage() {
     const { data: clients = [], isLoading: clientsLoading } = useQuery({
         queryKey: ['gbp_clients_active'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('gbp_clients').select('id, name, industry').eq('is_active', true).order('name');
+            const { data, error } = await supabase.from('clients').select('id, name, industry').eq('gbp_enabled', true).order('name');
             if (error) throw error;
             return data;
         },
@@ -120,9 +122,9 @@ export default function GbpGeneratePage() {
         queryFn: async () => {
             if (!selectedClientId) return [];
             const { data, error } = await supabase
-                .from('gbp_locations')
+                .from('client_locations')
                 .select('id, location_name, city, state, sheet_tab_name')
-                .eq('gbp_client_id', selectedClientId)
+                .eq('client_id', selectedClientId)
                 .eq('is_active', true)
                 .order('location_name');
             if (error) throw error;
@@ -137,7 +139,7 @@ export default function GbpGeneratePage() {
         queryFn: async () => {
             if (!selectedClientId) return [];
             let q = supabase.from('gbp_posts').select(`
-                *, gbp_clients(name), gbp_locations(location_name, city, state)
+                *, clients(name), client_locations(location_name, city, state)
             `).eq('gbp_client_id', selectedClientId).order('created_at', { ascending: false }).limit(50);
             if (selectedLocationId !== 'all') q = q.eq('location_id', selectedLocationId);
             const { data, error } = await q;
@@ -190,6 +192,29 @@ export default function GbpGeneratePage() {
     const currentClient = clients.find((c: any) => c.id === selectedClientId);
     const draftCount = posts.filter((p: any) => p.status === 'DRAFT').length;
     const approvedCount = posts.filter((p: any) => p.status === 'APPROVED').length;
+
+    if (isInitialLoading) {
+        return (
+            <Layout>
+                <div className="min-h-screen bg-background flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-brand-blue-crayola/50" />
+                </div>
+            </Layout>
+        );
+    }
+
+    if (userRole !== 'admin') {
+        return (
+            <Layout>
+                <div className="min-h-screen bg-background p-8 flex items-center justify-center">
+                    <div className="text-center space-y-3 opacity-60">
+                        <p className="text-lg font-bold text-foreground">Admin access required</p>
+                        <p className="text-sm text-muted-foreground">You don't have permission to view this page.</p>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
         <Layout>

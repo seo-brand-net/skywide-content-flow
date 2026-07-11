@@ -18,25 +18,16 @@ import {
     Globe,
     MapPin,
     ShieldAlert,
+    Pencil,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { AddClientModal } from '@/components/clients/AddClientModal';
+import { AddClientModal, type EditableClient } from '@/components/clients/AddClientModal';
 import { LocationsPanel } from '@/components/clients/LocationsPanel';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface Client {
-    id: string;
-    name: string;
-    industry: string | null;
-    sitemap_url: string | null;
-    key_selling_point: string | null;
-    workbook_url: string | null;
-    folder_url: string | null;
-    content_enabled: boolean;
-    gbp_enabled: boolean;
-    indexing_enabled: boolean;
+interface Client extends EditableClient {
     created_at: string;
 }
 
@@ -116,7 +107,7 @@ export default function ClientsSettingsPage() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('clients')
-                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, created_at')
+                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url, created_at')
                 .order('name');
             if (error) throw error;
             return data as Client[];
@@ -289,9 +280,25 @@ export default function ClientsSettingsPage() {
 
                                                 {/* Client name + locations */}
                                                 <td className="px-6 py-4">
-                                                    <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
-                                                        {client.name}
-                                                    </p>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
+                                                            {client.name}
+                                                        </p>
+                                                        <AddClientModal
+                                                            client={client}
+                                                            onClientAdded={() => refetch()}
+                                                            trigger={
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-6 w-6 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-brand-blue-crayola transition-opacity"
+                                                                    title={`Edit ${client.name}`}
+                                                                >
+                                                                    <Pencil className="w-3 h-3" />
+                                                                </Button>
+                                                            }
+                                                        />
+                                                    </div>
                                                     {client.sitemap_url && (
                                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate max-w-[220px]">
                                                             {client.sitemap_url}
