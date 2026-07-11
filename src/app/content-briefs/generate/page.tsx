@@ -22,10 +22,10 @@ import {
     RotateCcw,
     Trash2,
     RefreshCw,
-    ArrowLeft
+    ArrowLeft,
+    PlusCircle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { AddClientModal } from '@/components/clients/AddClientModal';
 import { useToast } from "@/hooks/use-toast";
 import { usePusherBriefUpdates } from '@/hooks/usePusherBriefUpdates';
 import {
@@ -433,7 +433,14 @@ export default function ContentBriefsPage() {
                         >
                             <RotateCcw className={`w-4 h-4 ${isLoadingClients ? 'animate-spin' : ''}`} />
                         </Button>
-                        <AddClientModal onClientAdded={() => queryClient.invalidateQueries({ queryKey: ['clients'] })} />
+                        <Button
+                            variant="outline"
+                            className="gap-2"
+                            onClick={() => router.push('/settings/clients/new')}
+                        >
+                            <PlusCircle className="w-4 h-4" />
+                            Add Client
+                        </Button>
                     </div>
                 </div>
 

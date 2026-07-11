@@ -61,6 +61,36 @@ SELECT i.name, true, i.workbook_url, COALESCE(i.tab_name, 'Indexing Automation')
 FROM public.indexing_clients i
 WHERE NOT EXISTS (SELECT 1 FROM public.clients c WHERE lower(c.name) = lower(i.name));
 
+-- ─── 3c. Backfill `clients` from distinct `content_requests.client_name` ────
+-- Content Briefs has historically taken client_name as free text, so most real
+-- clients (~70+) likely only exist as strings on content_requests, never as a
+-- clients row. This reconciles both directions: existing rows (e.g. created via
+-- the GBP/Indexing backfill above) get content_enabled flipped on if they have
+-- content history, and genuinely new names get their own client row.
+
+-- 3c-i. Flip content_enabled on for any existing client with content history
+UPDATE public.clients c
+SET content_enabled = true
+WHERE c.content_enabled = false
+  AND EXISTS (
+    SELECT 1 FROM public.content_requests req
+    WHERE lower(trim(req.client_name)) = lower(c.name)
+  );
+
+-- 3c-ii. Insert client names that only ever existed as free text on content_requests.
+-- DISTINCT ON + lower(trim(...)) collapses case/whitespace variants of the same
+-- name (e.g. "Align PEO" vs "align peo ") down to one canonical row.
+WITH distinct_content_clients AS (
+  SELECT DISTINCT ON (lower(trim(client_name))) trim(client_name) AS name
+  FROM public.content_requests
+  WHERE trim(client_name) <> ''
+  ORDER BY lower(trim(client_name)), client_name
+)
+INSERT INTO public.clients (name, content_enabled, gbp_enabled, indexing_enabled)
+SELECT dc.name, true, false, false
+FROM distinct_content_clients dc
+WHERE NOT EXISTS (SELECT 1 FROM public.clients c WHERE lower(c.name) = lower(dc.name));
+
 -- ─── 4. Backfill `client_locations` from `gbp_locations` ────────────────────
 -- Only insert locations that don't already exist for that client+name (idempotent re-run safety).
 

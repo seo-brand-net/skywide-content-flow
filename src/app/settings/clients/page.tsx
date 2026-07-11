@@ -19,10 +19,12 @@ import {
     MapPin,
     ShieldAlert,
     Pencil,
+    PlusCircle,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { AddClientModal, type EditableClient } from '@/components/clients/AddClientModal';
+import { useRouter } from 'next/navigation';
+import { type EditableClient } from '@/components/clients/ClientForm';
 import { LocationsPanel } from '@/components/clients/LocationsPanel';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -95,6 +97,7 @@ function ServiceToggle({
 export default function ClientsSettingsPage() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const router = useRouter();
     const queryClient = useQueryClient();
     const { userRole, isInitialLoading } = useUserRole(user?.id);
 
@@ -194,7 +197,13 @@ export default function ClientsSettingsPage() {
                             {clients.length} {clients.length === 1 ? 'client' : 'clients'} — manage services and locations in one place.
                         </p>
                     </div>
-                    <AddClientModal onClientAdded={() => refetch()} />
+                    <Button
+                        className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
+                        onClick={() => router.push('/settings/clients/new')}
+                    >
+                        <PlusCircle className="w-4 h-4" />
+                        Add Client
+                    </Button>
                 </div>
 
                 {/* ── Stats Row ─────────────────────────────────────────── */}
@@ -284,20 +293,15 @@ export default function ClientsSettingsPage() {
                                                         <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
                                                             {client.name}
                                                         </p>
-                                                        <AddClientModal
-                                                            client={client}
-                                                            onClientAdded={() => refetch()}
-                                                            trigger={
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="h-6 w-6 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-brand-blue-crayola transition-opacity"
-                                                                    title={`Edit ${client.name}`}
-                                                                >
-                                                                    <Pencil className="w-3 h-3" />
-                                                                </Button>
-                                                            }
-                                                        />
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-6 w-6 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-brand-blue-crayola transition-opacity"
+                                                            title={`Edit ${client.name}`}
+                                                            onClick={() => router.push(`/settings/clients/${client.id}/edit`)}
+                                                        >
+                                                            <Pencil className="w-3 h-3" />
+                                                        </Button>
                                                     </div>
                                                     {client.sitemap_url && (
                                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate max-w-[220px]">
