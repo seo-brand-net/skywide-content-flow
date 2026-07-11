@@ -1054,7 +1054,7 @@
     {
       "parameters": {
         "folderId": "={{ $('Create folder1').first().json.id }}",
-        "title": "={{ $('Webhook1').first().json.body.title }} - Claude"
+        "title": "={{ $('Webhook1').first().json.body.title }} - Optimized"
       },
       "type": "n8n-nodes-base.googleDocs",
       "typeVersion": 2,
@@ -1424,6 +1424,54 @@
         23472,
         8688
       ]
+    },
+    {
+      "parameters": {
+        "folderId": "={{ $('Create folder1').first().json.id }}",
+        "title": "={{ $('Webhook1').first().json.body.title }} - Draft"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        25744,
+        9280
+      ],
+      "id": "c9d1947c-06b2-48a7-8ccb-b8bba8e6cc90",
+      "name": "Create Draft Document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "MtLhGZ2k5z3HZHk8",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ .id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=$('Claude Draft (Claude Opus 3)1').first().json.text"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        26100,
+        9280
+      ],
+      "id": "38109375-ec63-483f-b036-29967077be02",
+      "name": "Update Draft Document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "MtLhGZ2k5z3HZHk8",
+          "name": "Google Docs account"
+        }
+      }
     }
   ],
   "connections": {
@@ -1924,6 +1972,11 @@
             "node": "Claude Keyword Check + Semantic Gap1",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Create Draft Document",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1984,6 +2037,17 @@
         [
           {
             "node": "Pre-Draft Fact Checker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft Document": {
+      "main": [
+        [
+          {
+            "node": "Update Draft Document",
             "type": "main",
             "index": 0
           }
