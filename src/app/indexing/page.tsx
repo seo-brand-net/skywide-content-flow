@@ -35,6 +35,7 @@ import {
     Activity
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 import { useRouter } from 'next/navigation';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -358,9 +359,15 @@ export default function IndexingHistoryPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" className="gap-2" onClick={() => router.push('/settings/clients/new?service=indexing&returnTo=/indexing')}>
-                            Add Client
-                        </Button>
+                        <QuickAddClientModal
+                            service="indexing"
+                            onSaved={() => queryClient.invalidateQueries({ queryKey: ['indexing_runs_all'] })}
+                            trigger={
+                                <Button variant="outline" className="gap-2">
+                                    Add Client
+                                </Button>
+                            }
+                        />
                         <Button
                             onClick={() => router.push('/indexing/run')}
                             className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"

@@ -28,6 +28,7 @@ import {
 import { supabase } from '@/lib/supabase';
 import { useToast } from "@/hooks/use-toast";
 import { usePusherBriefUpdates } from '@/hooks/usePusherBriefUpdates';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -433,14 +434,19 @@ export default function ContentBriefsPage() {
                         >
                             <RotateCcw className={`w-4 h-4 ${isLoadingClients ? 'animate-spin' : ''}`} />
                         </Button>
-                        <Button
-                            variant="outline"
-                            className="gap-2"
-                            onClick={() => router.push('/settings/clients/new?service=content&returnTo=/content-briefs/generate')}
-                        >
-                            <PlusCircle className="w-4 h-4" />
-                            Add Client
-                        </Button>
+                        <QuickAddClientModal
+                            service="content"
+                            onSaved={(client) => {
+                                queryClient.invalidateQueries({ queryKey: ['clients'] });
+                                setSelectedClient(client.id);
+                            }}
+                            trigger={
+                                <Button variant="outline" className="gap-2">
+                                    <PlusCircle className="w-4 h-4" />
+                                    Add Client
+                                </Button>
+                            }
+                        />
                     </div>
                 </div>
 

@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 import { useRouter } from 'next/navigation';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -428,14 +429,19 @@ export default function IndexingRunPage() {
                         >
                             <RotateCcw className={`w-4 h-4 ${isLoadingClients ? 'animate-spin' : ''}`} />
                         </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="gap-2"
-                            onClick={() => router.push('/settings/clients/new?service=indexing&returnTo=/indexing/run')}
-                        >
-                            Add Client
-                        </Button>
+                        <QuickAddClientModal
+                            service="indexing"
+                            onSaved={(client) => {
+                                queryClient.invalidateQueries({ queryKey: ['indexing_clients'] });
+                                setSelectedClientId(client.id);
+                                setLatestResult(null);
+                            }}
+                            trigger={
+                                <Button variant="outline" size="sm" className="gap-2">
+                                    Add Client
+                                </Button>
+                            }
+                        />
                     </div>
                 </div>
 

@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth as useAuthHook } from '@/hooks/useAuth';
 import { Layout } from '@/components/Layout';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface GbpPost {
@@ -200,9 +201,15 @@ export default function GbpPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" className="gap-2" onClick={() => router.push('/settings/clients/new?service=gbp&returnTo=/gbp')}>
-                            <Settings className="w-4 h-4" /> Add Client
-                        </Button>
+                        <QuickAddClientModal
+                            service="gbp"
+                            onSaved={() => queryClient.invalidateQueries({ queryKey: ['gbp_clients_all'] })}
+                            trigger={
+                                <Button variant="outline" size="sm" className="gap-2">
+                                    <Settings className="w-4 h-4" /> Add Client
+                                </Button>
+                            }
+                        />
                         <Button
                             onClick={() => router.push('/gbp/generate')}
                             className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"

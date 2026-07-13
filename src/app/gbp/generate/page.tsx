@@ -16,6 +16,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Layout } from '@/components/Layout';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 
 // ─── Post Card (grid item) ────────────────────────────────────────────────────
 function PostCard({ post }: { post: any }) {
@@ -252,15 +253,23 @@ export default function GbpGeneratePage() {
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Client</Label>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-6 gap-1 px-2 text-[11px] font-bold text-brand-blue-crayola hover:text-brand-blue-crayola/80"
-                                            onClick={() => router.push('/settings/clients/new?service=gbp&returnTo=/gbp/generate')}
-                                        >
-                                            <PlusCircle className="w-3 h-3" /> Add Client
-                                        </Button>
+                                        <QuickAddClientModal
+                                            service="gbp"
+                                            onSaved={(client) => {
+                                                queryClient.invalidateQueries({ queryKey: ['gbp_clients_active'] });
+                                                handleClientChange(client.id);
+                                            }}
+                                            trigger={
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-6 gap-1 px-2 text-[11px] font-bold text-brand-blue-crayola hover:text-brand-blue-crayola/80"
+                                                >
+                                                    <PlusCircle className="w-3 h-3" /> Add Client
+                                                </Button>
+                                            }
+                                        />
                                     </div>
                                     <Select value={selectedClientId} onValueChange={handleClientChange} disabled={clientsLoading}>
                                         <SelectTrigger className="bg-background/50 border-input h-11">
