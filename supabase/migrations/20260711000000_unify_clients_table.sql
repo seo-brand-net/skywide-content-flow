@@ -20,6 +20,26 @@
 
 BEGIN;
 
+-- ─── 0. Ensure is_admin_user() exists ────────────────────────────────────────
+-- Step 6 below depends on this. Given the discovery that at least one prior
+-- migration in this repo's history was never actually applied to this
+-- database, don't assume this function exists either — (re)create it
+-- defensively rather than find out via a failed transaction later.
+
+CREATE OR REPLACE FUNCTION public.is_admin_user()
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid()
+    AND role = 'admin'
+  );
+$$;
+
 -- ─── 1. Extend `clients` with GBP + Indexing config fields ──────────────────
 -- Includes sitemap_url / industry / key_selling_point / content_enabled /
 -- gbp_enabled / indexing_enabled, which were supposed to already exist from
@@ -79,10 +99,19 @@ SET
 FROM public.gbp_clients g
 WHERE lower(c.name) = lower(g.name);
 
--- 2b. Insert gbp_clients that have no matching clients row
+-- 2b. Insert gbp_clients that have no matching clients row.
+-- Deduped by case-insensitive name first — gbp_clients.name is UNIQUE, but two
+-- rows differing only by case/whitespace would otherwise both pass the
+-- NOT EXISTS check and then collide on clients.name's UNIQUE constraint,
+-- failing (and rolling back) this entire transaction.
+WITH distinct_gbp_clients AS (
+  SELECT DISTINCT ON (lower(trim(name))) *
+  FROM public.gbp_clients
+  ORDER BY lower(trim(name)), name
+)
 INSERT INTO public.clients (name, industry, sitemap_url, key_selling_point, gbp_sheet_id, gbp_topics_tab_name, gbp_enabled, content_enabled, indexing_enabled)
 SELECT g.name, g.industry, g.sitemap_url, g.key_selling_point, g.sheet_id, COALESCE(g.topics_tab_name, 'Topics'), true, false, false
-FROM public.gbp_clients g
+FROM distinct_gbp_clients g
 WHERE NOT EXISTS (SELECT 1 FROM public.clients c WHERE lower(c.name) = lower(g.name));
 
 -- ─── 3. Backfill `clients` from `indexing_clients` (matched by name) ────────
@@ -99,10 +128,15 @@ SET
 FROM public.indexing_clients i
 WHERE lower(c.name) = lower(i.name);
 
--- 3b. Insert indexing_clients that have no matching clients row
+-- 3b. Insert indexing_clients that have no matching clients row (same dedup reasoning as 2b).
+WITH distinct_indexing_clients AS (
+  SELECT DISTINCT ON (lower(trim(name))) *
+  FROM public.indexing_clients
+  ORDER BY lower(trim(name)), name
+)
 INSERT INTO public.clients (name, indexing_enabled, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url, indexing_last_run_at, content_enabled, gbp_enabled)
 SELECT i.name, true, i.workbook_url, COALESCE(i.tab_name, 'Indexing Automation'), i.gsc_property, i.bing_site_url, i.last_run_at, false, false
-FROM public.indexing_clients i
+FROM distinct_indexing_clients i
 WHERE NOT EXISTS (SELECT 1 FROM public.clients c WHERE lower(c.name) = lower(i.name));
 
 -- ─── 3c. Backfill `clients` from distinct `content_requests.client_name` ────
@@ -287,5 +321,37 @@ SET client_id = c.id
 FROM public.clients c
 WHERE lower(req.client_name) = lower(c.name)
   AND req.client_id IS NULL;
+
+-- ─── 8. Summary — printed to the SQL editor's output before COMMIT ──────────
+-- If this transaction fails on anything above, none of these numbers ever
+-- get printed and nothing here takes effect — Postgres rolls the whole thing
+-- back. Seeing this NOTICE output is proof the backfill actually landed.
+
+DO $$
+DECLARE
+  v_clients_total int;
+  v_content_enabled int;
+  v_gbp_enabled int;
+  v_indexing_enabled int;
+  v_old_gbp int;
+  v_old_indexing int;
+  v_content_total int;
+  v_content_matched int;
+BEGIN
+  SELECT count(*) INTO v_clients_total FROM public.clients;
+  SELECT count(*) INTO v_content_enabled FROM public.clients WHERE content_enabled;
+  SELECT count(*) INTO v_gbp_enabled FROM public.clients WHERE gbp_enabled;
+  SELECT count(*) INTO v_indexing_enabled FROM public.clients WHERE indexing_enabled;
+  SELECT count(*) INTO v_old_gbp FROM public.gbp_clients;
+  SELECT count(*) INTO v_old_indexing FROM public.indexing_clients;
+  SELECT count(*), count(client_id) INTO v_content_total, v_content_matched FROM public.content_requests;
+
+  RAISE NOTICE '=== Unify-clients migration summary ===';
+  RAISE NOTICE 'clients table now has % total row(s)', v_clients_total;
+  RAISE NOTICE '  content_enabled: %', v_content_enabled;
+  RAISE NOTICE '  gbp_enabled: % (source gbp_clients had %)', v_gbp_enabled, v_old_gbp;
+  RAISE NOTICE '  indexing_enabled: % (source indexing_clients had %)', v_indexing_enabled, v_old_indexing;
+  RAISE NOTICE 'content_requests: %/% row(s) matched to a client_id', v_content_matched, v_content_total;
+END $$;
 
 COMMIT;

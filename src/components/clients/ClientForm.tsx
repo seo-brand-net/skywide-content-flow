@@ -105,12 +105,14 @@ function ServiceSection({
     color,
     icon: Icon,
     title,
+    highlighted,
     children,
 }: {
     active: boolean;
     color: 'blue' | 'green' | 'purple';
     icon: React.ElementType;
     title: string;
+    highlighted?: boolean;
     children: React.ReactNode;
 }) {
     if (!active) return null;
@@ -120,10 +122,17 @@ function ServiceSection({
         purple: 'bg-purple-500/5 border-purple-500/20 text-purple-600',
     }[color];
     return (
-        <div className={`rounded-2xl border p-5 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200 ${colorClasses}`}>
-            <div className="flex items-center gap-2">
-                <Icon className="w-4 h-4" />
-                <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
+        <div className={`rounded-2xl border p-5 space-y-4 animate-in fade-in slide-in-from-top-1 duration-200 ${colorClasses} ${highlighted ? 'ring-2 ring-offset-2 ring-offset-background ring-current' : ''}`}>
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                    <Icon className="w-4 h-4" />
+                    <h3 className="text-sm font-bold uppercase tracking-wider">{title}</h3>
+                </div>
+                {highlighted && (
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-current/10">
+                        Configure this
+                    </span>
+                )}
             </div>
             <div className="space-y-4">{children}</div>
         </div>
@@ -331,6 +340,176 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
         !!formData.name &&
         !(formData.indexing_enabled && (!formData.indexing_workbook_url || !formData.indexing_gsc_property));
 
+    // ── Service config sections, order-able so the automation you arrived to
+    //    configure (defaultService) always shows first instead of wherever it
+    //    happens to fall in the fixed Content → GBP → Indexing layout. ────────
+
+    const contentSection = (
+        <ServiceSection key="content_enabled" active={formData.content_enabled} color="blue" icon={FileText} title="Content Briefs Config" highlighted={targetServiceKey === 'content_enabled'}>
+            <div className="space-y-2">
+                <Label htmlFor="client-workbook" className="text-xs font-semibold">
+                    Workbook URL <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                    id="client-workbook"
+                    value={formData.workbook_url}
+                    onChange={(e) => setFormData({ ...formData, workbook_url: e.target.value })}
+                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                    className="bg-background border-input h-9 text-sm"
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="client-folder" className="text-xs font-semibold">
+                    Drive Folder URL <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                    id="client-folder"
+                    value={formData.folder_url}
+                    onChange={(e) => setFormData({ ...formData, folder_url: e.target.value })}
+                    placeholder="https://drive.google.com/drive/folders/..."
+                    className="bg-background border-input h-9 text-sm"
+                />
+            </div>
+        </ServiceSection>
+    );
+
+    const gbpSection = (
+        <ServiceSection key="gbp_enabled" active={formData.gbp_enabled} color="green" icon={MapPin} title="GBP Config" highlighted={targetServiceKey === 'gbp_enabled'}>
+            <div className="space-y-2">
+                <Label htmlFor="client-ksp" className="text-xs font-semibold">
+                    Key Selling Point <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                    id="client-ksp"
+                    value={formData.key_selling_point}
+                    onChange={(e) => setFormData({ ...formData, key_selling_point: e.target.value })}
+                    placeholder="e.g. Board-certified dermatologists, 10 Florida locations"
+                    className="bg-background border-input h-9 text-sm"
+                />
+                <p className="text-xs text-muted-foreground/70">Used to personalize generated post content.</p>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="client-sitemap" className="text-xs font-semibold">
+                    Sitemap URL <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                    id="client-sitemap"
+                    value={formData.sitemap_url}
+                    onChange={(e) => setFormData({ ...formData, sitemap_url: e.target.value })}
+                    placeholder="https://example.com/page-sitemap.xml"
+                    className="bg-background border-input h-9 text-sm"
+                />
+                <p className="text-xs text-muted-foreground/70">Used to pick the best internal link per post.</p>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="client-gbp-sheet" className="text-xs font-semibold">
+                    Google Sheet ID <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                    id="client-gbp-sheet"
+                    value={formData.gbp_sheet_id}
+                    onChange={(e) => setFormData({ ...formData, gbp_sheet_id: e.target.value })}
+                    placeholder="1xh0As6rrHv9WqCDqfgUyvJm8WCPvLf1Hks5RFf-Sf0A"
+                    className="bg-background border-input h-9 text-sm"
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="client-gbp-tab" className="text-xs font-semibold">Topics Tab Name</Label>
+                <Input
+                    id="client-gbp-tab"
+                    value={formData.gbp_topics_tab_name}
+                    onChange={(e) => setFormData({ ...formData, gbp_topics_tab_name: e.target.value })}
+                    placeholder="Topics"
+                    className="bg-background border-input h-9 text-sm"
+                />
+            </div>
+
+            {isEditMode ? (
+                <div className="pt-2 border-t border-green-500/10">
+                    <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5" /> Locations
+                    </p>
+                    <LocationsPanel client={client!} />
+                </div>
+            ) : isExtendingExisting ? (
+                <div className="pt-2 border-t border-green-500/10">
+                    <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5" /> Locations
+                    </p>
+                    <LocationsPanel client={linkedClient!} />
+                </div>
+            ) : (
+                <p className="text-xs text-muted-foreground/70 pt-2 border-t border-green-500/10">
+                    Locations for multi-location clients (e.g. Suncoast) can be added after saving.
+                </p>
+            )}
+        </ServiceSection>
+    );
+
+    const indexingSection = (
+        <ServiceSection key="indexing_enabled" active={formData.indexing_enabled} color="purple" icon={Globe} title="Indexing Config" highlighted={targetServiceKey === 'indexing_enabled'}>
+            <div className="space-y-2">
+                <Label htmlFor="client-idx-workbook" className="text-xs font-semibold">
+                    Indexing Workbook URL <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                    id="client-idx-workbook"
+                    value={formData.indexing_workbook_url}
+                    onChange={(e) => setFormData({ ...formData, indexing_workbook_url: e.target.value })}
+                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                    required={formData.indexing_enabled}
+                    className="bg-background border-input h-9 text-sm"
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="client-idx-tab" className="text-xs font-semibold">Tab Name</Label>
+                <Input
+                    id="client-idx-tab"
+                    value={formData.indexing_tab_name}
+                    onChange={(e) => setFormData({ ...formData, indexing_tab_name: e.target.value })}
+                    placeholder="Indexing Automation"
+                    className="bg-background border-input h-9 text-sm"
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="client-idx-gsc" className="text-xs font-semibold">
+                    GSC Property <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                    id="client-idx-gsc"
+                    value={formData.indexing_gsc_property}
+                    onChange={(e) => setFormData({ ...formData, indexing_gsc_property: e.target.value })}
+                    placeholder="https://example.com/ or sc-domain:example.com"
+                    required={formData.indexing_enabled}
+                    className="bg-background border-input h-9 text-sm"
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="client-idx-bing" className="text-xs font-semibold">
+                    Bing Site URL <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <Input
+                    id="client-idx-bing"
+                    value={formData.indexing_bing_site_url}
+                    onChange={(e) => setFormData({ ...formData, indexing_bing_site_url: e.target.value })}
+                    placeholder="https://example.com"
+                    className="bg-background border-input h-9 text-sm"
+                />
+                <p className="text-xs text-muted-foreground/70">Leave blank to skip Bing indexing for this client.</p>
+            </div>
+        </ServiceSection>
+    );
+
+    const sectionsByKey: Record<ServiceKey, React.ReactNode> = {
+        content_enabled: contentSection,
+        gbp_enabled: gbpSection,
+        indexing_enabled: indexingSection,
+    };
+    const baseOrder: ServiceKey[] = ['content_enabled', 'gbp_enabled', 'indexing_enabled'];
+    const sectionOrder: ServiceKey[] = targetServiceKey
+        ? [targetServiceKey, ...baseOrder.filter((k) => k !== targetServiceKey)]
+        : baseOrder;
+
     return (
         <div className="min-h-screen bg-background p-8">
             <div className="max-w-3xl mx-auto">
@@ -451,158 +630,9 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
                         </CardContent>
                     </Card>
 
-                    {/* ── Content Briefs config ──────────────────────────────── */}
-                    <ServiceSection active={formData.content_enabled} color="blue" icon={FileText} title="Content Briefs Config">
-                        <div className="space-y-2">
-                            <Label htmlFor="client-workbook" className="text-xs font-semibold">
-                                Workbook URL <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                id="client-workbook"
-                                value={formData.workbook_url}
-                                onChange={(e) => setFormData({ ...formData, workbook_url: e.target.value })}
-                                placeholder="https://docs.google.com/spreadsheets/d/..."
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="client-folder" className="text-xs font-semibold">
-                                Drive Folder URL <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                id="client-folder"
-                                value={formData.folder_url}
-                                onChange={(e) => setFormData({ ...formData, folder_url: e.target.value })}
-                                placeholder="https://drive.google.com/drive/folders/..."
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                        </div>
-                    </ServiceSection>
-
-                    {/* ── GBP config ──────────────────────────────────────────── */}
-                    <ServiceSection active={formData.gbp_enabled} color="green" icon={MapPin} title="GBP Config">
-                        <div className="space-y-2">
-                            <Label htmlFor="client-ksp" className="text-xs font-semibold">
-                                Key Selling Point <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                id="client-ksp"
-                                value={formData.key_selling_point}
-                                onChange={(e) => setFormData({ ...formData, key_selling_point: e.target.value })}
-                                placeholder="e.g. Board-certified dermatologists, 10 Florida locations"
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                            <p className="text-xs text-muted-foreground/70">Used to personalize generated post content.</p>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="client-sitemap" className="text-xs font-semibold">
-                                Sitemap URL <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                id="client-sitemap"
-                                value={formData.sitemap_url}
-                                onChange={(e) => setFormData({ ...formData, sitemap_url: e.target.value })}
-                                placeholder="https://example.com/page-sitemap.xml"
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                            <p className="text-xs text-muted-foreground/70">Used to pick the best internal link per post.</p>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="client-gbp-sheet" className="text-xs font-semibold">
-                                Google Sheet ID <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                id="client-gbp-sheet"
-                                value={formData.gbp_sheet_id}
-                                onChange={(e) => setFormData({ ...formData, gbp_sheet_id: e.target.value })}
-                                placeholder="1xh0As6rrHv9WqCDqfgUyvJm8WCPvLf1Hks5RFf-Sf0A"
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="client-gbp-tab" className="text-xs font-semibold">Topics Tab Name</Label>
-                            <Input
-                                id="client-gbp-tab"
-                                value={formData.gbp_topics_tab_name}
-                                onChange={(e) => setFormData({ ...formData, gbp_topics_tab_name: e.target.value })}
-                                placeholder="Topics"
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                        </div>
-
-                        {isEditMode ? (
-                            <div className="pt-2 border-t border-green-500/10">
-                                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
-                                    <MapPin className="w-3.5 h-3.5" /> Locations
-                                </p>
-                                <LocationsPanel client={client!} />
-                            </div>
-                        ) : isExtendingExisting ? (
-                            <div className="pt-2 border-t border-green-500/10">
-                                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
-                                    <MapPin className="w-3.5 h-3.5" /> Locations
-                                </p>
-                                <LocationsPanel client={linkedClient!} />
-                            </div>
-                        ) : (
-                            <p className="text-xs text-muted-foreground/70 pt-2 border-t border-green-500/10">
-                                Locations for multi-location clients (e.g. Suncoast) can be added after saving.
-                            </p>
-                        )}
-                    </ServiceSection>
-
-                    {/* ── Indexing config ─────────────────────────────────────── */}
-                    <ServiceSection active={formData.indexing_enabled} color="purple" icon={Globe} title="Indexing Config">
-                        <div className="space-y-2">
-                            <Label htmlFor="client-idx-workbook" className="text-xs font-semibold">
-                                Indexing Workbook URL <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="client-idx-workbook"
-                                value={formData.indexing_workbook_url}
-                                onChange={(e) => setFormData({ ...formData, indexing_workbook_url: e.target.value })}
-                                placeholder="https://docs.google.com/spreadsheets/d/..."
-                                required={formData.indexing_enabled}
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="client-idx-tab" className="text-xs font-semibold">Tab Name</Label>
-                            <Input
-                                id="client-idx-tab"
-                                value={formData.indexing_tab_name}
-                                onChange={(e) => setFormData({ ...formData, indexing_tab_name: e.target.value })}
-                                placeholder="Indexing Automation"
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="client-idx-gsc" className="text-xs font-semibold">
-                                GSC Property <span className="text-destructive">*</span>
-                            </Label>
-                            <Input
-                                id="client-idx-gsc"
-                                value={formData.indexing_gsc_property}
-                                onChange={(e) => setFormData({ ...formData, indexing_gsc_property: e.target.value })}
-                                placeholder="https://example.com/ or sc-domain:example.com"
-                                required={formData.indexing_enabled}
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="client-idx-bing" className="text-xs font-semibold">
-                                Bing Site URL <span className="text-muted-foreground font-normal">(optional)</span>
-                            </Label>
-                            <Input
-                                id="client-idx-bing"
-                                value={formData.indexing_bing_site_url}
-                                onChange={(e) => setFormData({ ...formData, indexing_bing_site_url: e.target.value })}
-                                placeholder="https://example.com"
-                                className="bg-background border-input h-9 text-sm"
-                            />
-                            <p className="text-xs text-muted-foreground/70">Leave blank to skip Bing indexing for this client.</p>
-                        </div>
-                    </ServiceSection>
+                    {/* ── Content Briefs / GBP / Indexing config, ordered so whichever ──
+                        automation you arrived to configure (defaultService) shows first ── */}
+                    {sectionOrder.map((key) => sectionsByKey[key])}
 
                     {/* ── Actions ─────────────────────────────────────────────── */}
                     <div className="flex items-center justify-end gap-3 pb-8">
