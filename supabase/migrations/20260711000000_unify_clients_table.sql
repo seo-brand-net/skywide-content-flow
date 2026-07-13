@@ -21,9 +21,19 @@
 BEGIN;
 
 -- ─── 1. Extend `clients` with GBP + Indexing config fields ──────────────────
--- (sitemap_url, industry, key_selling_point already exist and are reused as-is)
+-- Includes sitemap_url / industry / key_selling_point / content_enabled /
+-- gbp_enabled / indexing_enabled, which were supposed to already exist from
+-- an earlier migration (20260507220000_extend_clients_for_gbp.sql) — but
+-- that migration was apparently never actually applied to this database, so
+-- every column here is added defensively rather than assumed present.
 
 ALTER TABLE public.clients
+  ADD COLUMN IF NOT EXISTS sitemap_url           text,
+  ADD COLUMN IF NOT EXISTS industry              text,
+  ADD COLUMN IF NOT EXISTS key_selling_point     text,
+  ADD COLUMN IF NOT EXISTS gbp_enabled           boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS content_enabled       boolean NOT NULL DEFAULT true,
+  ADD COLUMN IF NOT EXISTS indexing_enabled      boolean NOT NULL DEFAULT false,
   ADD COLUMN IF NOT EXISTS gbp_sheet_id          text,
   ADD COLUMN IF NOT EXISTS gbp_topics_tab_name   text DEFAULT 'Topics',
   ADD COLUMN IF NOT EXISTS indexing_workbook_url text,
@@ -31,6 +41,29 @@ ALTER TABLE public.clients
   ADD COLUMN IF NOT EXISTS indexing_gsc_property text,
   ADD COLUMN IF NOT EXISTS indexing_bing_site_url text,
   ADD COLUMN IF NOT EXISTS indexing_last_run_at  timestamptz;
+
+-- ─── 1b. Ensure `client_locations` exists ────────────────────────────────────
+-- Same situation — this table was supposed to already exist from that same
+-- earlier migration. Created defensively here if it's missing; if it already
+-- exists this is a no-op. RLS policy is created later in step 6, not here,
+-- to avoid clashing with an existing policy of the same name.
+
+CREATE TABLE IF NOT EXISTS public.client_locations (
+  id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id      uuid NOT NULL REFERENCES public.clients(id) ON DELETE CASCADE,
+  location_name  text NOT NULL,
+  city           text NOT NULL,
+  state          text NOT NULL,
+  gbp_account_id text,
+  sheet_tab_name text,
+  is_active      boolean NOT NULL DEFAULT true,
+  created_at     timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.client_locations ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_client_locations_client_id
+  ON public.client_locations(client_id);
 
 -- ─── 2. Backfill `clients` from `gbp_clients` (matched by name, case-insensitive) ──
 
