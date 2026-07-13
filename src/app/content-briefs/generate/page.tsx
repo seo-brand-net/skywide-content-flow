@@ -436,7 +436,7 @@ export default function ContentBriefsPage() {
                         <Button
                             variant="outline"
                             className="gap-2"
-                            onClick={() => router.push('/settings/clients/new')}
+                            onClick={() => router.push('/settings/clients/new?service=content&returnTo=/content-briefs/generate')}
                         >
                             <PlusCircle className="w-4 h-4" />
                             Add Client

@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
 import { withTimeout } from '@/utils/timeout';
 import { ABTestModal } from '@/components/ab-test-modal';
 import { v4 as uuidv4 } from 'uuid';
@@ -37,6 +38,7 @@ export default function Dashboard() {
     const { user, displayName, supabase } = useAuth();
     const { isAdmin } = useUserRole(user?.id);
     const { toast } = useToast();
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { data: clients = [] } = useQuery({
@@ -605,9 +607,20 @@ Integrated treatment supports long-term resilience.`,
 
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="clientName" className="text-foreground">
-                                        Client *
-                                    </Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="clientName" className="text-foreground">
+                                            Client *
+                                        </Label>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 gap-1 px-2 text-[11px] font-bold text-brand-blue-crayola hover:text-brand-blue-crayola/80"
+                                            onClick={() => router.push('/settings/clients/new?service=content&returnTo=/dashboard')}
+                                        >
+                                            <PlusCircle className="w-3 h-3" /> Add Client
+                                        </Button>
+                                    </div>
                                     <Select
                                         value={formData.clientId}
                                         onValueChange={(id) => {

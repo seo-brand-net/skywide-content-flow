@@ -432,9 +432,9 @@ export default function IndexingRunPage() {
                             variant="outline"
                             size="sm"
                             className="gap-2"
-                            onClick={() => router.push('/settings/clients')}
+                            onClick={() => router.push('/settings/clients/new?service=indexing&returnTo=/indexing/run')}
                         >
-                            Manage Clients
+                            Add Client
                         </Button>
                     </div>
                 </div>
@@ -533,7 +533,7 @@ export default function IndexingRunPage() {
                                     <div className="text-center py-6 opacity-50">
                                         <Globe className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
                                         <p className="text-xs text-muted-foreground">No indexing clients yet.</p>
-                                        <p className="text-xs text-muted-foreground">Enable indexing for a client under "Manage Clients" to get started.</p>
+                                        <p className="text-xs text-muted-foreground">Click "Add Client" above to get started.</p>
                                     </div>
                                 )}
                             </CardContent>

@@ -200,8 +200,8 @@ export default function GbpPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" className="gap-2" onClick={() => router.push('/settings/clients')}>
-                            <Settings className="w-4 h-4" /> Manage Clients
+                        <Button variant="outline" size="sm" className="gap-2" onClick={() => router.push('/settings/clients/new?service=gbp&returnTo=/gbp')}>
+                            <Settings className="w-4 h-4" /> Add Client
                         </Button>
                         <Button
                             onClick={() => router.push('/gbp/generate')}

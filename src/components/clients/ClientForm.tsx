@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, FileText, MapPin, Globe, Save, ArrowLeft } from 'lucide-react';
+import { Loader2, FileText, MapPin, Globe, Save, ArrowLeft, CheckCircle2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { LocationsPanel } from '@/components/clients/LocationsPanel';
@@ -31,8 +31,20 @@ export interface EditableClient {
     indexing_bing_site_url: string | null;
 }
 
+type ServiceKey = 'content_enabled' | 'gbp_enabled' | 'indexing_enabled';
+
+const SERVICE_LABELS: Record<ServiceKey, string> = {
+    content_enabled: 'Content Briefs',
+    gbp_enabled: 'GBP Posts',
+    indexing_enabled: 'Indexing',
+};
+
 interface ClientFormProps {
     client?: EditableClient;
+    /** When arriving from an automation page (e.g. Indexing's "Add Client"), pre-enable this service. */
+    defaultService?: 'content' | 'gbp' | 'indexing';
+    /** Where to send the user after a successful save — defaults to /settings/clients. */
+    returnTo?: string;
 }
 
 const emptyFormData = {
@@ -73,6 +85,20 @@ function toFormData(client: EditableClient): typeof emptyFormData {
     };
 }
 
+function serviceKeyFor(defaultService?: 'content' | 'gbp' | 'indexing'): ServiceKey | null {
+    if (defaultService === 'content') return 'content_enabled';
+    if (defaultService === 'gbp') return 'gbp_enabled';
+    if (defaultService === 'indexing') return 'indexing_enabled';
+    return null;
+}
+
+function initialFormData(client: EditableClient | undefined, defaultService: 'content' | 'gbp' | 'indexing' | undefined) {
+    const base = client ? toFormData(client) : { ...emptyFormData };
+    const key = serviceKeyFor(defaultService);
+    if (key && !client) base[key] = true;
+    return base;
+}
+
 // ─── Section wrapper for a conditionally-revealed service config block ───────
 function ServiceSection({
     active,
@@ -104,12 +130,145 @@ function ServiceSection({
     );
 }
 
-export function ClientForm({ client }: ClientFormProps) {
+// ─── Client name field with existing-client typeahead (create mode only) ─────
+interface ClientMatch {
+    id: string;
+    name: string;
+    content_enabled: boolean;
+    gbp_enabled: boolean;
+    indexing_enabled: boolean;
+}
+
+function ClientNameField({
+    name,
+    onNameChange,
+    onMatchSelected,
+    disabled,
+}: {
+    name: string;
+    onNameChange: (name: string) => void;
+    onMatchSelected: (match: ClientMatch) => void;
+    disabled: boolean;
+}) {
+    const [matches, setMatches] = useState<ClientMatch[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        const query = name.trim();
+        if (disabled || query.length < 2) {
+            setMatches([]);
+            return;
+        }
+        debounceRef.current = setTimeout(async () => {
+            setIsSearching(true);
+            const { data, error } = await supabase
+                .from('clients')
+                .select('id, name, content_enabled, gbp_enabled, indexing_enabled')
+                .ilike('name', `%${query}%`)
+                .order('name')
+                .limit(6);
+            setIsSearching(false);
+            if (!error) {
+                setMatches((data || []) as ClientMatch[]);
+                setShowDropdown(true);
+            }
+        }, 300);
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, [name, disabled]);
+
+    return (
+        <div className="space-y-2 relative">
+            <Label htmlFor="client-name" className="text-sm font-semibold">
+                Client Name <span className="text-destructive">*</span>
+            </Label>
+            <Input
+                id="client-name"
+                value={name}
+                onChange={(e) => onNameChange(e.target.value)}
+                onFocus={() => matches.length > 0 && setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+                placeholder="e.g. Suncoast Skin Solutions"
+                required
+                autoComplete="off"
+                disabled={disabled}
+                className="bg-background border-input"
+            />
+            {!disabled && isSearching && (
+                <p className="text-xs text-muted-foreground">Checking existing clients...</p>
+            )}
+            {!disabled && showDropdown && matches.length > 0 && (
+                <div className="absolute z-20 mt-1 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+                    <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted/30 border-b border-border/50">
+                        Already exists — select to extend instead of creating a duplicate
+                    </p>
+                    {matches.map((m) => {
+                        const active = ([
+                            m.content_enabled && 'Content',
+                            m.gbp_enabled && 'GBP',
+                            m.indexing_enabled && 'Indexing',
+                        ] as const).filter(Boolean) as string[];
+                        return (
+                            <button
+                                key={m.id}
+                                type="button"
+                                onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    onMatchSelected(m);
+                                    setShowDropdown(false);
+                                }}
+                                className="w-full text-left px-3 py-2.5 hover:bg-muted/40 transition-colors flex items-center justify-between gap-3"
+                            >
+                                <span className="text-sm font-medium text-foreground">{m.name}</span>
+                                <span className="text-[10px] text-muted-foreground">
+                                    {active.length > 0 ? active.join(' · ') : 'No services yet'}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+export function ClientForm({ client, defaultService, returnTo }: ClientFormProps) {
     const isEditMode = !!client;
     const router = useRouter();
     const { toast } = useToast();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formData, setFormData] = useState(client ? toFormData(client) : emptyFormData);
+    const [formData, setFormData] = useState(initialFormData(client, defaultService));
+    const [linkedClient, setLinkedClient] = useState<EditableClient | null>(null);
+
+    const targetServiceKey = serviceKeyFor(defaultService);
+    const effectiveClientId = client?.id ?? linkedClient?.id ?? null;
+    const isExtendingExisting = !isEditMode && !!linkedClient;
+
+    const handleMatchSelected = async (match: ClientMatch) => {
+        const { data, error } = await supabase
+            .from('clients')
+            .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url')
+            .eq('id', match.id)
+            .single();
+        if (error || !data) {
+            toast({ title: 'Error', description: error?.message || 'Could not load that client.', variant: 'destructive' });
+            return;
+        }
+        const full = data as EditableClient;
+        setLinkedClient(full);
+        const next = toFormData(full);
+        if (targetServiceKey) next[targetServiceKey] = true;
+        setFormData(next);
+    };
+
+    const clearMatch = () => {
+        setLinkedClient(null);
+        setFormData(initialFormData(undefined, defaultService));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -141,18 +300,20 @@ export function ClientForm({ client }: ClientFormProps) {
                 indexing_bing_site_url: formData.indexing_enabled ? (formData.indexing_bing_site_url || null) : null,
             };
 
-            const { data, error } = isEditMode
-                ? await supabase.from('clients').update(payload).eq('id', client.id).select('id').single()
-                : await supabase.from('clients').insert([payload]).select('id').single();
+            const { error } = effectiveClientId
+                ? await supabase.from('clients').update(payload).eq('id', effectiveClientId)
+                : await supabase.from('clients').insert([payload]);
 
             if (error) throw error;
 
             toast({
-                title: isEditMode ? 'Client updated' : 'Client added',
-                description: `${formData.name} has been ${isEditMode ? 'updated' : 'added'} successfully.`,
+                title: isExtendingExisting ? 'Client updated' : isEditMode ? 'Client updated' : 'Client added',
+                description: isExtendingExisting && targetServiceKey
+                    ? `${SERVICE_LABELS[targetServiceKey]} enabled for ${formData.name}.`
+                    : `${formData.name} has been ${isEditMode || isExtendingExisting ? 'updated' : 'added'} successfully.`,
             });
 
-            router.push('/settings/clients');
+            router.push(returnTo || '/settings/clients');
             router.refresh();
         } catch (error: any) {
             console.error('Error saving client:', error);
@@ -177,21 +338,37 @@ export function ClientForm({ client }: ClientFormProps) {
                     variant="ghost"
                     size="sm"
                     className="mb-4 -ml-2 text-muted-foreground hover:text-foreground gap-2"
-                    onClick={() => router.push('/settings/clients')}
+                    onClick={() => router.push(returnTo || '/settings/clients')}
                 >
                     <ArrowLeft className="w-4 h-4" />
-                    Back to Client Management
+                    Back
                 </Button>
 
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-foreground">
-                        {isEditMode ? `Edit ${client!.name}` : 'Add New Client'}
+                        {isEditMode ? `Edit ${client!.name}` : isExtendingExisting ? `Update ${linkedClient!.name}` : 'Add New Client'}
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Configure this client and choose which automations to enable. Each service's settings only
-                        appear once that service is turned on.
+                        {isExtendingExisting
+                            ? "This client already exists — saving will update their existing record, not create a duplicate."
+                            : "Configure this client and choose which automations to enable. Each service's settings only appear once that service is turned on."}
                     </p>
                 </div>
+
+                {isExtendingExisting && (
+                    <div className="mb-6 flex items-center justify-between gap-3 p-4 bg-brand-blue-crayola/5 border border-brand-blue-crayola/20 rounded-xl animate-in fade-in duration-200">
+                        <div className="flex items-center gap-2.5 text-sm">
+                            <CheckCircle2 className="w-4 h-4 text-brand-blue-crayola shrink-0" />
+                            <span>
+                                Matched <strong>{linkedClient!.name}</strong>
+                                {targetServiceKey && `. Enabling ${SERVICE_LABELS[targetServiceKey]} for them.`}
+                            </span>
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" className="h-7 gap-1 text-xs shrink-0" onClick={clearMatch}>
+                            <X className="w-3 h-3" /> Not this client
+                        </Button>
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* ── Basic Info ─────────────────────────────────────────── */}
@@ -201,19 +378,30 @@ export function ClientForm({ client }: ClientFormProps) {
                             <CardDescription>Applies regardless of which automations are active.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="client-name" className="text-sm font-semibold">
-                                    Client Name <span className="text-destructive">*</span>
-                                </Label>
-                                <Input
-                                    id="client-name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="e.g. Suncoast Skin Solutions"
-                                    required
-                                    className="bg-background border-input"
+                            {isEditMode ? (
+                                <div className="space-y-2">
+                                    <Label htmlFor="client-name" className="text-sm font-semibold">
+                                        Client Name <span className="text-destructive">*</span>
+                                    </Label>
+                                    <Input
+                                        id="client-name"
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        required
+                                        className="bg-background border-input"
+                                    />
+                                </div>
+                            ) : (
+                                <ClientNameField
+                                    name={formData.name}
+                                    onNameChange={(name) => {
+                                        if (linkedClient) setLinkedClient(null);
+                                        setFormData((prev) => ({ ...prev, name }));
+                                    }}
+                                    onMatchSelected={handleMatchSelected}
+                                    disabled={isExtendingExisting}
                                 />
-                            </div>
+                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="client-industry" className="text-sm font-semibold">
                                     Industry <span className="text-muted-foreground font-normal text-xs">(optional)</span>
@@ -349,6 +537,13 @@ export function ClientForm({ client }: ClientFormProps) {
                                 </p>
                                 <LocationsPanel client={client!} />
                             </div>
+                        ) : isExtendingExisting ? (
+                            <div className="pt-2 border-t border-green-500/10">
+                                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5" /> Locations
+                                </p>
+                                <LocationsPanel client={linkedClient!} />
+                            </div>
                         ) : (
                             <p className="text-xs text-muted-foreground/70 pt-2 border-t border-green-500/10">
                                 Locations for multi-location clients (e.g. Suncoast) can be added after saving.
@@ -414,7 +609,7 @@ export function ClientForm({ client }: ClientFormProps) {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => router.push('/settings/clients')}
+                            onClick={() => router.push(returnTo || '/settings/clients')}
                             disabled={isSubmitting}
                         >
                             Cancel
@@ -427,12 +622,12 @@ export function ClientForm({ client }: ClientFormProps) {
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                    {isEditMode ? 'Saving...' : 'Adding...'}
+                                    {isEditMode || isExtendingExisting ? 'Saving...' : 'Adding...'}
                                 </>
                             ) : (
                                 <>
                                     <Save className="h-4 w-4" />
-                                    {isEditMode ? 'Save Changes' : 'Add Client'}
+                                    {isEditMode || isExtendingExisting ? 'Save Changes' : 'Add Client'}
                                 </>
                             )}
                         </Button>

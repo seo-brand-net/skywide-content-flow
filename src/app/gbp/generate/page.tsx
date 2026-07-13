@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import {
     MapPin, Zap, Loader2, ArrowLeft, Building2, CheckCircle2,
-    Clock, Image, ExternalLink, FileText, RefreshCw
+    Clock, Image, ExternalLink, FileText, RefreshCw, PlusCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -250,7 +250,18 @@ export default function GbpGeneratePage() {
 
                                 {/* Client Selector */}
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Client</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Client</Label>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 gap-1 px-2 text-[11px] font-bold text-brand-blue-crayola hover:text-brand-blue-crayola/80"
+                                            onClick={() => router.push('/settings/clients/new?service=gbp&returnTo=/gbp/generate')}
+                                        >
+                                            <PlusCircle className="w-3 h-3" /> Add Client
+                                        </Button>
+                                    </div>
                                     <Select value={selectedClientId} onValueChange={handleClientChange} disabled={clientsLoading}>
                                         <SelectTrigger className="bg-background/50 border-input h-11">
                                             <SelectValue placeholder={clientsLoading ? 'Loading...' : 'Select a client...'} />

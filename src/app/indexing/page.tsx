@@ -358,8 +358,8 @@ export default function IndexingHistoryPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" className="gap-2" onClick={() => router.push('/settings/clients')}>
-                            Manage Clients
+                        <Button variant="outline" className="gap-2" onClick={() => router.push('/settings/clients/new?service=indexing&returnTo=/indexing')}>
+                            Add Client
                         </Button>
                         <Button
                             onClick={() => router.push('/indexing/run')}
