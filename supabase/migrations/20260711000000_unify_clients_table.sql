@@ -7,7 +7,18 @@
 -- keeps reading them) until application code is repointed in a follow-up
 -- deploy. Dropping them is a deliberate later step once the new read paths
 -- are verified in production.
+--
+-- RUN ORDER MATTERS: apply this only after the app code from this branch is
+-- already deployed and live. Running it against the currently-deployed (old)
+-- code creates a window where GBP topic/post writes will silently fail
+-- (FK mismatch) until the new code ships. Deploying the new code first is
+-- safe on its own — client dropdowns just show empty until this runs.
+--
+-- Wrapped in a transaction: if anything below errors, everything rolls back
+-- and the database is left exactly as it was — nothing is left half-migrated.
 -- ═══════════════════════════════════════════════════════════════════════════
+
+BEGIN;
 
 -- ─── 1. Extend `clients` with GBP + Indexing config fields ──────────────────
 -- (sitemap_url, industry, key_selling_point already exist and are reused as-is)
@@ -243,3 +254,5 @@ SET client_id = c.id
 FROM public.clients c
 WHERE lower(req.client_name) = lower(c.name)
   AND req.client_id IS NULL;
+
+COMMIT;
