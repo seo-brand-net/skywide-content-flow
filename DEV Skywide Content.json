@@ -1443,12 +1443,12 @@
     {
       "parameters": {
         "operation": "update",
-        "documentURL": "={{ .id }}",
+        "documentURL": "={{ $json.id }}",
         "actionsUi": {
           "actionFields": [
             {
               "action": "insert",
-              "text": "=$('Claude Draft (Claude Opus 3)1').first().json.text"
+              "text": "={{ $node[\"Claude Draft (Claude Opus 3)1\"].json.text }}"
             }
           ]
         }
