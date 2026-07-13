@@ -209,7 +209,10 @@ ALTER TABLE public.gbp_topics DROP COLUMN gbp_client_id;
 ALTER TABLE public.gbp_topics DROP COLUMN location_id;
 ALTER TABLE public.gbp_topics RENAME COLUMN client_id_new TO gbp_client_id;
 ALTER TABLE public.gbp_topics RENAME COLUMN location_id_new TO location_id;
-ALTER TABLE public.gbp_topics ALTER COLUMN gbp_client_id SET NOT NULL;
+-- Deliberately NOT forcing gbp_client_id NOT NULL here: some historical rows
+-- can't be resolved to a real client (orphaned/legacy data), and we'd rather
+-- keep those rows — shown as unlinked in the UI — than block the whole
+-- migration or silently delete them.
 ALTER TABLE public.gbp_topics ADD CONSTRAINT gbp_topics_gbp_client_id_fkey
   FOREIGN KEY (gbp_client_id) REFERENCES public.clients(id) ON DELETE CASCADE;
 ALTER TABLE public.gbp_topics ADD CONSTRAINT gbp_topics_location_id_fkey
@@ -243,7 +246,8 @@ ALTER TABLE public.gbp_posts DROP COLUMN gbp_client_id;
 ALTER TABLE public.gbp_posts DROP COLUMN location_id;
 ALTER TABLE public.gbp_posts RENAME COLUMN client_id_new TO gbp_client_id;
 ALTER TABLE public.gbp_posts RENAME COLUMN location_id_new TO location_id;
-ALTER TABLE public.gbp_posts ALTER COLUMN gbp_client_id SET NOT NULL;
+-- Same reasoning as gbp_topics above — not forcing NOT NULL so orphaned rows
+-- stay instead of blocking the migration.
 ALTER TABLE public.gbp_posts ADD CONSTRAINT gbp_posts_gbp_client_id_fkey
   FOREIGN KEY (gbp_client_id) REFERENCES public.clients(id) ON DELETE CASCADE;
 ALTER TABLE public.gbp_posts ADD CONSTRAINT gbp_posts_location_id_fkey
@@ -265,7 +269,7 @@ WHERE r.indexing_client_id = i.id;
 ALTER TABLE public.indexing_runs DROP CONSTRAINT IF EXISTS indexing_runs_indexing_client_id_fkey;
 ALTER TABLE public.indexing_runs DROP COLUMN indexing_client_id;
 ALTER TABLE public.indexing_runs RENAME COLUMN client_id_new TO indexing_client_id;
-ALTER TABLE public.indexing_runs ALTER COLUMN indexing_client_id SET NOT NULL;
+-- Same reasoning as gbp_topics/gbp_posts above — not forcing NOT NULL.
 ALTER TABLE public.indexing_runs ADD CONSTRAINT indexing_runs_indexing_client_id_fkey
   FOREIGN KEY (indexing_client_id) REFERENCES public.clients(id) ON DELETE CASCADE;
 
@@ -337,6 +341,9 @@ DECLARE
   v_old_indexing int;
   v_content_total int;
   v_content_matched int;
+  v_gbp_topics_orphaned int;
+  v_gbp_posts_orphaned int;
+  v_indexing_runs_orphaned int;
 BEGIN
   SELECT count(*) INTO v_clients_total FROM public.clients;
   SELECT count(*) INTO v_content_enabled FROM public.clients WHERE content_enabled;
@@ -345,6 +352,9 @@ BEGIN
   SELECT count(*) INTO v_old_gbp FROM public.gbp_clients;
   SELECT count(*) INTO v_old_indexing FROM public.indexing_clients;
   SELECT count(*), count(client_id) INTO v_content_total, v_content_matched FROM public.content_requests;
+  SELECT count(*) INTO v_gbp_topics_orphaned FROM public.gbp_topics WHERE gbp_client_id IS NULL;
+  SELECT count(*) INTO v_gbp_posts_orphaned FROM public.gbp_posts WHERE gbp_client_id IS NULL;
+  SELECT count(*) INTO v_indexing_runs_orphaned FROM public.indexing_runs WHERE indexing_client_id IS NULL;
 
   RAISE NOTICE '=== Unify-clients migration summary ===';
   RAISE NOTICE 'clients table now has % total row(s)', v_clients_total;
@@ -352,6 +362,8 @@ BEGIN
   RAISE NOTICE '  gbp_enabled: % (source gbp_clients had %)', v_gbp_enabled, v_old_gbp;
   RAISE NOTICE '  indexing_enabled: % (source indexing_clients had %)', v_indexing_enabled, v_old_indexing;
   RAISE NOTICE 'content_requests: %/% row(s) matched to a client_id', v_content_matched, v_content_total;
+  RAISE NOTICE 'Orphaned (unmatched, now unlinked) rows: gbp_topics=%, gbp_posts=%, indexing_runs=%',
+    v_gbp_topics_orphaned, v_gbp_posts_orphaned, v_indexing_runs_orphaned;
 END $$;
 
 COMMIT;
