@@ -1388,12 +1388,7 @@
         "options": {
           "temperature": 0
         },
-        "model": {
-          "__rl": true,
-          "value": "gpt-4o",
-          "mode": "list",
-          "cachedResultName": "gpt-4o"
-        }
+        "model": "gpt-4o"
       },
       "id": "7fdf3d6e-84e2-43c9-b25d-4319728aaee1",
       "name": "Claims Extractor Model",
