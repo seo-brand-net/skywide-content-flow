@@ -741,6 +741,12 @@
               "name": "retryCount",
               "value": "={{ ($json.retryCount || 0) + 1 }}",
               "type": "number"
+            },
+            {
+              "id": "carry_runs_count",
+              "name": "runs",
+              "value": "={{ $('Max Iterations1').first().json.runs }}",
+              "type": "number"
             }
           ]
         },
