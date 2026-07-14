@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { type EditableClient } from '@/components/clients/ClientForm';
 import { LocationsPanel } from '@/components/clients/LocationsPanel';
+import { ServiceStatusBadge, type ClientActivityStatus } from '@/components/clients/ServiceStatusBadge';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +39,7 @@ interface Client extends EditableClient {
 const SERVICE_CONFIGS = [
     {
         key: 'content_enabled' as keyof Client,
+        service: 'content' as const,
         label: 'Content',
         icon: FileText,
         activeClass: 'bg-brand-blue-crayola/10 text-brand-blue-crayola border-brand-blue-crayola/25',
@@ -45,6 +47,7 @@ const SERVICE_CONFIGS = [
     },
     {
         key: 'gbp_enabled' as keyof Client,
+        service: 'gbp' as const,
         label: 'GBP',
         icon: MapPin,
         activeClass: 'bg-green-500/10 text-green-500 border-green-500/25',
@@ -52,6 +55,7 @@ const SERVICE_CONFIGS = [
     },
     {
         key: 'indexing_enabled' as keyof Client,
+        service: 'indexing' as const,
         label: 'Indexing',
         icon: Globe,
         activeClass: 'bg-purple-500/10 text-purple-500 border-purple-500/25',
@@ -117,6 +121,22 @@ export default function ClientsSettingsPage() {
         },
         enabled: !!user?.id,
     });
+
+    const { data: activityStatus = [] } = useQuery({
+        queryKey: ['client_activity_status'],
+        queryFn: async () => {
+            const { data, error } = await supabase.from('client_activity_status').select('*');
+            if (error) throw error;
+            return data as ClientActivityStatus[];
+        },
+        enabled: !!user?.id,
+    });
+
+    const statusByClientId = useMemo(() => {
+        const map = new Map<string, ClientActivityStatus>();
+        activityStatus.forEach((s) => map.set(s.client_id, s));
+        return map;
+    }, [activityStatus]);
 
     // ── Derived ───────────────────────────────────────────────────────────────
 
@@ -319,7 +339,7 @@ export default function ClientsSettingsPage() {
                                                 </td>
 
                                                 {/* Service toggles */}
-                                                {SERVICE_CONFIGS.map(({ key, label, activeClass, inactiveClass }) => (
+                                                {SERVICE_CONFIGS.map(({ key, service, label, activeClass, inactiveClass }) => (
                                                     <td key={key} className="px-4 py-4 text-center">
                                                         <div className="flex flex-col items-center gap-1.5">
                                                             <ServiceToggle
@@ -330,6 +350,9 @@ export default function ClientsSettingsPage() {
                                                                 inactiveClass={inactiveClass}
                                                                 onToggle={handleToggle}
                                                             />
+                                                            {(client[key] as boolean) && (
+                                                                <ServiceStatusBadge service={service} status={statusByClientId.get(client.id)} />
+                                                            )}
                                                         </div>
                                                     </td>
                                                 ))}
