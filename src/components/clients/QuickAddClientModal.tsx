@@ -326,7 +326,7 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                         )}
                     </div>
 
-                    {service !== 'content_brief' && (
+                    {(service === 'gbp' || service === 'indexing') && (
                         <div className="space-y-2">
                             <Label htmlFor="qa-industry" className="text-sm font-semibold">
                                 Industry <span className="text-muted-foreground font-normal text-xs">(optional)</span>
@@ -342,20 +342,34 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                     )}
 
                     {service === 'content_request' && (
-                        <div className="space-y-2">
-                            <Label htmlFor="qa-website" className="text-sm font-semibold">
-                                Website URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
-                            </Label>
-                            <Input
-                                id="qa-website"
-                                type="url"
-                                value={formData.website_url}
-                                onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                                placeholder="https://www.clientwebsite.com"
-                                className="bg-background border-input"
-                            />
-                            <p className="text-xs text-muted-foreground">Auto-fills the website field on future content requests for this client.</p>
-                        </div>
+                        <>
+                            <div className="space-y-2">
+                                <Label htmlFor="qa-website" className="text-sm font-semibold">
+                                    Website URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                </Label>
+                                <Input
+                                    id="qa-website"
+                                    type="url"
+                                    value={formData.website_url}
+                                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                                    placeholder="https://www.clientwebsite.com"
+                                    className="bg-background border-input"
+                                />
+                                <p className="text-xs text-muted-foreground">Auto-fills the website field on future content requests for this client.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="qa-industry" className="text-sm font-semibold">
+                                    Industry <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                </Label>
+                                <Input
+                                    id="qa-industry"
+                                    value={formData.industry}
+                                    onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                                    placeholder="e.g. Dermatology, Digital Marketing"
+                                    className="bg-background border-input"
+                                />
+                            </div>
+                        </>
                     )}
 
                     {service === 'content_brief' && (
