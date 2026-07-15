@@ -282,7 +282,7 @@ export default function ContentBriefActivityLog() {
                     </div>
                     <div className="flex items-center gap-3">
                         <QuickAddClientModal
-                            service="content"
+                            service="content_brief"
                             onSaved={() => queryClient.invalidateQueries({ queryKey: ['workbook_rows'] })}
                             trigger={
                                 <Button variant="outline" className="gap-2">

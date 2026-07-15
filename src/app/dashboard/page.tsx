@@ -622,7 +622,7 @@ Integrated treatment supports long-term resilience.`,
                                             Client *
                                         </Label>
                                         <QuickAddClientModal
-                                            service="content"
+                                            service="content_request"
                                             onSaved={(client) => {
                                                 queryClient.invalidateQueries({ queryKey: ['clients_content_enabled'] });
                                                 setFormData(prev => ({
@@ -666,7 +666,7 @@ Integrated treatment supports long-term resilience.`,
                                             />
                                         </div>
                                         <QuickAddClientModal
-                                            service="content"
+                                            service="content_request"
                                             onSaved={(client) => {
                                                 queryClient.invalidateQueries({ queryKey: ['clients_content_enabled'] });
                                                 setFormData(prev => ({

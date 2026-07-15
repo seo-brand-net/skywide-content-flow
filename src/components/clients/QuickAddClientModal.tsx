@@ -17,7 +17,7 @@ import { Loader2, CheckCircle2, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
-export type QuickAddService = 'content' | 'gbp' | 'indexing';
+export type QuickAddService = 'content_request' | 'content_brief' | 'gbp' | 'indexing';
 
 interface SavedClient {
     id: string;
@@ -56,13 +56,15 @@ interface FullClient extends ClientMatch {
 }
 
 const SERVICE_ENABLED_KEY = {
-    content: 'content_enabled',
+    content_request: 'content_enabled',
+    content_brief: 'content_enabled',
     gbp: 'gbp_enabled',
     indexing: 'indexing_enabled',
 } as const;
 
 const SERVICE_LABEL = {
-    content: 'Content',
+    content_request: 'Content Requests',
+    content_brief: 'Content Briefs',
     gbp: 'GBP Posts',
     indexing: 'Indexing',
 } as const;
@@ -180,12 +182,13 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
         try {
             const payload: Record<string, any> = {
                 name: formData.name,
-                industry: formData.industry || null,
                 [enabledKey]: true,
             };
 
-            if (service === 'content') {
+            if (service === 'content_request') {
+                payload.industry = formData.industry || null;
                 payload.website_url = formData.website_url || null;
+            } else if (service === 'content_brief') {
                 payload.workbook_url = formData.workbook_url || null;
                 payload.folder_url = formData.folder_url || null;
                 let folderId = '';
@@ -194,11 +197,13 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                 }
                 payload.folder_id = folderId || null;
             } else if (service === 'gbp') {
+                payload.industry = formData.industry || null;
                 payload.key_selling_point = formData.key_selling_point || null;
                 payload.sitemap_url = formData.sitemap_url || null;
                 payload.gbp_sheet_id = formData.gbp_sheet_id || null;
                 payload.gbp_topics_tab_name = formData.gbp_topics_tab_name || 'Topics';
             } else if (service === 'indexing') {
+                payload.industry = formData.industry || null;
                 payload.indexing_workbook_url = formData.indexing_workbook_url || null;
                 payload.indexing_tab_name = formData.indexing_tab_name || 'Indexing Automation';
                 payload.indexing_gsc_property = formData.indexing_gsc_property || null;
@@ -231,7 +236,7 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                 id: savedId!,
                 name: formData.name,
                 industry: formData.industry || null,
-                website_url: service === 'content' ? (formData.website_url || null) : (linkedClient?.website_url ?? null),
+                website_url: service === 'content_request' ? (formData.website_url || null) : (linkedClient?.website_url ?? null),
             });
             setIsOpen(false);
         } catch (error: any) {
@@ -321,35 +326,40 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                         )}
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="qa-industry" className="text-sm font-semibold">
-                            Industry <span className="text-muted-foreground font-normal text-xs">(optional)</span>
-                        </Label>
-                        <Input
-                            id="qa-industry"
-                            value={formData.industry}
-                            onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                            placeholder="e.g. Dermatology, Digital Marketing"
-                            className="bg-background border-input"
-                        />
-                    </div>
+                    {service !== 'content_brief' && (
+                        <div className="space-y-2">
+                            <Label htmlFor="qa-industry" className="text-sm font-semibold">
+                                Industry <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                            </Label>
+                            <Input
+                                id="qa-industry"
+                                value={formData.industry}
+                                onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                                placeholder="e.g. Dermatology, Digital Marketing"
+                                className="bg-background border-input"
+                            />
+                        </div>
+                    )}
 
-                    {service === 'content' && (
+                    {service === 'content_request' && (
+                        <div className="space-y-2">
+                            <Label htmlFor="qa-website" className="text-sm font-semibold">
+                                Website URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                            </Label>
+                            <Input
+                                id="qa-website"
+                                type="url"
+                                value={formData.website_url}
+                                onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                                placeholder="https://www.clientwebsite.com"
+                                className="bg-background border-input"
+                            />
+                            <p className="text-xs text-muted-foreground">Auto-fills the website field on future content requests for this client.</p>
+                        </div>
+                    )}
+
+                    {service === 'content_brief' && (
                         <>
-                            <div className="space-y-2">
-                                <Label htmlFor="qa-website" className="text-sm font-semibold">
-                                    Website URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
-                                </Label>
-                                <Input
-                                    id="qa-website"
-                                    type="url"
-                                    value={formData.website_url}
-                                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                                    placeholder="https://www.clientwebsite.com"
-                                    className="bg-background border-input"
-                                />
-                                <p className="text-xs text-muted-foreground">Auto-fills the website field on future content requests for this client.</p>
-                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="qa-workbook" className="text-sm font-semibold">
                                     Workbook URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
@@ -373,7 +383,7 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                                     placeholder="https://drive.google.com/drive/folders/..."
                                     className="bg-background border-input"
                                 />
-                                <p className="text-xs text-muted-foreground">Workbook + Drive Folder are needed to run Content Briefs generation for this client.</p>
+                                <p className="text-xs text-muted-foreground">Needed to run Content Briefs generation for this client.</p>
                             </div>
                         </>
                     )}

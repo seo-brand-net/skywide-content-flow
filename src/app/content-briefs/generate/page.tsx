@@ -435,7 +435,7 @@ export default function ContentBriefsPage() {
                             <RotateCcw className={`w-4 h-4 ${isLoadingClients ? 'animate-spin' : ''}`} />
                         </Button>
                         <QuickAddClientModal
-                            service="content"
+                            service="content_brief"
                             onSaved={(client) => {
                                 queryClient.invalidateQueries({ queryKey: ['clients'] });
                                 setSelectedClient(client.id);
