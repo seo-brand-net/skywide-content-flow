@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, FileText, BarChart, Settings, LogOut, Users, MessageSquare, Search, Sparkles, Globe, MapPin } from 'lucide-react';
+import { Home, FileText, BarChart, Settings, LogOut, Users, MessageSquare, Search, Sparkles, Globe, MapPin, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -16,6 +16,7 @@ const navItems = [
     { icon: Globe, label: 'Indexing', path: '/indexing' },
     { icon: MessageSquare, label: 'Features', path: '/features' },
     { icon: Search, label: 'Research', path: '/research' },
+    { icon: BookOpen, label: 'Help', path: '/docs' },
     { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
@@ -31,6 +32,7 @@ const adminNavItems = [
     { icon: Users, label: 'Invite Users', path: '/invite-users' },
     { icon: BarChart, label: 'Analytics', path: '/analytics' },
     { icon: Users, label: 'Clients', path: '/settings/clients' },
+    { icon: BookOpen, label: 'Help', path: '/docs' },
     { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
