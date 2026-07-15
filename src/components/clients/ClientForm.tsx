@@ -17,6 +17,7 @@ export interface EditableClient {
     name: string;
     workbook_url: string | null;
     folder_url: string | null;
+    website_url: string | null;
     sitemap_url: string | null;
     industry: string | null;
     key_selling_point: string | null;
@@ -51,6 +52,7 @@ const emptyFormData = {
     name: '',
     workbook_url: '',
     folder_url: '',
+    website_url: '',
     sitemap_url: '',
     industry: '',
     key_selling_point: '',
@@ -70,6 +72,7 @@ function toFormData(client: EditableClient): typeof emptyFormData {
         name: client.name,
         workbook_url: client.workbook_url || '',
         folder_url: client.folder_url || '',
+        website_url: client.website_url || '',
         sitemap_url: client.sitemap_url || '',
         industry: client.industry || '',
         key_selling_point: client.key_selling_point || '',
@@ -260,7 +263,7 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
     const handleMatchSelected = async (match: ClientMatch) => {
         const { data, error } = await supabase
             .from('clients')
-            .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url')
+            .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, website_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url')
             .eq('id', match.id)
             .single();
         if (error || !data) {
@@ -293,6 +296,7 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
             const payload = {
                 name: formData.name,
                 industry: formData.industry || null,
+                website_url: formData.website_url || null,
                 content_enabled: formData.content_enabled,
                 gbp_enabled: formData.gbp_enabled,
                 indexing_enabled: formData.indexing_enabled,
@@ -592,6 +596,20 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
                                     placeholder="e.g. Dermatology, Digital Marketing"
                                     className="bg-background border-input"
                                 />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="client-website" className="text-sm font-semibold">
+                                    Website URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                </Label>
+                                <Input
+                                    id="client-website"
+                                    type="url"
+                                    value={formData.website_url}
+                                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                                    placeholder="https://www.clientwebsite.com"
+                                    className="bg-background border-input"
+                                />
+                                <p className="text-xs text-muted-foreground/70">Auto-fills the website field on future content requests for this client.</p>
                             </div>
                         </CardContent>
                     </Card>

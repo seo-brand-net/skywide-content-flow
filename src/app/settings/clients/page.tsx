@@ -114,7 +114,7 @@ export default function ClientsSettingsPage() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('clients')
-                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url, created_at')
+                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, website_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url, created_at')
                 .order('name');
             if (error) throw error;
             return data as Client[];
@@ -305,7 +305,11 @@ export default function ClientsSettingsPage() {
                                     </thead>
                                     <tbody className="divide-y divide-border/30">
                                         {filtered.map((client) => (
-                                            <tr key={client.id} className="hover:bg-muted/20 transition-colors group align-top">
+                                            <tr
+                                                key={client.id}
+                                                className="hover:bg-muted/20 transition-colors group align-top cursor-pointer"
+                                                onClick={() => router.push(`/settings/clients/${client.id}/edit`)}
+                                            >
 
                                                 {/* Client name + locations */}
                                                 <td className="px-6 py-4">
@@ -313,22 +317,16 @@ export default function ClientsSettingsPage() {
                                                         <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
                                                             {client.name}
                                                         </p>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-6 w-6 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-brand-blue-crayola transition-opacity"
-                                                            title={`Edit ${client.name}`}
-                                                            onClick={() => router.push(`/settings/clients/${client.id}/edit`)}
-                                                        >
-                                                            <Pencil className="w-3 h-3" />
-                                                        </Button>
+                                                        <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     </div>
                                                     {client.sitemap_url && (
                                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate max-w-[220px]">
                                                             {client.sitemap_url}
                                                         </p>
                                                     )}
-                                                    <LocationsPanel client={client} />
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <LocationsPanel client={client} />
+                                                    </div>
                                                 </td>
 
                                                 {/* Industry */}
@@ -340,7 +338,7 @@ export default function ClientsSettingsPage() {
 
                                                 {/* Service toggles */}
                                                 {SERVICE_CONFIGS.map(({ key, service, label, activeClass, inactiveClass }) => (
-                                                    <td key={key} className="px-4 py-4 text-center">
+                                                    <td key={key} className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                                                         <div className="flex flex-col items-center gap-1.5">
                                                             <ServiceToggle
                                                                 client={client}

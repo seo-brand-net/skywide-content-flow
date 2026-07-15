@@ -21,7 +21,7 @@ export default function EditClientPage() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('clients')
-                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url')
+                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, website_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url')
                 .eq('id', id)
                 .single();
             if (error) throw error;
