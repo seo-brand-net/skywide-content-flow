@@ -43,6 +43,8 @@ interface ClientMatch {
 interface FullClient extends ClientMatch {
     industry: string | null;
     website_url: string | null;
+    workbook_url: string | null;
+    folder_url: string | null;
     key_selling_point: string | null;
     sitemap_url: string | null;
     gbp_sheet_id: string | null;
@@ -60,7 +62,7 @@ const SERVICE_ENABLED_KEY = {
 } as const;
 
 const SERVICE_LABEL = {
-    content: 'Content Briefs',
+    content: 'Content',
     gbp: 'GBP Posts',
     indexing: 'Indexing',
 } as const;
@@ -69,6 +71,8 @@ const emptyForm = {
     name: '',
     industry: '',
     website_url: '',
+    workbook_url: '',
+    folder_url: '',
     key_selling_point: '',
     sitemap_url: '',
     gbp_sheet_id: '',
@@ -84,6 +88,8 @@ function toForm(c: FullClient): typeof emptyForm {
         name: c.name,
         industry: c.industry || '',
         website_url: c.website_url || '',
+        workbook_url: c.workbook_url || '',
+        folder_url: c.folder_url || '',
         key_selling_point: c.key_selling_point || '',
         sitemap_url: c.sitemap_url || '',
         gbp_sheet_id: c.gbp_sheet_id || '',
@@ -146,7 +152,7 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
     const handleMatchSelected = async (match: ClientMatch) => {
         const { data, error } = await supabase
             .from('clients')
-            .select('id, name, industry, website_url, content_enabled, gbp_enabled, indexing_enabled, key_selling_point, sitemap_url, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url')
+            .select('id, name, industry, website_url, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, key_selling_point, sitemap_url, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url')
             .eq('id', match.id)
             .single();
         if (error || !data) {
@@ -180,6 +186,13 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
 
             if (service === 'content') {
                 payload.website_url = formData.website_url || null;
+                payload.workbook_url = formData.workbook_url || null;
+                payload.folder_url = formData.folder_url || null;
+                let folderId = '';
+                if (formData.folder_url.includes('/folders/')) {
+                    folderId = formData.folder_url.split('/folders/')[1].split('?')[0];
+                }
+                payload.folder_id = folderId || null;
             } else if (service === 'gbp') {
                 payload.key_selling_point = formData.key_selling_point || null;
                 payload.sitemap_url = formData.sitemap_url || null;
@@ -322,20 +335,47 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                     </div>
 
                     {service === 'content' && (
-                        <div className="space-y-2">
-                            <Label htmlFor="qa-website" className="text-sm font-semibold">
-                                Website URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
-                            </Label>
-                            <Input
-                                id="qa-website"
-                                type="url"
-                                value={formData.website_url}
-                                onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
-                                placeholder="https://www.clientwebsite.com"
-                                className="bg-background border-input"
-                            />
-                            <p className="text-xs text-muted-foreground">Auto-fills the website field on future content requests for this client.</p>
-                        </div>
+                        <>
+                            <div className="space-y-2">
+                                <Label htmlFor="qa-website" className="text-sm font-semibold">
+                                    Website URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                </Label>
+                                <Input
+                                    id="qa-website"
+                                    type="url"
+                                    value={formData.website_url}
+                                    onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                                    placeholder="https://www.clientwebsite.com"
+                                    className="bg-background border-input"
+                                />
+                                <p className="text-xs text-muted-foreground">Auto-fills the website field on future content requests for this client.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="qa-workbook" className="text-sm font-semibold">
+                                    Workbook URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                </Label>
+                                <Input
+                                    id="qa-workbook"
+                                    value={formData.workbook_url}
+                                    onChange={(e) => setFormData({ ...formData, workbook_url: e.target.value })}
+                                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                                    className="bg-background border-input"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="qa-folder" className="text-sm font-semibold">
+                                    Drive Folder URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                </Label>
+                                <Input
+                                    id="qa-folder"
+                                    value={formData.folder_url}
+                                    onChange={(e) => setFormData({ ...formData, folder_url: e.target.value })}
+                                    placeholder="https://drive.google.com/drive/folders/..."
+                                    className="bg-background border-input"
+                                />
+                                <p className="text-xs text-muted-foreground">Workbook + Drive Folder are needed to run Content Briefs generation for this client.</p>
+                            </div>
+                        </>
                     )}
 
                     {service === 'gbp' && (

@@ -44,6 +44,8 @@ import { Separator } from "@/components/ui/separator";
 import { usePusherGlobalBriefUpdates } from '@/hooks/usePusherGlobalBriefUpdates';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
+import { PlusCircle } from 'lucide-react';
 
 
 // GAS hard-kills executions around the 6-minute mark; past that, an IN_PROGRESS
@@ -278,13 +280,24 @@ export default function ContentBriefActivityLog() {
                                 : `You have ${totalCount} research ${totalCount === 1 ? 'brief' : 'briefs'} in your personal history`}
                         </p>
                     </div>
-                    <Button
-                        onClick={() => router.push('/content-briefs/generate')}
-                        className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
-                    >
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Generate New Brief
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <QuickAddClientModal
+                            service="content"
+                            onSaved={() => queryClient.invalidateQueries({ queryKey: ['workbook_rows'] })}
+                            trigger={
+                                <Button variant="outline" className="gap-2">
+                                    <PlusCircle className="w-4 h-4" /> Add Client
+                                </Button>
+                            }
+                        />
+                        <Button
+                            onClick={() => router.push('/content-briefs/generate')}
+                            className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
+                        >
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Generate New Brief
+                        </Button>
+                    </div>
                 </div>
 
                 <Card className="border-border/50 shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
