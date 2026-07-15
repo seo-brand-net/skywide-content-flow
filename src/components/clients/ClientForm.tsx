@@ -342,7 +342,9 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
 
     const canSubmit =
         !!formData.name &&
-        !(formData.indexing_enabled && (!formData.indexing_workbook_url || !formData.indexing_gsc_property));
+        !(formData.indexing_enabled && (!formData.indexing_workbook_url || !formData.indexing_gsc_property)) &&
+        !(formData.gbp_enabled && !formData.gbp_sheet_id) &&
+        !(formData.content_enabled && (!formData.workbook_url || !formData.folder_url));
 
     // ── Service config sections, order-able so the automation you arrived to
     //    configure (defaultService) always shows first instead of wherever it
@@ -352,27 +354,30 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
         <ServiceSection key="content_enabled" active={formData.content_enabled} color="blue" icon={FileText} title="Content Briefs Config" highlighted={targetServiceKey === 'content_enabled'}>
             <div className="space-y-2">
                 <Label htmlFor="client-workbook" className="text-xs font-semibold">
-                    Workbook URL <span className="text-muted-foreground font-normal">(optional)</span>
+                    Workbook URL <span className="text-destructive">*</span>
                 </Label>
                 <Input
                     id="client-workbook"
                     value={formData.workbook_url}
                     onChange={(e) => setFormData({ ...formData, workbook_url: e.target.value })}
                     placeholder="https://docs.google.com/spreadsheets/d/..."
+                    required={formData.content_enabled}
                     className="bg-background border-input h-9 text-sm"
                 />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="client-folder" className="text-xs font-semibold">
-                    Drive Folder URL <span className="text-muted-foreground font-normal">(optional)</span>
+                    Drive Folder URL <span className="text-destructive">*</span>
                 </Label>
                 <Input
                     id="client-folder"
                     value={formData.folder_url}
                     onChange={(e) => setFormData({ ...formData, folder_url: e.target.value })}
                     placeholder="https://drive.google.com/drive/folders/..."
+                    required={formData.content_enabled}
                     className="bg-background border-input h-9 text-sm"
                 />
+                <p className="text-xs text-muted-foreground/70">Both are required to run Content Briefs generation for this client.</p>
             </div>
         </ServiceSection>
     );
@@ -407,15 +412,17 @@ export function ClientForm({ client, defaultService, returnTo }: ClientFormProps
             </div>
             <div className="space-y-2">
                 <Label htmlFor="client-gbp-sheet" className="text-xs font-semibold">
-                    Google Sheet ID <span className="text-muted-foreground font-normal">(optional)</span>
+                    Google Sheet ID <span className="text-destructive">*</span>
                 </Label>
                 <Input
                     id="client-gbp-sheet"
                     value={formData.gbp_sheet_id}
                     onChange={(e) => setFormData({ ...formData, gbp_sheet_id: e.target.value })}
                     placeholder="1xh0As6rrHv9WqCDqfgUyvJm8WCPvLf1Hks5RFf-Sf0A"
+                    required={formData.gbp_enabled}
                     className="bg-background border-input h-9 text-sm"
                 />
+                <p className="text-xs text-muted-foreground/70">Required — GBP post generation reads topics from this sheet.</p>
             </div>
             <div className="space-y-2">
                 <Label htmlFor="client-gbp-tab" className="text-xs font-semibold">Topics Tab Name</Label>

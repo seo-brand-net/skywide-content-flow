@@ -177,6 +177,8 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
         e.preventDefault();
         if (!formData.name) return;
         if (service === 'indexing' && (!formData.indexing_workbook_url || !formData.indexing_gsc_property)) return;
+        if (service === 'gbp' && !formData.gbp_sheet_id) return;
+        if (service === 'content_brief' && (!formData.workbook_url || !formData.folder_url)) return;
 
         setIsSubmitting(true);
         try {
@@ -247,7 +249,10 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
         }
     };
 
-    const canSubmit = !!formData.name && !(service === 'indexing' && (!formData.indexing_workbook_url || !formData.indexing_gsc_property));
+    const canSubmit = !!formData.name
+        && !(service === 'indexing' && (!formData.indexing_workbook_url || !formData.indexing_gsc_property))
+        && !(service === 'gbp' && !formData.gbp_sheet_id)
+        && !(service === 'content_brief' && (!formData.workbook_url || !formData.folder_url));
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -376,28 +381,30 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                         <>
                             <div className="space-y-2">
                                 <Label htmlFor="qa-workbook" className="text-sm font-semibold">
-                                    Workbook URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                    Workbook URL <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="qa-workbook"
                                     value={formData.workbook_url}
                                     onChange={(e) => setFormData({ ...formData, workbook_url: e.target.value })}
                                     placeholder="https://docs.google.com/spreadsheets/d/..."
+                                    required
                                     className="bg-background border-input"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="qa-folder" className="text-sm font-semibold">
-                                    Drive Folder URL <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                    Drive Folder URL <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="qa-folder"
                                     value={formData.folder_url}
                                     onChange={(e) => setFormData({ ...formData, folder_url: e.target.value })}
                                     placeholder="https://drive.google.com/drive/folders/..."
+                                    required
                                     className="bg-background border-input"
                                 />
-                                <p className="text-xs text-muted-foreground">Needed to run Content Briefs generation for this client.</p>
+                                <p className="text-xs text-muted-foreground">Both are required to run Content Briefs generation for this client.</p>
                             </div>
                         </>
                     )}
@@ -430,15 +437,17 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="qa-sheet" className="text-sm font-semibold">
-                                    Google Sheet ID <span className="text-muted-foreground font-normal text-xs">(optional)</span>
+                                    Google Sheet ID <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="qa-sheet"
                                     value={formData.gbp_sheet_id}
                                     onChange={(e) => setFormData({ ...formData, gbp_sheet_id: e.target.value })}
                                     placeholder="1xh0As6rrHv9WqCDqfgUyvJm8WCPvLf1Hks5RFf-Sf0A"
+                                    required
                                     className="bg-background border-input"
                                 />
+                                <p className="text-xs text-muted-foreground">Required — GBP post generation reads topics from this sheet.</p>
                             </div>
                         </>
                     )}
