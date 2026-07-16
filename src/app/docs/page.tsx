@@ -377,10 +377,16 @@ export default function DocsPage() {
                                             <Callout tone="info">
                                                 In both places, typing a name that already exists — even one set up under a different automation — shows it in a dropdown so you extend that client's existing record instead of creating a duplicate.
                                             </Callout>
-                                            <Screenshot
-                                                label="Screenshot 10"
-                                                caption="Full client edit page showing Basic Info plus the config section for one active service."
-                                            />
+                                            <div className="my-4 rounded-xl border border-border/50 overflow-hidden">
+                                                <img
+                                                    src="/docs/client-edit-services-config.png"
+                                                    alt="Full client edit page showing the Content Briefs Config section (Workbook URL, Drive Folder URL, both required) and GBP Config section (Key Selling Point, Sitemap URL, Google Sheet ID required, Topics Tab Name, Locations)."
+                                                    className="w-full"
+                                                />
+                                                <p className="text-xs text-muted-foreground text-center py-2 bg-muted/20">
+                                                    Full client edit page — each active service gets its own config card, only the fields that service actually needs.
+                                                </p>
+                                            </div>
                                         </AccordionContent>
                                     </AccordionItem>
 

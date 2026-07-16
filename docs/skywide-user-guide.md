@@ -130,4 +130,6 @@ Two ways to add or change a client, depending on how much you need to do:
 
 **Tip:** In both places, typing a name that already exists — even one set up under a different automation — shows it in a dropdown so you extend that client's existing record instead of creating a duplicate.
 
-> 📸 **Screenshot 10** — Full client edit page showing Basic Info plus the config section for one active service.
+![Full client edit page — Content Briefs Config and GBP Config sections](images/client-edit-services-config.png)
+
+*Full client edit page — each active service gets its own config card, only the fields that service actually needs.*
