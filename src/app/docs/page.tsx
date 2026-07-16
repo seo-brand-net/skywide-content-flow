@@ -3,7 +3,6 @@
 import { ReactNode } from 'react';
 import {
     BookOpen,
-    Camera,
     FileText,
     MapPin,
     Globe,
@@ -18,16 +17,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 
 // ─── Reusable building blocks ──────────────────────────────────────────────
-
-function Screenshot({ label, caption }: { label: string; caption: string }) {
-    return (
-        <div className="my-4 rounded-xl border-2 border-dashed border-border/60 bg-muted/20 p-6 flex flex-col items-center justify-center text-center gap-2">
-            <Camera className="w-6 h-6 text-muted-foreground/50" />
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/70">{label}</p>
-            <p className="text-xs text-muted-foreground max-w-md">{caption}</p>
-        </div>
-    );
-}
 
 function Shot({ src, alt, caption }: { src: string; alt: string; caption: string }) {
     return (
@@ -199,9 +188,10 @@ export default function DocsPage() {
                                                     <strong>Request is Complete but needs changes:</strong> click <strong>Request Revision</strong>, add a short note on what to change, and it automatically reruns with your notes included.
                                                 </li>
                                             </ul>
-                                            <Screenshot
-                                                label="Screenshot 4"
-                                                caption="A completed request card showing the Retry and Request Revision buttons."
+                                            <Shot
+                                                src="/docs/my-requests-retry-button.png"
+                                                alt="My Requests row with an Error status, highlighting the Retry action icon."
+                                                caption="An Error row on My Requests — click the highlighted Retry icon to re-run it."
                                             />
                                         </AccordionContent>
                                     </AccordionItem>
@@ -217,7 +207,7 @@ export default function DocsPage() {
                             <CardHeader>
                                 <CardTitle className="text-lg">What this covers</CardTitle>
                                 <CardDescription>
-                                    GBP Posts, Indexing, and Content Briefs — the three automations Account Managers set up, run, and (for GBP) review. Every client used by any of these lives in one shared record, managed from the Clients page.
+                                    GBP Posts, Indexing, and Content Briefs — the three automations Account Managers set up and run. Every client used by any of these lives in one shared record, managed from the Clients page.
                                 </CardDescription>
                             </CardHeader>
                         </Card>
@@ -253,7 +243,7 @@ export default function DocsPage() {
                                                     <p><StatusPill color="green" label="Green" /> — posted within 14 days</p>
                                                     <p><StatusPill color="yellow" label="Yellow" /> — posted, but 14–45 days ago</p>
                                                     <p><StatusPill color="red" label="Red" /> — nothing in 45+ days</p>
-                                                    <p className="text-muted-foreground">Plus a note when drafts are waiting on your review.</p>
+                                                    <p className="text-muted-foreground">Plus a note when there are drafts waiting to be handled.</p>
                                                 </div>
                                             </div>
                                             <Shot
@@ -270,7 +260,7 @@ export default function DocsPage() {
                                         </AccordionTrigger>
                                         <AccordionContent>
                                             <p className="text-sm text-foreground mb-3">
-                                                Auto-generates Google Business Profile post drafts for a client from their topics sheet. <strong>This is the one automation with a real review step</strong> — nothing goes out without you looking at it first.
+                                                Auto-generates Google Business Profile post drafts for a client from their topics sheet.
                                             </p>
 
                                             <p className="text-sm font-semibold text-foreground mt-4 mb-1">Setting up a client</p>
@@ -286,25 +276,13 @@ export default function DocsPage() {
                                                     <>Click <strong>Generate Posts</strong>. Drafts start appearing within moments as each one finishes.</>,
                                                 ]}
                                             />
-
-                                            <p className="text-sm font-semibold text-foreground mt-4 mb-1">Reviewing drafts (your part)</p>
-                                            <Steps
-                                                items={[
-                                                    <>Go to <strong>GBP → Posts</strong> tab.</>,
-                                                    <>Every new post lands as <StatusPill color="gray" label="Draft" />.</>,
-                                                    <>Read it, then click the checkmark to <strong>Approve</strong> it, or the X to <strong>Request Changes</strong> (sends it back to Draft).</>,
-                                                ]}
+                                            <Shot
+                                                src="/docs/gbp-generate-page.png"
+                                                alt="GBP Generate Posts page showing the Configuration panel with a client dropdown (Add Client button) and the Generated Posts panel."
+                                                caption="GBP → Generate Posts — pick a client from Configuration to generate and view their posts."
                                             />
-                                            <Screenshot
-                                                label="Screenshot 6"
-                                                caption="GBP Generate page — client/location picker and the Generate Posts button."
-                                            />
-                                            <Screenshot
-                                                label="Screenshot 7"
-                                                caption="GBP Posts tab showing a Draft post with the Approve (check) and Request Changes (X) buttons."
-                                            />
-                                            <Callout tone="warning">
-                                                Approved is currently the final state — automatic publishing straight to Google isn't live yet, so once a post is Approved it's ready to be posted through your normal channel.
+                                            <Callout tone="info">
+                                                Generated posts land on the <strong>GBP → Posts</strong> tab as <strong>Draft</strong>. A formal approve/review step isn't live yet, so for now treat drafts as the automation's output and handle review through your normal process outside Skywide.
                                             </Callout>
                                         </AccordionContent>
                                     </AccordionItem>
@@ -369,11 +347,6 @@ export default function DocsPage() {
                                                 src="/docs/content-briefs-research-history.png"
                                                 alt="Research History page showing rows with Done and Error status badges and Doc links."
                                                 caption="Content Briefs Research History — Done rows link straight to the finished Doc; Error rows are ready for a restart."
-                                            />
-                                            <Shot
-                                                src="/docs/content-briefs-restart-button.png"
-                                                alt="Close-up of a Content Briefs row with an Error status, highlighting the Restart button."
-                                                caption="An Error (or stuck) row — click the highlighted Restart button to give it another attempt."
                                             />
                                         </AccordionContent>
                                     </AccordionItem>

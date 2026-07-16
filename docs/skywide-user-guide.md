@@ -2,8 +2,6 @@
 
 Step-by-step guides for using Skywide day to day. This document mirrors the in-app Help Center at `/docs`. Pick the section that matches your role.
 
-> 📸 = a screenshot goes here. Each one is labeled with exactly what to capture — take the screenshot in the live app and drop it in below the label before sharing this doc.
-
 ---
 
 ## Part 1 — For the Content Team
@@ -48,13 +46,15 @@ Go to **My Requests** in the sidebar to see everything you've submitted and wher
 - **Request shows Cancelled/Error:** open it on My Requests and click **Retry** — this re-runs the same request without you having to resubmit the whole form.
 - **Request is Complete but needs changes:** click **Request Revision**, add a short note on what to change, and it automatically reruns with your notes included.
 
-> 📸 **Screenshot 4** — A completed request card showing the Retry and Request Revision buttons.
+![Retry button on an Error row in My Requests](images/my-requests-retry-button.png)
+
+*An Error row on My Requests — click the highlighted Retry icon to re-run it.*
 
 ---
 
 ## Part 2 — For Account Managers
 
-*GBP Posts, Indexing, and Content Briefs — the three automations Account Managers set up, run, and (for GBP) review. Every client used by any of these lives in one shared record, managed from the Clients page.*
+*GBP Posts, Indexing, and Content Briefs — the three automations Account Managers set up and run. Every client used by any of these lives in one shared record, managed from the Clients page.*
 
 ### 1. Client Management — the one place for everything
 
@@ -73,7 +73,7 @@ Go to **Clients** in the sidebar. Every client is a single record shared by Cont
 - 🟢 Green — posted within 14 days
 - 🟡 Yellow — posted, but 14–45 days ago
 - 🔴 Red — nothing in 45+ days
-- Plus a note when drafts are waiting on your review.
+- Plus a note when there are drafts waiting to be handled.
 
 ![Clients page with status shown under each service](images/clients-status-dots.png)
 
@@ -81,7 +81,7 @@ Go to **Clients** in the sidebar. Every client is a single record shared by Cont
 
 ### 2. GBP Posts
 
-Auto-generates Google Business Profile post drafts for a client from their topics sheet. **This is the one automation with a real review step** — nothing goes out without you looking at it first.
+Auto-generates Google Business Profile post drafts for a client from their topics sheet.
 
 **Setting up a client:** Turn on GBP for the client and fill in their **Google Sheet ID** — this is required, since post generation reads the client's topics straight from that sheet. Key Selling Point and Sitemap URL are optional but improve post quality.
 
@@ -90,16 +90,11 @@ Auto-generates Google Business Profile post drafts for a client from their topic
 2. Pick the client (and location, if they have more than one).
 3. Click **Generate Posts**. Drafts start appearing within moments as each one finishes.
 
-**Reviewing drafts (your part):**
-1. Go to **GBP → Posts** tab.
-2. Every new post lands as **Draft**.
-3. Read it, then click the checkmark to **Approve** it, or the X to **Request Changes** (sends it back to Draft).
+![GBP Generate Posts page](images/gbp-generate-page.png)
 
-> 📸 **Screenshot 6** — GBP Generate page: client/location picker and the Generate Posts button.
+*GBP → Generate Posts — pick a client from Configuration to generate and view their posts.*
 
-> 📸 **Screenshot 7** — GBP Posts tab showing a Draft post with the Approve (check) and Request Changes (X) buttons.
-
-**Note:** Approved is currently the final state — automatic publishing straight to Google isn't live yet, so once a post is Approved it's ready to be posted through your normal channel.
+**Note:** Generated posts land on the **GBP → Posts** tab as **Draft**. A formal approve/review step isn't live yet, so for now treat drafts as the automation's output and handle review through your normal process outside Skywide.
 
 ### 3. Indexing
 
@@ -132,10 +127,6 @@ Bulk-generates SEO research briefs — one Google Doc per keyword row in a clien
 ![Content Briefs Research History](images/content-briefs-research-history.png)
 
 *Content Briefs Research History — Done rows link straight to the finished Doc; Error rows are ready for a restart.*
-
-![Restart button on an Error row](images/content-briefs-restart-button.png)
-
-*An Error (or stuck) row — click the highlighted Restart button to give it another attempt.*
 
 ### 5. Adding & Editing Clients
 
