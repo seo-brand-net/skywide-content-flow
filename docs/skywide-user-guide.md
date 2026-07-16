@@ -18,9 +18,13 @@ Step-by-step guides for using Skywide day to day. This document mirrors the in-a
 4. Fill in the rest of the brief the way you normally would (creative brief, page intent, article type, etc.).
 5. Click **Submit**. The request is created immediately and handed off to the writing automation — you don't need to do anything else.
 
-> 📸 **Screenshot 1** — Dashboard content request form: Client field with the searchable dropdown and the small + button, plus the Website URL / Industry fields showing they auto-filled.
+![Dashboard content request form](images/dashboard-content-request-form.png)
 
-> 📸 **Screenshot 2** — The Add Client pop-up showing its three fields: Client Name, Website URL, Industry.
+*Dashboard content request form — Client field with the searchable dropdown and Add Client button, plus Industry.*
+
+![Add Client pop-up for Content Requests](images/add-client-content-request-modal.png)
+
+*The Add Client pop-up — just three fields: Client Name, Website URL, Industry.*
 
 **Tip:** If you type a name that already exists anywhere in Skywide (even one only set up for GBP or Indexing before), it'll show up in a dropdown under the name field so you can select it instead of accidentally creating a second, duplicate client record.
 
@@ -35,7 +39,9 @@ Go to **My Requests** in the sidebar to see everything you've submitted and wher
 - **Complete** — done. A Google Drive folder link appears on the request — that's your delivered content.
 - **Cancelled / Error** — something went wrong. See below.
 
-> 📸 **Screenshot 3** — My Requests page with the Status column visible, showing a mix of Pending / In Progress / Complete rows.
+![My Requests page status column](images/my-requests-status.png)
+
+*My Requests — the Status column shows exactly where each request stands.*
 
 ### 3. If Something Goes Wrong (or Needs Changes)
 
@@ -69,7 +75,9 @@ Go to **Clients** in the sidebar. Every client is a single record shared by Cont
 - 🔴 Red — nothing in 45+ days
 - Plus a note when drafts are waiting on your review.
 
-> 📸 **Screenshot 5** — Clients page showing a row with the colored status dots under each active service.
+![Clients page with status shown under each service](images/clients-status-dots.png)
+
+*Clients page — status shown under each active service (e.g. "10 days ago" for a healthy Indexing client, "1 pending" for Content).*
 
 ### 2. GBP Posts
 
@@ -105,7 +113,9 @@ Submits a client's page URLs to Google and Bing so new/updated pages get crawled
 
 **Tip:** Indexing also runs itself automatically — any client that hasn't run in 14+ days gets picked up overnight, so you don't have to remember to run every client by hand. You'll see an **Auto** or **Manual** tag on each run showing which one triggered it.
 
-> 📸 **Screenshot 8** — Indexing → Run page showing a client's run history with Auto vs Manual tags and Success/Error status.
+![Indexing Run page and run history](images/indexing-run-history.png)
+
+*Indexing → Run — Run History shows each run's Auto/Manual trigger, Success/Error status, and Google/Bing counts.*
 
 ### 4. Content Briefs
 
@@ -119,7 +129,13 @@ Bulk-generates SEO research briefs — one Google Doc per keyword row in a clien
 
 **Note:** If a row sits "In Progress" for more than 6 minutes, it's flagged **Stuck** — click **Restart** to give it another attempt. As a backstop, anything still stuck past 10 minutes gets auto-marked Error on its own, so nothing hangs forever unnoticed.
 
-> 📸 **Screenshot 9** — Content Briefs Research History page showing status badges (New / In Progress / Done / Error) and a Restart button on a stuck row.
+![Content Briefs Research History](images/content-briefs-research-history.png)
+
+*Content Briefs Research History — Done rows link straight to the finished Doc; Error rows are ready for a restart.*
+
+![Restart button on an Error row](images/content-briefs-restart-button.png)
+
+*An Error (or stuck) row — click the highlighted Restart button to give it another attempt.*
 
 ### 5. Adding & Editing Clients
 
@@ -130,6 +146,10 @@ Two ways to add or change a client, depending on how much you need to do:
 
 **Tip:** In both places, typing a name that already exists — even one set up under a different automation — shows it in a dropdown so you extend that client's existing record instead of creating a duplicate.
 
-![Full client edit page — Content Briefs Config and GBP Config sections](images/client-edit-services-config.png)
+![Top of the client edit page — Basic Info and Active Services toggles](images/client-edit-basic-info-services.png)
 
-*Full client edit page — each active service gets its own config card, only the fields that service actually needs.*
+*Top of the edit page — Basic Info plus the Active Services toggles that reveal each service's config below.*
+
+![Client edit page — Content Briefs Config and GBP Config sections](images/client-edit-services-config.png)
+
+*Each active service gets its own config card below, showing only the fields that service actually needs.*

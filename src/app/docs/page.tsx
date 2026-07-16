@@ -29,6 +29,15 @@ function Screenshot({ label, caption }: { label: string; caption: string }) {
     );
 }
 
+function Shot({ src, alt, caption }: { src: string; alt: string; caption: string }) {
+    return (
+        <div className="my-4 rounded-xl border border-border/50 overflow-hidden">
+            <img src={src} alt={alt} className="w-full" />
+            <p className="text-xs text-muted-foreground text-center py-2 bg-muted/20 px-4">{caption}</p>
+        </div>
+    );
+}
+
 function Steps({ items }: { items: ReactNode[] }) {
     return (
         <ol className="space-y-3 my-3">
@@ -132,13 +141,15 @@ export default function DocsPage() {
                                                     <>Click <strong>Submit</strong>. The request is created immediately and handed off to the writing automation — you don't need to do anything else.</>,
                                                 ]}
                                             />
-                                            <Screenshot
-                                                label="Screenshot 1"
-                                                caption="Dashboard content request form — Client field with the searchable dropdown and the small + button, plus the Website URL / Industry fields showing they auto-filled."
+                                            <Shot
+                                                src="/docs/dashboard-content-request-form.png"
+                                                alt="Dashboard Content Submission Form showing the Client field with a searchable dropdown and Add Client + button, plus the Industry field."
+                                                caption="Dashboard content request form — Client field with the searchable dropdown and Add Client button, plus Industry."
                                             />
-                                            <Screenshot
-                                                label="Screenshot 2"
-                                                caption="The Add Client pop-up showing its three fields: Client Name, Website URL, Industry."
+                                            <Shot
+                                                src="/docs/add-client-content-request-modal.png"
+                                                alt="Add Client — Content Requests pop-up with three fields: Client Name, Website URL, Industry."
+                                                caption="The Add Client pop-up — just three fields: Client Name, Website URL, Industry."
                                             />
                                             <Callout tone="info">
                                                 If you type a name that already exists anywhere in Skywide (even one only set up for GBP or Indexing before), it'll show up in a dropdown under the name field so you can select it instead of accidentally creating a second, duplicate client record.
@@ -167,9 +178,10 @@ export default function DocsPage() {
                                                 <li><strong>Complete</strong> — done. A Google Drive folder link appears on the request — that's your delivered content.</li>
                                                 <li><strong>Cancelled / Error</strong> — something went wrong. See below.</li>
                                             </ul>
-                                            <Screenshot
-                                                label="Screenshot 3"
-                                                caption="My Requests page with the Status column visible, showing a mix of Pending / In Progress / Complete rows."
+                                            <Shot
+                                                src="/docs/my-requests-status.png"
+                                                alt="My Requests page showing the Status column with In Progress and Complete rows."
+                                                caption="My Requests — the Status column shows exactly where each request stands."
                                             />
                                         </AccordionContent>
                                     </AccordionItem>
@@ -244,9 +256,10 @@ export default function DocsPage() {
                                                     <p className="text-muted-foreground">Plus a note when drafts are waiting on your review.</p>
                                                 </div>
                                             </div>
-                                            <Screenshot
-                                                label="Screenshot 5"
-                                                caption="Clients page showing a row with the colored status dots under each active service."
+                                            <Shot
+                                                src="/docs/clients-status-dots.png"
+                                                alt="Clients page table showing rows with status text under each active service, e.g. '1 pending', '10 days ago', 'Up to date', 'No requests yet'."
+                                                caption="Clients page — status shown under each active service (e.g. '10 days ago' for a healthy Indexing client, '1 pending' for Content)."
                                             />
                                         </AccordionContent>
                                     </AccordionItem>
@@ -320,9 +333,10 @@ export default function DocsPage() {
                                             <Callout tone="info">
                                                 Indexing also runs itself automatically — any client that hasn't run in 14+ days gets picked up overnight, so you don't have to remember to run every client by hand. You'll see an <StatusPill color="blue" label="Auto" /> or <StatusPill color="gray" label="Manual" /> tag on each run showing which one triggered it.
                                             </Callout>
-                                            <Screenshot
-                                                label="Screenshot 8"
-                                                caption="Indexing → Run page showing a client's run history with Auto vs Manual tags and Success/Error status."
+                                            <Shot
+                                                src="/docs/indexing-run-history.png"
+                                                alt="Indexing Run page showing the Client Selection panel and a Run History table with Auto tags, Success status, and Google/Bing submission counts."
+                                                caption="Indexing → Run — Run History shows each run's Auto/Manual trigger, Success/Error status, and Google/Bing counts."
                                             />
                                         </AccordionContent>
                                     </AccordionItem>
@@ -351,9 +365,15 @@ export default function DocsPage() {
                                             <Callout tone="warning">
                                                 If a row sits "In Progress" for more than 6 minutes, it's flagged <strong>Stuck</strong> — click <strong>Restart</strong> to give it another attempt. As a backstop, anything still stuck past 10 minutes gets auto-marked Error on its own, so nothing hangs forever unnoticed.
                                             </Callout>
-                                            <Screenshot
-                                                label="Screenshot 9"
-                                                caption="Content Briefs Research History page showing status badges (New / In Progress / Done / Error) and a Restart button on a stuck row."
+                                            <Shot
+                                                src="/docs/content-briefs-research-history.png"
+                                                alt="Research History page showing rows with Done and Error status badges and Doc links."
+                                                caption="Content Briefs Research History — Done rows link straight to the finished Doc; Error rows are ready for a restart."
+                                            />
+                                            <Shot
+                                                src="/docs/content-briefs-restart-button.png"
+                                                alt="Close-up of a Content Briefs row with an Error status, highlighting the Restart button."
+                                                caption="An Error (or stuck) row — click the highlighted Restart button to give it another attempt."
                                             />
                                         </AccordionContent>
                                     </AccordionItem>
@@ -377,16 +397,16 @@ export default function DocsPage() {
                                             <Callout tone="info">
                                                 In both places, typing a name that already exists — even one set up under a different automation — shows it in a dropdown so you extend that client's existing record instead of creating a duplicate.
                                             </Callout>
-                                            <div className="my-4 rounded-xl border border-border/50 overflow-hidden">
-                                                <img
-                                                    src="/docs/client-edit-services-config.png"
-                                                    alt="Full client edit page showing the Content Briefs Config section (Workbook URL, Drive Folder URL, both required) and GBP Config section (Key Selling Point, Sitemap URL, Google Sheet ID required, Topics Tab Name, Locations)."
-                                                    className="w-full"
-                                                />
-                                                <p className="text-xs text-muted-foreground text-center py-2 bg-muted/20">
-                                                    Full client edit page — each active service gets its own config card, only the fields that service actually needs.
-                                                </p>
-                                            </div>
+                                            <Shot
+                                                src="/docs/client-edit-basic-info-services.png"
+                                                alt="Client edit page top section: Basic Info (Client Name, Industry, Website URL) and Active Services toggles for Content Briefs, GBP Posts, Indexing."
+                                                caption="Top of the edit page — Basic Info plus the Active Services toggles that reveal each service's config below."
+                                            />
+                                            <Shot
+                                                src="/docs/client-edit-services-config.png"
+                                                alt="Full client edit page showing the Content Briefs Config section (Workbook URL, Drive Folder URL, both required) and GBP Config section (Key Selling Point, Sitemap URL, Google Sheet ID required, Topics Tab Name, Locations)."
+                                                caption="Each active service gets its own config card below, showing only the fields that service actually needs."
+                                            />
                                         </AccordionContent>
                                     </AccordionItem>
 
