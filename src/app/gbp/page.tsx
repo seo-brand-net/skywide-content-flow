@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useAuth as useAuthHook } from '@/hooks/useAuth';
 import { Layout } from '@/components/Layout';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface GbpPost {
@@ -32,8 +33,8 @@ interface GbpPost {
     reviewed_by: string | null;
     generated_at: string | null;
     created_at: string;
-    gbp_clients: { name: string } | null;
-    gbp_locations: { location_name: string; city: string; state: string } | null;
+    clients: { name: string } | null;
+    client_locations: { location_name: string; city: string; state: string } | null;
 }
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -73,7 +74,7 @@ function exportPostsToPdf(posts: GbpPost[], clientName: string) {
             <div style="display:flex;justify-content:space-between;align-items:flex-start">
                 <h2>${p.post_topic}</h2>
             </div>
-            ${p.gbp_locations ? `<p style="font-size:12px;color:#9ca3af;margin:2px 0 0">${p.gbp_locations.location_name}, ${p.gbp_locations.state}</p>` : ''}
+            ${p.client_locations ? `<p style="font-size:12px;color:#9ca3af;margin:2px 0 0">${p.client_locations.location_name}, ${p.client_locations.state}</p>` : ''}
             <div class="body">${p.post_body || 'Content pending...'}</div>
             ${p.image_url ? `<div style="margin: 14px 0; text-align: center;"><img src="${p.image_url}" alt="Generated post image" style="max-width:100%;height:auto;border-radius:8px;max-height:300px;object-fit:contain;border:1px solid #e5e7eb;" /></div>` : ''}
             <div class="meta-row">
@@ -92,8 +93,8 @@ function exportPostsToCsv(posts: GbpPost[], clientName: string) {
     const header = ["Topic", "Client", "Location", "Date", "Post Body", "Image Prompt", "Target Link"];
     const rows = posts.map(p => [
         p.post_topic,
-        p.gbp_clients?.name || '',
-        p.gbp_locations ? `${p.gbp_locations.location_name}, ${p.gbp_locations.state}` : '',
+        p.clients?.name || '',
+        p.client_locations ? `${p.client_locations.location_name}, ${p.client_locations.state}` : '',
         new Date(p.generated_at || p.created_at).toLocaleDateString(),
         p.post_body || '',
         p.image_prompt || '',
@@ -130,7 +131,7 @@ export default function GbpPage() {
     const { data: clients = [] } = useQuery({
         queryKey: ['gbp_clients_all'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('gbp_clients').select('id, name').order('name');
+            const { data, error } = await supabase.from('clients').select('id, name').eq('gbp_enabled', true).order('name');
             if (error) throw error;
             return data;
         },
@@ -143,8 +144,8 @@ export default function GbpPage() {
         queryFn: async () => {
             let q = supabase.from('gbp_posts').select(`
                 *,
-                gbp_clients(name),
-                gbp_locations(location_name, city, state)
+                clients(name),
+                client_locations(location_name, city, state)
             `).order('created_at', { ascending: false }).limit(500);
             if (clientFilter !== 'all') q = q.eq('gbp_client_id', clientFilter);
             const { data, error } = await q;
@@ -160,8 +161,8 @@ export default function GbpPage() {
         const q = search.toLowerCase();
         return posts.filter(p =>
             p.post_topic.toLowerCase().includes(q) ||
-            p.gbp_clients?.name.toLowerCase().includes(q) ||
-            p.gbp_locations?.location_name.toLowerCase().includes(q)
+            p.clients?.name.toLowerCase().includes(q) ||
+            p.client_locations?.location_name.toLowerCase().includes(q)
         );
     }, [posts, search]);
 
@@ -200,9 +201,15 @@ export default function GbpPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Button variant="outline" size="sm" className="gap-2" onClick={() => router.push('/gbp/clients')}>
-                            <Settings className="w-4 h-4" /> Manage Clients
-                        </Button>
+                        <QuickAddClientModal
+                            service="gbp"
+                            onSaved={() => queryClient.invalidateQueries({ queryKey: ['gbp_clients_all'] })}
+                            trigger={
+                                <Button variant="outline" size="sm" className="gap-2">
+                                    <Settings className="w-4 h-4" /> Add Client
+                                </Button>
+                            }
+                        />
                         <Button
                             onClick={() => router.push('/gbp/generate')}
                             className="bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold px-6 h-12 shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
@@ -310,8 +317,8 @@ export default function GbpPage() {
                                                         <p className="font-semibold text-foreground text-sm max-w-[300px] truncate">{post.post_topic}</p>
                                                         {post.post_body && <p className="text-xs text-muted-foreground mt-1 max-w-[350px] line-clamp-2 leading-relaxed">{post.post_body}</p>}
                                                     </td>
-                                                    <td className="px-4 py-4 text-sm font-medium text-foreground">{post.gbp_clients?.name || '—'}</td>
-                                                    <td className="px-4 py-4 text-xs text-muted-foreground">{post.gbp_locations ? `${post.gbp_locations.location_name}, ${post.gbp_locations.state}` : '—'}</td>
+                                                    <td className="px-4 py-4 text-sm font-medium text-foreground">{post.clients?.name || '—'}</td>
+                                                    <td className="px-4 py-4 text-xs text-muted-foreground">{post.client_locations ? `${post.client_locations.location_name}, ${post.client_locations.state}` : '—'}</td>
                                                     <td className="px-4 py-4">
                                                         <div className="flex flex-col gap-0.5">
                                                             <span className="text-xs font-medium text-foreground">{new Date(post.generated_at || post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -336,10 +343,10 @@ export default function GbpPage() {
                                                                     <div className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden font-sans">
                                                                         <div className="p-4 flex items-start gap-3">
                                                                             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0 text-white font-bold text-sm">
-                                                                                {post.gbp_clients?.name?.charAt(0) || 'B'}
+                                                                                {post.clients?.name?.charAt(0) || 'B'}
                                                                             </div>
                                                                             <div className="mt-0.5">
-                                                                                <p className="text-[15px] font-bold text-gray-900 leading-tight tracking-tight">{post.gbp_clients?.name}</p>
+                                                                                <p className="text-[15px] font-bold text-gray-900 leading-tight tracking-tight">{post.clients?.name}</p>
                                                                                 <p className="text-[13px] text-gray-500 mt-0.5">{post.generated_at ? 'Just now' : 'Just now'} · <span className="opacity-70">🌍</span></p>
                                                                             </div>
                                                                         </div>
@@ -381,10 +388,10 @@ export default function GbpPage() {
                                                                     <div className="pt-5 border-t border-border/50">
                                                                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5"><Download className="w-3.5 h-3.5" />Export Options</p>
                                                                         <div className="flex gap-3">
-                                                                            <Button size="sm" variant="outline" className="h-10 px-5 font-bold gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200 shadow-sm" onClick={() => exportPostsToCsv([post], post.gbp_clients?.name || 'Post')}>
+                                                                            <Button size="sm" variant="outline" className="h-10 px-5 font-bold gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200 shadow-sm" onClick={() => exportPostsToCsv([post], post.clients?.name || 'Post')}>
                                                                                 <Download className="w-4 h-4" /> Export as CSV
                                                                             </Button>
-                                                                            <Button size="sm" variant="outline" className="h-10 px-5 font-bold gap-2 bg-background shadow-sm hover:bg-muted/50" onClick={() => exportPostsToPdf([post], post.gbp_clients?.name || 'Post')}>
+                                                                            <Button size="sm" variant="outline" className="h-10 px-5 font-bold gap-2 bg-background shadow-sm hover:bg-muted/50" onClick={() => exportPostsToPdf([post], post.clients?.name || 'Post')}>
                                                                                 <FileText className="w-4 h-4" /> Export as PDF
                                                                             </Button>
                                                                         </div>

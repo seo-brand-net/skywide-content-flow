@@ -34,9 +34,9 @@ export async function POST(request: Request) {
         if (!location_id || location_id === 'all') {
             // Fetch all active locations for this client
             const { data: locations, error } = await supabaseAdmin
-                .from('gbp_locations')
+                .from('client_locations')
                 .select('id, location_name, sheet_tab_name')
-                .eq('gbp_client_id', client_id)
+                .eq('client_id', client_id)
                 .eq('is_active', true)
                 .order('created_at', { ascending: true });
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
         } else {
             // Single specific location
             const { data: loc, error } = await supabaseAdmin
-                .from('gbp_locations')
+                .from('client_locations')
                 .select('id, location_name, sheet_tab_name')
                 .eq('id', location_id)
                 .single();

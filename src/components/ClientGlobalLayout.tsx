@@ -16,7 +16,8 @@ const SIDEBAR_PATHS = [ // Whitelist of paths that SHOULD have the sidebar
     "/ai-rewriter",
     "/content-briefs",
     "/indexing",
-    "/gbp"
+    "/gbp",
+    "/docs"
 ]
 
 export function ClientGlobalLayout({

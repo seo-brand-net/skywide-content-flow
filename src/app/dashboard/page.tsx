@@ -3,6 +3,8 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,17 +12,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, PlusCircle } from 'lucide-react';
 import { withTimeout } from '@/utils/timeout';
 import { ABTestModal } from '@/components/ab-test-modal';
 import { v4 as uuidv4 } from 'uuid';
+import { ClientCombobox, type ComboboxClient } from '@/components/clients/ClientCombobox';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 
 
 interface FormData {
     articleTitle: string;
     titleAudience: string;
+    clientId: string;
     clientName: string;
     clientWebsiteUrl: string;
+    industry: string;
     creativeBrief: string;
     articleType: string;
     wordCount: string;
@@ -35,12 +41,31 @@ export default function Dashboard() {
     const { user, displayName, supabase } = useAuth();
     const { isAdmin } = useUserRole(user?.id);
     const { toast } = useToast();
+    const router = useRouter();
+    const queryClient = useQueryClient();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const { data: clients = [] } = useQuery({
+        queryKey: ['clients_content_enabled'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('clients')
+                .select('id, name, industry, website_url')
+                .eq('content_enabled', true)
+                .order('name');
+            if (error) throw error;
+            return data as ComboboxClient[];
+        },
+        enabled: !!user?.id,
+    });
+
     const [formData, setFormData] = useState<FormData>({
         articleTitle: '',
         titleAudience: '',
+        clientId: '',
         clientName: '',
         clientWebsiteUrl: '',
+        industry: '',
         creativeBrief: '',
         articleType: '',
         wordCount: '',
@@ -57,7 +82,7 @@ export default function Dashboard() {
 
         if (!formData.articleTitle.trim()) newErrors.articleTitle = 'Article Title is required';
         if (!formData.titleAudience.trim()) newErrors.titleAudience = 'Title Audience is required';
-        if (!formData.clientName.trim()) newErrors.clientName = 'Client Name is required';
+        if (!formData.clientId.trim()) newErrors.clientName = 'Client is required';
         if (!formData.creativeBrief.trim()) newErrors.creativeBrief = 'Creative Brief is required';
         if (!formData.articleType) newErrors.articleType = 'Article Type is required';
         if (!formData.wordCount.trim()) newErrors.wordCount = 'Word Count is required';
@@ -110,8 +135,10 @@ export default function Dashboard() {
                         tone: formData.tone,
                         word_count: parseInt(formData.wordCount) || 0,
                         article_type: formData.articleType,
+                        client_id: formData.clientId || null,
                         client_name: formData.clientName,
                         client_website_url: formData.clientWebsiteUrl || null,
+                        industry: formData.industry || null,
                         creative_brief: formData.creativeBrief,
                         page_intent: formData.pageIntent,
                         status: 'pending' // DO NOT set current_run_id yet due to FK constraint
@@ -142,6 +169,7 @@ export default function Dashboard() {
                         audience: formData.titleAudience,
                         client_name: formData.clientName,
                         client_website_url: formData.clientWebsiteUrl || null,
+                        industry: formData.industry || null,
                         creative_brief: formData.creativeBrief,
                         article_type: formData.articleType,
                         word_count: formData.wordCount,
@@ -215,8 +243,10 @@ export default function Dashboard() {
             setFormData({
                 articleTitle: '',
                 titleAudience: '',
+                clientId: '',
                 clientName: '',
                 clientWebsiteUrl: '',
+                industry: '',
                 creativeBrief: '',
                 articleType: '',
                 wordCount: '',
@@ -247,8 +277,10 @@ export default function Dashboard() {
         setFormData({
             articleTitle: "Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses",
             titleAudience: "Professional Engineers",
+            clientId: clients.find(c => c.name === "Align PEO")?.id || '',
             clientName: "Align PEO",
             clientWebsiteUrl: "",
+            industry: clients.find(c => c.name === "Align PEO")?.industry || '',
             creativeBrief: `Blog Title: Wisconsin PE Ethics Requirements: What Counts & Where to Find Approved Courses Reading Time: ~6 minutes Target Word Count: ~1,000 words
 
 Audience Licensed Professional Engineers in Wisconsin approaching their renewal deadline who need to understand the ethics PDH requirement — what qualifies, how many hours are needed, and where[...]
@@ -351,8 +383,10 @@ NCEES — PE Licensing Resources — https://ncees.org/engineering/pe/`,
         setFormData({
             articleTitle: "Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens",
             titleAudience: "Parents and Caregivers",
+            clientId: clients.find(c => c.name === "Paradigm Treatment")?.id || '',
             clientName: "Paradigm Treatment",
             clientWebsiteUrl: "",
+            industry: clients.find(c => c.name === "Paradigm Treatment")?.industry || '',
             creativeBrief: `Blog Brief: Stress, Chronic Illness & Anxiety: Why Physical Health Matters in Mental Wellness for Teens
 Reading Time: ~6 minutes
 Target Word Count: 800 words
@@ -583,19 +617,97 @@ Integrated treatment supports long-term resilience.`,
 
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="clientName" className="text-foreground">
-                                        Client Name *
-                                    </Label>
-                                    <Input
-                                        id="clientName"
-                                        value={formData.clientName}
-                                        onChange={(e) => handleInputChange('clientName', e.target.value)}
-                                        className={`bg-background border-input ${errors.clientName ? 'border-destructive' : ''}`}
-                                        placeholder="Enter client name"
-                                    />
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="clientName" className="text-foreground">
+                                            Client *
+                                        </Label>
+                                        <QuickAddClientModal
+                                            service="content_request"
+                                            onSaved={(client) => {
+                                                queryClient.invalidateQueries({ queryKey: ['clients_content_enabled'] });
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    clientId: client.id,
+                                                    clientName: client.name,
+                                                    industry: client.industry || prev.industry,
+                                                    clientWebsiteUrl: client.website_url || prev.clientWebsiteUrl,
+                                                }));
+                                                if (errors.clientName) setErrors(prev => ({ ...prev, clientName: undefined }));
+                                            }}
+                                            trigger={
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-6 gap-1 px-2 text-[11px] font-bold text-brand-blue-crayola hover:text-brand-blue-crayola/80"
+                                                >
+                                                    <PlusCircle className="w-3 h-3" /> Add Client
+                                                </Button>
+                                            }
+                                        />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <ClientCombobox
+                                                clients={clients}
+                                                value={formData.clientId}
+                                                placeholder="Select a client"
+                                                className={errors.clientName ? 'border-destructive' : ''}
+                                                onSelect={(client) => {
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        clientId: client.id,
+                                                        clientName: client.name,
+                                                        industry: client.industry || '',
+                                                        clientWebsiteUrl: client.website_url || '',
+                                                    }));
+                                                    if (errors.clientName) setErrors(prev => ({ ...prev, clientName: undefined }));
+                                                }}
+                                            />
+                                        </div>
+                                        <QuickAddClientModal
+                                            service="content_request"
+                                            onSaved={(client) => {
+                                                queryClient.invalidateQueries({ queryKey: ['clients_content_enabled'] });
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    clientId: client.id,
+                                                    clientName: client.name,
+                                                    industry: client.industry || prev.industry,
+                                                    clientWebsiteUrl: client.website_url || prev.clientWebsiteUrl,
+                                                }));
+                                                if (errors.clientName) setErrors(prev => ({ ...prev, clientName: undefined }));
+                                            }}
+                                            trigger={
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-10 w-10 shrink-0"
+                                                    title="Add a new client"
+                                                >
+                                                    <PlusCircle className="w-4 h-4" />
+                                                </Button>
+                                            }
+                                        />
+                                    </div>
                                     {errors.clientName && (
                                         <p className="text-sm text-destructive">{errors.clientName}</p>
                                     )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="industry" className="text-foreground">
+                                        Industry
+                                        <span className="ml-1 text-xs text-muted-foreground font-normal">(optional — keeps content on-topic for the client's industry)</span>
+                                    </Label>
+                                    <Input
+                                        id="industry"
+                                        value={formData.industry}
+                                        onChange={(e) => handleInputChange('industry', e.target.value)}
+                                        className="bg-background border-input"
+                                        placeholder="e.g. Dermatology, Digital Marketing"
+                                    />
                                 </div>
 
                                 <div className="space-y-2">

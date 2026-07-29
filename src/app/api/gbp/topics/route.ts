@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
     const query = supabaseAdmin
         .from('gbp_topics')
-        .select('id, topic, status, location_id, gbp_locations(location_name, city, state)')
+        .select('id, topic, status, location_id, client_locations(location_name, city, state)')
         .eq('gbp_client_id', clientId)
         .eq('status', status)
         .order('created_at', { ascending: true });

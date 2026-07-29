@@ -18,25 +18,19 @@ import {
     Globe,
     MapPin,
     ShieldAlert,
+    Pencil,
+    PlusCircle,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { AddClientModal } from '@/components/clients/AddClientModal';
+import { useRouter } from 'next/navigation';
+import { type EditableClient } from '@/components/clients/ClientForm';
 import { LocationsPanel } from '@/components/clients/LocationsPanel';
+import { ServiceStatusBadge, type ClientActivityStatus } from '@/components/clients/ServiceStatusBadge';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface Client {
-    id: string;
-    name: string;
-    industry: string | null;
-    sitemap_url: string | null;
-    key_selling_point: string | null;
-    workbook_url: string | null;
-    folder_url: string | null;
-    content_enabled: boolean;
-    gbp_enabled: boolean;
-    indexing_enabled: boolean;
+interface Client extends EditableClient {
     created_at: string;
 }
 
@@ -45,6 +39,7 @@ interface Client {
 const SERVICE_CONFIGS = [
     {
         key: 'content_enabled' as keyof Client,
+        service: 'content' as const,
         label: 'Content',
         icon: FileText,
         activeClass: 'bg-brand-blue-crayola/10 text-brand-blue-crayola border-brand-blue-crayola/25',
@@ -52,6 +47,7 @@ const SERVICE_CONFIGS = [
     },
     {
         key: 'gbp_enabled' as keyof Client,
+        service: 'gbp' as const,
         label: 'GBP',
         icon: MapPin,
         activeClass: 'bg-green-500/10 text-green-500 border-green-500/25',
@@ -59,6 +55,7 @@ const SERVICE_CONFIGS = [
     },
     {
         key: 'indexing_enabled' as keyof Client,
+        service: 'indexing' as const,
         label: 'Indexing',
         icon: Globe,
         activeClass: 'bg-purple-500/10 text-purple-500 border-purple-500/25',
@@ -104,6 +101,7 @@ function ServiceToggle({
 export default function ClientsSettingsPage() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const router = useRouter();
     const queryClient = useQueryClient();
     const { userRole, isInitialLoading } = useUserRole(user?.id);
 
@@ -116,13 +114,29 @@ export default function ClientsSettingsPage() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('clients')
-                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, content_enabled, gbp_enabled, indexing_enabled, created_at')
+                .select('id, name, industry, sitemap_url, key_selling_point, workbook_url, folder_url, website_url, content_enabled, gbp_enabled, indexing_enabled, gbp_sheet_id, gbp_topics_tab_name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url, created_at')
                 .order('name');
             if (error) throw error;
             return data as Client[];
         },
         enabled: !!user?.id,
     });
+
+    const { data: activityStatus = [] } = useQuery({
+        queryKey: ['client_activity_status'],
+        queryFn: async () => {
+            const { data, error } = await supabase.from('client_activity_status').select('*');
+            if (error) throw error;
+            return data as ClientActivityStatus[];
+        },
+        enabled: !!user?.id,
+    });
+
+    const statusByClientId = useMemo(() => {
+        const map = new Map<string, ClientActivityStatus>();
+        activityStatus.forEach((s) => map.set(s.client_id, s));
+        return map;
+    }, [activityStatus]);
 
     // ── Derived ───────────────────────────────────────────────────────────────
 
@@ -203,7 +217,13 @@ export default function ClientsSettingsPage() {
                             {clients.length} {clients.length === 1 ? 'client' : 'clients'} — manage services and locations in one place.
                         </p>
                     </div>
-                    <AddClientModal onClientAdded={() => refetch()} />
+                    <Button
+                        className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
+                        onClick={() => router.push('/settings/clients/new')}
+                    >
+                        <PlusCircle className="w-4 h-4" />
+                        Add Client
+                    </Button>
                 </div>
 
                 {/* ── Stats Row ─────────────────────────────────────────── */}
@@ -285,19 +305,28 @@ export default function ClientsSettingsPage() {
                                     </thead>
                                     <tbody className="divide-y divide-border/30">
                                         {filtered.map((client) => (
-                                            <tr key={client.id} className="hover:bg-muted/20 transition-colors group align-top">
+                                            <tr
+                                                key={client.id}
+                                                className="hover:bg-muted/20 transition-colors group align-top cursor-pointer"
+                                                onClick={() => router.push(`/settings/clients/${client.id}/edit`)}
+                                            >
 
                                                 {/* Client name + locations */}
                                                 <td className="px-6 py-4">
-                                                    <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
-                                                        {client.name}
-                                                    </p>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
+                                                            {client.name}
+                                                        </p>
+                                                        <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    </div>
                                                     {client.sitemap_url && (
                                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate max-w-[220px]">
                                                             {client.sitemap_url}
                                                         </p>
                                                     )}
-                                                    <LocationsPanel client={client} />
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <LocationsPanel client={client} />
+                                                    </div>
                                                 </td>
 
                                                 {/* Industry */}
@@ -308,8 +337,8 @@ export default function ClientsSettingsPage() {
                                                 </td>
 
                                                 {/* Service toggles */}
-                                                {SERVICE_CONFIGS.map(({ key, label, activeClass, inactiveClass }) => (
-                                                    <td key={key} className="px-4 py-4 text-center">
+                                                {SERVICE_CONFIGS.map(({ key, service, label, activeClass, inactiveClass }) => (
+                                                    <td key={key} className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                                                         <div className="flex flex-col items-center gap-1.5">
                                                             <ServiceToggle
                                                                 client={client}
@@ -319,6 +348,9 @@ export default function ClientsSettingsPage() {
                                                                 inactiveClass={inactiveClass}
                                                                 onToggle={handleToggle}
                                                             />
+                                                            {(client[key] as boolean) && (
+                                                                <ServiceStatusBadge service={service} status={statusByClientId.get(client.id)} />
+                                                            )}
                                                         </div>
                                                     </td>
                                                 ))}

@@ -22,12 +22,13 @@ import {
     RotateCcw,
     Trash2,
     RefreshCw,
-    ArrowLeft
+    ArrowLeft,
+    PlusCircle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { AddClientModal } from '@/components/clients/AddClientModal';
 import { useToast } from "@/hooks/use-toast";
 import { usePusherBriefUpdates } from '@/hooks/usePusherBriefUpdates';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -94,6 +95,7 @@ export default function ContentBriefsPage() {
             const { data, error } = await supabase
                 .from('clients')
                 .select('*')
+                .eq('content_enabled', true)
             if (error) throw error;
             return data as Client[];
         },
@@ -432,7 +434,19 @@ export default function ContentBriefsPage() {
                         >
                             <RotateCcw className={`w-4 h-4 ${isLoadingClients ? 'animate-spin' : ''}`} />
                         </Button>
-                        <AddClientModal onClientAdded={() => queryClient.invalidateQueries({ queryKey: ['clients'] })} />
+                        <QuickAddClientModal
+                            service="content_brief"
+                            onSaved={(client) => {
+                                queryClient.invalidateQueries({ queryKey: ['clients'] });
+                                setSelectedClient(client.id);
+                            }}
+                            trigger={
+                                <Button variant="outline" className="gap-2">
+                                    <PlusCircle className="w-4 h-4" />
+                                    Add Client
+                                </Button>
+                            }
+                        />
                     </div>
                 </div>
 

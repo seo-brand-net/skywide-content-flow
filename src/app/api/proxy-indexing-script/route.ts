@@ -200,21 +200,21 @@ export async function POST(request: Request) {
             if (isSuccess && !hasRateLimitedUrls) {
                 // Full success — start 14-day cooldown
                 await supabaseAdmin
-                    .from('indexing_clients')
-                    .update({ last_run_at: new Date().toISOString() })
+                    .from('clients')
+                    .update({ indexing_last_run_at: new Date().toISOString() })
                     .eq('id', indexing_client_id);
             } else if (isTimeoutRateLimit) {
                 // Timeout / rate limit — NULL so cron retries tomorrow
                 await supabaseAdmin
-                    .from('indexing_clients')
-                    .update({ last_run_at: null })
+                    .from('clients')
+                    .update({ indexing_last_run_at: null })
                     .eq('id', indexing_client_id);
                 console.log('[proxy-indexing-script] last_run_at set to NULL — rate limit/timeout, will retry tomorrow.');
             } else {
                 // Other errors — stamp today so it doesn't retry endlessly
                 await supabaseAdmin
-                    .from('indexing_clients')
-                    .update({ last_run_at: new Date().toISOString() })
+                    .from('clients')
+                    .update({ indexing_last_run_at: new Date().toISOString() })
                     .eq('id', indexing_client_id);
                 console.log('[proxy-indexing-script] last_run_at stamped today — non-retryable error, will not retry.');
             }

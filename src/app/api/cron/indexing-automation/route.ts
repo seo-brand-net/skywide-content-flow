@@ -45,16 +45,27 @@ export async function GET(request: Request) {
         ));
         const fourteenDaysAgo = cutoff.toISOString();
 
-        const { data: dueClients, error: fetchError } = await supabaseAdmin
-            .from('indexing_clients')
-            .select('id, name, workbook_url, tab_name, gsc_property, bing_site_url, last_run_at')
-            .eq('is_active', true)
-            .or(`last_run_at.is.null,last_run_at.lt.${fourteenDaysAgo}`);
+        const { data: dueClientsRaw, error: fetchError } = await supabaseAdmin
+            .from('clients')
+            .select('id, name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url, indexing_last_run_at')
+            .eq('indexing_enabled', true)
+            .or(`indexing_last_run_at.is.null,indexing_last_run_at.lt.${fourteenDaysAgo}`);
 
         if (fetchError) {
             console.error('[cron/indexing-automation] Failed to fetch due clients:', fetchError);
             return NextResponse.json({ error: 'Failed to fetch due clients', details: fetchError }, { status: 500 });
         }
+
+        // Map to the automation's internal field names so the rest of this function is unchanged.
+        const dueClients = dueClientsRaw?.map(c => ({
+            id: c.id,
+            name: c.name,
+            workbook_url: c.indexing_workbook_url,
+            tab_name: c.indexing_tab_name,
+            gsc_property: c.indexing_gsc_property,
+            bing_site_url: c.indexing_bing_site_url,
+            last_run_at: c.indexing_last_run_at,
+        }));
 
         if (!dueClients || dueClients.length === 0) {
             console.log('[cron/indexing-automation] No clients due for indexing today.');
@@ -106,22 +117,22 @@ export async function GET(request: Request) {
                 if (isSuccess && !hasRateLimitedUrls) {
                     // Full success — start the 14-day cooldown
                     await supabaseAdmin
-                        .from('indexing_clients')
-                        .update({ last_run_at: new Date().toISOString() })
+                        .from('clients')
+                        .update({ indexing_last_run_at: new Date().toISOString() })
                         .eq('id', client.id);
                     console.log(`[cron/indexing-automation] ✓ ${client.name} — last_run_at updated (14-day cooldown started)`);
                 } else if (shouldNullLastRunAt) {
                     // Timeout / rate limit — NULL so it retries tomorrow
                     await supabaseAdmin
-                        .from('indexing_clients')
-                        .update({ last_run_at: null })
+                        .from('clients')
+                        .update({ indexing_last_run_at: null })
                         .eq('id', client.id);
                     console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL (rate limit/timeout, will retry tomorrow)`);
                 } else {
                     // Other errors — stamp today so it doesn't retry endlessly
                     await supabaseAdmin
-                        .from('indexing_clients')
-                        .update({ last_run_at: new Date().toISOString() })
+                        .from('clients')
+                        .update({ indexing_last_run_at: new Date().toISOString() })
                         .eq('id', client.id);
                     console.log(`[cron/indexing-automation] ✗ ${client.name} — last_run_at stamped today (non-retryable error: ${result.error || result.message})`);
                 }
@@ -152,16 +163,16 @@ export async function GET(request: Request) {
                 if (isTimeoutRateLimit) {
                     // Timeout = rate limit — NULL so it retries tomorrow
                     await supabaseAdmin
-                        .from('indexing_clients')
-                        .update({ last_run_at: null })
+                        .from('clients')
+                        .update({ indexing_last_run_at: null })
                         .eq('id', client.id)
                         .then(() => {});
                     console.log(`[cron/indexing-automation] ↩ ${client.name} — last_run_at set to NULL after timeout (will retry tomorrow)`);
                 } else {
                     // Other exception — stamp today so it doesn't retry endlessly
                     await supabaseAdmin
-                        .from('indexing_clients')
-                        .update({ last_run_at: new Date().toISOString() })
+                        .from('clients')
+                        .update({ indexing_last_run_at: new Date().toISOString() })
                         .eq('id', client.id)
                         .then(() => {});
                     console.log(`[cron/indexing-automation] ✗ ${client.name} — last_run_at stamped today after exception (non-retryable: ${clientError.message})`);

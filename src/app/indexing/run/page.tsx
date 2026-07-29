@@ -28,8 +28,8 @@ import {
     ArrowLeft
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { AddIndexingClientModal } from '@/components/indexing/AddIndexingClientModal';
 import { useToast } from '@/hooks/use-toast';
+import { QuickAddClientModal } from '@/components/clients/QuickAddClientModal';
 import { useRouter } from 'next/navigation';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -44,6 +44,32 @@ interface IndexingClient {
     is_active: boolean;
     last_run_at: string | null;
     created_at: string;
+}
+
+interface ClientRow {
+    id: string;
+    name: string;
+    indexing_workbook_url: string;
+    indexing_tab_name: string;
+    indexing_gsc_property: string;
+    indexing_bing_site_url: string | null;
+    indexing_enabled: boolean;
+    indexing_last_run_at: string | null;
+    created_at: string;
+}
+
+function toIndexingClient(c: ClientRow): IndexingClient {
+    return {
+        id: c.id,
+        name: c.name,
+        workbook_url: c.indexing_workbook_url,
+        tab_name: c.indexing_tab_name,
+        gsc_property: c.indexing_gsc_property,
+        bing_site_url: c.indexing_bing_site_url,
+        is_active: c.indexing_enabled,
+        last_run_at: c.indexing_last_run_at,
+        created_at: c.created_at,
+    };
 }
 
 interface GoogleSummary {
@@ -208,11 +234,12 @@ export default function IndexingRunPage() {
         queryKey: ['indexing_clients'],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from('indexing_clients')
-                .select('*')
+                .from('clients')
+                .select('id, name, indexing_workbook_url, indexing_tab_name, indexing_gsc_property, indexing_bing_site_url, indexing_enabled, indexing_last_run_at, created_at')
+                .eq('indexing_enabled', true)
                 .order('name', { ascending: true });
             if (error) throw error;
-            return data as IndexingClient[];
+            return (data as ClientRow[]).map(toIndexingClient);
         },
         enabled: !!user?.id
     });
@@ -350,6 +377,17 @@ export default function IndexingRunPage() {
         );
     }
 
+    if (!isInitialLoading && userRole !== 'admin') {
+        return (
+            <div className="min-h-screen bg-background p-8 flex items-center justify-center">
+                <div className="text-center space-y-3 opacity-60">
+                    <p className="text-lg font-bold text-foreground">Admin access required</p>
+                    <p className="text-sm text-muted-foreground">You don't have permission to view this page.</p>
+                </div>
+            </div>
+        );
+    }
+
     // ── Render ────────────────────────────────────────────────────────────────
 
     return (
@@ -391,8 +429,18 @@ export default function IndexingRunPage() {
                         >
                             <RotateCcw className={`w-4 h-4 ${isLoadingClients ? 'animate-spin' : ''}`} />
                         </Button>
-                        <AddIndexingClientModal
-                            onClientAdded={() => queryClient.invalidateQueries({ queryKey: ['indexing_clients'] })}
+                        <QuickAddClientModal
+                            service="indexing"
+                            onSaved={(client) => {
+                                queryClient.invalidateQueries({ queryKey: ['indexing_clients'] });
+                                setSelectedClientId(client.id);
+                                setLatestResult(null);
+                            }}
+                            trigger={
+                                <Button variant="outline" size="sm" className="gap-2">
+                                    Add Client
+                                </Button>
+                            }
                         />
                     </div>
                 </div>
@@ -491,7 +539,7 @@ export default function IndexingRunPage() {
                                     <div className="text-center py-6 opacity-50">
                                         <Globe className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
                                         <p className="text-xs text-muted-foreground">No indexing clients yet.</p>
-                                        <p className="text-xs text-muted-foreground">Click "Add Client" to get started.</p>
+                                        <p className="text-xs text-muted-foreground">Click "Add Client" above to get started.</p>
                                     </div>
                                 )}
                             </CardContent>

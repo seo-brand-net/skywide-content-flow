@@ -15,9 +15,10 @@ export async function GET(request: Request) {
     }
 
     const { data: client, error: clientError } = await supabaseAdmin
-        .from('gbp_clients')
-        .select('id, name, industry, key_selling_point, sitemap_url, sheet_id, topics_tab_name, is_active')
+        .from('clients')
+        .select('id, name, industry, key_selling_point, sitemap_url, gbp_sheet_id, gbp_topics_tab_name, gbp_enabled')
         .eq('id', clientId)
+        .eq('gbp_enabled', true)
         .single();
 
     if (clientError || !client) {
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
     }
 
     // Ensure we only return the ID, even if a full URL was saved in the DB
-    let finalSheetId = client.sheet_id;
+    let finalSheetId = client.gbp_sheet_id;
     if (finalSheetId && finalSheetId.includes('/spreadsheets/d/')) {
         const match = finalSheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
         if (match && match[1]) {
@@ -34,9 +35,9 @@ export async function GET(request: Request) {
     }
 
     const { data: locations, error: locError } = await supabaseAdmin
-        .from('gbp_locations')
+        .from('client_locations')
         .select('id, location_name, city, state, sheet_tab_name, is_active')
-        .eq('gbp_client_id', clientId)
+        .eq('client_id', clientId)
         .eq('is_active', true)
         .order('created_at', { ascending: true });
 
@@ -44,5 +45,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: locError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ ...client, sheet_id: finalSheetId, locations: locations || [] });
+    // Keep response field names (`sheet_id`, `topics_tab_name`) stable — n8n reads these by name.
+    const { gbp_sheet_id, gbp_topics_tab_name, gbp_enabled, ...rest } = client;
+    return NextResponse.json({
+        ...rest,
+        sheet_id: finalSheetId,
+        topics_tab_name: gbp_topics_tab_name,
+        is_active: gbp_enabled,
+        locations: locations || [],
+    });
 }
