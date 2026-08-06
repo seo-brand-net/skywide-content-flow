@@ -1,0 +1,524 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## DEV Video Edit Pipeline (v1)\n\nSkywide-style architecture, inverted cost profile:\n**code does the cutting, AI only does the thinking.**\n\nLLM calls per video: 3 small ones\n1. Parse Video Brief (structured JSON from free text)\n2. Generate EDL (pick in/out points from transcript + silence map)\n3. Fix EDL (only fires if validation fails, capped at 2 retries)\n\nEverything else is ffmpeg/ffprobe via Execute Command + Code nodes: probing, silence detection, caption building, cutting, cropping 9:16, loudness normalize, QA.\n\nEst. cost per video: Whisper (~$0.006/min) + 2-3 cheap LLM calls = well under $0.50.",
+        "height": 420,
+        "width": 460
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1180, -560],
+      "id": "sticky-overview",
+      "name": "Sticky Overview"
+    },
+    {
+      "parameters": {
+        "content": "## Setup checklist (before first run)\n\n1. Self-hosted n8n with **ffmpeg + ffprobe** installed on the container/host (`apt-get install ffmpeg`)\n2. Attach credentials after import:\n   - OpenAI (Parse Brief, Generate EDL, Fix EDL, Whisper Transcribe)\n   - Google Drive OAuth (Download, Create Folder, Upload)\n3. Replace `YOUR-DASHBOARD.example.com` in Startup Update / Completion Webhook / Send Error nodes (or delete them if no dashboard yet)\n4. POST to the webhook:\n```json\n{\n  \"title\": \"My podcast ep 12 clips\",\n  \"video_file_id\": \"<Google Drive file id>\",\n  \"creative_brief\": \"Make 3 punchy 60s vertical clips, captions on, keep the story about the client win, cut all rambling\",\n  \"request_id\": \"...\",\n  \"run_id\": \"...\"\n}\n```",
+        "height": 420,
+        "width": 480
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-680, -560],
+      "id": "sticky-setup",
+      "name": "Sticky Setup"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video-edit",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1180, 0],
+      "id": "vw-001",
+      "name": "Video Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-DASHBOARD.example.com/api/webhooks/video-start",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"executionId\": $execution.id, \"run_id\": $json.body.run_id, \"request_id\": $json.body.request_id } }}",
+        "options": { "timeout": 10000 }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-960, 0],
+      "id": "su-001",
+      "name": "Startup Update",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a strict extraction agent for a video editing pipeline. Parse the free-form video brief into JSON. Return ONLY valid JSON, no markdown:\n{\n  \"target_clip_seconds\": number (default 60),\n  \"clips_count\": number (default 3),\n  \"aspect_ratio\": \"9:16\" | \"16:9\" | \"1:1\" (default \"9:16\"),\n  \"captions\": boolean (default true),\n  \"tone\": \"string describing desired pacing/energy\",\n  \"must_keep_moments\": [\"topics or quotes the user explicitly wants kept\"],\n  \"global_rules\": [\"any other directives: no profanity bleeps, keep intros, etc.\"]\n}\nUse defaults for anything not specified. Never invent must_keep_moments that were not mentioned.",
+              "role": "system"
+            },
+            {
+              "content": "=Video brief to parse:\n\n{{ $('Video Webhook').first().json.body.creative_brief }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [-740, 0],
+      "id": "pb-001",
+      "name": "Parse Video Brief (LLM)"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Video Webhook').first().json.body.video_file_id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [-520, 0],
+      "id": "dl-001",
+      "name": "Download Source Video"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/tmp/vp_{{ $execution.id }}_source.mp4",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [-300, 0],
+      "id": "sv-001",
+      "name": "Save Source to Disk"
+    },
+    {
+      "parameters": {
+        "command": "=bash -c \"ffprobe -v quiet -print_format json -show_format -show_streams /tmp/vp_{{ $execution.id }}_source.mp4 > /tmp/vp_{{ $execution.id }}_probe.json; ffmpeg -hide_banner -i /tmp/vp_{{ $execution.id }}_source.mp4 -af silencedetect=noise=-35dB:d=0.5 -f null - 2> /tmp/vp_{{ $execution.id }}_silence.log; ffmpeg -hide_banner -i /tmp/vp_{{ $execution.id }}_source.mp4 -vn -ac 1 -ar 16000 -b:a 64k -y /tmp/vp_{{ $execution.id }}_audio.mp3 2>/dev/null; cat /tmp/vp_{{ $execution.id }}_probe.json; echo ---SILENCE---; cat /tmp/vp_{{ $execution.id }}_silence.log\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [-80, 0],
+      "id": "mp-001",
+      "name": "Media Probe"
+    },
+    {
+      "parameters": {
+        "fileSelector": "=/tmp/vp_{{ $execution.id }}_audio.mp3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [140, 0],
+      "id": "ra-001",
+      "name": "Read Audio File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            { "name": "model", "value": "whisper-1" },
+            { "name": "response_format", "value": "verbose_json" }
+          ]
+        },
+        "options": { "timeout": 600000 }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [360, 0],
+      "id": "wt-001",
+      "name": "Whisper Transcribe"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge ffprobe metadata + silence map + Whisper transcript + parsed brief into one edit context\nconst stdout = $('Media Probe').first().json.stdout || '';\nconst parts = stdout.split('---SILENCE---');\nlet probe = {};\ntry { probe = JSON.parse(parts[0]); } catch (e) {}\nconst duration = parseFloat(probe?.format?.duration || 0);\n\nconst silences = [];\nfor (const line of (parts[1] || '').split('\\n')) {\n  const s = line.match(/silence_start:\\s*([\\d.]+)/);\n  if (s) { silences.push({ start: parseFloat(s[1]) }); continue; }\n  const e = line.match(/silence_end:\\s*([\\d.]+)/);\n  if (e && silences.length && silences[silences.length - 1].end === undefined) {\n    silences[silences.length - 1].end = parseFloat(e[1]);\n  }\n}\n\nconst whisper = $('Whisper Transcribe').first().json;\nconst segments = (whisper.segments || []).map(s => ({\n  start: +(+s.start).toFixed(2),\n  end: +(+s.end).toFixed(2),\n  text: (s.text || '').trim()\n}));\n\nconst brief = $('Parse Video Brief (LLM)').first().json.message.content;\n\nif (!duration) throw new Error('ffprobe returned no duration - is ffmpeg installed on the n8n host?');\nif (!segments.length) throw new Error('Whisper returned no segments - check the audio extraction step');\n\nreturn [{ json: { duration, silences, segments, brief } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [580, 0],
+      "id": "ac-001",
+      "name": "Assemble Edit Context"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an expert short-form video edit planner. You receive a timestamped transcript, a silence map, and an edit brief. You NEVER touch media - you only decide WHAT to cut. Return ONLY valid JSON, no markdown:\n{\n  \"clips\": [ { \"start\": seconds, \"end\": seconds, \"label\": \"short_slug\", \"reason\": \"why this segment works as a clip\" } ],\n  \"video_title\": \"string\",\n  \"video_description\": \"string\"\n}\n\nRULES:\n1. Produce exactly clips_count clips, each within +/-15% of target_clip_seconds.\n2. Clip boundaries MUST land on transcript segment boundaries - never cut mid-sentence.\n3. Prefer boundaries that fall inside or next to silences (the silence map is provided) so cuts feel natural.\n4. The strongest hook goes first: pick moments with a clear payoff, story, or bold claim in the first 3 seconds.\n5. Every must_keep_moments topic from the brief MUST be covered by at least one clip.\n6. Clips must not overlap. start < end for every clip. All timestamps within [0, duration].\n7. Respect all global_rules from the brief.",
+              "role": "system"
+            },
+            {
+              "content": "=EDIT CONTEXT (duration, silences, transcript segments, brief):\n\n{{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [800, 0],
+      "id": "ge-001",
+      "name": "Generate EDL (LLM)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Deterministic EDL validation + auto-snap to silence boundaries (the Keyword Validator of this pipeline)\nconst runs = $json.runs || 0;\nlet raw = $json.edl_raw ?? $json.message?.content;\nlet edl = null;\nif (typeof raw === 'object' && raw !== null) edl = raw;\nelse {\n  try {\n    edl = JSON.parse(String(raw).replace(/^[\\s\\S]*?```json/i, '').replace(/```[\\s\\S]*$/, '').trim());\n  } catch (e) { edl = null; }\n}\n\nconst ctx = $('Assemble Edit Context').first().json;\nconst issues = [];\nif (!edl || !Array.isArray(edl.clips) || edl.clips.length === 0) {\n  issues.push('EDL is missing a non-empty clips array');\n}\n\nlet clips = (edl?.clips || [])\n  .map(c => ({\n    start: Math.max(0, +c.start || 0),\n    end: Math.min(ctx.duration, +c.end || 0),\n    label: String(c.label || 'clip').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 40),\n    reason: c.reason || ''\n  }))\n  .filter(c => c.end > c.start);\n\n// Auto-snap boundaries to the nearest silence edge within 0.6s so cuts never chop words\nconst bounds = [];\nfor (const s of ctx.silences) {\n  if (s.start !== undefined) bounds.push(s.start);\n  if (s.end !== undefined) bounds.push(s.end);\n}\nconst snap = t => {\n  let best = t, d = 0.6;\n  for (const b of bounds) { const dd = Math.abs(b - t); if (dd < d) { d = dd; best = b; } }\n  return +best.toFixed(2);\n};\nclips = clips.map(c => ({ ...c, start: snap(c.start), end: snap(c.end) })).filter(c => c.end - c.start >= 3);\n\nclips.sort((a, b) => a.start - b.start);\nfor (let i = 1; i < clips.length; i++) {\n  if (clips[i].start < clips[i - 1].end) issues.push(`Clips ${i - 1} and ${i} overlap after snapping`);\n}\n\nconst target = +ctx.brief?.target_clip_seconds || 60;\nclips.forEach((c, i) => {\n  const len = c.end - c.start;\n  if (len > target * 1.5) issues.push(`Clip ${i} is ${len.toFixed(0)}s - far over the ${target}s target`);\n  if (len < target * 0.4) issues.push(`Clip ${i} is only ${len.toFixed(0)}s - too short for the ${target}s target`);\n});\n\nconst wanted = +ctx.brief?.clips_count || 3;\nif (clips.length < wanted) issues.push(`Brief asked for ${wanted} clips, usable EDL has ${clips.length}`);\n\nreturn [{ json: {\n  passed: issues.length === 0,\n  issues,\n  runs,\n  clips,\n  video_title: edl?.video_title || '',\n  video_description: edl?.video_description || ''\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1020, 0],
+      "id": "ev-001",
+      "name": "EDL Validator & Auto-Snap"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "edl-passed",
+              "leftValue": "={{ $json.passed }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            },
+            {
+              "id": "edl-retry-cap",
+              "leftValue": "={{ $json.runs }}",
+              "rightValue": 2,
+              "operator": { "type": "number", "operation": "largerEqual" }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1240, 0],
+      "id": "if-001",
+      "name": "If EDL OK"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a surgical EDL fixer. You receive a video edit decision list and a precise list of validation issues. Fix ONLY the listed issues and return the COMPLETE corrected EDL in the exact same JSON schema ({clips:[{start,end,label,reason}],video_title,video_description}). Do not change clips that have no issues. Return ONLY valid JSON.",
+              "role": "system"
+            },
+            {
+              "content": "=VALIDATION ISSUES TO FIX:\n{{ JSON.stringify($('EDL Validator & Auto-Snap').first().json.issues) }}\n\nCURRENT EDL:\n{{ JSON.stringify({ clips: $('EDL Validator & Auto-Snap').first().json.clips, video_title: $('EDL Validator & Auto-Snap').first().json.video_title, video_description: $('EDL Validator & Auto-Snap').first().json.video_description }) }}\n\nEDIT CONTEXT (duration, silences, segments, brief):\n{{ JSON.stringify($('Assemble Edit Context').first().json) }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1240, 220],
+      "id": "fx-001",
+      "name": "Fix EDL (LLM)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  edl_raw: $json.message.content,\n  runs: ($('EDL Validator & Auto-Snap').first().json.runs || 0) + 1\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1020, 220],
+      "id": "br-001",
+      "name": "Bump Retry"
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "name": "={{ $('Video Webhook').first().json.body.title || ('Video Edit ' + $execution.id) }}",
+        "driveId": { "__rl": true, "mode": "list", "value": "My Drive" },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [1460, 0],
+      "id": "cf-001",
+      "name": "Create Project Folder"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build one render job per clip: re-timed SRT captions + full ffmpeg command. All deterministic, $0.\nconst v = $('EDL Validator & Auto-Snap').first().json;\nconst ctx = $('Assemble Edit Context').first().json;\nconst execId = $execution.id;\nconst src = `/tmp/vp_${execId}_source.mp4`;\nconst aspect = ctx.brief?.aspect_ratio || '9:16';\nconst burn = ctx.brief?.captions !== false;\n\nconst esc = t => t.replace(/\\n/g, ' ').trim();\nconst fmtT = t => {\n  const ms = String(Math.round((t % 1) * 1000)).padStart(3, '0');\n  const s = Math.floor(t);\n  const hh = String(Math.floor(s / 3600)).padStart(2, '0');\n  const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');\n  const ss = String(s % 60).padStart(2, '0');\n  return `${hh}:${mm}:${ss},${ms}`;\n};\n\nconst out = [];\nfor (let i = 0; i < v.clips.length; i++) {\n  const c = v.clips[i];\n  // Re-time transcript segments to clip-local time for the burned captions\n  const segs = ctx.segments.filter(s => s.end > c.start && s.start < c.end);\n  let srt = '';\n  let n = 1;\n  for (const s of segs) {\n    const a = Math.max(0, s.start - c.start);\n    const b = Math.min(c.end - c.start, s.end - c.start);\n    if (b <= a) continue;\n    srt += `${n++}\\n${fmtT(a)} --> ${fmtT(b)}\\n${esc(s.text)}\\n\\n`;\n  }\n  const srtPath = `/tmp/vp_${execId}_clip_${i}.srt`;\n  const outPath = `/tmp/vp_${execId}_clip_${i}.mp4`;\n  let vf = aspect === '9:16' ? 'crop=ih*9/16:ih,scale=1080:1920'\n         : aspect === '1:1' ? 'crop=ih:ih,scale=1080:1080'\n         : 'scale=-2:1080';\n  if (burn && srt) vf += `,subtitles=${srtPath}`;\n  const cmd = `ffmpeg -y -ss ${c.start} -to ${c.end} -i ${src} -vf \"${vf}\" -af loudnorm=I=-16:TP=-1.5:LRA=11 -c:v libx264 -preset veryfast -crf 20 -c:a aac -b:a 128k ${outPath}`;\n  out.push({\n    json: {\n      index: i,\n      label: c.label,\n      start: c.start,\n      end: c.end,\n      reason: c.reason,\n      target_len: +(c.end - c.start).toFixed(2),\n      srt_path: srtPath,\n      out_path: outPath,\n      ffmpeg_cmd: cmd\n    },\n    binary: {\n      data: await this.helpers.prepareBinaryData(Buffer.from(srt || ' ', 'utf8'), `clip_${i}.srt`)\n    }\n  });\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 0],
+      "id": "pr-001",
+      "name": "Prepare Render Jobs"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.srt_path }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [1900, 0],
+      "id": "ws-001",
+      "name": "Write Clip SRT"
+    },
+    {
+      "parameters": {
+        "command": "={{ $('Prepare Render Jobs').item.json.ffmpeg_cmd }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [2120, 0],
+      "id": "rc-001",
+      "name": "Render Clip"
+    },
+    {
+      "parameters": {
+        "command": "=ffprobe -v quiet -print_format json -show_format {{ $('Prepare Render Jobs').item.json.out_path }}"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [2340, 0],
+      "id": "qp-001",
+      "name": "QA Probe Clip"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Deterministic output QA: duration within 1.5s of the EDL target, non-empty file\nlet probe = {};\ntry { probe = JSON.parse($json.stdout || '{}'); } catch (e) {}\nconst job = $('Prepare Render Jobs').item.json;\nconst dur = parseFloat(probe?.format?.duration || 0);\nconst size = parseInt(probe?.format?.size || 0);\nconst ok = dur > 0 && size > 0 && Math.abs(dur - job.target_len) <= 1.5;\nreturn { json: {\n  ...job,\n  rendered_duration: +dur.toFixed(2),\n  qa_passed: ok,\n  qa_issue: ok ? '' : `Expected ~${job.target_len}s, got ${dur.toFixed(2)}s (size ${size} bytes)`\n} };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2560, 0],
+      "id": "qc-001",
+      "name": "QA Check"
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.out_path }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [2780, 0],
+      "id": "rr-001",
+      "name": "Read Rendered Clip"
+    },
+    {
+      "parameters": {
+        "name": "={{ 'clip_' + $('QA Check').item.json.index + '_' + $('QA Check').item.json.label + '.mp4' }}",
+        "driveId": { "__rl": true, "mode": "list", "value": "My Drive" },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create Project Folder').first().json.id }}",
+          "mode": "id"
+        },
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [3000, 0],
+      "id": "up-001",
+      "name": "Upload Clip to Drive"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate everything into the edit report - the video analog of Skywide's verified_claims payload\nconst qa = $('QA Check').all().map(i => i.json);\nconst uploads = $input.all().map(i => i.json);\nconst v = $('EDL Validator & Auto-Snap').first().json;\nconst body = $('Video Webhook').first().json.body;\nconst folderId = $('Create Project Folder').first().json.id;\n\nconst clips = qa.map((q, i) => ({\n  label: q.label,\n  source_start: q.start,\n  source_end: q.end,\n  duration: q.rendered_duration,\n  why_this_clip: q.reason,\n  qa_passed: q.qa_passed,\n  qa_issue: q.qa_issue,\n  drive_link: uploads[i]?.id ? `https://drive.google.com/file/d/${uploads[i].id}/view` : ''\n}));\n\nreturn [{ json: {\n  request_id: body.request_id || '',\n  run_id: body.run_id || '',\n  folder_url: `https://drive.google.com/drive/folders/${folderId}`,\n  video_title: v.video_title,\n  video_description: v.video_description,\n  edl_validation_issues: v.issues,\n  edl_retries_used: v.runs,\n  clips\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3220, 0],
+      "id": "er-001",
+      "name": "Build Edit Report"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-DASHBOARD.example.com/api/webhooks/video-complete",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": { "timeout": 15000 }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3440, 0],
+      "id": "cw-001",
+      "name": "Completion Webhook",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "command": "=bash -c \"rm -f /tmp/vp_{{ $execution.id }}_*\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [3660, 0],
+      "id": "cl-001",
+      "name": "Cleanup Workspace"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [-1180, 400],
+      "id": "et-001",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-DASHBOARD.example.com/api/webhooks/video-error",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"executionId\": $json.execution.id, \"errorMessage\": $json.execution.error.message, \"nodeName\": $json.execution.lastNodeExecuted, \"workflowId\": $workflow.id, \"workflowName\": $workflow.name } }}",
+        "options": { "timeout": 10000 }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-960, 400],
+      "id": "se-001",
+      "name": "Send Error to Dashboard"
+    }
+  ],
+  "connections": {
+    "Video Webhook": {
+      "main": [[{ "node": "Startup Update", "type": "main", "index": 0 }]]
+    },
+    "Startup Update": {
+      "main": [[{ "node": "Parse Video Brief (LLM)", "type": "main", "index": 0 }]]
+    },
+    "Parse Video Brief (LLM)": {
+      "main": [[{ "node": "Download Source Video", "type": "main", "index": 0 }]]
+    },
+    "Download Source Video": {
+      "main": [[{ "node": "Save Source to Disk", "type": "main", "index": 0 }]]
+    },
+    "Save Source to Disk": {
+      "main": [[{ "node": "Media Probe", "type": "main", "index": 0 }]]
+    },
+    "Media Probe": {
+      "main": [[{ "node": "Read Audio File", "type": "main", "index": 0 }]]
+    },
+    "Read Audio File": {
+      "main": [[{ "node": "Whisper Transcribe", "type": "main", "index": 0 }]]
+    },
+    "Whisper Transcribe": {
+      "main": [[{ "node": "Assemble Edit Context", "type": "main", "index": 0 }]]
+    },
+    "Assemble Edit Context": {
+      "main": [[{ "node": "Generate EDL (LLM)", "type": "main", "index": 0 }]]
+    },
+    "Generate EDL (LLM)": {
+      "main": [[{ "node": "EDL Validator & Auto-Snap", "type": "main", "index": 0 }]]
+    },
+    "EDL Validator & Auto-Snap": {
+      "main": [[{ "node": "If EDL OK", "type": "main", "index": 0 }]]
+    },
+    "If EDL OK": {
+      "main": [
+        [{ "node": "Create Project Folder", "type": "main", "index": 0 }],
+        [{ "node": "Fix EDL (LLM)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fix EDL (LLM)": {
+      "main": [[{ "node": "Bump Retry", "type": "main", "index": 0 }]]
+    },
+    "Bump Retry": {
+      "main": [[{ "node": "EDL Validator & Auto-Snap", "type": "main", "index": 0 }]]
+    },
+    "Create Project Folder": {
+      "main": [[{ "node": "Prepare Render Jobs", "type": "main", "index": 0 }]]
+    },
+    "Prepare Render Jobs": {
+      "main": [[{ "node": "Write Clip SRT", "type": "main", "index": 0 }]]
+    },
+    "Write Clip SRT": {
+      "main": [[{ "node": "Render Clip", "type": "main", "index": 0 }]]
+    },
+    "Render Clip": {
+      "main": [[{ "node": "QA Probe Clip", "type": "main", "index": 0 }]]
+    },
+    "QA Probe Clip": {
+      "main": [[{ "node": "QA Check", "type": "main", "index": 0 }]]
+    },
+    "QA Check": {
+      "main": [[{ "node": "Read Rendered Clip", "type": "main", "index": 0 }]]
+    },
+    "Read Rendered Clip": {
+      "main": [[{ "node": "Upload Clip to Drive", "type": "main", "index": 0 }]]
+    },
+    "Upload Clip to Drive": {
+      "main": [[{ "node": "Build Edit Report", "type": "main", "index": 0 }]]
+    },
+    "Build Edit Report": {
+      "main": [[{ "node": "Completion Webhook", "type": "main", "index": 0 }]]
+    },
+    "Completion Webhook": {
+      "main": [[{ "node": "Cleanup Workspace", "type": "main", "index": 0 }]]
+    },
+    "Error Trigger": {
+      "main": [[{ "node": "Send Error to Dashboard", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
