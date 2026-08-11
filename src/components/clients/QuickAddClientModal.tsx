@@ -175,6 +175,14 @@ export function QuickAddClientModal({ service, trigger, onSaved }: QuickAddClien
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        // This modal's <form> is rendered through a Radix Portal, so it isn't a
+        // DOM descendant of whatever page-level <form> hosts the trigger button —
+        // but React re-dispatches synthetic events along the React tree, not the
+        // DOM tree, so this submit still bubbles up to a wrapping page <form>
+        // (e.g. the Content Request form on /dashboard) and fires ITS onSubmit
+        // too, running its validation against stale state before this modal's
+        // onSaved() has updated it. Stop it from escaping this form.
+        e.stopPropagation();
         if (!formData.name) return;
         if (service === 'indexing' && (!formData.indexing_workbook_url || !formData.indexing_gsc_property)) return;
         if (service === 'gbp' && !formData.gbp_sheet_id) return;
