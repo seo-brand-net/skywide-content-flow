@@ -156,6 +156,18 @@ export default function ClientsSettingsPage() {
     // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleToggle = async (id: string, key: keyof Client, value: boolean) => {
+        if (key === 'content_enabled' && value) {
+            const client = clients.find((c) => c.id === id);
+            if (client && (!client.workbook_url || !client.folder_url)) {
+                toast({
+                    title: 'Missing Setup',
+                    description: `${client.name} needs a Workbook URL and Drive Folder URL before Content Briefs can run. Edit the client to add them first.`,
+                    variant: 'destructive',
+                });
+                return;
+            }
+        }
+
         // Optimistic update
         queryClient.setQueryData<Client[]>(['clients_unified'], (old) =>
             (old ?? []).map((c) => (c.id === id ? { ...c, [key]: value } : c))

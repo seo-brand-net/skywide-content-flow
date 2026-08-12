@@ -44,9 +44,9 @@ import {
 interface Client {
     id: string;
     name: string;
-    workbook_url: string;
-    folder_url: string;
-    folder_id: string;
+    workbook_url: string | null;
+    folder_url: string | null;
+    folder_id: string | null;
 }
 
 interface WorkbookRow {
@@ -315,6 +315,7 @@ export default function ContentBriefsPage() {
 
 
     const currentClient = clients.find(c => c.id === selectedClient);
+    const isMissingClientSetup = !!currentClient && (!currentClient.workbook_url || !currentClient.folder_id);
 
     const handleRunAutomation = () => {
         if (!selectedClient || !currentClient) {
@@ -325,6 +326,16 @@ export default function ContentBriefsPage() {
             });
             return;
         }
+
+        if (!currentClient.workbook_url || !currentClient.folder_id) {
+            toast({
+                title: "Client Setup Incomplete",
+                description: `${currentClient.name} is missing its Workbook URL or Drive Folder — edit the client to add them before running Content Briefs.`,
+                variant: "destructive",
+            });
+            return;
+        }
+
         automationMutation.mutate({ client: currentClient });
     };
 
@@ -481,18 +492,39 @@ export default function ContentBriefsPage() {
 
                                 {currentClient && (
                                     <div className="space-y-4 animate-in fade-in duration-500">
+                                        {isMissingClientSetup && (
+                                            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-start gap-2.5 text-amber-600 dark:text-amber-500 text-xs">
+                                                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                                <span>
+                                                    {currentClient.name} is missing its {!currentClient.workbook_url && !currentClient.folder_id ? 'Workbook URL and Drive Folder' : !currentClient.workbook_url ? 'Workbook URL' : 'Drive Folder'}.
+                                                    {' '}
+                                                    <a href={`/settings/clients/${currentClient.id}/edit`} className="underline font-semibold hover:text-amber-700 dark:hover:text-amber-400">
+                                                        Edit the client
+                                                    </a>{' '}
+                                                    to add it before running Content Briefs.
+                                                </span>
+                                            </div>
+                                        )}
                                         <div className="grid grid-cols-2 gap-3">
-                                            <Button variant="outline" className="flex items-center gap-2 h-10 text-xs" asChild>
-                                                <a href={currentClient.workbook_url} target="_blank" rel="noopener noreferrer" title="Opens the Content Brief tab in the client workbook">
-                                                    <ExternalLink className="w-3 h-3" />
-                                                    Workbook Tab
-                                                </a>
+                                            <Button variant="outline" className="flex items-center gap-2 h-10 text-xs" disabled={!currentClient.workbook_url} asChild={!!currentClient.workbook_url}>
+                                                {currentClient.workbook_url ? (
+                                                    <a href={currentClient.workbook_url} target="_blank" rel="noopener noreferrer" title="Opens the Content Brief tab in the client workbook">
+                                                        <ExternalLink className="w-3 h-3" />
+                                                        Workbook Tab
+                                                    </a>
+                                                ) : (
+                                                    <span className="flex items-center gap-2"><ExternalLink className="w-3 h-3" />Workbook Tab</span>
+                                                )}
                                             </Button>
-                                            <Button variant="outline" className="flex items-center gap-2 h-10 text-xs" asChild>
-                                                <a href={currentClient.folder_url || (currentClient.folder_id ? `https://drive.google.com/drive/folders/${currentClient.folder_id}` : '#')} target="_blank" rel="noopener noreferrer">
-                                                    <FolderOpen className="w-3 h-3" />
-                                                    Drive Folder
-                                                </a>
+                                            <Button variant="outline" className="flex items-center gap-2 h-10 text-xs" disabled={!currentClient.folder_url && !currentClient.folder_id} asChild={!!(currentClient.folder_url || currentClient.folder_id)}>
+                                                {(currentClient.folder_url || currentClient.folder_id) ? (
+                                                    <a href={currentClient.folder_url || `https://drive.google.com/drive/folders/${currentClient.folder_id}`} target="_blank" rel="noopener noreferrer">
+                                                        <FolderOpen className="w-3 h-3" />
+                                                        Drive Folder
+                                                    </a>
+                                                ) : (
+                                                    <span className="flex items-center gap-2"><FolderOpen className="w-3 h-3" />Drive Folder</span>
+                                                )}
                                             </Button>
                                         </div>
 
@@ -502,7 +534,7 @@ export default function ContentBriefsPage() {
                                             <Button
                                                 className="w-full h-12 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold text-sm shadow-lg shadow-brand-blue-crayola/20"
                                                 onClick={handleRunAutomation}
-                                                disabled={automationMutation.isPending || isGenerating}
+                                                disabled={automationMutation.isPending || isGenerating || isMissingClientSetup}
                                             >
                                                 {(automationMutation.isPending || isGenerating) ? (
                                                     <span className="flex items-center gap-2">
@@ -539,7 +571,8 @@ export default function ContentBriefsPage() {
                                         onClick={() => {
                                             if (currentClient) syncMutation.mutate(currentClient);
                                         }}
-                                        disabled={syncMutation.isPending}
+                                        disabled={syncMutation.isPending || !currentClient?.workbook_url}
+                                        title={!currentClient?.workbook_url ? 'This client has no Workbook URL configured' : undefined}
                                     >
                                         <RefreshCw className={`w-3 h-3 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
                                         Sync from Workbook
