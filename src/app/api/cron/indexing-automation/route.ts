@@ -105,7 +105,13 @@ export async function GET(request: Request) {
                 // ANY OTHER ERROR                          → set to today (don't retry, just log)
                 const isSuccess = response.ok;
                 const errorStr = String(result.error || result.message || '').toLowerCase();
-                const isTimeoutRateLimit = errorStr.includes('timed out after 290');
+                // A legitimate Apps Script response is always JSON, so any indication that
+                // proxy-indexing-script received something else back (Google Drive/Apps Script
+                // throttling, a bad redirect, etc.) is transient — treat it the same as a timeout.
+                const isTimeoutRateLimit = errorStr.includes('timed out after 290')
+                    || errorStr.includes('non-json response')
+                    || errorStr.includes('unable to open the file')
+                    || errorStr.includes('<!doctype html');
 
                 const googleRateLimited = result.google_summary?.rate_limited || 0;
                 const bingRateLimited = result.bing_summary?.rate_limited || 0;

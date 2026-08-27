@@ -109,11 +109,17 @@ export async function POST(request: Request) {
 
         const rawText = await gasResponse.text();
         let gasData: any;
+        let isNonJsonResponse = false;
 
         try {
             gasData = JSON.parse(rawText);
         } catch {
-            gasData = { status: 'error', message: rawText };
+            // A legitimate Apps Script response is always JSON. Getting HTML back means
+            // something upstream (Google Drive/Apps Script quota, a bad redirect, etc.)
+            // rejected the call before it ran — that's transient, not a real content error,
+            // so it must not be treated as permanent below.
+            isNonJsonResponse = true;
+            gasData = { status: 'error', message: 'Apps Script returned a non-JSON response (likely Google-side throttling): ' + rawText.slice(0, 500) };
         }
 
         console.log('[proxy-indexing-script] Apps Script response:', gasData);
@@ -195,7 +201,7 @@ export async function POST(request: Request) {
 
         if (indexing_client_id) {
             const errMsg = String(gasData?.error || gasData?.message || '').toLowerCase();
-            const isTimeoutRateLimit = errMsg.includes('timed out after 290') || hasRateLimitedUrls;
+            const isTimeoutRateLimit = errMsg.includes('timed out after 290') || hasRateLimitedUrls || isNonJsonResponse;
 
             if (isSuccess && !hasRateLimitedUrls) {
                 // Full success — start 14-day cooldown
