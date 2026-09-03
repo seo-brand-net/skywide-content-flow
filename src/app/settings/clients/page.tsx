@@ -105,7 +105,7 @@ export default function ClientsSettingsPage() {
     const { toast } = useToast();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const { userRole, isInitialLoading } = useUserRole(user?.id);
+    const { isInitialLoading } = useUserRole(user?.id);
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -158,8 +158,6 @@ export default function ClientsSettingsPage() {
     // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleToggle = async (id: string, key: keyof Client, value: boolean) => {
-        if (userRole !== 'admin') return;
-
         if (key === 'content_enabled' && value) {
             const client = clients.find((c) => c.id === id);
             if (client && (!client.workbook_url || !client.folder_url)) {
@@ -202,8 +200,6 @@ export default function ClientsSettingsPage() {
         );
     }
 
-    const isAdmin = userRole === 'admin';
-
     // ── Render ────────────────────────────────────────────────────────────────
 
     return (
@@ -223,15 +219,13 @@ export default function ClientsSettingsPage() {
                             {clients.length} {clients.length === 1 ? 'client' : 'clients'} — manage services and locations in one place.
                         </p>
                     </div>
-                    {isAdmin && (
-                        <Button
-                            className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
-                            onClick={() => router.push('/settings/clients/new')}
-                        >
-                            <PlusCircle className="w-4 h-4" />
-                            Add Client
-                        </Button>
-                    )}
+                    <Button
+                        className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
+                        onClick={() => router.push('/settings/clients/new')}
+                    >
+                        <PlusCircle className="w-4 h-4" />
+                        Add Client
+                    </Button>
                 </div>
 
                 {/* ── Stats Row ─────────────────────────────────────────── */}
@@ -315,8 +309,8 @@ export default function ClientsSettingsPage() {
                                         {filtered.map((client) => (
                                             <tr
                                                 key={client.id}
-                                                className={`hover:bg-muted/20 transition-colors group align-top ${isAdmin ? 'cursor-pointer' : ''}`}
-                                                onClick={() => { if (isAdmin) router.push(`/settings/clients/${client.id}/edit`); }}
+                                                className="hover:bg-muted/20 transition-colors group align-top cursor-pointer"
+                                                onClick={() => router.push(`/settings/clients/${client.id}/edit`)}
                                             >
 
                                                 {/* Client name + locations */}
@@ -325,9 +319,7 @@ export default function ClientsSettingsPage() {
                                                         <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
                                                             {client.name}
                                                         </p>
-                                                        {isAdmin && (
-                                                            <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                        )}
+                                                        <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                                                     </div>
                                                     {client.sitemap_url && (
                                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate max-w-[220px]">
@@ -335,7 +327,7 @@ export default function ClientsSettingsPage() {
                                                         </p>
                                                     )}
                                                     <div onClick={(e) => e.stopPropagation()}>
-                                                        <LocationsPanel client={client} canEdit={isAdmin} />
+                                                        <LocationsPanel client={client} />
                                                     </div>
                                                 </td>
 
@@ -357,7 +349,6 @@ export default function ClientsSettingsPage() {
                                                                 activeClass={activeClass}
                                                                 inactiveClass={inactiveClass}
                                                                 onToggle={handleToggle}
-                                                                disabled={!isAdmin}
                                                             />
                                                             {(client[key] as boolean) && (
                                                                 <ServiceStatusBadge service={service} status={statusByClientId.get(client.id)} />
