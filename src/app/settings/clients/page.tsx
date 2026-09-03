@@ -17,7 +17,6 @@ import {
     FileText,
     Globe,
     MapPin,
-    ShieldAlert,
     Pencil,
     PlusCircle,
 } from 'lucide-react';
@@ -72,6 +71,7 @@ function ServiceToggle({
     activeClass,
     inactiveClass,
     onToggle,
+    disabled,
 }: {
     client: Client;
     serviceKey: keyof Client;
@@ -79,14 +79,16 @@ function ServiceToggle({
     activeClass: string;
     inactiveClass: string;
     onToggle: (id: string, key: keyof Client, value: boolean) => void;
+    disabled?: boolean;
 }) {
     const isActive = client[serviceKey] as boolean;
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" title={disabled ? 'Only admins can change service access' : undefined}>
             <Switch
                 id={`${client.id}-${serviceKey}`}
                 checked={isActive}
                 onCheckedChange={(checked) => onToggle(client.id, serviceKey, checked)}
+                disabled={disabled}
                 className="scale-[0.8]"
             />
             <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${isActive ? activeClass : inactiveClass}`}>
@@ -156,6 +158,8 @@ export default function ClientsSettingsPage() {
     // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleToggle = async (id: string, key: keyof Client, value: boolean) => {
+        if (userRole !== 'admin') return;
+
         if (key === 'content_enabled' && value) {
             const client = clients.find((c) => c.id === id);
             if (client && (!client.workbook_url || !client.folder_url)) {
@@ -198,17 +202,7 @@ export default function ClientsSettingsPage() {
         );
     }
 
-    if (userRole !== 'admin') {
-        return (
-            <div className="min-h-screen bg-background p-8 flex items-center justify-center">
-                <div className="text-center space-y-3 opacity-60">
-                    <ShieldAlert className="w-12 h-12 mx-auto text-muted-foreground" />
-                    <p className="text-lg font-bold text-foreground">Admin access required</p>
-                    <p className="text-sm text-muted-foreground">You don't have permission to view this page.</p>
-                </div>
-            </div>
-        );
-    }
+    const isAdmin = userRole === 'admin';
 
     // ── Render ────────────────────────────────────────────────────────────────
 
@@ -229,13 +223,15 @@ export default function ClientsSettingsPage() {
                             {clients.length} {clients.length === 1 ? 'client' : 'clients'} — manage services and locations in one place.
                         </p>
                     </div>
-                    <Button
-                        className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
-                        onClick={() => router.push('/settings/clients/new')}
-                    >
-                        <PlusCircle className="w-4 h-4" />
-                        Add Client
-                    </Button>
+                    {isAdmin && (
+                        <Button
+                            className="flex items-center gap-2 bg-brand-blue-crayola text-white hover:bg-brand-blue-crayola/90 font-bold shadow-lg shadow-brand-blue-crayola/20 transition-all hover:scale-105"
+                            onClick={() => router.push('/settings/clients/new')}
+                        >
+                            <PlusCircle className="w-4 h-4" />
+                            Add Client
+                        </Button>
+                    )}
                 </div>
 
                 {/* ── Stats Row ─────────────────────────────────────────── */}
@@ -319,8 +315,8 @@ export default function ClientsSettingsPage() {
                                         {filtered.map((client) => (
                                             <tr
                                                 key={client.id}
-                                                className="hover:bg-muted/20 transition-colors group align-top cursor-pointer"
-                                                onClick={() => router.push(`/settings/clients/${client.id}/edit`)}
+                                                className={`hover:bg-muted/20 transition-colors group align-top ${isAdmin ? 'cursor-pointer' : ''}`}
+                                                onClick={() => { if (isAdmin) router.push(`/settings/clients/${client.id}/edit`); }}
                                             >
 
                                                 {/* Client name + locations */}
@@ -329,7 +325,9 @@ export default function ClientsSettingsPage() {
                                                         <p className="font-bold text-foreground group-hover:text-brand-blue-crayola transition-colors">
                                                             {client.name}
                                                         </p>
-                                                        <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        {isAdmin && (
+                                                            <Pencil className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        )}
                                                     </div>
                                                     {client.sitemap_url && (
                                                         <p className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate max-w-[220px]">
@@ -337,7 +335,7 @@ export default function ClientsSettingsPage() {
                                                         </p>
                                                     )}
                                                     <div onClick={(e) => e.stopPropagation()}>
-                                                        <LocationsPanel client={client} />
+                                                        <LocationsPanel client={client} canEdit={isAdmin} />
                                                     </div>
                                                 </td>
 
@@ -359,6 +357,7 @@ export default function ClientsSettingsPage() {
                                                                 activeClass={activeClass}
                                                                 inactiveClass={inactiveClass}
                                                                 onToggle={handleToggle}
+                                                                disabled={!isAdmin}
                                                             />
                                                             {(client[key] as boolean) && (
                                                                 <ServiceStatusBadge service={service} status={statusByClientId.get(client.id)} />

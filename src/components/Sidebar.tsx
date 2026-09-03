@@ -16,6 +16,7 @@ const navItems = [
     { icon: Globe, label: 'Indexing', path: '/indexing' },
     { icon: MessageSquare, label: 'Features', path: '/features' },
     { icon: Search, label: 'Research', path: '/research' },
+    { icon: Users, label: 'Clients', path: '/settings/clients' },
     { icon: BookOpen, label: 'Help', path: '/docs' },
     { icon: Settings, label: 'Settings', path: '/settings' },
 ];
