@@ -38,11 +38,13 @@ interface Location {
 
 interface LocationsPanelProps {
     client: Client;
+    /** Whether the current user can add/edit/delete locations. Defaults to true — callers outside admin-gated pages should pass false for viewers. */
+    canEdit?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function LocationsPanel({ client }: LocationsPanelProps) {
+export function LocationsPanel({ client, canEdit = true }: LocationsPanelProps) {
     const { toast } = useToast();
     const [locations, setLocations] = useState<Location[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
@@ -170,6 +172,7 @@ export function LocationsPanel({ client }: LocationsPanelProps) {
                                     <Switch
                                         checked={loc.is_active}
                                         onCheckedChange={() => toggleActive(loc)}
+                                        disabled={!canEdit}
                                         className="scale-75 shrink-0"
                                     />
                                     <div className="flex-1 min-w-0">
@@ -189,21 +192,23 @@ export function LocationsPanel({ client }: LocationsPanelProps) {
                                         }`}>
                                         {loc.is_active ? 'Active' : 'Paused'}
                                     </span>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={() => deleteLocation(loc)}
-                                    >
-                                        <Trash2 className="w-3 h-3" />
-                                    </Button>
+                                    {canEdit && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => deleteLocation(loc)}
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                        </Button>
+                                    )}
                                 </div>
                             ))}
                         </div>
                     )}
 
                     {/* Add location button / form */}
-                    {!isAddOpen ? (
+                    {!canEdit ? null : !isAddOpen ? (
                         <Button
                             variant="outline"
                             size="sm"

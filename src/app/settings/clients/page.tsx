@@ -17,7 +17,6 @@ import {
     FileText,
     Globe,
     MapPin,
-    ShieldAlert,
     Pencil,
     PlusCircle,
 } from 'lucide-react';
@@ -72,6 +71,7 @@ function ServiceToggle({
     activeClass,
     inactiveClass,
     onToggle,
+    disabled,
 }: {
     client: Client;
     serviceKey: keyof Client;
@@ -79,14 +79,16 @@ function ServiceToggle({
     activeClass: string;
     inactiveClass: string;
     onToggle: (id: string, key: keyof Client, value: boolean) => void;
+    disabled?: boolean;
 }) {
     const isActive = client[serviceKey] as boolean;
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" title={disabled ? 'Only admins can change service access' : undefined}>
             <Switch
                 id={`${client.id}-${serviceKey}`}
                 checked={isActive}
                 onCheckedChange={(checked) => onToggle(client.id, serviceKey, checked)}
+                disabled={disabled}
                 className="scale-[0.8]"
             />
             <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${isActive ? activeClass : inactiveClass}`}>
@@ -103,7 +105,7 @@ export default function ClientsSettingsPage() {
     const { toast } = useToast();
     const router = useRouter();
     const queryClient = useQueryClient();
-    const { userRole, isInitialLoading } = useUserRole(user?.id);
+    const { isInitialLoading } = useUserRole(user?.id);
 
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -156,6 +158,18 @@ export default function ClientsSettingsPage() {
     // ── Handlers ──────────────────────────────────────────────────────────────
 
     const handleToggle = async (id: string, key: keyof Client, value: boolean) => {
+        if (key === 'content_enabled' && value) {
+            const client = clients.find((c) => c.id === id);
+            if (client && (!client.workbook_url || !client.folder_url)) {
+                toast({
+                    title: 'Missing Setup',
+                    description: `${client.name} needs a Workbook URL and Drive Folder URL before Content Briefs can run. Edit the client to add them first.`,
+                    variant: 'destructive',
+                });
+                return;
+            }
+        }
+
         // Optimistic update
         queryClient.setQueryData<Client[]>(['clients_unified'], (old) =>
             (old ?? []).map((c) => (c.id === id ? { ...c, [key]: value } : c))
@@ -181,18 +195,6 @@ export default function ClientsSettingsPage() {
                 <div className="max-w-7xl mx-auto space-y-6">
                     <Skeleton className="h-12 w-64" />
                     <Skeleton className="h-[400px] w-full" />
-                </div>
-            </div>
-        );
-    }
-
-    if (userRole !== 'admin') {
-        return (
-            <div className="min-h-screen bg-background p-8 flex items-center justify-center">
-                <div className="text-center space-y-3 opacity-60">
-                    <ShieldAlert className="w-12 h-12 mx-auto text-muted-foreground" />
-                    <p className="text-lg font-bold text-foreground">Admin access required</p>
-                    <p className="text-sm text-muted-foreground">You don't have permission to view this page.</p>
                 </div>
             </div>
         );
